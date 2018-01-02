@@ -87,7 +87,7 @@ class preprocess:
     """
 
     def __init__(self, X):
-        self.manipulated, self.idx_removed, self.original = remove_constant_vars(X)
+        self.manipulated, self.idx_removed, self.original, self.idx_retained = remove_constant_vars(X)
 
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
@@ -105,15 +105,20 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     npts, nvar = X.shape
     original = np.copy(X)
     idx_removed = []
-    for i in range(0, nvar):
+    idx_retained = []
+    for i in reversed(range(0, nvar)):
         min = np.min(X[:, i], axis=0)
         max = np.max(X[:, i], axis=0)
         maxabs = np.max(np.abs(X[:, i]), axis=0)
         if (maxabs < maxtol) or ((max - min) / maxabs < rangetol):
             X = np.delete(X, i, 1)
             idx_removed.append(i)
+        else:
+            idx_retained.append(i)
     manipulated = X
-    return manipulated, idx_removed, original
+    idx_removed = idx_removed[::-1]
+    idx_retained = idx_retained[::-1]
+    return manipulated, idx_removed, original, idx_retained
 
 
 class PCA:
@@ -149,13 +154,13 @@ class PCA:
 
     """
 
-    def __init__(self, X, scaling='std', neta=0, useXTXeig=False):
+    def __init__(self, X, scaling='std', neta=0, useXTXeig=True):
         npts, nvar = X.shape
         if (npts < nvar):
             raise ValueError('Variables should be in columns; observations in rows.\n'
                              'Also ensure that you have more than one observation\n')
 
-        manipulated, idx_removed, original = remove_constant_vars(X)
+        manipulated, idx_removed, original, idx_retained = remove_constant_vars(X)
 
         if len(idx_removed) != 0:
             raise ValueError('Constant variable detected. Must preprocess data for PCA.')
