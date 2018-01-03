@@ -1,4 +1,4 @@
-`PCA-python` is the python version of the PCA Matlab suite found at: https://software.crsim.utah.edu:8443/James_Research_Group/PCA
+`PCA-python` is the python version of the PCA Matlab suite found at: https://gitlab.multiscale.utah.edu/common/PCA
 
 # Dependencies
 `PCA-python` requires `python3` (developed with `python3.5`) and the following packages:
@@ -9,7 +9,7 @@
 # Installation
 Clone the `PCA-python` repository and move into the `PCA-python` directory created:
 ```
-git clone https://software.crsim.utah.edu:8443/elizabeth/PCA-python.git
+git clone http://gitlab.multiscale.utah.edu/elizabeth/PCA-python.git
 cd PCA-python
 ```
 
