@@ -99,8 +99,8 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     :param maxtol: tolerance for the maximum absolute value of a column (variable) in X to be saved
     :param rangetol: tolerance for the range (max-min) over the maximum absolute value of a column (variable) in X to
                      be saved
-    :return: the manipulated data (manipulated), the indices of columns removed from X (ide_removed), the original
-             data X (original)
+    :return: the manipulated data (manipulated), the indices of columns removed from X (idx_removed), the original
+             data X (original), the indices of columns retained in X (idx_retained)
     """
     npts, nvar = X.shape
     original = np.copy(X)
@@ -149,8 +149,8 @@ class PCA:
                     'POISSON'       scale by sqrt(mean)
     :param neta: (optional) number of retained eigenvalues - default is all
     :param useXTXeig: (optional) method for obtaining the eigenvalues (L) and eigenvectors (Q)
-                      useXTXeig = False (default) : uses singular-value decomposition (from scipy.linalg.svd)
-                      useXTXeig = True : uses numpy.linalg.eigh on the covariance matrix (R)
+                      useXTXeig = False: uses singular-value decomposition (from scipy.linalg.svd)
+                      useXTXeig = True (default): uses numpy.linalg.eigh on the covariance matrix (R)
 
     """
 
