@@ -9,7 +9,7 @@
 # Installation
 Clone the `PCA-python` repository and move into the `PCA-python` directory created:
 ```
-git clone http://gitlab.multiscale.utah.edu/elizabeth/PCA-python.git
+git clone http://gitlab.multiscale.utah.edu/common/PCA-python.git
 cd PCA-python
 ```
 
