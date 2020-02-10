@@ -129,8 +129,8 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
     if (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_obs):
         raise ValueError("Sizes of train and test data do not sum up to the total number of observations.")
 
-    idx_train = np.sort(idx_train)
-    idx_test = np.sort(idx_test)
+    idx_train = np.sort(idx_train.astype(int))
+    idx_test = np.sort(idx_test.astype(int))
 
     return (idx_train, idx_test)
 
@@ -196,8 +196,8 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     if np.size(idx_test) + np.size(idx_train) != n_obs:
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
-    idx_train = np.sort(idx_train)
-    idx_test = np.sort(idx_test)
+    idx_train = np.sort(idx_train.astype(int))
+    idx_test = np.sort(idx_test.astype(int))
 
     return (idx_train, idx_test)
 
@@ -243,7 +243,7 @@ def train_test_split_random(n_obs, perc, verbose=False):
     if np.size(idx_test) + np.size(idx_train) != n_obs:
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
-    idx_train = np.sort(idx_train)
-    idx_test = np.sort(idx_test)
+    idx_train = np.sort(idx_train.astype(int))
+    idx_test = np.sort(idx_test.astype(int))
 
     return (idx_train, idx_test)
