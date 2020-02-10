@@ -4,7 +4,9 @@
 
 `trainingDataGeneration.py` [documentation](https://gitlab.multiscale.utah.edu/common/PCA-python/-/wikis/Training-data-generation-documentation)
 
-## Centering and scaling of machine learning input/output
+## Centering and scaling of input/output for machine learning models
+
+
 
 ## Activation functions
 
