@@ -15,12 +15,7 @@ setup(name='postProcessing',
     author='Kamila Zdybal',
     packages=['postProcessing'])
 
-setup(name='trainingDataGeneration',
-    description='Training data generation for machine learning models',
+setup(name='non-linear-regression',
+    description='Non-linear regression tools',
     author='Kamila Zdybal',
-    packages=['trainingDataGeneration'])
-
-setup(name='centerAndScale',
-    description='Centering and scaling input/output for machine learning models',
-    author='Kamila Zdybal',
-    packages=['centerAndScale'])
+    packages=['non-linear-regression.centerAndScale', 'non-linear-regression.trainingDataGeneration'])
