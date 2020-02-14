@@ -1,6 +1,5 @@
 import numpy as np
 
-# Global uncenter and unscale function: ----------------------------------------
 def uncenter_unscale(scaled_data, centers, scales):
     """
     This function uncenters and unscales data.
@@ -19,10 +18,9 @@ def uncenter_unscale(scaled_data, centers, scales):
 
     return uu_data
 
-# Centering and scaling functions: ---------------------------------------------
 def none(data):
     """
-    This function does not scale data.
+    This function does not center or scale data. Just a placeholder.
     """
 
     centers = np.zeros(np.size(data))
@@ -32,13 +30,14 @@ def none(data):
 
 def mean_center(data):
     """
-    This function centers the data by mean.
+    This function centers data by mean.
     """
 
     centers = np.mean(data, axis=0)
-    scaled_data = (data - centers)
+    scales = np.ones(np.size(data))
+    scaled_data = (data - centers)/scales
 
-    return (scaled_data, centers)
+    return (scaled_data, centers, scales)
 
 def zero_one(data):
     """
@@ -65,6 +64,14 @@ def minus_one_one(data):
 def z_score(data):
     """
     This function standardizes data with z-score (centering by mean, scaling by std).
+
+    The same can be achieved using:
+
+    ```
+    from sklearn.preprocessing import StandardScaler
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data)
+    ```
     """
 
     centers = np.mean(data, axis=0)
