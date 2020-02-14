@@ -39,7 +39,7 @@ def rmse(x, f):
 
     return rmse
 
-def nrmse(x, f, norm):
+def nrmse(x, f, norm=0):
     """
     This function computes the Normalized Root Mean Squared Error as:
 
