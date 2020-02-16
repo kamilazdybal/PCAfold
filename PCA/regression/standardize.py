@@ -101,3 +101,60 @@ def mean(data):
     scaled_data = (data - centers)/scales
 
     return (scaled_data, centers, scales)
+
+def test():
+    """
+    Performs regression testing of the standardizing functions.
+
+    Tests are performed on the Iris flower data set.
+    """
+
+    import pandas as pd
+    from sklearn.datasets import load_iris
+    import PCA.post_processing as pp
+
+    # Import data:
+    Xdf = pd.DataFrame(load_iris().data)
+    X = Xdf.to_numpy()
+    (n_obs, n_vars) = np.shape(X)
+
+    bound_tolerance = 10**-10
+    error_tolerance = 10**-6
+
+    # Test that data is within specified bounds:
+    (Xs, centers, scales) = minus_one_one(X)
+    min_Xs = np.min(Xs, axis=0)
+    max_Xs = np.max(Xs, axis=0)
+    X_uu = uncenter_unscale(Xs, centers, scales)
+    nrmse = pp.nrmse(X, X_uu)
+    r2 = pp.r2(X, X_uu)
+
+    if (r2 < 1 - error_tolerance) or (nrmse > error_tolerance):
+        print("Test of minus_one_one function failed.")
+        return 0
+
+    for i in range(0, n_vars):
+        if (min_Xs[i] < -1-bound_tolerance or min_Xs[i] > -1+bound_tolerance) or (max_Xs[i] < 1-bound_tolerance or max_Xs[i] > 1+bound_tolerance):
+            print("Test of minus_one_one function failed.")
+            return 0
+
+    (Xs, centers, scales) = zero_one(X)
+    min_Xs = np.min(Xs, axis=0)
+    max_Xs = np.max(Xs, axis=0)
+    X_uu = uncenter_unscale(Xs, centers, scales)
+    nrmse = pp.nrmse(X, X_uu)
+    r2 = pp.r2(X, X_uu)
+
+    if (r2 < 1 - error_tolerance) or (nrmse > error_tolerance):
+        print("Test of zero_one function failed.")
+        return 0
+
+    for i in range(0, n_vars):
+
+        if (min_Xs[i] < -bound_tolerance or min_Xs[i] > bound_tolerance) or (max_Xs[i] < 1-bound_tolerance or max_Xs[i] > 1+bound_tolerance):
+            print("Test of zero_one function failed.")
+            return 0
+
+    print("Tests passed.")
+
+    return 1
