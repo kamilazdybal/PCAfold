@@ -23,8 +23,8 @@ def none(data):
     This function does not center or scale data. Just a placeholder.
     """
 
-    centers = np.zeros(np.size(data))
-    scales = np.ones(np.size(data))
+    centers = np.zeros((np.size(data,axis=1),))
+    scales = np.ones((np.size(data,axis=1),))
 
     return (data, centers, scales)
 
@@ -34,7 +34,7 @@ def mean_center(data):
     """
 
     centers = np.mean(data, axis=0)
-    scales = np.ones(np.size(data))
+    scales = np.ones((np.size(data,axis=1),))
     scaled_data = (data - centers)/scales
 
     return (scaled_data, centers, scales)
@@ -85,7 +85,7 @@ def std(data):
     This function scales data by std.
     """
 
-    centers = np.zeros(np.size(data))
+    centers = np.zeros((np.size(data,axis=1),))
     scales = np.std(data, axis=0)
     scaled_data = (data - centers)/scales
 
@@ -96,7 +96,7 @@ def mean(data):
     This function scales data by mean.
     """
 
-    centers = np.zeros(np.size(data))
+    centers = np.zeros((np.size(data,axis=1),))
     scales = np.mean(data, axis=0)
     scaled_data = (data - centers)/scales
 
@@ -118,10 +118,10 @@ def test():
     X = Xdf.to_numpy()
     (n_obs, n_vars) = np.shape(X)
 
-    bound_tolerance = 10**-10
-    error_tolerance = 10**-6
+    bound_tolerance = 10**-12
+    error_tolerance = 10**-12
 
-    # Test that data is within specified bounds:
+    # Test minus_one_one:
     (Xs, centers, scales) = minus_one_one(X)
     min_Xs = np.min(Xs, axis=0)
     max_Xs = np.max(Xs, axis=0)
@@ -138,6 +138,7 @@ def test():
             print("Test of minus_one_one function failed.")
             return 0
 
+    # Test zero_one:
     (Xs, centers, scales) = zero_one(X)
     min_Xs = np.min(Xs, axis=0)
     max_Xs = np.max(Xs, axis=0)
@@ -154,6 +155,54 @@ def test():
         if (min_Xs[i] < -bound_tolerance or min_Xs[i] > bound_tolerance) or (max_Xs[i] < 1-bound_tolerance or max_Xs[i] > 1+bound_tolerance):
             print("Test of zero_one function failed.")
             return 0
+
+    # Test std:
+    (Xs, centers, scales) = std(X)
+    min_Xs = np.min(Xs, axis=0)
+    max_Xs = np.max(Xs, axis=0)
+    X_uu = uncenter_unscale(Xs, centers, scales)
+    nrmse = pp.nrmse(X, X_uu)
+    r2 = pp.r2(X, X_uu)
+
+    if (r2 < 1 - error_tolerance) or (nrmse > error_tolerance):
+        print("Test of std function failed.")
+        return 0
+
+    # Test mean:
+    (Xs, centers, scales) = mean(X)
+    min_Xs = np.min(Xs, axis=0)
+    max_Xs = np.max(Xs, axis=0)
+    X_uu = uncenter_unscale(Xs, centers, scales)
+    nrmse = pp.nrmse(X, X_uu)
+    r2 = pp.r2(X, X_uu)
+
+    if (r2 < 1 - error_tolerance) or (nrmse > error_tolerance):
+        print("Test of mean function failed.")
+        return 0
+
+    # Test z_score:
+    (Xs, centers, scales) = z_score(X)
+    min_Xs = np.min(Xs, axis=0)
+    max_Xs = np.max(Xs, axis=0)
+    X_uu = uncenter_unscale(Xs, centers, scales)
+    nrmse = pp.nrmse(X, X_uu)
+    r2 = pp.r2(X, X_uu)
+
+    if (r2 < 1 - error_tolerance) or (nrmse > error_tolerance):
+        print("Test of z_score function failed.")
+        return 0
+
+    # Test mean_center:
+    (Xs, centers, scales) = mean_center(X)
+    min_Xs = np.min(Xs, axis=0)
+    max_Xs = np.max(Xs, axis=0)
+    X_uu = uncenter_unscale(Xs, centers, scales)
+    nrmse = pp.nrmse(X, X_uu)
+    r2 = pp.r2(X, X_uu)
+
+    if (r2 < 1 - error_tolerance) or (nrmse > error_tolerance):
+        print("Test of mean_center function failed.")
+        return 0
 
     print("Tests passed.")
 
