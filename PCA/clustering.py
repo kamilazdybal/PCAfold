@@ -16,20 +16,20 @@ def degrade_clusters(idx, verbose=False):
     """
 
     index = 0
-    dict = {}
+    dictionary = {}
     sorted = np.unique(idx)
     k_init = np.max(idx) + 1
-    dict[sorted[0]] = 0
+    dictionary[sorted[0]] = 0
     old_val = sorted[0]
     idx_degraded = [0 for i in range(0, len(idx))]
 
     for val in sorted:
         if val > old_val:
             index += 1
-        dict[val] = index
+        dictionary[val] = index
 
     for i, val in enumerate(idx):
-        idx_degraded[i] = dict[val]
+        idx_degraded[i] = dictionary[val]
 
     k_update = np.max(idx_degraded) + 1
 
@@ -131,17 +131,17 @@ def kmeans(X, k):
 
     return(idx)
 
-def flip_clusters(idx, dict):
+def flip_clusters(idx, dictionary):
     """
     This function flips the cluster labelling according to instructions provided in the dictionary.
-    For a `dict = {key : value}`, a cluster with a number `key` will get a number `value`.
+    For a `dictionary = {key : value}`, a cluster with a number `key` will get a number `value`.
     """
 
     flipped_idx = []
 
     for i in idx:
-        if i in dict.keys():
-            flipped_idx.append(dict[i])
+        if i in dictionary.keys():
+            flipped_idx.append(dictionary[i])
         else:
             flipped_idx.append(i)
 
