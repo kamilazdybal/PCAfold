@@ -204,6 +204,6 @@ def test():
         print("Test of mean_center function failed.")
         return 0
 
-    print("Tests passed.")
+    print("Test passed.")
 
     return 1
