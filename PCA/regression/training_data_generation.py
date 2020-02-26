@@ -238,7 +238,7 @@ def train_test_split_random(n_obs, perc, verbose=False):
     idx_test = np.setdiff1d(idx_full, idx_train)
 
     if verbose == True:
-        print('\nSelected ' + str(np.size(idx_train)) + ' training samples (' + str(perc) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(100-perc) + '%).\n')
+        print('Selected ' + str(np.size(idx_train)) + ' training samples (' + str(perc) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(100-perc) + '%).\n')
 
     if np.size(idx_test) + np.size(idx_train) != n_obs:
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
