@@ -201,7 +201,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
     return (idx_train, idx_test)
 
-def train_test_split_random(n_obs, perc, verbose=False):
+def train_test_split_random(n_obs, perc, idx_test=[], verbose=False):
     """
     This function splits dataset into training and testing using random sampling.
 
@@ -224,6 +224,10 @@ def train_test_split_random(n_obs, perc, verbose=False):
     `n_obs`       - number of observations in the original data set.
     `perc`        - percentage of data to be selected as training data from each cluster.
                     Set perc=20 if you want 20%.
+    `idx_test`    - are the user-provided indices for test data. If specified,
+                    the training data will be selected ignoring the indices in `idx_test`
+                    and the test data will be return as the user-provided.
+                    If not specified, all remaining samples become test data.
     `verbose`     - boolean for printing clustering details.
 
     Output:
@@ -234,13 +238,17 @@ def train_test_split_random(n_obs, perc, verbose=False):
 
     idx_full = np.arange(0,n_obs)
 
-    idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
-    idx_test = np.setdiff1d(idx_full, idx_train)
+    if len(idx_test) != 0:
+        idx_full = np.setdiff1d(idx_full, idx_test)
+        idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
+    else:
+        idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
+        idx_test = np.setdiff1d(idx_full, idx_train)
 
     if verbose == True:
         print('Selected ' + str(np.size(idx_train)) + ' training samples (' + str(perc) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(100-perc) + '%).\n')
 
-    if np.size(idx_test) + np.size(idx_train) != n_obs:
+    if len(idx_test) == 0 and (np.size(idx_test) + np.size(idx_train) != n_obs):
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
     idx_train = np.sort(idx_train.astype(int))
