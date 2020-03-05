@@ -17,6 +17,15 @@ st.test()
 
 ## Training data generation
 
-`trainingDataGeneration.py` [documentation](https://gitlab.multiscale.utah.edu/common/PCA-python/-/wikis/Training-data-generation)
+`training_data_generation.py`
 
 Contains functions for selecting train and test data for machine learning algorithms.
+
+More details can be found in the [documentation](https://gitlab.multiscale.utah.edu/common/PCA-python/-/wikis/Training-data-generation).
+
+This module includes a `test` function for regression testing. Run:
+
+```
+import PCA.regression.training_data_generation as tdg
+tdg.test()
+```
