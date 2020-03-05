@@ -1,15 +1,16 @@
 import numpy as np
 import random
+import PCA.clustering
 
 def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, verbose=False):
     """
-    This function takes an `idx` resulting from a clustering technique and samples
+    This function takes an `idx` classifications from a clustering technique and samples
     a fixed number `n_of_samples` of observations from every cluster as training data.
 
-    The `n_of_samples` is estimated based on the percentage provided:
-        (1) the total number of samples for training is estimated as a percentage `perc`
-        from the total number of observations `n_obs`,
-        (2) this number is devided equally into `k` clusters.
+    `n_of_samples` is estimated based on the percentage provided.
+    First, the total number of samples for training is estimated as a percentage `perc`
+    from the total number of observations `n_obs`.
+    Next, this number is devided equally into `k` clusters.
 
     There is a bar that no more than 50% of observations from any cluster
     will be taken for training. This is to avoid that too little samples
@@ -20,11 +21,11 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
 
     Example:
     ----------
-    Suppose the full data has 10 observations with indices:
+    If the full data has 10 observations with indices:
 
     `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
 
-    and a clustering technique has divided the observations into clusters in the following way:
+    and a clustering technique divided the observations into clusters in the following way:
 
     `[1, 1, 1, 1, 1, 1, 2, 2, 2, 2]`
 
@@ -39,13 +40,16 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
 
     `idx_test = [3, 5, 6, 8]`
 
-    and its size would be computed based on the remaining smallest cluster observations:
-    in the smallest cluster 2 there are two remaining observations, so two test observations
-    will be samples from both clusters.
+    Two options for sampling test data are implemented.
+    If you select `test_selection_option=1`, all remaining samples
+    that were not taken as training data become the test data.
+    If you select `test_selection_option=2`, the smallest cluster is found and
+    the remaining number of observations are taken as test data in that cluster.
+    Next, the same number of observations is taken from all remaining larger clusters.
 
     Input:
     ----------
-    `idx`         - division to clusters.
+    `idx`         - vector of indices classifying observations to clusters.
     `perc`        - percentage of data to be selected as training data from each cluster.
                     Set perc=20 if you want 20%.
     `test_selection_option`
@@ -60,6 +64,10 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
     """
 
     n_obs = len(idx)
+
+    # Degrade clusters if needed:
+    if len(np.unique(idx)) != (np.max(idx)-1):
+        (idx, k_new) = PCA.clustering.degrade_clusters(idx, verbose=False)
 
     # Vector of indices 0..n_obs:
     idx_full = np.arange(0,n_obs)
@@ -136,19 +144,19 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
 
 def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     """
-    This function takes an `idx` resulting from a clustering technique and samples
-    a certain percentage `perc` from every cluster as training data.
+    This function takes an `idx` classifications from a clustering technique and samples
+    a certain percentage `perc` from every cluster as the training data.
     The remaining percentage is the test data.
 
-    For example if the full data has 10 observations with indices:
+    For example, if the full data has 10 observations with indices:
 
     `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
 
-    and you request 40% of the data to be training data, the function may return:
+    and you requested 40% of the data to be training data, the function may return:
 
     `idx_train = [0, 1, 2, 7]`
 
-    as the training data and:
+    and:
 
     `idx_test = [3, 4, 5, 6, 8, 9]`
 
@@ -156,7 +164,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
     Input:
     ----------
-    `idx`         - division to clusters.
+    `idx`         - vector of indices classifying observations to clusters.
     `perc`        - percentage of data to be selected as training data from each cluster.
                     Set perc=20 if you want 20%.
     `verbose`     - boolean for printing clustering details.
@@ -213,7 +221,7 @@ def train_test_split_random(n_obs, perc, idx_test=[], verbose=False):
 
     `idx_train = [0, 1, 2, 7]`
 
-    as the training data and:
+    and:
 
     `idx_test = [3, 4, 5, 6, 8, 9]`
 
@@ -237,10 +245,14 @@ def train_test_split_random(n_obs, perc, idx_test=[], verbose=False):
     """
 
     idx_full = np.arange(0,n_obs)
+    idx_test = np.array(idx_test)
 
     if len(idx_test) != 0:
-        idx_full = np.setdiff1d(idx_full, idx_test)
-        idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
+        idx_full_no_test = np.setdiff1d(idx_full, idx_test)
+        if int(len(idx_full)*perc/100) <= len(idx_full_no_test):
+            idx_train = np.array(random.sample(idx_full_no_test.tolist(), int(len(idx_full)*perc/100)))
+        else:
+            raise ValueError("The training percentage specified is too high, there aren't enough samples.")
     else:
         idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
         idx_test = np.setdiff1d(idx_full, idx_train)
@@ -255,3 +267,37 @@ def train_test_split_random(n_obs, perc, idx_test=[], verbose=False):
     idx_test = np.sort(idx_test.astype(int))
 
     return (idx_train, idx_test)
+
+def test():
+    """
+    This function tests the `training_data_generation` module.
+    """
+
+    try:
+        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
+        (idx_train, idx_test) = train_test_split_fixed_number_from_idx(idx, 40, test_selection_option=1, verbose=False)
+    except Exception:
+        print('Test of train_test_split_fixed_number_from_idx failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = train_test_split_random(10, 40, idx_test=[1,2], verbose=False)
+    except Exception:
+        print('Test of train_test_split_random failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = train_test_split_random(10, 40, idx_test=[1,2,3,4,5,6], verbose=False)
+    except Exception:
+        print('Test of train_test_split_random failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = train_test_split_random(10, 40, idx_test=[1,2,3,4,5,6,7], verbose=False)
+        print('Test of train_test_split_random failed.')
+        return 0
+    except Exception:
+        pass
+
+    print("Test passed.")
+    return 1
