@@ -1,12 +1,14 @@
-# Machine learning models
+# Regression
 
-## Standardising input/output
+This directory contains auxiliary functions that can be used with non-linear regression techniques.
+
+## Standardizing input/output
 
 `standardize.py`
 
-Contains functions for standardising data for use in machine learning algorithms. Some of the common scalings were implemented such as normalising data between 0 and 1 or between -1 and 1.
+Contains functions for standardizing data for use in machine learning algorithms. Some of the common scalings were implemented such as normalizing data between 0 and 1 or between -1 and 1.
 
-This module includes a `test` function for sanity tests. Run:
+This module includes a `test` function for regression testing. Run:
 
 ```
 import PCA.regression.standardize as st
