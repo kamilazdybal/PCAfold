@@ -98,11 +98,16 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
 
         # Selection of training data:
         if int(0.5*len(cluster)) < n_of_samples:
+
+            # If the 50% bar should apply, take only 50% of cluster observations:
             cluster_train = np.array(random.sample(cluster, int(0.5*len(cluster))))
 
             if verbose == True:
                 print("Cluster " + str(cl+1) + ": taking " + str(int(0.5*len(cluster))) + " training samples out of " + str(len(cluster)) + " observations (%.1f" % (int(0.5*len(cluster))/len(cluster)*100) + "%).")
+
         else:
+
+            # Otherwise take the calculated number of samples:
             cluster_train = np.array(random.sample(cluster, n_of_samples))
 
             if verbose == True:
@@ -175,6 +180,10 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     `idx_test`    - indices of the (remaining) test data.
     """
 
+    # Degrade clusters if needed:
+    if len(np.unique(idx)) != (np.max(idx)-1):
+        (idx, k_new) = PCA.clustering.degrade_clusters(idx, verbose=False)
+
     n_obs = len(idx)
     idx_full = np.arange(0,n_obs)
     idx_train = []
@@ -189,14 +198,14 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
             if id == cl:
                 cluster.append(idx_full[i])
 
-        if verbose == True:
-            print('Number of observations in cluster ' + str(cl) + ': ' + str(len(cluster)))
-
         cluster_train = np.array(random.sample(cluster, int(len(cluster)*perc/100)))
         cluster_test = np.setdiff1d(cluster, cluster_train)
 
         idx_train = np.concatenate((idx_train, cluster_train))
         idx_test = np.concatenate((idx_test, cluster_test))
+
+        if verbose == True:
+            print("Cluster " + str(cl+1) + ": taking " + str(len(cluster_train)) + " training samples out of " + str(len(cluster)) + " observations (%.1f" % (len(cluster_train)/len(cluster)*100) + "%).")
 
     if verbose == True:
         print('\nSelected ' + str(np.size(idx_train)) + ' training samples (' + str(perc) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(100-perc) + '%).\n')

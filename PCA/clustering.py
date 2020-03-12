@@ -47,9 +47,11 @@ def variable_bins(var, k, verbose=False):
     """
     This function does clustering based on dividing a variable vector `var` into bins
     of equal lengths.
+
     var_min                                               var_max
        |----------|----------|----------|----------|----------|
           bin 1      bin 2      bin 3       bin 4     bin 5
+
     """
 
     # Check that the number of clusters is an integer and is non-zero:
