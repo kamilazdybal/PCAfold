@@ -239,8 +239,9 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
 
     | Note that this function does not `degrade_clusters` to avoid disambiguity
     | between cluster numeration inside `idx` and inside the keys of the
-    | `sampling_dictionary`! It will however check whether the keys are
-    | consistent with the `idx`.
+    | `sampling_dictionary`! It will however check whether keys are consistent
+    | with `idx` entries and if yes it will continue running. If the `idx`
+    | requires running `degrade_clusters`, information will be printed.
 
     Example:
     ----------
@@ -283,6 +284,10 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
     """
 
     _sampling_type = ['percentage', 'number']
+
+    # Check if degrading clusters is needed and if yes print a message:
+    if len(np.unique(idx)) != (np.max(idx)-1):
+        print("----------\nConsider running `degrade_clusters` on `idx`!\n----------")
 
     n_obs = len(idx)
 
