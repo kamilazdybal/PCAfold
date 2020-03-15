@@ -4,19 +4,31 @@ import time
 
 def degrade_clusters(idx, verbose=False):
     """
-    This function degrades cluster numeration if it is composed of non-consecutive integers.
+    This function renumerates clusters if either of these two cases is true:
+        (1) `idx` is composed of non-consecutive integers, or:
+        (2) the smallest cluster number in `idx` is not equal to 0.
 
     Example:
     ----------
-    If from a clustering technique you get idx that is as following:
+    If from a clustering technique you get an `idx` that is the following:
 
     `[0, 0, 2, 0, 5, 10]`
 
-    this function turns this idx to:
+    this function would turns this `idx` to:
 
     `[0, 0, 1, 0, 2, 3]`
 
     where clusters are numbered with consecutive integers.
+
+    Alternatively, if the `idx` is the following:
+
+    `[1, 1, 2, 2, 3, 3]`
+
+    this function would turns this `idx` to:
+
+    `[0, 0, 1, 1, 2, 2]`
+
+    in order to make the smallest cluster number equal to 0.
     """
 
     index = 0
@@ -45,8 +57,8 @@ def degrade_clusters(idx, verbose=False):
 
 def variable_bins(var, k, verbose=False):
     """
-    This function does clustering based on dividing a variable vector `var` into bins
-    of equal lengths.
+    This function does clustering based on dividing a variable vector `var` into
+    bins of equal lengths.
 
     var_min                                               var_max
        |----------|----------|----------|----------|----------|
@@ -157,8 +169,9 @@ def kmeans(X, k):
 
 def flip_clusters(idx, dictionary):
     """
-    This function flips the cluster labelling according to instructions provided in the dictionary.
-    For a `dictionary = {key : value}`, a cluster with a number `key` will get a number `value`.
+    This function flips the cluster labelling according to instructions provided
+    in the dictionary. For a `dictionary = {key : value}`, a cluster with a
+    number `key` will get a number `value`.
     """
 
     flipped_idx = []
@@ -175,6 +188,14 @@ def test():
     """
     This function tests the `clustering` module.
     """
+
+    (idx, k) = degrade_clusters([1,1,2,2,3,3], verbose=False)
+    if np.min(idx) != 0:
+        print('Test of degrade_clusters failed.')
+        return 0
+    if k != 3:
+        print('Test of degrade_clusters failed.')
+        return 0
 
     print('Test passed.')
     return 1
