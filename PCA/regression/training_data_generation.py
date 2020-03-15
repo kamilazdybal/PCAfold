@@ -70,7 +70,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
     n_obs = len(idx)
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)-1):
+    if len(np.unique(idx)) != (np.max(idx)+1):
         (idx, k_new) = PCA.clustering.degrade_clusters(idx, verbose=False)
 
     # Vector of indices 0..n_obs:
@@ -189,7 +189,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     """
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)-1):
+    if len(np.unique(idx)) != (np.max(idx)+1):
         (idx, k_new) = PCA.clustering.degrade_clusters(idx, verbose=False)
 
     n_obs = len(idx)
@@ -286,7 +286,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
     _sampling_type = ['percentage', 'number']
 
     # Check if degrading clusters is needed and if yes print a message:
-    if len(np.unique(idx)) != (np.max(idx)-1):
+    if len(np.unique(idx)) != (np.max(idx)+1):
         print("----------\nConsider running `degrade_clusters` on `idx`!\n----------")
 
     n_obs = len(idx)
