@@ -34,6 +34,7 @@ def degrade_clusters(idx, verbose=False):
     ----------
     `idx`      - vector of indices classifying observations to clusters.
                  The first cluster has index 0.
+    `verbose`  - boolean for printing clustering details.
 
     Output:
     ----------
@@ -208,7 +209,7 @@ def kmeans(X, k):
 
     return(idx)
 
-def vqpca(X, k, n_pcs, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=600):
+def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=1000, verbose=False):
     """
     This function performs Vector Quantization clustering using
     Principal Component Analysis.
@@ -225,6 +226,13 @@ def vqpca(X, k, n_pcs, scaling_criteria='NONE', idx_0=[], maximum_number_of_iter
     `k`        - number of clusters to partition the data.
     `n_pcs`    - number of Principal Components that will be used to reconstruct
                  the data at each iteration.
+    `scaling_criteria`
+               - criterion to scale the global data set.
+    `idx_0`    - user-supplied initial idx for initializing the centroids.
+    `maximum_number_of_iterations`
+               - the maximum number of iterations that the algorithm will loop
+                 through.
+    `verbose`  - boolean for printing clustering details.
 
     Output:
     ----------
@@ -243,24 +251,29 @@ def vqpca(X, k, n_pcs, scaling_criteria='NONE', idx_0=[], maximum_number_of_iter
         if len(idx_0) != n_obs:
             raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
 
-    # Initialize parameters:
-    convergence = 0
+    # Initialize the iteration counter:
     iteration = 0
-    eps_rec = 1.0
-    eps_rec_min = 1.0e-02
 
-    # Tolerance for cluster centroids:
-    a_tol = 1.0e-16
-
-    # Tolerance for the error:
-    r_tol = 1.0e-08
-
-    # Initialize the eigenvectors matrix:
+    # Initialize the eigenvectors (Principal Components) matrix:
     eigenvectors = []
 
     # Initialize the scalings matrix:
     scalings = []
 
+    # Global convergence parameter that represents convergence of reconstruction errors and centroids:
+    convergence = 0
+
+    # Initialize the reconstruction error:
+    eps_rec = 1.0
+
+    # Tolerance for cluster centroids:
+    a_tol = 1.0e-16
+
+    # Tolerance for the reconstruction error:
+    r_tol = 1.0e-08
+
+    # Populate the initial eigenvectors and scalings matrices (scalings will not
+    # be updated later in the algorithm since we do not scale the data locally):
     for i in range(0,k):
         eigenvectors.append(np.eye(n_vars, n_pcs))
         scalings.append(np.ones((n_vars,)))
@@ -288,7 +301,8 @@ def vqpca(X, k, n_pcs, scaling_criteria='NONE', idx_0=[], maximum_number_of_iter
     # VQPCA algorithm:
     while ((convergence == 0) and (iteration <= maximum_number_of_iterations)):
 
-        print('Iteration: ' + str(iteration) + '\n----------')
+        if verbose==True:
+            print('Iteration: ' + str(iteration) + '\n----------')
 
         # Initialize the reconstruction error matrix:
         sq_rec_err = np.zeros((n_obs, k))
@@ -334,7 +348,8 @@ def vqpca(X, k, n_pcs, scaling_criteria='NONE', idx_0=[], maximum_number_of_iter
             eps_rec_new_clust[j] = np.mean(rec_err_min_rel_k[j])
             size_clust[j] = len(nz_X_k[j])
 
-        print('Global mean recontruction error at iteration ' + str(iteration) + ' is ' + str(eps_rec_new))
+        if verbose==True:
+            print('Global mean recontruction error at iteration ' + str(iteration) + ' is ' + str(eps_rec_new) + '.\n')
 
         # Find the new cluster centroids:
         centroids_new = np.zeros((k, n_vars))
@@ -343,13 +358,6 @@ def vqpca(X, k, n_pcs, scaling_criteria='NONE', idx_0=[], maximum_number_of_iter
             centroids_new[j, :] = np.mean(nz_X_k[j], axis=0)
 
         eps_rec_var = abs((eps_rec_new - eps_rec) / eps_rec_new)
-
-        # Potentially increase the number of Principal Components in the approximation,
-        # need to think it through whether we want to keep that:
-        # if ((eps_rec_var < r_tol) and (eps_rec_new > eps_rec_min) and (n_eigs < n_eigs_max)):
-        #     n_pcs = n_pcs + 1
-        #     print('Cluster ' + str(j)+ ' dimension increased to %d \n', j,  n_eigs);
-
 
         # Judge the convergence of errors:
         if (eps_rec_var < r_tol):
@@ -387,10 +395,9 @@ def vqpca(X, k, n_pcs, scaling_criteria='NONE', idx_0=[], maximum_number_of_iter
 
         # Increment the iteration counter:
         iteration = iteration + 1;
-        print('\n')
 
     if (convergence == 0):
-        print('Convergence not reached in ' + str(iteration) +' iterations.');
+        print('Convergence not reached in ' + str(iteration) + ' iterations.');
 
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
@@ -494,7 +501,7 @@ def get_partition(X, idx):
 
     # Remove empty clusters from indexing:
     if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = PCA.clustering.degrade_clusters(idx, verbose=False)
+        (idx, k_new) = degrade_clusters(idx, verbose=False)
         print('Empty clusters were removed.')
 
     k = len(np.unique(idx))
