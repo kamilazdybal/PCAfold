@@ -222,7 +222,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
 
     Input:
     ----------
-    `X`        - raw data set, uncentered and unscaled.
+    `X`        - raw global data set, uncentered and unscaled.
     `k`        - number of clusters to partition the data.
     `n_pcs`    - number of Principal Components that will be used to reconstruct
                  the data at each iteration.
@@ -266,10 +266,10 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
     # Initialize the reconstruction error:
     eps_rec = 1.0
 
-    # Tolerance for cluster centroids:
+    # Tolerance for division operations (to avoid division by zero):
     a_tol = 1.0e-16
 
-    # Tolerance for the reconstruction error:
+    # Tolerance for the reconstruction error and for cluster centroids:
     r_tol = 1.0e-08
 
     # Populate the initial eigenvectors and scalings matrices (scalings will not
@@ -288,7 +288,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
     if len(idx_0) > 0:
 
         # If there is a user provided initial idx_0, find the initial centroids:
-        centroids = get_centroids(scal_X, idx_0)
+        centroids = get_centroids(X_pre_processed, idx_0)
 
     else:
 
@@ -380,24 +380,30 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         centroids = centroids_new
         eps_rec = eps_rec_new
 
-        # Initialize the eigenvectors matrix:
+        # Initialize the new eigenvectors matrix:
         eigenvectors = []
 
-        # Perform PCA in local clusters:
+        # Perform PCA in local clusters to update the eigenvectors:
         for j in range(0,k):
 
-            # Perform PCA:
-            pca = sklPCA()
+            # Perform PCA using sklearn:
+            pca = sklPCA(svd_solver='auto')
             pca.fit(nz_X_k[j])
-            scores = pca.transform(nz_X_k[j])
             PCs = pca.components_
+
+            # # Perform PCA using this PCA library:
+            # preproc = PCA.preprocess(nz_X_k[j])
+            # PHI =  preproc.manipulated
+            # pca = PCA.PCA(PHI, 'NONE', n_pcs, useXTXeig=True)
+            # PCs = pca.Q
+
             eigenvectors.append(PCs[:,0:n_pcs])
 
         # Increment the iteration counter:
-        iteration = iteration + 1;
+        iteration = iteration + 1
 
     if (convergence == 0):
-        print('Convergence not reached in ' + str(iteration) + ' iterations.');
+        print('Convergence not reached in ' + str(iteration) + ' iterations.')
 
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
@@ -495,9 +501,9 @@ def get_partition(X, idx):
                  observations.
     """
 
-    (n_obs, n_vars) = np.shape(X);
-
     idx = np.array(idx)
+
+    (n_obs, n_vars) = np.shape(X)
 
     # Remove empty clusters from indexing:
     if len(np.unique(idx)) != (np.max(idx)+1):
