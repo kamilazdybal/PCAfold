@@ -302,7 +302,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
     while ((convergence == 0) and (iteration <= maximum_number_of_iterations)):
 
         if verbose==True:
-            print('Iteration: ' + str(iteration) + '\n----------')
+            print('\nIteration: ' + str(iteration) + '\n----------')
 
         # Initialize the reconstruction error matrix:
         sq_rec_err = np.zeros((n_obs, k))
@@ -332,7 +332,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         eps_rec_new = np.mean(rec_err_min_rel)
 
         # Partition the data observations into clusters:
-        (nz_X_k, nz_idx_clust, k) = get_partition(X_pre_processed, idx)
+        (nz_X_k, nz_idx_clust, k) = get_partition(X_pre_processed, idx, verbose)
 
         # Evaluate the relative recontruction errors in each cluster:
         rec_err_min_rel_k = []
@@ -374,7 +374,8 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         # If the convergence of centroids and reconstruction error is reached, the algorithm stops:
         if ((iteration > 1) and (centroids_convergence == 1) and (eps_rec_convergence == 1)):
             convergence = 1
-            print('Convergence reached in iteration: ' + str(iteration))
+            print('Convergence reached in iteration: ' + str(iteration) + '\n')
+            break
 
         # Update recontruction error and cluster centroids:
         centroids = centroids_new
@@ -388,7 +389,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
 
             # Perform PCA:
             centered_nz_X_k = nz_X_k[j] - np.mean(nz_X_k[j], axis=0)
-            covariance_matrix = np.dot(np.transpose(centered_nz_X_k), centered_nz_X_k) / n_obs
+            covariance_matrix = np.dot(np.transpose(centered_nz_X_k), centered_nz_X_k) / (n_obs-1)
             L, PCs = numpy.linalg.eig(covariance_matrix)
             PCs = np.real(PCs)
 
@@ -397,8 +398,6 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
             if verbose==True:
                 print('Cluster ' + str(j) + ' dimensions:')
                 print(np.shape(nz_X_k[j]))
-
-        print(eigenvectors)
 
         # Increment the iteration counter:
         iteration = iteration + 1
@@ -409,6 +408,10 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
         (idx, k_new) = degrade_clusters(idx, verbose=False)
+
+    # Check that the number of entries inside idx is the same as the number of observations:
+    if len(idx) != n_obs:
+        raise ValueError("The number of entires inside `idx` is not equal to the number of observations in the data set `X`.")
 
     return(idx)
 
@@ -484,7 +487,7 @@ def get_centroids(X, idx):
 
     return(centroids)
 
-def get_partition(X, idx):
+def get_partition(X, idx, verbose=False):
     """
     This function computes the centroids for the clustering specified in the
     `idx` vector.
@@ -508,8 +511,10 @@ def get_partition(X, idx):
 
     # Remove empty clusters from indexing:
     if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose=False)
-        print('Empty clusters were removed.')
+        (idx, _) = degrade_clusters(idx, verbose)
+        idx = np.array(idx)
+        if verbose==True:
+            print('Empty clusters will be removed.')
 
     k = len(np.unique(idx))
 
@@ -524,8 +529,9 @@ def get_partition(X, idx):
         idx_clust.append(indices_to_append)
         n_points[i] = len(indices_to_append)
 
-        if (n_points[i] < n_vars):
-            print('Too few points (' + str(int(n_points[i])) + ') in cluster ' + str(i) + ', cluster will be removed.')
+        if ((n_points[i] < n_vars) and (n_points[i] > 0)):
+            if verbose==True:
+                print('Too few points (' + str(int(n_points[i])) + ') in cluster ' + str(i) + ', cluster will be removed.')
 
     # Find those cluster numbers where the number of observations is not less than number of variables:
     nz_idx = np.argwhere(n_points >= n_vars).ravel()
