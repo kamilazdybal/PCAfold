@@ -386,18 +386,19 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         # Perform PCA in local clusters to update the eigenvectors:
         for j in range(0,k):
 
-            # Perform PCA using sklearn:
-            pca = sklPCA(svd_solver='auto')
-            pca.fit(nz_X_k[j])
-            PCs = pca.components_
-
-            # # Perform PCA using this PCA library:
-            # preproc = PCA.preprocess(nz_X_k[j])
-            # PHI =  preproc.manipulated
-            # pca = PCA.PCA(PHI, 'NONE', n_pcs, useXTXeig=True)
-            # PCs = pca.Q
+            # Perform PCA:
+            centered_nz_X_k = nz_X_k[j] - np.mean(nz_X_k[j], axis=0)
+            covariance_matrix = np.dot(np.transpose(centered_nz_X_k), centered_nz_X_k) / n_obs
+            L, PCs = numpy.linalg.eig(covariance_matrix)
+            PCs = np.real(PCs)
 
             eigenvectors.append(PCs[:,0:n_pcs])
+
+            if verbose==True:
+                print('Cluster ' + str(j) + ' dimensions:')
+                print(np.shape(nz_X_k[j]))
+
+        print(eigenvectors)
 
         # Increment the iteration counter:
         iteration = iteration + 1
