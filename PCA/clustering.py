@@ -66,7 +66,7 @@ def degrade_clusters(idx, verbose=False):
         print('Clusters have been degraded.')
         print('The number of clusters have been reduced from ' + str(k_init) + ' to ' + str(k_update) + '.')
 
-    return (idx_degraded, k_update)
+    return (np.asarray(idx_degraded), k_update)
 
 def variable_bins(var, k, verbose=False):
     """
@@ -181,7 +181,7 @@ def mixture_fraction_bins(Z, k, Z_stoich):
         idx_clust.append([np.where((Z >= borders[bin]) & (Z <= borders[bin+1]))])
         idx[idx_clust[bin]] = bin+1
 
-    return(idx)
+    return(np.asarray(idx))
 
 def kmeans(X, k):
     """
@@ -207,7 +207,7 @@ def kmeans(X, k):
     kmeans = KMeans(n_clusters=k, precompute_distances=True, algorithm='auto').fit(X)
     idx = kmeans.labels_
 
-    return(idx)
+    return(np.asarray(idx))
 
 def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=1000, verbose=False):
     """
@@ -413,7 +413,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
     if len(idx) != n_obs:
         raise ValueError("The number of entires inside `idx` is not equal to the number of observations in the data set `X`.")
 
-    return(idx)
+    return(np.asarray(idx))
 
 def flip_clusters(idx, dictionary):
     """
@@ -444,7 +444,7 @@ def flip_clusters(idx, dictionary):
         else:
             flipped_idx.append(i)
 
-    return flipped_idx
+    return(np.asarray(flipped_idx))
 
 def get_centroids(X, idx):
     """
@@ -504,8 +504,6 @@ def get_partition(X, idx, verbose=False):
                - matrix of cluster centroids. It has size k times number of
                  observations.
     """
-
-    idx = np.array(idx)
 
     (n_obs, n_vars) = np.shape(X)
 
