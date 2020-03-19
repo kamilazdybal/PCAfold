@@ -2,71 +2,7 @@ import numpy as np
 import random
 import time
 
-def degrade_clusters(idx, verbose=False):
-    """
-    This function renumerates clusters if either of these two cases is true:
-        (1) `idx` is composed of non-consecutive integers, or:
-        (2) the smallest cluster number in `idx` is not equal to 0.
-
-    Example:
-    ----------
-    If from a clustering technique you get an `idx` that is the following:
-
-    `[0, 0, 2, 0, 5, 10]`
-
-    this function would turns this `idx` to:
-
-    `[0, 0, 1, 0, 2, 3]`
-
-    where clusters are numbered with consecutive integers.
-
-    Alternatively, if the `idx` is the following:
-
-    `[1, 1, 2, 2, 3, 3]`
-
-    this function would turns this `idx` to:
-
-    `[0, 0, 1, 1, 2, 2]`
-
-    in order to make the smallest cluster number equal to 0.
-
-    Input:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
-    `verbose`  - boolean for printing clustering details.
-
-    Output:
-    ----------
-    `idx_degraded`
-               - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
-    `k_update` - the updated number of clusters.
-    """
-
-    index = 0
-    dictionary = {}
-    sorted = np.unique(idx)
-    k_init = np.max(idx) + 1
-    dictionary[sorted[0]] = 0
-    old_val = sorted[0]
-    idx_degraded = [0 for i in range(0, len(idx))]
-
-    for val in sorted:
-        if val > old_val:
-            index += 1
-        dictionary[val] = index
-
-    for i, val in enumerate(idx):
-        idx_degraded[i] = dictionary[val]
-
-    k_update = np.max(idx_degraded) + 1
-
-    if verbose == True:
-        print('Clusters have been degraded.')
-        print('The number of clusters have been reduced from ' + str(k_init) + ' to ' + str(k_update) + '.')
-
-    return (np.asarray(idx_degraded), k_update)
+# Clustering functions:
 
 def variable_bins(var, k, verbose=False):
     """
@@ -415,6 +351,74 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
 
     return(np.asarray(idx))
 
+# Auxiliary functions:
+
+def degrade_clusters(idx, verbose=False):
+    """
+    This function renumerates clusters if either of these two cases is true:
+        (1) `idx` is composed of non-consecutive integers, or:
+        (2) the smallest cluster number in `idx` is not equal to 0.
+
+    Example:
+    ----------
+    If from a clustering technique you get an `idx` that is the following:
+
+    `[0, 0, 2, 0, 5, 10]`
+
+    this function would turns this `idx` to:
+
+    `[0, 0, 1, 0, 2, 3]`
+
+    where clusters are numbered with consecutive integers.
+
+    Alternatively, if the `idx` is the following:
+
+    `[1, 1, 2, 2, 3, 3]`
+
+    this function would turns this `idx` to:
+
+    `[0, 0, 1, 1, 2, 2]`
+
+    in order to make the smallest cluster number equal to 0.
+
+    Input:
+    ----------
+    `idx`      - vector of indices classifying observations to clusters.
+                 The first cluster has index 0.
+    `verbose`  - boolean for printing clustering details.
+
+    Output:
+    ----------
+    `idx_degraded`
+               - vector of indices classifying observations to clusters.
+                 The first cluster has index 0.
+    `k_update` - the updated number of clusters.
+    """
+
+    index = 0
+    dictionary = {}
+    sorted = np.unique(idx)
+    k_init = np.max(idx) + 1
+    dictionary[sorted[0]] = 0
+    old_val = sorted[0]
+    idx_degraded = [0 for i in range(0, len(idx))]
+
+    for val in sorted:
+        if val > old_val:
+            index += 1
+        dictionary[val] = index
+
+    for i, val in enumerate(idx):
+        idx_degraded[i] = dictionary[val]
+
+    k_update = np.max(idx_degraded) + 1
+
+    if verbose == True:
+        print('Clusters have been degraded.')
+        print('The number of clusters have been reduced from ' + str(k_init) + ' to ' + str(k_update) + '.')
+
+    return (np.asarray(idx_degraded), k_update)
+
 def flip_clusters(idx, dictionary):
     """
     This function flips the cluster labelling according to instructions provided
@@ -510,7 +514,6 @@ def get_partition(X, idx, verbose=False):
     # Remove empty clusters from indexing:
     if len(np.unique(idx)) != (np.max(idx)+1):
         (idx, _) = degrade_clusters(idx, verbose)
-        idx = np.array(idx)
         if verbose==True:
             print('Empty clusters will be removed.')
 
