@@ -226,16 +226,18 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
     return (idx_train, idx_test)
 
-def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='percentage', verbose=False):
+def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='percentage', bar50=True, verbose=False):
     """
     This function takes an `idx` classifications from a clustering technique and
     a dictionary `sampling_dictionary` in which you manually specify what
     perecentage or what number of samples should be taken from every cluster as
     the training data.
 
-    There is a bar that no more than 50% of observations from any cluster will
-    be taken for training. This is to avoid that too little samples will remain
-    for test data from small clusters.
+    By default, there is a bar that no more than 50% of observations from any
+    cluster will be taken for training. This is to avoid that too little samples
+    will remain for test data from small clusters. If the parameter `bar50` is
+    set to False, this function will allow to sample more than 50% of
+    observations.
 
     | Note that this function does not `degrade_clusters` to avoid disambiguity
     | between cluster numeration inside `idx` and inside the keys of the
@@ -275,6 +277,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
                   - string specifying whether percentage or number is given in
                     the `sampling_dictionary`. Available options: 'percentage'
                     or 'number'. The default is 'percentage'.
+    `bar50`       - boolean specifying whether the 50% bar should apply.
     `verbose`     - boolean for printing clustering details.
 
     Output:
@@ -305,7 +308,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
         raise ValueError("The number of entries inside `sampling_dictionary` does not match the number of clusters specified in `idx`.")
 
     # Check that no percentage is higher than 50%:
-    if sampling_type == 'percentage':
+    if sampling_type == 'percentage' and bar50 == True:
         for key, value in sampling_dictionary.items():
             if value > 50:
                 raise ValueError("Error in cluster number " + str(key) + ". Percentage in `sampling_dictionary` cannot be higher than 50%.")
@@ -322,9 +325,14 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
             raise ValueError("Error in cluster number " + str(key) + ". Key must be a non-negative integer.")
 
         # Check that percentage is between 0 and 50:
-        if sampling_type == 'percentage':
+        if sampling_type == 'percentage' and bar50 == True:
             if not (value >= 0 and value <= 50):
                 raise ValueError("Error in cluster number " + str(key) + ". The percentage must be between 0% and 50%.")
+
+        # Check that percentage is between 0 and 100:
+        if sampling_type == 'percentage' and bar50 == False:
+            if not (value >= 0 and value <= 100):
+                raise ValueError("Error in cluster number " + str(key) + ". The percentage must be between 0% and 100%.")
 
         # Check that number is a non-negative integer:
         if sampling_type == 'number':
@@ -361,8 +369,11 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
                     cluster.append(idx_full[i])
 
             # Check that the number of requested observations from that cluster does not exceed 50% of observations in that cluster:
-            if value > 0.5*len(cluster):
+            if value > 0.5*len(cluster) and bar50==True:
                 raise ValueError("Error in cluster number " + str(key) + ". The number of samples in `sampling_dictionary` cannot exceed 50% of observations in a cluster.")
+
+            if value > len(cluster) and bar50==False:
+                raise ValueError("Error in cluster number " + str(key) + ". The number of samples in `sampling_dictionary` cannot exceed the number of observations in a cluster.")
 
             cluster_train = np.array(random.sample(cluster, value))
             cluster_test = np.setdiff1d(cluster, cluster_train)
