@@ -548,6 +548,39 @@ def get_partition(X, idx, verbose=False):
 
     return(data_in_clusters, data_idx_in_clusters, k_new)
 
+
+def get_populations(idx, verbose=False):
+    """
+    This function computes populations (number of observations) in clusters
+    specified in the `idx` vector.
+
+    Input:
+    ----------
+    `idx`      - vector of indices classifying observations to clusters.
+                 The first cluster has index 0.
+
+    Output:
+    ----------
+    `populations`
+               - list of cluster populations. Each entry referes to one cluster
+                 ordered according to `idx`.
+    """
+
+    populations = []
+
+    # Degrade clusters if needed:
+    if len(np.unique(idx)) != (np.max(idx)+1):
+        (idx, k_new) = degrade_clusters(idx, verbose)
+
+    # Find the number of clusters:
+    k = len(np.unique(idx))
+
+    for i in range(0,k):
+
+        populations.append((idx==i).sum())
+
+    return(populations)
+
 def test():
     """
     This function tests the `clustering` module.
