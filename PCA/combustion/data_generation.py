@@ -9,10 +9,10 @@ from spitfire.chemistry import flamelet
 #
 # https://github.com/sandialabs/Spitfire
 
-# Generic isobaric, adiabiatic, closed homogenous reactor:
-def homogenous_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equivalence_ratio):
+# Generic isobaric, adiabiatic, closed homogeneous reactor:
+def homogeneous_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equivalence_ratio):
     """
-    This function generates a state-space data set from a homogenous, isobaric,
+    This function generates a state-space data set from a homogeneous, isobaric,
     adiabatic closed reactor. It uses `HomogeneousReactor` from Spitfire.
 
     Input:
@@ -74,7 +74,7 @@ def homogenous_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equiv
                 time_list = np.zeros((1,))
                 number_of_steps = []
 
-            # Intialize the homogenous reactor and integrate:
+            # Intialize the homogeneous reactor and integrate:
             r = reactors.HomogeneousReactor(chemical_mechanism, mix, 'isobaric', 'adiabatic', 'closed')
             output = r.integrate_to_steady_after_ignition(steady_tolerance=1.e-8, first_time_step=1.e-9, transient_tolerance=1.e-12)
 
