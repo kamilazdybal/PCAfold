@@ -122,7 +122,7 @@ def homogeneous_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equi
                 species_mass_fraction = output['mass fraction ' + species]
                 state_space_at_this_iteration[:,i+1] = species_mass_fraction
 
-            state_space_sources_at_this_iteration[:,1::] = production_rates
+            state_space_sources_at_this_iteration[:,1::] = np.divide(production_rates, np.reshape(output['density'], (n_steps, 1)))
 
             print('it.%.0f \tT: %.0f \tEquivalence ratio: %.2f \tNumber of time steps: %.0f' % (iteration, IC_T, IC_ER, n_steps))
 
