@@ -180,7 +180,7 @@ def single_variable_observation_weights(x):
 
     Input:
     ----------
-    `X`           - multi-variable data set matrix.
+    `x`           - single variable vector.
 
     Output:
     ----------

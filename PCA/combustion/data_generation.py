@@ -27,6 +27,7 @@ def homogeneous_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equi
                - a vector of initial mixing temperatures to loop over.
     `equivalence_ratio`
                - a vector of equivalence ratios to loop over.
+
     Output:
     ----------
     `state_space`
