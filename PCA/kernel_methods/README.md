@@ -2,7 +2,9 @@
 
 ## `kernel_density`
 
-> References:
+Implementation of the kernel density method from [3].
+
+> **References:**
 >
 > [1] Rosenblatt, Murray. Remarks on Some Nonparametric Estimates of a Density Function. Ann. Math. Statist. 27 (1956), no. 3, 832--837.
 >
