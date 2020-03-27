@@ -1,9 +1,8 @@
 import numpy as np
-
-# Spitfire:
 from spitfire.chemistry import reactors
 from spitfire.chemistry import mechanism
 from spitfire.chemistry import flamelet
+from spitfire.chemistry import tabulation
 import spitfire.chemistry.analysis as sca
 from cantera import gas_constant
 
@@ -15,7 +14,8 @@ from cantera import gas_constant
 def homogeneous_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equivalence_ratio):
     """
     This function generates a state-space data set from a homogeneous, isobaric,
-    adiabatic closed reactor. It uses `HomogeneousReactor` from Spitfire.
+    adiabatic closed reactor.
+    It uses `HomogeneousReactor` class from Spitfire.
 
     Input:
     ----------
@@ -141,3 +141,90 @@ def homogeneous_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equi
     print('\nDone!')
 
     return (state_space, state_space_sources, time_list, number_of_steps, state_space_names, Z_stoich)
+
+# Generic steady laminar flamelet:
+def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, dissipation_rates):
+    """
+    This function generates a state-space data set from laminar flamelet.
+    It uses `Flamelet` class from Spitfire.
+
+    Input:
+    ----------
+    `chemical_mechanism`
+               - is a chemical mechanism, object of `ChemicalMechanismSpec`.
+    `fuel_ratio`
+               - string specifying the mass ratios of fuel components.
+    `initial_condition`
+               - initial condition for the flamelet library.
+    `dissipation_rates`
+               - a vector of dissipation rates.
+
+    Output:
+    ----------
+    `state_space`
+               - a matrix of state space: [temperature, species mass fractions].
+    `state_space_sources`
+               - a matrix of state space sources:
+                 [heat release rate, production rates].
+    `state_space_names`
+               - list of strings labeling the variables in the `state_space`
+                 matrix.
+    `mixture_fraction`
+               - a mixture fraction vector.
+    `Z_stoich`
+               - stoichiometric mixture fraction.
+    """
+
+    # Fuel and air streams:
+    fuel = chemical_mechanism.stream('X', fuel_ratio)
+    air = chemical_mechanism.stream(stp_air=True)
+
+    Z_stoich = chemical_mechanism.stoich_mixture_fraction(fuel, air)
+
+    # Extract the state-space variables names:
+    number_of_species = chemical_mechanism.n_species
+    species_names = chemical_mechanism.species_names
+    state_space_names = np.array(['T'] + species_names)
+
+    pressure = 101325.
+
+    flamelet_specs = {'mech_spec': chemical_mechanism,
+                      'pressure': pressure,
+                      'oxy_stream': air,
+                      'fuel_stream': fuel,
+                      'grid_points': 100,
+                      'grid_type': 'uniform',
+                      'include_enthalpy_flux': True,
+                      'include_variable_cp': True}
+
+    output = tabulation.build_adiabatic_slfm_library(flamelet_specs,
+                                        diss_rate_values=dissipation_rates,
+                                        diss_rate_ref='stoichiometric',
+                                        verbose=False)
+
+    output = sca.compute_density(chemical_mechanism, output) # density kg/m^3
+    output = sca.compute_isobaric_specific_heat(chemical_mechanism, output) # heat capacity cp J/kg/K
+    output = sca.compute_isochoric_specific_heat(chemical_mechanism, output) # heat capacity cv J/kg/K
+    output = sca.compute_pressure(chemical_mechanism, output) # pressure Pa
+    output = sca.compute_specific_enthalpy(chemical_mechanism, output) # enthalpy J/kg
+    ct_sa, lib_shape = sca.get_ct_solution_array(chemical_mechanism, output)
+    output['mixture_molecular_weight'] = ct_sa.mean_molecular_weight.reshape(lib_shape) # kg/kmol
+    output['energy'] = ct_sa.int_energy_mass.reshape(lib_shape) # specific internal energy J/kg
+    mass_fracs = ct_sa.Y # n_obs x n_spec array of mass fractions
+    production_rates = ct_sa.net_production_rates*ct_sa.molecular_weights # kmol/m^3/s * kg/kmol; n_obs x n_spec array of mass production rates
+    species_enthalpies = ct_sa.standard_enthalpies_RT * ct_sa.T[:,None] * gas_constant / ct_sa.molecular_weights[None,:] # J/kg; n_obs x n_spec array of species enthalpies
+    species_energies = ct_sa.standard_int_energies_RT * ct_sa.T[:,None] * gas_constant / ct_sa.molecular_weights[None,:] # J/kg; n_obs x n_spec array of species internal energies
+    heat_release_rate = -np.sum(production_rates * species_enthalpies, axis=1) / output['density'].ravel() / output['heat capacity cp'].ravel() # K/s; temperature source term
+
+    n_obs = len(ct_sa.T)
+
+    production_rates = np.divide(production_rates, np.reshape(output['density'], (n_obs, 1)))
+
+    mixture_fraction = np.reshape(output.mixture_fraction_grid, (n_obs,1))
+    state_space_sources = []
+    state_space_sources = np.hstack((np.reshape(heat_release_rate, (n_obs,1)), production_rates))
+    state_space = np.hstack((ct_sa.T[:,None], ct_sa.Y))
+
+    print('\nDone!')
+
+    return (state_space, state_space_sources, state_space_names, mixture_fraction, Z_stoich)
