@@ -315,6 +315,7 @@ def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, d
                  [heat release rate, production rates].
     `mixture_fraction`
                - a mixture fraction vector.
+    `chi`      - a dissipation rates vector.
     `Z_stoich`
                - stoichiometric mixture fraction.
     """
@@ -344,6 +345,11 @@ def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, d
     # Density:
     output = sca.compute_density(chemical_mechanism, output)
     density = output['density']
+
+    # Dissipation rates:
+    chi = output.dissipation_rate_stoich_grid
+    (n_mf, n_chi) = np.shape(chi)
+    chi = np.reshape(chi, (n_mf*n_chi, ))
 
     # Isobaric heat capacity:
     output = sca.compute_isobaric_specific_heat(chemical_mechanism, output) # J/kg/K
@@ -381,7 +387,7 @@ def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, d
 
     print('\nDone!')
 
-    return (state_space, state_space_sources, mixture_fraction, Z_stoich)
+    return (state_space, state_space_sources, mixture_fraction, chi, Z_stoich)
 
 # Generic isobaric, adiabiatic, open reactor (PSR):
 def PSR_reactors_in_series(chemical_mechanism, fuel_ratio, equivalence_ratio, residence_times, verbose=False):
@@ -410,6 +416,8 @@ def PSR_reactors_in_series(chemical_mechanism, fuel_ratio, equivalence_ratio, re
                  [heat release rate, production rates].
     `mixture_fraction`
                - vector of mixture fractions.
+    `residence_times_vector`
+               - vector of residence times.
     `Z_stoich`
                - stoichiometric mixture fraction.
     """
@@ -431,6 +439,7 @@ def PSR_reactors_in_series(chemical_mechanism, fuel_ratio, equivalence_ratio, re
     state_space = np.zeros_like(state_space_names, dtype=float)
     state_space_sources = np.zeros_like(state_space_names, dtype=float)
     mixture_fraction = np.zeros((1,))
+    residence_times_vector = np.zeros((1,))
     number_of_steps = []
 
     print('Integrating the homogeneous reactor...\n')
@@ -470,6 +479,9 @@ def PSR_reactors_in_series(chemical_mechanism, fuel_ratio, equivalence_ratio, re
 
             # Assuming constant mixture fraction within PSR (initial composition = feed composition):
             mixture_fraction = np.hstack((mixture_fraction, Z))
+
+            # Append the current residence time:
+            residence_times_vector = np.hstack((residence_times_vector, tau))
 
             # Density:
             output = sca.compute_density(chemical_mechanism, output)
@@ -520,7 +532,8 @@ def PSR_reactors_in_series(chemical_mechanism, fuel_ratio, equivalence_ratio, re
     state_space = state_space[1:,:]
     state_space_sources = state_space_sources[1:,:]
     mixture_fraction = mixture_fraction[1:]
+    residence_times_vector = residence_times_vector[1:]
 
     print('\nDone!')
 
-    return (state_space, state_space_sources, mixture_fraction, Z_stoich)
+    return (state_space, state_space_sources, mixture_fraction, residence_times_vector, Z_stoich)
