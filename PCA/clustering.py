@@ -117,6 +117,12 @@ def mixture_fraction_bins(Z, k, Z_stoich):
         idx_clust.append([np.where((Z >= borders[bin]) & (Z <= borders[bin+1]))])
         idx[idx_clust[bin]] = bin+1
 
+    idx = [int(i) for i in idx]
+
+    # Degrade clusters if needed:
+    if len(np.unique(idx)) != (np.max(idx)+1):
+        (idx, k_new) = degrade_clusters(idx, verbose=False)
+
     return(np.asarray(idx))
 
 def kmeans(X, k):
