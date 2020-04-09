@@ -290,7 +290,7 @@ def PSR_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equivalence_
     return (state_space, state_space_sources, time_list, number_of_steps, mixture_fraction, Z_stoich)
 
 # Generic steady laminar flamelet:
-def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, dissipation_rates):
+def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, dissipation_rates, n_of_mf=100):
     """
     This function generates a state-space data set from laminar flamelet.
     It uses `Flamelet` class from Spitfire.
@@ -305,6 +305,8 @@ def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, d
                - initial condition for the flamelet library.
     `dissipation_rates`
                - a vector of dissipation rates.
+    `n_of_mf`
+               - number of grid points in the mixture fraction space.
 
     Output:
     ----------
@@ -332,7 +334,7 @@ def steady_laminar_flamelet(chemical_mechanism, fuel_ratio, initial_condition, d
                       'pressure': pressure,
                       'oxy_stream': air,
                       'fuel_stream': fuel,
-                      'grid_points': 100,
+                      'grid_points': n_of_mf,
                       'grid_type': 'uniform',
                       'include_enthalpy_flux': True,
                       'include_variable_cp': True}
