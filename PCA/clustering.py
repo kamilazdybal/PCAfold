@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import time
+import copy
 
 # Clustering functions:
 
@@ -97,7 +98,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
             raise ValueError("Value " + str(value) + " is not within the range of the variable values.")
 
     idx = []
-    bins_borders = split_values
+    bins_borders = copy.deepcopy(split_values)
     bins_borders.insert(0, var_min)
     bins_borders.append(var_max)
 
