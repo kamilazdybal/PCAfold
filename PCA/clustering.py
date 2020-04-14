@@ -55,6 +55,69 @@ def variable_bins(var, k, verbose=False):
 
     return(np.asarray(idx))
 
+def predefined_variable_bins(var, split_values, verbose=False):
+    """
+    This function does clustering based on dividing a variable vector `var` into
+    bins such that the split is done at values specified in the `split_values`
+    list.
+
+    Example:
+    ----------
+
+    split_values = [value_1, value_2, value_3]
+
+
+    var_min     value_1              value_2      value_3  var_max
+       |----------|--------------------|------------|---------|
+           bin 1           bin 2            bin 3      bin 4
+
+    Note: When a split is performed at a given value_i, the observation in `var`
+    that takes exactly that value is assigned to the newly created bin.
+
+    Input:
+    ----------
+    `var`      - vector of variable values.
+    `split_values`
+               - list containing values at which the split to bins should be
+                 performed.
+
+    Output:
+    ----------
+    `idx`      - vector of indices classifying observations to clusters.
+                 The first cluster has index 0.
+    """
+
+    var_min = np.min(var)
+    var_max = np.max(var)
+
+    # Check that all values specified in `split_values` fall within the range of
+    # the variable `var`:
+    for value in split_values:
+        if value < var_min or value > var_max:
+            raise ValueError("Value " + str(value) + " is not within the range of the variable values.")
+
+    idx = []
+    bins_borders = split_values
+    bins_borders.insert(0, var_min)
+    bins_borders.append(var_max)
+
+    k = len(bins_borders) - 1
+
+    # Split into bins of variable:
+    for val in var:
+        if val == var_max:
+            idx.append(k-1)
+        else:
+            for cl in range(0,k):
+                if (val >= bins_borders[cl]) and (val < bins_borders[cl+1]):
+                    idx.append(cl)
+
+    # Degrade clusters if needed:
+    if np.size(np.unique(idx)) != k:
+        (idx, k) = degrade_clusters(idx, verbose)
+
+    return(np.asarray(idx))
+
 def mixture_fraction_bins(Z, k, Z_stoich):
     """
     This function does clustering based on dividing a mixture fraction vector
