@@ -54,6 +54,9 @@ def batch_reactor(chemical_mechanism, fuel_ratio, mixing_temperature, equivalenc
 
     Z_stoich = chemical_mechanism.stoich_mixture_fraction(fuel, air)
 
+    species_names = chemical_mechanism.species_names
+    state_space_names = np.array(['T'] + species_names)
+
     # Initialize matrices that will store the outputs:
     state_space = np.zeros_like(state_space_names, dtype=float)
     state_space_sources = np.zeros_like(state_space_names, dtype=float)

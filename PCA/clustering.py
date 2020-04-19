@@ -284,9 +284,6 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         eigenvectors.append(np.eye(n_vars, n_pcs))
         scalings.append(np.ones((n_vars,)))
 
-    # Maximum number of Principal Components:
-    n_pcs_max = n_pcs
-
     # Center and scale the data:
     (X_pre_processed, _, _) = PCA.center_scale(X, scaling_criteria)
 
@@ -332,7 +329,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         # Assign the observations to clusters based on the minimum reconstruction error:
         idx = np.argmin(sq_rec_err, axis = 1)
         rec_err_min = np.min(sq_rec_err, axis = 1)
-        rec_err_min_rel = rec_err_min
+        rec_err_min_rel = rec_err_min.copy()
 
         # Evaluate the global mean reconstruction error (single value):
         eps_rec_new = np.mean(rec_err_min_rel)
@@ -384,8 +381,8 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
             break
 
         # Update recontruction error and cluster centroids:
-        centroids = centroids_new
-        eps_rec = eps_rec_new
+        centroids = centroids_new.copy()
+        eps_rec = eps_rec_new.copy()
 
         # Initialize the new eigenvectors matrix:
         eigenvectors = []
