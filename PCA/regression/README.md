@@ -29,3 +29,11 @@ This module includes a `test` function for regression testing. Run:
 import PCA.regression.training_data_generation as tdg
 tdg.test()
 ```
+
+## Cluster-biased PCA
+
+`cluster_biased_pca.py`
+
+Contains auxiliary functions for analyzing data sets with cluster-biased PCA.
+
+More details can be found in the documentation...
