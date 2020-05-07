@@ -16,9 +16,9 @@ font_title = 22
 font_text = 16
 font_legend = 18
 
-def analyze_centers_movement(X, X_r, variable_names=[], save_plot=False, save_filename=''):
+def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, save_filename=''):
     """
-    This function analyzed the movement of centers in the subset of the original
+    This function analyzes the movement of centers in the subset of the original
     data set `X_r` with respect to the full original data set `X`.
 
     NOTE: It first normalizes the variables to be in range between 0 and 1, so
@@ -27,7 +27,7 @@ def analyze_centers_movement(X, X_r, variable_names=[], save_plot=False, save_fi
     Input:
     ----------
     `X`           - original (full) data set.
-    `X_r`         - reduced data set.
+    `idx_X_r`     - indices that should be extracted from `X` to form `X_r`.
     `variable_names`
                   - list of strings specifying the variable names.
     `save_plot`   - boolean specifying whether the plot should be saved.
@@ -51,27 +51,24 @@ def analyze_centers_movement(X, X_r, variable_names=[], save_plot=False, save_fi
     marker_size = 50
 
     (n_obs_X, n_vars_X) = np.shape(X)
-    (n_obs_X_r, n_vars_X_r) = np.shape(X_r)
 
     if len(variable_names) != 0:
         n_vars = len(variable_names)
     else:
         variable_names = ['X_' + str(i) for i in range(0, n_vars_X)]
 
-    if n_vars_X != n_vars or n_vars_X_r != n_vars:
-        raise ValueError("The number of observations between X and X_r is not consistent with the variable names.")
+    X_normalized = (X - np.min(X, axis=0))
+    X_normalized = X_normalized / np.max(X_normalized, axis=0)
 
-    minimums_X = np.min(X, axis=0)
-    maximums_X = np.max(X, axis=0)
-    X_normalized = (X - minimums_X)/maximums_X
-    X_r_normalized = (X_r - minimums_X)/maximums_X
+    # Extract X_r using the provided idx_X_r:
+    X_r_normalized = X_normalized[idx_X_r,:]
 
     # Find centers:
     norm_centers_X = np.mean(X_normalized, axis=0)
     norm_centers_X_r = np.mean(X_r_normalized, axis=0)
 
     # Compute the relative percentage by how much the center has moved:
-    center_movement_percentage = abs((norm_centers_X - norm_centers_X_r))/norm_centers_X * 100
+    center_movement_percentage = (norm_centers_X_r - norm_centers_X) / norm_centers_X * 100
 
     x_range = np.arange(1, n_vars+1)
 
