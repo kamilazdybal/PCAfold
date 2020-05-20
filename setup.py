@@ -3,4 +3,4 @@ from distutils.core import setup
 setup(name='PCA',
       description='Principal Component Analysis in python',
       author='Elizabeth Armstrong',
-      packages=['PCA', 'PCA.regression'])
+      packages=['PCA', 'PCA.regression', 'PCA.manifold_dimensionality'])
