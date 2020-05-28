@@ -4,6 +4,9 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
+import PCA.PCA as P
+import PCA.clustering as cl
+import PCA.regression.training_data_generation as tdg
 
 # Plotting parameters:
 csfont = {'fontname':'Charter', 'fontweight':'regular'}
@@ -83,6 +86,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, sav
     plt.xticks(x_range, variable_names, fontsize=font_annotations)
     plt.ylabel('Normalized center [-]', fontsize=font_labels)
     plt.ylim(0,1)
+    plt.grid(alpha=0.3)
 
     for i, value in enumerate(center_movement_percentage):
         plt.text(i+1.05, norm_centers_X_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r)
@@ -147,10 +151,6 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
-
-    Output:
-    ----------
-
     """
 
     (n_versions, n_vars) = np.shape(eigenvector_matrix)
@@ -192,3 +192,87 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
 
     return
+
+def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0, verbose=False):
+    """
+    This function gradually equilibrates cluster populations, heading towards
+    the population of the smallest cluster.
+
+    At each iteration it generates the reduced data set `X_r` made up from new
+    populations, performs PCA and finds the eigenvectors for subsequent plotting
+    of eigenvector weights movement.
+
+    Input:
+    ----------
+    `X`           - original (full) data set.
+    `idx`         - vector of indices classifying observations to clusters.
+                    The first cluster has index 0.
+    `scaling`     - data scaling criterion.
+    `n_iterations`- number of iterations to loop over.
+    `stop_iter`   - number of iteration to stop.
+    `verbose`     - boolean for printing verbose details.
+
+    Output:
+    ----------
+    `eigenvectors_1`
+                  - collected PC-1 from each iteration.
+    `eigenvectors_2`
+                  - collected PC-2 from each iteration.
+    """
+
+    (n_obs, n_vars) = np.shape(X)
+    populations = cl.get_populations(idx)
+    smallest_cluster = np.min(populations)
+    k = len(populations)
+    eigenvectors_1 = np.zeros((1, n_vars))
+    eigenvectors_2 = np.zeros((1, n_vars))
+
+    if verbose == True:
+        print("The initial cluster populations are:")
+        print(populations)
+
+    # Number of observations that should be ate up from each cluster at each iteration
+    eat_ups = np.zeros((k,))
+    for cluster in range(0,k):
+        eat_ups[cluster] = (populations[cluster] - smallest_cluster)/n_iterations
+
+    for iter in range(0,n_iterations):
+
+        if (stop_iter != 0) and (iter == stop_iter):
+            break
+
+        for cluster, population in enumerate(populations):
+            if population != smallest_cluster:
+                # Eat up the segment:
+                populations[cluster] = population - int(eat_ups[cluster])
+            else:
+                populations[cluster] = smallest_cluster
+
+        # Generate a dictionary for manual sampling:
+        sampling_dictionary = {}
+
+        for cluster in range(0,k):
+            sampling_dictionary[cluster] = int(populations[cluster])
+
+        if verbose == True:
+            print("\nAt iteration " + str(iter+1) + " taking samples:")
+            print(sampling_dictionary)
+
+        (idx_train, _) = tdg.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, verbose=False)
+
+        # Generate the reduced data set X_r:
+        X_r = X[idx_train,:]
+
+        # Perform PCA on X_r:
+        pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+        eigenvectors = pca.Q
+
+        # Append the new eigenvectors:
+        eigenvectors_1 = np.vstack((eigenvectors_1, eigenvectors[:,0].T))
+        eigenvectors_2 = np.vstack((eigenvectors_2, eigenvectors[:,1].T))
+
+    # Remove the row of zeros:
+    eigenvectors_1 = eigenvectors_1[1::,:]
+    eigenvectors_2 = eigenvectors_2[1::,:]
+
+    return(eigenvectors_1, eigenvectors_2)

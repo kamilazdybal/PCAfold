@@ -615,7 +615,6 @@ def get_partition(X, idx, verbose=False):
 
     return(data_in_clusters, data_idx_in_clusters, k_new)
 
-
 def get_populations(idx, verbose=False):
     """
     This function computes populations (number of observations) in clusters
