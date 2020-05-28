@@ -102,7 +102,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, sav
 
     return (norm_centers_X, norm_centers_X_r, center_movement_percentage)
 
-def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plot_variables=[], save_plot=False, save_filename=''):
+def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plot_variables=[], zero_norm=False, save_plot=False, save_filename=''):
     """
     This function analyzes the movement of weights of variables on a single
     eigenvector when PCA is performed on different versions of the reduced data
@@ -127,7 +127,9 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     NOTE: This function plots absolute, normalized values of weights on each
     variable. Columns are normalized by dividing by the maximum value. This is
     done in order to compare the movement of weights equally, with the highest,
-    normalized one being equal to 1.0.
+    normalized one being equal to 1.0. You can additionally set the
+    `zero_norm=True` in order to normalize weights such that they are between
+    0 and 1 (this is not done by default).
 
     Input:
     ----------
@@ -139,6 +141,9 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     `plot_variables`
                   - list of integers specifying indices of variables to be plotted.
                     By default, all variables are plotted.
+    `zero_norm`   - boolean specifying whether weights should be normalized
+                    between 0 and 1. By default they are not normalized to
+                    start at 0.
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
@@ -162,6 +167,9 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         (_, n_vars) = np.shape(eigenvector_matrix)
 
     # Normalize each column inside `eigenvector_weights`:
+    if zero_norm == True:
+        eigenvector_matrix = np.abs(eigenvector_matrix) - np.min(np.abs(eigenvector_matrix), 0)
+
     eigenvector_matrix = np.divide(np.abs(eigenvector_matrix), np.max(np.abs(eigenvector_matrix), 0))
 
     x_range = np.arange(0,n_vars)
