@@ -16,11 +16,11 @@ ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
 font_axes = 18
 font_labels = 24
 font_annotations = 18
-font_title = 22
+font_title = 18
 font_text = 16
 font_legend = 20
 
-def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, save_filename=''):
+def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the movement of centers in the subset of the original
     data set `X_r` with respect to the full original data set `X`.
@@ -89,6 +89,9 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, sav
     plt.xlim(0, n_vars+1.5)
     plt.grid(alpha=0.3)
 
+    if title != False:
+        plt.title(title, fontsize=font_title)
+
     for i, value in enumerate(center_movement_percentage):
         plt.text(i+1.05, norm_centers_X_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r)
 
@@ -107,7 +110,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, sav
 
     return (norm_centers_X, norm_centers_X_r, center_movement_percentage)
 
-def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plot_variables=[], normalize=False, zero_norm=False, save_plot=False, save_filename=''):
+def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plot_variables=[], normalize=False, zero_norm=False, title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the movement of weights of variables on a single
     eigenvector when PCA is performed on different versions of the reduced data
@@ -190,13 +193,19 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         scat = ax.scatter(np.repeat(idx, n_versions), eigenvector_matrix[:,idx], c=color_range, cmap=plt.cm.Spectral)
 
     plt.xticks(x_range, variable_names, fontsize=font_annotations)
+
     if normalize == True:
         plt.ylabel('Normalized weight [-]', fontsize=font_labels)
     else:
         plt.ylabel('Absolute weight [-]', fontsize=font_labels)
+
     plt.ylim(-0.05,1.05)
     plt.xlim(-1, n_vars)
     plt.grid(alpha=0.3)
+
+    if title != False:
+        plt.title(title, fontsize=font_title)
+
     cbar = plt.colorbar(scat, ticks=[1, round(n_versions/2), n_versions])
 
     if save_plot == True:
