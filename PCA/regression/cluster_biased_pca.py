@@ -85,7 +85,8 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, sav
 
     plt.xticks(x_range, variable_names, fontsize=font_annotations)
     plt.ylabel('Normalized center [-]', fontsize=font_labels)
-    plt.ylim(0,1)
+    plt.ylim(-0.05,1.05)
+    plt.xlim(0, n_vars+1.5)
     plt.grid(alpha=0.3)
 
     for i, value in enumerate(center_movement_percentage):
@@ -106,7 +107,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], save_plot=False, sav
 
     return (norm_centers_X, norm_centers_X_r, center_movement_percentage)
 
-def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plot_variables=[], zero_norm=False, save_plot=False, save_filename=''):
+def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plot_variables=[], normalize=False, zero_norm=False, save_plot=False, save_filename=''):
     """
     This function analyzes the movement of weights of variables on a single
     eigenvector when PCA is performed on different versions of the reduced data
@@ -145,9 +146,12 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     `plot_variables`
                   - list of integers specifying indices of variables to be plotted.
                     By default, all variables are plotted.
+    `normalize`   - boolean specifying whether weights should be normlized at all.
+                    If set to false, the absolute values are plotted.
     `zero_norm`   - boolean specifying whether weights should be normalized
                     between 0 and 1. By default they are not normalized to
                     start at 0.
+                    Only has effect if `normalize=True`.
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
@@ -167,10 +171,14 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         (_, n_vars) = np.shape(eigenvector_matrix)
 
     # Normalize each column inside `eigenvector_weights`:
-    if zero_norm == True:
-        eigenvector_matrix = np.abs(eigenvector_matrix) - np.min(np.abs(eigenvector_matrix), 0)
+    if normalize == True:
+        if zero_norm == True:
+            eigenvector_matrix = np.abs(eigenvector_matrix) - np.min(np.abs(eigenvector_matrix), 0)
 
-    eigenvector_matrix = np.divide(np.abs(eigenvector_matrix), np.max(np.abs(eigenvector_matrix), 0))
+        eigenvector_matrix = np.divide(np.abs(eigenvector_matrix), np.max(np.abs(eigenvector_matrix), 0))
+    else:
+        eigenvector_matrix = np.abs(eigenvector_matrix)
+
 
     x_range = np.arange(0,n_vars)
     color_range = np.arange(1, n_versions+1)
@@ -182,7 +190,10 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         scat = ax.scatter(np.repeat(idx, n_versions), eigenvector_matrix[:,idx], c=color_range, cmap=plt.cm.Spectral)
 
     plt.xticks(x_range, variable_names, fontsize=font_annotations)
-    plt.ylabel('Normalized weight [-]', fontsize=font_labels)
+    if normalize == True:
+        plt.ylabel('Normalized weight [-]', fontsize=font_labels)
+    else:
+        plt.ylabel('Absolute weight [-]', fontsize=font_labels)
     plt.ylim(-0.05,1.05)
     plt.xlim(-1, n_vars)
     plt.grid(alpha=0.3)
@@ -218,6 +229,8 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
                   - collected PC-1 from each iteration.
     `eigenvectors_2`
                   - collected PC-2 from each iteration.
+    `idx_train`
+                  - the final training indices from the equilibrated iteration.
     """
 
     (n_obs, n_vars) = np.shape(X)
@@ -275,4 +288,4 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
     eigenvectors_1 = eigenvectors_1[1::,:]
     eigenvectors_2 = eigenvectors_2[1::,:]
 
-    return(eigenvectors_1, eigenvectors_2)
+    return(eigenvectors_1, eigenvectors_2, idx_train)
