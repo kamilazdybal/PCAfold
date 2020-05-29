@@ -265,7 +265,10 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
         sampling_dictionary = {}
 
         for cluster in range(0,k):
-            sampling_dictionary[cluster] = int(populations[cluster])
+            if iter == n_iterations-1:
+                sampling_dictionary[cluster] = int(smallest_cluster)
+            else:
+                sampling_dictionary[cluster] = int(populations[cluster])
 
         if verbose == True:
             print("\nAt iteration " + str(iter+1) + " taking samples:")
