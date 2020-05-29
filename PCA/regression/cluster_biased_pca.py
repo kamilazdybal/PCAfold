@@ -244,7 +244,7 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
 
     (n_obs, n_vars) = np.shape(X)
     populations = cl.get_populations(idx)
-    smallest_cluster = np.min(populations)
+    N_smallest_cluster = np.min(populations)
     k = len(populations)
     eigenvectors_1 = np.zeros((1, n_vars))
     eigenvectors_2 = np.zeros((1, n_vars))
@@ -256,7 +256,7 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
     # Number of observations that should be ate up from each cluster at each iteration
     eat_ups = np.zeros((k,))
     for cluster in range(0,k):
-        eat_ups[cluster] = (populations[cluster] - smallest_cluster)/n_iterations
+        eat_ups[cluster] = (populations[cluster] - N_smallest_cluster)/n_iterations
 
     for iter in range(0,n_iterations):
 
@@ -264,18 +264,18 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
             break
 
         for cluster, population in enumerate(populations):
-            if population != smallest_cluster:
+            if population != N_smallest_cluster:
                 # Eat up the segment:
                 populations[cluster] = population - int(eat_ups[cluster])
             else:
-                populations[cluster] = smallest_cluster
+                populations[cluster] = N_smallest_cluster
 
         # Generate a dictionary for manual sampling:
         sampling_dictionary = {}
 
         for cluster in range(0,k):
             if iter == n_iterations-1:
-                sampling_dictionary[cluster] = int(smallest_cluster)
+                sampling_dictionary[cluster] = int(N_smallest_cluster)
             else:
                 sampling_dictionary[cluster] = int(populations[cluster])
 
