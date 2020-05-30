@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+from matplotlib import rcParams
 import matplotlib.cm as cm
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
@@ -12,6 +12,9 @@ import PCA.regression.training_data_generation as tdg
 csfont = {'fontname':'Charter', 'fontweight':'regular'}
 hfont = {'fontname':'Charter', 'fontweight':'bold'}
 ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
+rcParams["font.family"] = "serif"
+rcParams["font.serif"] = "Charter"
+rcParams['font.size'] = 16
 
 font_axes = 18
 font_labels = 24
@@ -19,6 +22,7 @@ font_annotations = 18
 font_title = 18
 font_text = 16
 font_legend = 20
+font_colorbar = 16
 
 def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_plot=False, save_filename=''):
     """
@@ -36,6 +40,8 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_pl
                     `training_data_generation` module.
     `variable_names`
                   - list of strings specifying variable names.
+    `title`       - boolean or string specifying plot title. If set to False,
+                    no title will be plotted.
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
@@ -83,17 +89,17 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_pl
     plt.scatter(x_range, norm_centers_X, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1)
     plt.scatter(x_range, norm_centers_X_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1)
 
-    plt.xticks(x_range, variable_names, fontsize=font_annotations)
-    plt.ylabel('Normalized center [-]', fontsize=font_labels)
+    plt.xticks(x_range, variable_names, fontsize=font_annotations, **csfont)
+    plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_vars+1.5)
     plt.grid(alpha=0.3)
 
     if title != False:
-        plt.title(title, fontsize=font_title)
+        plt.title(title, fontsize=font_title, **csfont)
 
     for i, value in enumerate(center_movement_percentage):
-        plt.text(i+1.05, norm_centers_X_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r)
+        plt.text(i+1.05, norm_centers_X_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r, **csfont)
 
     ax.spines["top"].set_visible(True)
     ax.spines["bottom"].set_visible(True)
@@ -104,6 +110,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_pl
 
     lgnd.legendHandles[0]._sizes = [marker_size]
     lgnd.legendHandles[1]._sizes = [marker_size]
+    plt.setp(lgnd.texts, **csfont)
 
     if save_plot == True:
         plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
@@ -155,6 +162,8 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
                     between 0 and 1. By default they are not normalized to
                     start at 0.
                     Only has effect if `normalize=True`.
+    `title`       - boolean or string specifying plot title. If set to False,
+                    no title will be plotted.
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
@@ -192,19 +201,19 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     for idx, variable in enumerate(variable_names):
         scat = ax.scatter(np.repeat(idx, n_versions), eigenvector_matrix[:,idx], c=color_range, cmap=plt.cm.Spectral)
 
-    plt.xticks(x_range, variable_names, fontsize=font_annotations)
+    plt.xticks(x_range, variable_names, fontsize=font_annotations, **csfont)
 
     if normalize == True:
-        plt.ylabel('Normalized weight [-]', fontsize=font_labels)
+        plt.ylabel('Normalized weight [-]', fontsize=font_labels, **csfont)
     else:
-        plt.ylabel('Absolute weight [-]', fontsize=font_labels)
+        plt.ylabel('Absolute weight [-]', fontsize=font_labels, **csfont)
 
     plt.ylim(-0.05,1.05)
     plt.xlim(-1, n_vars)
     plt.grid(alpha=0.3)
 
     if title != False:
-        plt.title(title, fontsize=font_title)
+        plt.title(title, fontsize=font_title, **csfont)
 
     cbar = plt.colorbar(scat, ticks=[1, round(n_versions/2), n_versions])
 
