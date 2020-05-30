@@ -247,6 +247,8 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
                   - collected PC-1 from each iteration.
     `eigenvectors_2`
                   - collected PC-2 from each iteration.
+    `pc_scores_1`  - collected PC-1 scores from each iteration.
+    `pc_scores_2`  - collected PC-2 scores from each iteration.
     `idx_train`
                   - the final training indices from the equilibrated iteration.
     """
@@ -255,12 +257,31 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
     populations = cl.get_populations(idx)
     N_smallest_cluster = np.min(populations)
     k = len(populations)
+
+    # Initialize matrices:
     eigenvectors_1 = np.zeros((1, n_vars))
     eigenvectors_2 = np.zeros((1, n_vars))
+    pc_scores_1 = np.zeros((n_obs,1))
+    pc_scores_2 = np.zeros((n_obs,1))
 
     if verbose == True:
         print("The initial cluster populations are:")
         print(populations)
+
+    # Perform global PCA on the original data set X to have the initial PCs:
+    pca_global = P.PCA(X, scaling, 2, useXTXeig=True)
+    global_eigenvectors = pca_global.Q
+
+    # Compute PC-scores:
+    global_pc_scores = pca_global.x2eta(X, nocenter=False)
+
+    # Append the global PC-scores:
+    pc_scores_1 = np.hstack((pc_scores_1, global_pc_scores[:,0:1]))
+    pc_scores_2 = np.hstack((pc_scores_2, global_pc_scores[:,1:2]))
+
+    # Append the global eigenvectors:
+    eigenvectors_1 = np.vstack((eigenvectors_1, global_eigenvectors[:,0].T))
+    eigenvectors_2 = np.vstack((eigenvectors_2, global_eigenvectors[:,1].T))
 
     # Number of observations that should be ate up from each cluster at each iteration
     eat_ups = np.zeros((k,))
@@ -301,12 +322,21 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
         pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
         eigenvectors = pca.Q
 
+        # Compute PC-scores:
+        pc_scores = pca.x2eta(X, nocenter=False)
+
+        # Append the local PC-scores:
+        pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
+        pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
+
         # Append the new eigenvectors:
         eigenvectors_1 = np.vstack((eigenvectors_1, eigenvectors[:,0].T))
         eigenvectors_2 = np.vstack((eigenvectors_2, eigenvectors[:,1].T))
 
-    # Remove the row of zeros:
+    # Remove the first row of zeros:
+    pc_scores_1 = pc_scores_1[:,1::]
+    pc_scores_2 = pc_scores_2[:,1::]
     eigenvectors_1 = eigenvectors_1[1::,:]
     eigenvectors_2 = eigenvectors_2[1::,:]
 
-    return(eigenvectors_1, eigenvectors_2, idx_train)
+    return(eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, idx_train)
