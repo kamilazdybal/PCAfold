@@ -432,32 +432,31 @@ def degrade_clusters(idx, verbose=False):
 
     `[0, 0, 2, 0, 5, 10]`
 
-    this function would turns this `idx` to:
+    this function turns this `idx` to:
 
     `[0, 0, 1, 0, 2, 3]`
 
     where clusters are numbered with consecutive integers.
 
-    Alternatively, if the `idx` is the following:
+    Alternatively, if `idx` is:
 
     `[1, 1, 2, 2, 3, 3]`
 
-    this function would turns this `idx` to:
+    this function turns this `idx` to:
 
     `[0, 0, 1, 1, 2, 2]`
 
-    in order to make the smallest cluster number equal to 0.
+    so that the smallest cluster number is equal to 0.
 
     Input:
     ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    `idx`      - raw vector of indices classifying observations to clusters.
     `verbose`  - boolean for printing clustering details.
 
     Output:
     ----------
     `idx_degraded`
-               - vector of indices classifying observations to clusters.
+               - degraded vector of indices classifying observations to clusters.
                  The first cluster has index 0.
     `k_update` - the updated number of clusters.
     """
@@ -560,20 +559,25 @@ def get_centroids(X, idx):
 
 def get_partition(X, idx, verbose=False):
     """
-    This function computes the centroids for the clustering specified in the
-    `idx` vector.
+    This function performs partitioning of the data set observations according
+    to `idx` provided.
 
     Input:
     ----------
     `X`        - data set for computing the cluster centroids.
     `idx`      - vector of indices classifying observations to clusters.
                  The first cluster has index 0.
+    `verbose`  - boolean for printing details.
 
     Output:
     ----------
-    `centroids`
-               - matrix of cluster centroids. It has size k times number of
-                 observations.
+    `data_in_clusters`
+               - matrix of size () that contains original data set observations
+                 in each cluster.
+    `data_idx_in_clusters`
+               - matrix of size () that contains indices of the original data
+                 set observations in each cluster.
+    `k_new`    - the updated number of clusters.
     """
 
     (n_obs, n_vars) = np.shape(X)
