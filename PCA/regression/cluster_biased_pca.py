@@ -222,7 +222,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
 
     return
 
-def equilibrate_cluster_populations(X, idx, scaling, n_iterations=10, stop_iter=0, verbose=False):
+def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=10, stop_iter=0, verbose=False):
     """
     This function gradually equilibrates cluster populations, heading towards
     the population of the smallest cluster.
@@ -245,10 +245,22 @@ def equilibrate_cluster_populations(X, idx, scaling, n_iterations=10, stop_iter=
     ----------
     `eigenvectors_1`
                   - collected PC-1 from each iteration.
+                    Size (n_iterations x n_vars).
     `eigenvectors_2`
                   - collected PC-2 from each iteration.
+                    Size (n_iterations x n_vars).
     `pc_scores_1` - collected PC-1 scores from each iteration.
+                    Size (n_obs x n_iterations).
     `pc_scores_2` - collected PC-2 scores from each iteration.
+                    Size (n_obs x n_iterations).
+    `pc_sources_1`- collected PC-1 sources from each iteration.
+                    Size (n_obs x n_iterations).
+                    This variable is only returned if `X_sources` was passed as
+                    an input parameter.
+    `pc_sources_2`- collected PC-2 sources from each iteration.
+                    Size (n_obs x n_iterations).
+                    This variable is only returned if `X_sources` was passed as
+                    an input parameter.
     `idx_train`
                   - the final training indices from the equilibrated iteration.
     """
@@ -257,32 +269,52 @@ def equilibrate_cluster_populations(X, idx, scaling, n_iterations=10, stop_iter=
     populations = cl.get_populations(idx)
     N_smallest_cluster = np.min(populations)
     k = len(populations)
+    if verbose == True:
+        print("The initial cluster populations are:")
+        print(populations)
 
     # Initialize matrices:
     eigenvectors_1 = np.zeros((1, n_vars))
     eigenvectors_2 = np.zeros((1, n_vars))
     pc_scores_1 = np.zeros((n_obs,1))
     pc_scores_2 = np.zeros((n_obs,1))
+    if len(X_source) != 0:
+        pc_sources_1 = np.zeros((n_obs,1))
+        pc_sources_2 = np.zeros((n_obs,1))
 
-    if verbose == True:
-        print("The initial cluster populations are:")
-        print(populations)
-
-    # Perform global PCA on the original data set X to have the initial PCs:
+    # Perform global PCA on the original data set X:
     pca_global = P.PCA(X, scaling, 2, useXTXeig=True)
+
+    # Get a centered and scaled data set:
     X_cs = pca_global.X
+    X_center = pca_global.XCenter
+    X_scale = pca_global.XScale
+
+    # Compute global eigenvectors:
     global_eigenvectors = pca_global.Q
 
-    # Compute PC-scores:
+    # Append the global eigenvectors:
+    eigenvectors_1 = np.vstack((eigenvectors_1, global_eigenvectors[:,0].T))
+    eigenvectors_2 = np.vstack((eigenvectors_2, global_eigenvectors[:,1].T))
+
+    # Compute global PC-scores:
     global_pc_scores = pca_global.x2eta(X, nocenter=False)
 
     # Append the global PC-scores:
     pc_scores_1 = np.hstack((pc_scores_1, global_pc_scores[:,0:1]))
     pc_scores_2 = np.hstack((pc_scores_2, global_pc_scores[:,1:2]))
 
-    # Append the global eigenvectors:
-    eigenvectors_1 = np.vstack((eigenvectors_1, global_eigenvectors[:,0].T))
-    eigenvectors_2 = np.vstack((eigenvectors_2, global_eigenvectors[:,1].T))
+    if len(X_source) != 0:
+
+        # Scale sources with the global scalings:
+        X_source_cs = np.divide(X_source, X_scale)
+
+        # Compute global PC-sources:
+        global_pc_sources = pca_global.x2eta(X_source, nocenter=True)
+
+        # Append the global PC-sources:
+        pc_sources_1 = np.hstack((pc_sources_1, global_pc_sources[:,0:1]))
+        pc_sources_2 = np.hstack((pc_sources_2, global_pc_sources[:,1:2]))
 
     # Number of observations that should be ate up from each cluster at each iteration
     eat_ups = np.zeros((k,))
@@ -306,6 +338,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_iterations=10, stop_iter=
 
         for cluster in range(0,k):
             if iter == n_iterations-1:
+                # At the last iteration reach equal number of samples:
                 sampling_dictionary[cluster] = int(N_smallest_cluster)
             else:
                 sampling_dictionary[cluster] = int(populations[cluster])
@@ -321,9 +354,15 @@ def equilibrate_cluster_populations(X, idx, scaling, n_iterations=10, stop_iter=
 
         # Perform PCA on X_r:
         pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+
+        # Compute local eigenvectors:
         eigenvectors = pca.Q
 
-        # Compute PC-scores:
+        # Append the local eigenvectors:
+        eigenvectors_1 = np.vstack((eigenvectors_1, eigenvectors[:,0].T))
+        eigenvectors_2 = np.vstack((eigenvectors_2, eigenvectors[:,1].T))
+
+        # Compute local PC-scores:
         pc_scores = X_cs.dot(eigenvectors)
         # pc_scores = pca.x2eta(X, nocenter=False)
         # -> we probably don't want to compute them like this since the centers
@@ -335,14 +374,25 @@ def equilibrate_cluster_populations(X, idx, scaling, n_iterations=10, stop_iter=
         pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
         pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
-        # Append the new eigenvectors:
-        eigenvectors_1 = np.vstack((eigenvectors_1, eigenvectors[:,0].T))
-        eigenvectors_2 = np.vstack((eigenvectors_2, eigenvectors[:,1].T))
+        if len(X_source) != 0:
+
+            # Compute local PC-sources:
+            pc_sources = X_source_cs.dot(eigenvectors)
+
+            # Append the global PC-sources:
+            pc_sources_1 = np.hstack((pc_sources_1, pc_sources[:,0:1]))
+            pc_sources_2 = np.hstack((pc_sources_2, pc_sources[:,1:2]))
 
     # Remove the first row of zeros:
-    pc_scores_1 = pc_scores_1[:,1::]
-    pc_scores_2 = pc_scores_2[:,1::]
     eigenvectors_1 = eigenvectors_1[1::,:]
     eigenvectors_2 = eigenvectors_2[1::,:]
+    pc_scores_1 = pc_scores_1[:,1::]
+    pc_scores_2 = pc_scores_2[:,1::]
+    if len(X_source) != 0:
+        pc_sources_1 = pc_sources_1[:,1::]
+        pc_sources_2 = pc_sources_2[:,1::]
 
-    return(eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, idx_train)
+    if len(X_source) != 0:
+        return(eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, pc_sources_1, pc_sources_2, idx_train)
+    else:
+        return(eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, idx_train)
