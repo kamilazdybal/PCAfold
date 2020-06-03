@@ -24,7 +24,7 @@ font_text = 16
 font_legend = 20
 font_colorbar = 16
 
-def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_plot=False, save_filename=''):
+def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the movement of centers in the subset of the original
     data set `X_r` with respect to the full original data set `X`.
@@ -40,6 +40,9 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_pl
                     `training_data_generation` module.
     `variable_names`
                   - list of strings specifying variable names.
+    `plot_variables`
+                  - list of integers specifying indices of variables to be plotted.
+                    By default, all variables are plotted.
     `title`       - boolean or string specifying plot title. If set to False,
                     no title will be plotted.
     `save_plot`   - boolean specifying whether the plot should be saved.
@@ -68,6 +71,11 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], title=False, save_pl
         n_vars = len(variable_names)
     else:
         variable_names = ['X_' + str(i) for i in range(0, n_vars_X)]
+
+    if len(plot_variables) != 0:
+        X = X[:,plot_variables]
+        variable_names = [variable_names[i] for i in plot_variables]
+        (_, n_vars) = np.shape(X)
 
     X_normalized = (X - np.min(X, axis=0))
     X_normalized = X_normalized / np.max(X_normalized, axis=0)
@@ -237,6 +245,8 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
     `idx`         - vector of indices classifying observations to clusters.
                     The first cluster has index 0.
     `scaling`     - data scaling criterion.
+    `X_source`    - source terms corresponding to the state-space variables in
+                    `X`.
     `n_iterations`- number of iterations to loop over.
     `stop_iter`   - number of iteration to stop.
     `verbose`     - boolean for printing verbose details.
