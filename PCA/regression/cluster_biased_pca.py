@@ -222,7 +222,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
 
     return
 
-def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0, verbose=False):
+def equilibrate_cluster_populations(X, idx, scaling, n_iterations=10, stop_iter=0, verbose=False):
     """
     This function gradually equilibrates cluster populations, heading towards
     the population of the smallest cluster.
@@ -247,8 +247,8 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
                   - collected PC-1 from each iteration.
     `eigenvectors_2`
                   - collected PC-2 from each iteration.
-    `pc_scores_1`  - collected PC-1 scores from each iteration.
-    `pc_scores_2`  - collected PC-2 scores from each iteration.
+    `pc_scores_1` - collected PC-1 scores from each iteration.
+    `pc_scores_2` - collected PC-2 scores from each iteration.
     `idx_train`
                   - the final training indices from the equilibrated iteration.
     """
@@ -270,6 +270,7 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
 
     # Perform global PCA on the original data set X to have the initial PCs:
     pca_global = P.PCA(X, scaling, 2, useXTXeig=True)
+    X_cs = pca_global.X
     global_eigenvectors = pca_global.Q
 
     # Compute PC-scores:
@@ -323,7 +324,12 @@ def equilibrate_cluster_population(X, idx, scaling, n_iterations=10, stop_iter=0
         eigenvectors = pca.Q
 
         # Compute PC-scores:
-        pc_scores = pca.x2eta(X, nocenter=False)
+        pc_scores = X_cs.dot(eigenvectors)
+        # pc_scores = pca.x2eta(X, nocenter=False)
+        # -> we probably don't want to compute them like this since the centers
+        # and scales that will be used are the ones computed on the data set X_r.
+        # Empirically, I've seen that the difference might not be very big.
+        # But still it might make sense to use `X_cs`.
 
         # Append the local PC-scores:
         pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
