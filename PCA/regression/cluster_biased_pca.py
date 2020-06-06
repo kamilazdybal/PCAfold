@@ -6,7 +6,7 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 import PCA.PCA as P
 import PCA.clustering as cl
-import PCA.regression.training_data_generation as tdg
+import PCA.regression.train_test_select as tts
 
 # Plotting parameters:
 csfont = {'fontname':'Charter', 'fontweight':'regular'}
@@ -357,7 +357,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
             print("\nAt iteration " + str(iter+1) + " taking samples:")
             print(sampling_dictionary)
 
-        (idx_train, _) = tdg.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, verbose=False)
+        (idx_train, _) = tts.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, verbose=False)
 
         # Generate the reduced data set X_r:
         X_r = X[idx_train,:]
