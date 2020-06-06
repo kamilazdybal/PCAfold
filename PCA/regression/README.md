@@ -15,25 +15,32 @@ import PCA.regression.standardize as st
 st.test()
 ```
 
-## Training data generation
+## Train and test data selection
 
-`training_data_generation.py`
+`train_test_select.py`
 
 Contains functions for selecting train and test data for machine learning algorithms.
 
-More details can be found in the [documentation](https://gitlab.multiscale.utah.edu/common/PCA-python/-/wikis/Training-data-generation).
+More details can be found in the [documentation](https://gitlab.multiscale.utah.edu/common/PCA-python/-/wikis/Train-and-test-data-selection).
 
 This module includes a `test` function for regression testing. Run:
 
 ```
-import PCA.regression.training_data_generation as tdg
-tdg.test()
+import PCA.regression.train_test_select as tts
+tts.test()
 ```
 
 ## Cluster-biased PCA
 
 `cluster_biased_pca.py`
 
-Contains auxiliary functions for analyzing data sets with cluster-biased PCA.
+Contains functions for performing cluster-biased PCA.
 
-More details can be found in the documentation...
+More details can be found in the [documentation](https://gitlab.multiscale.utah.edu/common/PCA-python/-/wikis/Cluster-biased-PCA).
+
+This module includes a `test` function for regression testing. Run:
+
+```
+import PCA.regression.cluster_biased_pca as cbpca
+cbpca.test()
+```
