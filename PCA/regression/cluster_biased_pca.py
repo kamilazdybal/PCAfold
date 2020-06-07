@@ -230,7 +230,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
 
     return
 
-def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=10, stop_iter=0, verbose=False):
+def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_iterations=10, stop_iter=0, verbose=False):
     """
     This function gradually equilibrates cluster populations, heading towards
     the population of the smallest cluster.
@@ -247,6 +247,9 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
     `scaling`     - data scaling criterion.
     `X_source`    - source terms corresponding to the state-space variables in
                     `X`.
+    `option`      - integer specifying biasing option. See documentation of
+                    cluster-biased PCA for more information.
+                    Can only attain values [1,2,3,4].
     `n_iterations`- number of iterations to loop over.
     `stop_iter`   - number of iteration to stop.
     `verbose`     - boolean for printing verbose details.
@@ -275,6 +278,11 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
                   - the final training indices from the equilibrated iteration.
     """
 
+    # Check that `option` parameter was passed correctly:
+    _options = [1,2,3,4]
+    if option not in _options:
+        raise ValueError("Option can only be 1, 2, 3 or 4.")
+
     (n_obs, n_vars) = np.shape(X)
     populations = cl.get_populations(idx)
     N_smallest_cluster = np.min(populations)
@@ -286,11 +294,22 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
     # Initialize matrices:
     eigenvectors_1 = np.zeros((1, n_vars))
     eigenvectors_2 = np.zeros((1, n_vars))
-    pc_scores_1 = np.zeros((n_obs,1))
-    pc_scores_2 = np.zeros((n_obs,1))
-    if len(X_source) != 0:
-        pc_sources_1 = np.zeros((n_obs,1))
-        pc_sources_2 = np.zeros((n_obs,1))
+    if option != 4:
+        pc_scores_1 = np.zeros((n_obs,1))
+        pc_scores_2 = np.zeros((n_obs,1))
+        if len(X_source) != 0:
+            pc_sources_1 = np.zeros((n_obs,1))
+            pc_sources_2 = np.zeros((n_obs,1))
+    else:
+        # If option is 4, we need to use a list because the number of observations will decrease at each iteration:
+        pc_scores_1 = []
+        pc_scores_2 = []
+        if len(X_source) != 0:
+            pc_sources_1 = []
+            pc_sources_2 = []
+
+    # TO HAVE THE INITIAL MANIFOLD
+    # --------------------------------------------------------------------------
 
     # Perform global PCA on the original data set X:
     pca_global = P.PCA(X, scaling, 2, useXTXeig=True)
@@ -311,8 +330,12 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
     global_pc_scores = pca_global.x2eta(X, nocenter=False)
 
     # Append the global PC-scores:
-    pc_scores_1 = np.hstack((pc_scores_1, global_pc_scores[:,0:1]))
-    pc_scores_2 = np.hstack((pc_scores_2, global_pc_scores[:,1:2]))
+    if option != 4:
+        pc_scores_1 = np.hstack((pc_scores_1, global_pc_scores[:,0:1]))
+        pc_scores_2 = np.hstack((pc_scores_2, global_pc_scores[:,1:2]))
+    else:
+        pc_scores_1.append(global_pc_scores[:,0:1])
+        pc_scores_2.append(global_pc_scores[:,1:2])
 
     if len(X_source) != 0:
 
@@ -323,8 +346,12 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
         global_pc_sources = pca_global.x2eta(X_source, nocenter=True)
 
         # Append the global PC-sources:
-        pc_sources_1 = np.hstack((pc_sources_1, global_pc_sources[:,0:1]))
-        pc_sources_2 = np.hstack((pc_sources_2, global_pc_sources[:,1:2]))
+        if option != 4:
+            pc_sources_1 = np.hstack((pc_sources_1, global_pc_sources[:,0:1]))
+            pc_sources_2 = np.hstack((pc_sources_2, global_pc_sources[:,1:2]))
+        else:
+            pc_sources_1.append(global_pc_sources[:,0:1])
+            pc_sources_2.append(global_pc_sources[:,1:2])
 
     # Number of observations that should be ate up from each cluster at each iteration
     eat_ups = np.zeros((k,))
@@ -359,48 +386,140 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_iterations=1
 
         (idx_train, _) = tts.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, verbose=False)
 
-        # Generate the reduced data set X_r:
-        X_r = X[idx_train,:]
+        # TO HAVE THE BIASED MANIFOLD
+        # --------------------------------------------------------------------------
+        if option == 1:
+            if verbose == True:
+                print('Biasing will be performed with option 1.')
 
-        # Perform PCA on X_r:
-        pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+            # Generate the reduced data set X_r:
+            X_r = X[idx_train,:]
 
-        # Compute local eigenvectors:
-        eigenvectors = pca.Q
+            # Perform PCA on X_r:
+            pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+
+            # Compute local eigenvectors:
+            eigenvectors = pca.Q
+
+            # Compute local PC-scores:
+            pc_scores = X_cs.dot(eigenvectors)
+
+            if len(X_source) != 0:
+
+                # Compute local PC-sources:
+                pc_sources = X_source_cs.dot(eigenvectors)
+
+                # Append the global PC-sources:
+                pc_sources_1 = np.hstack((pc_sources_1, pc_sources[:,0:1]))
+                pc_sources_2 = np.hstack((pc_sources_2, pc_sources[:,1:2]))
+
+            # Append the local PC-scores:
+            pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
+            pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
+
+        elif option == 2:
+            if verbose == True:
+                print('Biasing will be performed with option 2.')
+            # Generate the reduced data set X_r:
+            X_r = X_cs[idx_train,:]
+
+            # Perform PCA on X_r:
+            pca = P.PCA(X_r, 'none', 2, useXTXeig=True)
+
+            # Compute local eigenvectors:
+            eigenvectors = pca.Q
+
+            # Compute local PC-scores:
+            pc_scores = X_cs.dot(eigenvectors)
+
+            if len(X_source) != 0:
+
+                # Compute local PC-sources:
+                pc_sources = X_source_cs.dot(eigenvectors)
+
+                # Append the global PC-sources:
+                pc_sources_1 = np.hstack((pc_sources_1, pc_sources[:,0:1]))
+                pc_sources_2 = np.hstack((pc_sources_2, pc_sources[:,1:2]))
+
+            # Append the local PC-scores:
+            pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
+            pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
+
+        elif option == 3:
+            if verbose == True:
+                print('Biasing will be performed with option 3.')
+
+            # Generate the reduced data set X_r:
+            X_r = X[idx_train,:]
+
+            # Perform PCA on X_r:
+            pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+
+            # Compute local eigenvectors:
+            eigenvectors = pca.Q
+
+            # Compute local PC-scores (the original data set will be centered and scaled with the local centers and scales):
+            pc_scores = pca.x2eta(X, nocenter=False)
+
+            if len(X_source) != 0:
+
+                # Compute local PC-sources:
+                pc_sources = pca.x2eta(X_source, nocenter=True)
+
+                # Append the global PC-sources:
+                pc_sources_1 = np.hstack((pc_sources_1, pc_sources[:,0:1]))
+                pc_sources_2 = np.hstack((pc_sources_2, pc_sources[:,1:2]))
+
+            # Append the local PC-scores:
+            pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
+            pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
+
+        elif option == 4:
+            if verbose == True:
+                print('Biasing will be performed with option 4.')
+
+            # Generate the reduced data set X_r:
+            X_r = X[idx_train,:]
+
+            # Sample the sources using the same idx:
+            X_source_r = X_source[idx_train,:]
+
+            # Perform PCA on X_r:
+            pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+
+            # Compute local eigenvectors:
+            eigenvectors = pca.Q
+
+            # Compute local PC-scores:
+            pc_scores = pca.x2eta(X_r, nocenter=False)
+
+            if len(X_source) != 0:
+
+                # Compute local PC-sources:
+                pc_sources = pca.x2eta(X_source_r, nocenter=True)
+
+                # Append the global PC-sources:
+                pc_sources_1.append(pc_sources[:,0:1])
+                pc_sources_2.append(pc_sources[:,1:2])
+
+            # Append the local PC-scores:
+            pc_scores_1.append(pc_scores[:,0:1])
+            pc_scores_2.append(pc_scores[:,1:2])
 
         # Append the local eigenvectors:
         eigenvectors_1 = np.vstack((eigenvectors_1, eigenvectors[:,0].T))
         eigenvectors_2 = np.vstack((eigenvectors_2, eigenvectors[:,1].T))
 
-        # Compute local PC-scores:
-        pc_scores = X_cs.dot(eigenvectors)
-        # pc_scores = pca.x2eta(X, nocenter=False)
-        # -> we probably don't want to compute them like this since the centers
-        # and scales that will be used are the ones computed on the data set X_r.
-        # Empirically, I've seen that the difference might not be very big.
-        # But still it might make sense to use `X_cs`.
-
-        # Append the local PC-scores:
-        pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
-        pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
-
-        if len(X_source) != 0:
-
-            # Compute local PC-sources:
-            pc_sources = X_source_cs.dot(eigenvectors)
-
-            # Append the global PC-sources:
-            pc_sources_1 = np.hstack((pc_sources_1, pc_sources[:,0:1]))
-            pc_sources_2 = np.hstack((pc_sources_2, pc_sources[:,1:2]))
-
     # Remove the first row of zeros:
     eigenvectors_1 = eigenvectors_1[1::,:]
     eigenvectors_2 = eigenvectors_2[1::,:]
-    pc_scores_1 = pc_scores_1[:,1::]
-    pc_scores_2 = pc_scores_2[:,1::]
-    if len(X_source) != 0:
-        pc_sources_1 = pc_sources_1[:,1::]
-        pc_sources_2 = pc_sources_2[:,1::]
+
+    if option != 4:
+        pc_scores_1 = pc_scores_1[:,1::]
+        pc_scores_2 = pc_scores_2[:,1::]
+        if len(X_source) != 0:
+            pc_sources_1 = pc_sources_1[:,1::]
+            pc_sources_2 = pc_sources_2[:,1::]
 
     if len(X_source) != 0:
         return(eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, pc_sources_1, pc_sources_2, idx_train)
