@@ -235,9 +235,19 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     This function gradually equilibrates cluster populations, heading towards
     the population of the smallest cluster.
 
-    At each iteration it generates the reduced data set `X_r` made up from new
-    populations, performs PCA and finds the eigenvectors for subsequent plotting
-    of eigenvector weights movement.
+    At each iteration it generates the reduced data set `X_r(i)` made up from
+    new populations, performs PCA on that data set to find the i-th version of
+    the eigenvectors. Depending on the option selected, it then does the
+    projection of a data set (and optionally also its sources) onto the found
+    eigenvectors.
+
+    The first column (or entry) inside `eigenvectors`, `pc_scores` and
+    `pc_sources` matrices corresponds to the initial manifold and all the
+    remaining columns (or entries) correspond to the biased manifold. The number
+    of columns will thus always be n_iterations+1.
+
+    Note: if option==4, the `eigenvectors`, `pc_scores` and `pc_sources` are
+    lists of numpy.ndarray. For all other options, they are numpy.ndarray.
 
     Input:
     ----------
@@ -308,9 +318,6 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_sources_1 = []
             pc_sources_2 = []
 
-    # TO HAVE THE INITIAL MANIFOLD
-    # --------------------------------------------------------------------------
-
     # Perform global PCA on the original data set X:
     pca_global = P.PCA(X, scaling, 2, useXTXeig=True)
 
@@ -353,10 +360,13 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_sources_1.append(global_pc_sources[:,0:1])
             pc_sources_2.append(global_pc_sources[:,1:2])
 
-    # Number of observations that should be ate up from each cluster at each iteration
+    # Number of observations that should be taken from each cluster at each iteration:
     eat_ups = np.zeros((k,))
     for cluster in range(0,k):
         eat_ups[cluster] = (populations[cluster] - N_smallest_cluster)/n_iterations
+
+    if verbose == True:
+        print('Biasing will be performed with option ' + str(option) + '.')
 
     for iter in range(0,n_iterations):
 
@@ -386,11 +396,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
 
         (idx_train, _) = tts.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, verbose=False)
 
-        # TO HAVE THE BIASED MANIFOLD
-        # --------------------------------------------------------------------------
         if option == 1:
-            if verbose == True:
-                print('Biasing will be performed with option 1.')
 
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
@@ -418,13 +424,12 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
         elif option == 2:
-            if verbose == True:
-                print('Biasing will be performed with option 2.')
+
             # Generate the reduced data set X_r:
             X_r = X_cs[idx_train,:]
 
             # Perform PCA on X_r:
-            pca = P.PCA(X_r, 'none', 2, useXTXeig=True)
+            pca = P.PCA(X_r, 'none', 2, useXTXeig=True, nocenter=True)
 
             # Compute local eigenvectors:
             eigenvectors = pca.Q
@@ -446,8 +451,6 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
         elif option == 3:
-            if verbose == True:
-                print('Biasing will be performed with option 3.')
 
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
@@ -475,8 +478,6 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
         elif option == 4:
-            if verbose == True:
-                print('Biasing will be performed with option 4.')
 
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
