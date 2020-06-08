@@ -481,8 +481,10 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
 
-            # Sample the sources using the same idx:
-            X_source_r = X_source[idx_train,:]
+            if len(X_source) != 0:
+
+                # Sample the sources using the same idx:
+                X_source_r = X_source[idx_train,:]
 
             # Perform PCA on X_r:
             pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
