@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import copy as cp
 
 
-def center_scale(X, scaling):
+def center_scale(X, scaling, nocenter=False):
     """
     Centers and scales data - used in constructing PCA objects
 
@@ -59,7 +59,14 @@ def center_scale(X, scaling):
         raise ValueError('Unsupported scaling option')
 
     for i in range(0, nvar):
-        Xout[:, i] = (X[:, i] - xbar[i]) / d[i]
+        if nocenter:
+            Xout[:, i] = (X[:, i]) / d[i]
+        else:
+            Xout[:, i] = (X[:, i] - xbar[i]) / d[i]
+
+    if nocenter:
+        xbar = np.zeros(nvar)
+
     return Xout, xbar, d
 
 
@@ -154,7 +161,7 @@ class PCA:
 
     """
 
-    def __init__(self, X, scaling='std', neta=0, useXTXeig=True):
+    def __init__(self, X, scaling='std', neta=0, useXTXeig=True, nocenter=False):
         npts, nvar = X.shape
         if (npts < nvar):
             raise ValueError('Variables should be in columns; observations in rows.\n'
@@ -172,7 +179,7 @@ class PCA:
         else:
             self.neta = nvar
 
-        self.X, self.XCenter, self.XScale = center_scale(X, self.scaling)
+        self.X, self.XCenter, self.XScale = center_scale(X, self.scaling, nocenter)
         self.R = np.dot(self.X.transpose(), self.X) / npts
         if useXTXeig:
             L, Q = np.linalg.eigh(self.R)
