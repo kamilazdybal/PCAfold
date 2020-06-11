@@ -35,8 +35,8 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     Input:
     ----------
     `X`           - original (full) data set.
-    `idx_X_r`     - indices that should be extracted from `X` to form `X_r`.
-                    It could be obtained as training indices from
+    `idx_X_r`     - vector of indices that should be extracted from `X` to form
+                    `X_r`. It could be obtained as training indices from
                     `training_data_generation` module.
     `variable_names`
                   - list of strings specifying variable names.
@@ -134,13 +134,13 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     The `eigenvector_matrix` should be formed in the following way:
 
                  T Y_1 Y_2  ...  Y_n
+                [                   ] PC-i on the original data set X
                 [                   ] PC-i on a biased set X_r(1)
-                [                   ] PC-i on a biased set X_r(2)
                 [                   ] .
                 [                   ] .
                 [                   ] PC-i on a biased set X_r(j)
                 [                   ] .
-                [                   ] PC-i on a biased set X_r(N)
+                [                   ] PC-i on the equilibrated data set X_r(N)
 
     Each row is a selected i-th eigenvector (for instance PC-1) computed by
     performing PCA on a specific (j)-th version of the reduced data set.
@@ -201,7 +201,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
 
 
     x_range = np.arange(0,n_vars)
-    color_range = np.arange(1, n_versions+1)
+    color_range = np.arange(0, n_versions)
 
     # Plot the eigenvector weights movement:
     fig, ax = plt.subplots(figsize=(n_vars, 6))
@@ -223,7 +223,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     if title != False:
         plt.title(title, fontsize=font_title, **csfont)
 
-    cbar = plt.colorbar(scat, ticks=[1, round(n_versions/2), n_versions])
+    cbar = plt.colorbar(scat, ticks=[0, round((n_versions-1)/2), n_versions-1])
 
     if save_plot == True:
         plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
