@@ -3,8 +3,6 @@ import random
 import time
 import copy
 
-# Clustering functions:
-
 def variable_bins(var, k, verbose=False):
     """
     This function does clustering based on dividing a variable vector `var` into
@@ -18,6 +16,7 @@ def variable_bins(var, k, verbose=False):
     ----------
     `var`      - vector of variable values.
     `k`        - number of clusters to partition the data.
+    `verbose`  - boolean for printing clustering details.
 
     Output:
     ----------
@@ -54,7 +53,18 @@ def variable_bins(var, k, verbose=False):
     if np.size(np.unique(idx)) != k:
         (idx, k) = degrade_clusters(idx, verbose)
 
-    return(np.asarray(idx))
+    if verbose==True:
+        print('Border values for each bin are:')
+        print(bins_borders)
+
+    idx = np.asarray(idx)
+
+    if verbose==True:
+        for cl in range(0,k):
+            print("Bounds for cluster " + str(cl+1) + ":")
+            print("\t" + str(np.min(var[np.argwhere(idx==cl)])) + ", " + str(np.max(var[np.argwhere(idx==cl)])))
+
+    return(idx)
 
 def predefined_variable_bins(var, split_values, verbose=False):
     """
@@ -81,6 +91,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
     `split_values`
                - list containing values at which the split to bins should be
                  performed.
+    `verbose`  - boolean for printing clustering details.
 
     Output:
     ----------
@@ -173,12 +184,12 @@ def mixture_fraction_bins(Z, k, Z_stoich):
 
     # Bin data matrices initialization:
     idx_clust = []
-    idx = np.zeros((len(Z), 1))
+    idx = np.zeros((len(Z),))
 
     # Create the cluster division vector:
     for bin in range(0,k):
 
-        idx_clust.append([np.where((Z >= borders[bin]) & (Z <= borders[bin+1]))])
+        idx_clust.append(np.where((Z >= borders[bin]) & (Z <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
     idx = [int(i) for i in idx]
@@ -377,7 +388,8 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         # If the convergence of centroids and reconstruction error is reached, the algorithm stops:
         if ((iteration > 1) and (centroids_convergence == 1) and (eps_rec_convergence == 1)):
             convergence = 1
-            print('Convergence reached in iteration: ' + str(iteration) + '\n')
+            if verbose==True:
+                print('Convergence reached in iteration: ' + str(iteration) + '\n')
             break
 
         # Update recontruction error and cluster centroids:
@@ -417,8 +429,6 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         raise ValueError("The number of entires inside `idx` is not equal to the number of observations in the data set `X`.")
 
     return(np.asarray(idx))
-
-# Auxiliary functions:
 
 def degrade_clusters(idx, verbose=False):
     """
@@ -564,7 +574,7 @@ def get_partition(X, idx, verbose=False):
 
     Input:
     ----------
-    `X`        - data set for computing the cluster centroids.
+    `X`        - data set to partition.
     `idx`      - vector of indices classifying observations to clusters.
                  The first cluster has index 0.
     `verbose`  - boolean for printing details.
@@ -572,15 +582,19 @@ def get_partition(X, idx, verbose=False):
     Output:
     ----------
     `data_in_clusters`
-               - matrix of size () that contains original data set observations
+               - list of `k_new` arrays that contains original data set observations
                  in each cluster.
     `data_idx_in_clusters`
-               - matrix of size () that contains indices of the original data
+               - list of `k_new` arrays that contains indices of the original data
                  set observations in each cluster.
     `k_new`    - the updated number of clusters.
     """
 
-    (n_obs, n_vars) = np.shape(X)
+    try:
+        (n_obs, n_vars) = np.shape(X)
+    except:
+        (n_obs, ) = np.shape(X)
+        n_vars = 1
 
     # Remove empty clusters from indexing:
     if len(np.unique(idx)) != (np.max(idx)+1):
@@ -656,6 +670,78 @@ def test():
     This function tests the `clustering` module.
     """
 
+    # Test if `idx` output vectors are of type numpy.ndarray and of size (_,):
+    try:
+        idx_1 = variable_bins(np.array([1,2,3,4,5,6,7,8,9,10]), 4, verbose=False)
+    except:
+        print('Test of variable_bins failed.')
+        return 0
+    if not isinstance(idx_1, np.ndarray):
+        print('Test of variable_bins failed.')
+        return 0
+    try:
+        (n_obs,) = np.shape(idx_1)
+    except:
+        print('Test of variable_bins failed.')
+        return 0
+
+    try:
+        idx_2 = predefined_variable_bins(np.array([1,2,3,4,5,6,7,8,9,10]), [3.5, 8.5], verbose=False)
+    except:
+        print('Test of predefined_variable_bins failed.')
+        return 0
+    if not isinstance(idx_2, np.ndarray):
+        print('Test of predefined_variable_bins failed.')
+        return 0
+    try:
+        (n_obs,) = np.shape(idx_2)
+    except:
+        print('Test of predefined_variable_bins failed.')
+        return 0
+
+    try:
+        idx_3 = mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2)
+    except:
+        print('Test of mixture_fraction_bins failed.')
+        return 0
+    if not isinstance(idx_3, np.ndarray):
+        print('Test of mixture_fraction_bins failed.')
+        return 0
+    try:
+        (n_obs,) = np.shape(idx_3)
+    except:
+        print('Test of mixture_fraction_bins failed.')
+        return 0
+
+    try:
+        idx_4 = kmeans(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, 2)
+    except:
+        print('Test of kmeans failed.')
+        return 0
+    if not isinstance(idx_4, np.ndarray):
+        print('Test of kmeans failed.')
+        return 0
+    try:
+        (n_obs,) = np.shape(idx_4)
+    except:
+        print('Test of kmeans failed.')
+        return 0
+
+    try:
+        idx_5 = vqpca(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=20, verbose=False)
+    except:
+        print('Test of vqpca failed.')
+        return 0
+    if not isinstance(idx_5, np.ndarray):
+        print('Test of vqpca failed.')
+        return 0
+    try:
+        (n_obs,) = np.shape(idx_5)
+    except:
+        print('Test of vqpca failed.')
+        return 0
+
+    # Test degrade_clusters function:
     (idx, k) = degrade_clusters([1,1,2,2,3,3], verbose=False)
     if np.min(idx) != 0:
         print('Test of degrade_clusters failed.')
