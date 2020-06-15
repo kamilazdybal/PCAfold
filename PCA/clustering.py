@@ -218,7 +218,9 @@ def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, verbose=False):
     of clusters is 3, so that there is at least there three clusters: with high
     negative values, with close to zero values, with high positive values.
 
- pc_source_min                 0                            pc_source_max
+                    -offset         +offset
+                            \     /
+ pc_source_min               | 0 |                          pc_source_max
        |----------|----------|---|----------|----------|----------|
           bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
 
@@ -228,7 +230,8 @@ def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, verbose=False):
     `k`        - number of clusters to partition the data.
                  Cannot be smaller than 3.
     `zero_offset_percentage`
-               - number of clusters to partition the data.
+               - percentage of |pc_source_max - pc_source_min| to take as the
+                 `offset` value.
     `verbose`  - boolean for printing clustering details.
 
     Output:
