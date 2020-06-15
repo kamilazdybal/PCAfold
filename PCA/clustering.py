@@ -130,7 +130,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
     return(np.asarray(idx))
 
-def mixture_fraction_bins(Z, k, Z_stoich):
+def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
     This function does clustering based on dividing a mixture fraction vector
     `Z` into bins of equal lengths. The vector is first split to lean and rich
@@ -148,6 +148,7 @@ def mixture_fraction_bins(Z, k, Z_stoich):
     `Z`        - vector of mixture fraction values.
     `k`        - number of clusters to partition the data.
     `Z_stoich` - stoichiometric mixture fraction.
+    `verbose`  - boolean for printing clustering details.
 
     Output:
     ----------
@@ -191,6 +192,85 @@ def mixture_fraction_bins(Z, k, Z_stoich):
 
         idx_clust.append(np.where((Z >= borders[bin]) & (Z <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
+
+    if verbose==True:
+        print('Border values for each bin are:')
+        print(borders)
+
+    idx = [int(i) for i in idx]
+
+    # Degrade clusters if needed:
+    if len(np.unique(idx)) != (np.max(idx)+1):
+        (idx, k_new) = degrade_clusters(idx, verbose=False)
+
+    return(np.asarray(idx))
+
+def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, verbose=False):
+    """
+    This function does clustering based on bins of a PC-source vector
+    `pc_source`. It finds the first cluster between a negative and a positive
+    offset from PC-source=0. The offset is computed based on the input parameter
+    `zero_offset_percentage`, which specifies a percentage of the range
+    |pc_source_max - pc_source_min|. Further clusters are found by clustering
+    positive and negative PC-sources alternatingly into bins of equal lengths.
+
+    Due to the nature of this clustering technique, the smallest allowed number
+    of clusters is 3, so that there is at least there three clusters: with high
+    negative values, with close to zero values, with high positive values.
+
+ pc_source_min                 0                            pc_source_max
+       |----------|----------|---|----------|----------|----------|
+          bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
+
+    Input:
+    ----------
+    `pc_source`- vector of variable values.
+    `k`        - number of clusters to partition the data.
+                 Cannot be smaller than 3.
+    `zero_offset_percentage`
+               - number of clusters to partition the data.
+    `verbose`  - boolean for printing clustering details.
+
+    Output:
+    ----------
+    `idx`      - vector of indices classifying observations to clusters.
+                 The first cluster has index 0.
+    """
+
+    # Check that the number of clusters is an integer and is larger than 2:
+    if not (isinstance(k, int) and k > 2):
+        raise ValueError("The number of clusters must be an integer not smaller than 3.")
+
+    pc_source_min = np.min(pc_source)
+    pc_source_max = np.max(pc_source)
+    pc_source_range = abs(pc_source_max - pc_source_min)
+    offset = zero_offset_percentage * pc_source_range / 100
+
+    # Number of interval borders:
+    n_bins_borders = k
+
+    # Generate cluster borders on the negative side:
+    borders_negative = np.linspace(pc_source_min, -offset, np.ceil(n_bins_borders/2))
+
+    # Generate cluster borders on the positive side:
+    borders_positive = np.linspace(offset, pc_source_max, np.ceil((n_bins_borders+1)/2))
+
+    # Combine the two partitions:
+    borders = np.concatenate((borders_negative, borders_positive))
+
+    # Bin data matrices initialization:
+    idx_clust = []
+    idx = np.zeros((len(pc_source),))
+
+    # Create the cluster division vector:
+    for bin in range(0,k):
+
+        idx_clust.append(np.where((pc_source >= borders[bin]) & (pc_source <= borders[bin+1])))
+        idx[idx_clust[bin]] = bin+1
+
+    if verbose==True:
+        print('Border values for each bin are:')
+        print(borders)
 
     idx = [int(i) for i in idx]
 
@@ -739,6 +819,20 @@ def test():
         (n_obs,) = np.shape(idx_5)
     except:
         print('Test of vqpca failed.')
+        return 0
+
+    try:
+        idx_6 = pc_source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, verbose=False)
+    except:
+        print('Test of pc_source_bins failed.')
+        return 0
+    if not isinstance(idx_6, np.ndarray):
+        print('Test of pc_source_bins failed.')
+        return 0
+    try:
+        (n_obs,) = np.shape(idx_6)
+    except:
+        print('Test of pc_source_bins failed.')
         return 0
 
     # Test degrade_clusters function:
