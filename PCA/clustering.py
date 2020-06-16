@@ -205,7 +205,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     return(np.asarray(idx))
 
-def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
+def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
     This function does clustering based on bins of a PC-source vector
     `pc_source`. By default, it finds one cluster between a negative and
@@ -275,8 +275,21 @@ def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, split_at_zero=Fal
     pc_source_range = abs(pc_source_max - pc_source_min)
     offset = zero_offset_percentage * pc_source_range / 100
 
+    # Basic checks on the PC-source vector:
+    if not (pc_source_min < 0):
+        raise ValueError("PC-source vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
+
+    if not (pc_source_max > 0):
+        raise ValueError("PC-source vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
+
+    if (pc_source_min > -offset) or (pc_source_max < offset):
+        raise ValueError("Offset from zero crosses the minimum or maximum value of the PC-source vector. Consider lowering `zero_offset_percentage`.")
+
     # Number of interval borders:
-    n_bins_borders = k
+    if split_at_zero:
+        n_bins_borders = k-1
+    else:
+        n_bins_borders = k
 
     # Generate cluster borders on the negative side:
     borders_negative = np.linspace(pc_source_min, -offset, np.ceil(n_bins_borders/2))
