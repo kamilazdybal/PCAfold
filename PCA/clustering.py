@@ -251,7 +251,8 @@ def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, split_at_zero=Fal
                - percentage of |pc_source_max - pc_source_min| to take as the
                  `offset` value.
     `split_at_zero`
-               - boolean .
+               - boolean specifying whether partitioning should be done at
+                 PC-source=0.
     `verbose`  - boolean for printing clustering details.
 
     Output:
