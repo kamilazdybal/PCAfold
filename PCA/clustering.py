@@ -205,24 +205,42 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     return(np.asarray(idx))
 
-def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, verbose=False):
+def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
     This function does clustering based on bins of a PC-source vector
-    `pc_source`. It finds the first cluster between a negative and a positive
-    offset from PC-source=0. The offset is computed based on the input parameter
-    `zero_offset_percentage`, which specifies a percentage of the range
-    |pc_source_max - pc_source_min|. Further clusters are found by clustering
+    `pc_source`. By default, it finds one cluster between a negative and
+    a positive offset from PC-source=0. The offset is computed from the input
+    parameter `zero_offset_percentage` which specifies a percentage of the range
+    `pc_source_max - pc_source_min`. Further clusters are found by clustering
     positive and negative PC-sources alternatingly into bins of equal lengths.
 
-    Due to the nature of this clustering technique, the smallest allowed number
-    of clusters is 3, so that there is at least there three clusters: with high
-    negative values, with close to zero values, with high positive values.
+                        -offset         +offset
+                                \     /
+     pc_source_min               | 0 |                          pc_source_max
+           |----------|----------|---|----------|----------|----------|
+              bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
 
-                    -offset         +offset
-                            \     /
- pc_source_min               | 0 |                          pc_source_max
-       |----------|----------|---|----------|----------|----------|
-          bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
+    If `split_at_zero` is set to True, the partitioning will always find one
+    cluster that is between `-offset` and 0 and another cluster that is between
+    0 and `+offset`.
+
+                        -offset     0     +offset
+                                \   |   /
+     pc_source_min               |  |  |                          pc_source_max
+           |----------|----------|--|--|----------|----------|----------|
+              bin 1      bin 2    /   \   bin 5      bin 6      bin 7
+                                 /     \
+                            bin 3       bin 4
+
+    Due to the nature of this clustering technique, the smallest allowed number
+    of clusters is 3 if `split_at_zero=False`. This is to assure that there are
+    at least there three clusters: with high negative values, with close to zero
+    values, with high positive values.
+
+    If `split_at_zero=True`, the smallest allowed number of clusters is 4. This
+    is to assure that there are at least four clusters: with high negative
+    values, with negative values close to zero, with positive values close to
+    zero and with high positive values.
 
     Input:
     ----------
@@ -232,6 +250,8 @@ def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, verbose=False):
     `zero_offset_percentage`
                - percentage of |pc_source_max - pc_source_min| to take as the
                  `offset` value.
+    `split_at_zero`
+               - boolean .
     `verbose`  - boolean for printing clustering details.
 
     Output:
@@ -241,8 +261,12 @@ def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, verbose=False):
     """
 
     # Check that the number of clusters is an integer and is larger than 2:
-    if not (isinstance(k, int) and k > 2):
-        raise ValueError("The number of clusters must be an integer not smaller than 3.")
+    if (not split_at_zero) and (not (isinstance(k, int) and k > 2)):
+        raise ValueError("The number of clusters must be an integer not smaller than 3 when not splitting at zero.")
+
+    # Check that the number of clusters is an integer and is larger than 2:
+    if split_at_zero and (not (isinstance(k, int) and k > 3)):
+        raise ValueError("The number of clusters must be an integer not smaller than 4 when splitting at zero.")
 
     pc_source_min = np.min(pc_source)
     pc_source_max = np.max(pc_source)
@@ -259,7 +283,10 @@ def pc_source_bins(pc_source, k=3, zero_offset_percentage=0.1, verbose=False):
     borders_positive = np.linspace(offset, pc_source_max, np.ceil((n_bins_borders+1)/2))
 
     # Combine the two partitions:
-    borders = np.concatenate((borders_negative, borders_positive))
+    if split_at_zero:
+        borders = np.concatenate((borders_negative, np.array([0]), borders_positive))
+    else:
+        borders = np.concatenate((borders_negative, borders_positive))
 
     # Bin data matrices initialization:
     idx_clust = []
@@ -825,7 +852,7 @@ def test():
         return 0
 
     try:
-        idx_6 = pc_source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, verbose=False)
+        idx_6 = pc_source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=False)
     except:
         print('Test of pc_source_bins failed.')
         return 0
