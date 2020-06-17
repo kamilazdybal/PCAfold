@@ -313,17 +313,22 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         idx_clust.append(np.where((pc_source >= borders[bin]) & (pc_source <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
-    if verbose==True:
-        print('Border values for each bin are:')
-        print(borders)
-
-    idx = [int(i) for i in idx]
+    idx = np.asarray([int(i) for i in idx])
 
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
-    return(np.asarray(idx))
+    if verbose==True:
+        print('Border values for each bin are:')
+        print(borders)
+
+    if verbose==True:
+        for cl in range(0,k):
+            print("Bounds for cluster " + str(cl+1) + ":")
+            print("\t" + str(np.min(pc_source[np.argwhere(idx==cl)])) + ", " + str(np.max(pc_source[np.argwhere(idx==cl)])))
+
+    return(idx)
 
 def kmeans(X, k):
     """
