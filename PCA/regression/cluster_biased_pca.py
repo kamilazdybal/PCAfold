@@ -289,9 +289,9 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     """
 
     # Check that `option` parameter was passed correctly:
-    _options = [1,2,3,4]
+    _options = [1,2,3,4,5]
     if option not in _options:
-        raise ValueError("Option can only be 1, 2, 3 or 4.")
+        raise ValueError("Option can only be 1-5.")
 
     (n_obs, n_vars) = np.shape(X)
     populations = cl.get_populations(idx)
@@ -508,6 +508,39 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             # Append the local PC-scores:
             pc_scores_1.append(pc_scores[:,0:1])
             pc_scores_2.append(pc_scores[:,1:2])
+
+        elif option == 5:
+
+            # Generate the reduced data set X_r:
+            X_r = X[idx_train,:]
+
+            # Compute the current centers and scales of X_r:
+            (_, C_r, D_r) = P.center_scale(X_r, scaling)
+
+            # Pre-process the global data set with the current C_r and D_r:
+            X_cs = (X - C_r) / D_r
+
+            # Perform PCA on the original data set X:
+            pca = P.PCA(X_cs, 'none', 2, useXTXeig=True, nocenter=True)
+
+            # Compute local eigenvectors:
+            eigenvectors = pca.Q
+
+            # Compute local PC-scores:
+            pc_scores = X_cs.dot(eigenvectors)
+
+            if len(X_source) != 0:
+
+                # Compute local PC-sources:
+                pc_sources = X_source_cs.dot(eigenvectors)
+
+                # Append the global PC-sources:
+                pc_sources_1 = np.hstack((pc_sources_1, pc_sources[:,0:1]))
+                pc_sources_2 = np.hstack((pc_sources_2, pc_sources[:,1:2]))
+
+            # Append the local PC-scores:
+            pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
+            pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
         # Append the local eigenvectors:
         eigenvectors_1 = np.vstack((eigenvectors_1, eigenvectors[:,0].T))
