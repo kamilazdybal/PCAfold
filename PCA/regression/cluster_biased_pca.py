@@ -232,7 +232,8 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
 def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the normalized eigenvalue distribution when PCA is
-    performed on different versions of the reduced data sets `X_r`.
+    performed on different versions of the reduced data sets `X_r` vs. on the
+    original data set `X`.
 
     Input:
     ----------
@@ -248,6 +249,11 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
+
+    Input:
+    ----------
+    `min_at_q2_k` - label for which the eigenvalue was smallest when q=2.
+    `min_at_q3_k` - label for which the eigenvalue was smallest when q=3.
     """
 
     n_k = len(k_list)
@@ -266,14 +272,38 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
         if i_idx==0:
             original_distribution = plt.plot(np.arange(1, n_vars+1), eigenvalues[:,0], 'r-', linewidth=3, label='Original')
 
+            # Initialize the minimum eigenvalue at q=2 and q=3:
+            min_at_q2 = eigenvalues[1,0]
+            min_at_q3 = eigenvalues[2,0]
+            min_at_q2_k = 0
+            min_at_q3_k = 0
+
+        if eigenvalues[1,1] < min_at_q2:
+            min_at_q2 = eigenvalues[1,1]
+            min_at_q2_k = k
+        if eigenvalues[2,1] < min_at_q3:
+            min_at_q3 = eigenvalues[2,1]
+            min_at_q3_k = k
+
         # Plot the eigenvalue distribution from the current equilibrated X_r for the current idx:
         plt.plot(np.arange(1, n_vars+1), eigenvalues[:,-1], 'o--', c=colors[i_idx], label='$k=' + str(k) + '$')
 
     plt.xticks(x_range, fontsize=font_annotations, **csfont)
+    plt.ylabel('q [-]', fontsize=font_labels, **csfont)
     plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_vars+1.5)
     plt.grid(alpha=0.3)
+
+    if min_at_q2_k==0:
+        plt.text(n_vars/3, 0.9, 'Min at $q=2$: Original, $\lambda=' + str(round(min_at_q2,3)) + '$')
+    else:
+        plt.text(n_vars/3, 0.9, 'Min at $q=2$: $k=' + str(min_at_q2_k) + '$, $\lambda=' + str(round(min_at_q2,3)) + '$')
+
+    if min_at_q3_k==0:
+        plt.text(n_vars/3, 0.8, 'Min at $q=3$: Original, $\lambda=' + str(round(min_at_q3,3)) + '$')
+    else:
+        plt.text(n_vars/3, 0.8, 'Min at $q=3$: $k=' + str(min_at_q3_k) + '$, $\lambda=' + str(round(min_at_q3,3)) + '$')
 
     lgnd = plt.legend(fontsize=font_legend, loc="upper right")
     plt.setp(lgnd.texts, **csfont)
@@ -284,7 +314,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
     if save_plot == True:
         plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
 
-    return
+    return(min_at_q2_k, min_at_q3_k)
 
 def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_iterations=10, stop_iter=0, verbose=False):
     """
