@@ -44,7 +44,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
                   - list of integers specifying indices of variables to be plotted.
                     By default, all variables are plotted.
     `title`       - boolean or string specifying plot title. If set to False,
-                    no title will be plotted.
+                    title will not be plotted.
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
@@ -171,7 +171,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
                     start at 0.
                     Only has effect if `normalize=True`.
     `title`       - boolean or string specifying plot title. If set to False,
-                    no title will be plotted.
+                    title will not be plotted.
     `save_plot`   - boolean specifying whether the plot should be saved.
     `save_filename`
                   - plot save location/filename.
@@ -199,7 +199,6 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     else:
         eigenvector_matrix = np.abs(eigenvector_matrix)
 
-
     x_range = np.arange(0,n_vars)
     color_range = np.arange(0, n_versions)
 
@@ -224,6 +223,63 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         plt.title(title, fontsize=font_title, **csfont)
 
     cbar = plt.colorbar(scat, ticks=[0, round((n_versions-1)/2), n_versions-1])
+
+    if save_plot == True:
+        plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
+
+    return
+
+def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, title=False, save_plot=False, save_filename=''):
+    """
+    This function analyzes the normalized eigenvalue distribution when PCA is
+    performed on different versions of the reduced data sets `X_r`.
+
+    Input:
+    ----------
+    `X`           - original (full) data set.
+    `idx_matrix`  - matrix of collected idx vectors.
+    `k_list`      - list of numerical labels for the idx_matrix columns.
+    `scaling`     - data scaling criterion.
+    `option`      - integer specifying biasing option. See documentation of
+                    cluster-biased PCA for more information.
+                    Can only attain values [1,2,3,4,5].
+    `title`       - boolean or string specifying plot title. If set to False,
+                    title will not be plotted.
+    `save_plot`   - boolean specifying whether the plot should be saved.
+    `save_filename`
+                  - plot save location/filename.
+    """
+
+    n_k = len(k_list)
+    (n_obs, n_vars) = np.shape(X)
+    x_range = np.arange(1, n_vars+1)
+    colors = plt.cm.Blues(np.linspace(0.3,1,n_k))
+
+    fig, ax = plt.subplots(figsize=(n_vars, 6))
+
+    for i_idx, k in enumerate(k_list):
+
+        idx = idx_matrix[:,i_idx]
+        (eigenvalues, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, option=option, n_iterations=1)
+
+        # Plot the eigenvalue distribution when PCA is performed on the original data set:
+        if i_idx==0:
+            original_distribution = plt.plot(np.arange(1, n_vars+1), eigenvalues[:,0], 'r-', linewidth=3, label='Original')
+
+        # Plot the eigenvalue distribution from the current equilibrated X_r for the current idx:
+        plt.plot(np.arange(1, n_vars+1), eigenvalues[:,-1], 'o--', c=colors[i_idx], label='$k=' + str(k) + '$')
+
+    plt.xticks(x_range, fontsize=font_annotations, **csfont)
+    plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
+    plt.ylim(-0.05,1.05)
+    plt.xlim(0, n_vars+1.5)
+    plt.grid(alpha=0.3)
+
+    lgnd = plt.legend(fontsize=font_legend, loc="upper right")
+    plt.setp(lgnd.texts, **csfont)
+
+    if title != False:
+        plt.title(title, fontsize=font_title, **csfont)
 
     if save_plot == True:
         plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
@@ -259,7 +315,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
                     `X`.
     `option`      - integer specifying biasing option. See documentation of
                     cluster-biased PCA for more information.
-                    Can only attain values [1,2,3,4].
+                    Can only attain values [1,2,3,4,5].
     `n_iterations`- number of iterations to loop over.
     `stop_iter`   - number of iteration to stop.
     `verbose`     - boolean for printing verbose details.
@@ -304,6 +360,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     # Initialize matrices:
     eigenvectors_1 = np.zeros((1, n_vars))
     eigenvectors_2 = np.zeros((1, n_vars))
+    eigenvalues = np.zeros((n_vars, 1))
     if option != 4:
         pc_scores_1 = np.zeros((n_obs,1))
         pc_scores_2 = np.zeros((n_obs,1))
@@ -329,9 +386,16 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     # Compute global eigenvectors:
     global_eigenvectors = pca_global.Q
 
+    # Compute global eigenvalues:
+    global_eigenvalues = pca_global.L
+    maximum_global_eigenvalue = np.max(global_eigenvalues)
+
     # Append the global eigenvectors:
     eigenvectors_1 = np.vstack((eigenvectors_1, global_eigenvectors[:,0].T))
     eigenvectors_2 = np.vstack((eigenvectors_2, global_eigenvectors[:,1].T))
+
+    # Append the global eigenvalues:
+    eigenvalues = np.hstack((eigenvalues, np.reshape(global_eigenvalues, (n_vars, 1))/maximum_global_eigenvalue))
 
     # Compute global PC-scores:
     global_pc_scores = pca_global.x2eta(X, nocenter=False)
@@ -407,6 +471,10 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             # Compute local eigenvectors:
             eigenvectors = pca.Q
 
+            # Compute local eigenvalues:
+            local_eigenvalues = pca.L
+            maximum_local_eigenvalue = np.max(local_eigenvalues)
+
             # Compute local PC-scores:
             pc_scores = X_cs.dot(eigenvectors)
 
@@ -434,6 +502,10 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             # Compute local eigenvectors:
             eigenvectors = pca.Q
 
+            # Compute local eigenvalues:
+            local_eigenvalues = pca.L
+            maximum_local_eigenvalue = np.max(local_eigenvalues)
+
             # Compute local PC-scores:
             pc_scores = X_cs.dot(eigenvectors)
 
@@ -460,6 +532,10 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
 
             # Compute local eigenvectors:
             eigenvectors = pca.Q
+
+            # Compute local eigenvalues:
+            local_eigenvalues = pca.L
+            maximum_local_eigenvalue = np.max(local_eigenvalues)
 
             # Compute local PC-scores (the original data set will be centered and scaled with the local centers and scales):
             pc_scores = pca.x2eta(X, nocenter=False)
@@ -492,6 +568,10 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
 
             # Compute local eigenvectors:
             eigenvectors = pca.Q
+
+            # Compute local eigenvalues:
+            local_eigenvalues = pca.L
+            maximum_local_eigenvalue = np.max(local_eigenvalues)
 
             # Compute local PC-scores:
             pc_scores = pca.x2eta(X_r, nocenter=False)
@@ -526,6 +606,10 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             # Compute local eigenvectors:
             eigenvectors = pca.Q
 
+            # Compute local eigenvalues:
+            local_eigenvalues = pca.L
+            maximum_local_eigenvalue = np.max(local_eigenvalues)
+
             # Compute local PC-scores:
             pc_scores = X_cs.dot(eigenvectors)
 
@@ -546,9 +630,15 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
         eigenvectors_1 = np.vstack((eigenvectors_1, eigenvectors[:,0].T))
         eigenvectors_2 = np.vstack((eigenvectors_2, eigenvectors[:,1].T))
 
+        # Append the local eigenvalues:
+        eigenvalues = np.hstack((eigenvalues, np.reshape(local_eigenvalues, (n_vars, 1))/maximum_local_eigenvalue))
+
     # Remove the first row of zeros:
     eigenvectors_1 = eigenvectors_1[1::,:]
     eigenvectors_2 = eigenvectors_2[1::,:]
+
+    # Remove the first column of zeros:
+    eigenvalues = eigenvalues[:,1::]
 
     if option != 4:
         pc_scores_1 = pc_scores_1[:,1::]
@@ -558,6 +648,6 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_sources_2 = pc_sources_2[:,1::]
 
     if len(X_source) != 0:
-        return(eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, pc_sources_1, pc_sources_2, idx_train)
+        return(eigenvalues, eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, pc_sources_1, pc_sources_2, idx_train)
     else:
-        return(eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, idx_train)
+        return(eigenvalues, eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, idx_train)
