@@ -275,8 +275,12 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
             # Initialize the minimum eigenvalue at q=2 and q=3:
             min_at_q2 = eigenvalues[1,0]
             min_at_q3 = eigenvalues[2,0]
+            max_at_q2 = eigenvalues[1,0]
+            max_at_q3 = eigenvalues[2,0]
             min_at_q2_k = 0
             min_at_q3_k = 0
+            max_at_q2_k = 0
+            max_at_q3_k = 0
 
         if eigenvalues[1,1] < min_at_q2:
             min_at_q2 = eigenvalues[1,1]
@@ -284,28 +288,44 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
         if eigenvalues[2,1] < min_at_q3:
             min_at_q3 = eigenvalues[2,1]
             min_at_q3_k = k
+        if eigenvalues[1,1] > max_at_q2:
+            max_at_q2 = eigenvalues[1,1]
+            max_at_q2_k = k
+        if eigenvalues[2,1] > max_at_q3:
+            max_at_q3 = eigenvalues[2,1]
+            max_at_q3_k = k
 
         # Plot the eigenvalue distribution from the current equilibrated X_r for the current idx:
         plt.plot(np.arange(1, n_vars+1), eigenvalues[:,-1], 'o--', c=colors[i_idx], label='$k=' + str(k) + '$')
 
     plt.xticks(x_range, fontsize=font_annotations, **csfont)
-    plt.ylabel('q [-]', fontsize=font_labels, **csfont)
+    plt.xlabel('q [-]', fontsize=font_labels, **csfont)
     plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_vars+1.5)
     plt.grid(alpha=0.3)
 
     if min_at_q2_k==0:
-        plt.text(n_vars/3, 0.9, 'Min at $q=2$: Original, $\lambda=' + str(round(min_at_q2,3)) + '$')
+        plt.text(n_vars/3, 0.93, 'Min at $q=2$: Original, $\lambda=' + str(round(min_at_q2,3)) + '$')
     else:
-        plt.text(n_vars/3, 0.9, 'Min at $q=2$: $k=' + str(min_at_q2_k) + '$, $\lambda=' + str(round(min_at_q2,3)) + '$')
+        plt.text(n_vars/3, 0.93, 'Min at $q=2$: $k=' + str(min_at_q2_k) + '$, $\lambda=' + str(round(min_at_q2,3)) + '$')
 
     if min_at_q3_k==0:
-        plt.text(n_vars/3, 0.8, 'Min at $q=3$: Original, $\lambda=' + str(round(min_at_q3,3)) + '$')
+        plt.text(n_vars/3, 0.79, 'Min at $q=3$: Original, $\lambda=' + str(round(min_at_q3,3)) + '$')
     else:
-        plt.text(n_vars/3, 0.8, 'Min at $q=3$: $k=' + str(min_at_q3_k) + '$, $\lambda=' + str(round(min_at_q3,3)) + '$')
+        plt.text(n_vars/3, 0.79, 'Min at $q=3$: $k=' + str(min_at_q3_k) + '$, $\lambda=' + str(round(min_at_q3,3)) + '$')
 
-    lgnd = plt.legend(fontsize=font_legend, loc="upper right")
+    if max_at_q2_k==0:
+        plt.text(n_vars/3, 0.86, 'Max at $q=2$: Original, $\lambda=' + str(round(max_at_q2,3)) + '$')
+    else:
+        plt.text(n_vars/3, 0.86, 'Max at $q=2$: $k=' + str(max_at_q2_k) + '$, $\lambda=' + str(round(max_at_q2,3)) + '$')
+
+    if max_at_q3_k==0:
+        plt.text(n_vars/3, 0.72, 'Max at $q=3$: Original, $\lambda=' + str(round(max_at_q3,3)) + '$')
+    else:
+        plt.text(n_vars/3, 0.72, 'Max at $q=3$: $k=' + str(max_at_q3_k) + '$, $\lambda=' + str(round(max_at_q3,3)) + '$')
+
+    lgnd = plt.legend(fontsize=font_legend-2, loc="upper right")
     plt.setp(lgnd.texts, **csfont)
 
     if title != False:
