@@ -579,6 +579,8 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
 
             # Perform PCA on X_r:
             pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+            X_center = pca.XCenter
+            X_scale = pca.XScale
 
             # Compute local eigenvectors:
             eigenvectors = pca.Q
@@ -615,6 +617,8 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
 
             # Perform PCA on X_r:
             pca = P.PCA(X_r, scaling, 2, useXTXeig=True)
+            X_center = pca.XCenter
+            X_scale = pca.XScale
 
             # Compute local eigenvectors:
             eigenvectors = pca.Q
@@ -646,6 +650,8 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
 
             # Compute the current centers and scales of X_r:
             (_, C_r, D_r) = P.center_scale(X_r, scaling)
+            X_center = C_r
+            X_scale = D_r
 
             # Pre-process the global data set with the current C_r and D_r:
             X_cs = (X - C_r) / D_r
@@ -698,6 +704,6 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_sources_2 = pc_sources_2[:,1::]
 
     if len(X_source) != 0:
-        return(eigenvalues, eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, pc_sources_1, pc_sources_2, idx_train)
+        return(eigenvalues, eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, pc_sources_1, pc_sources_2, idx_train, X_center, X_scale)
     else:
-        return(eigenvalues, eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, idx_train)
+        return(eigenvalues, eigenvectors_1, eigenvectors_2, pc_scores_1, pc_scores_2, idx_train, X_center, X_scale)
