@@ -266,7 +266,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
     for i_idx, k in enumerate(k_list):
 
         idx = idx_matrix[:,i_idx]
-        (eigenvalues, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, option=option, n_iterations=1)
+        (eigenvalues, _, _, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, option=option, n_iterations=1)
 
         # Plot the eigenvalue distribution when PCA is performed on the original data set:
         if i_idx==0:
@@ -334,7 +334,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
     if save_plot == True:
         plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
 
-    return(min_at_q2_k, min_at_q3_k)
+    return(min_at_q2_k, min_at_q3_k, max_at_q2_k, max_at_q3_k)
 
 def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_iterations=10, stop_iter=0, verbose=False):
     """
