@@ -1,3 +1,5 @@
+import PCA
+
 # extensions = ['sphinxcontrib.bibtex']
 extensions = [
     "sphinx.ext.autodoc",

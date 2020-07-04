@@ -1,4 +1,4 @@
-.. module:: clustering
+.. module:: PCA
 
 Clustering
 ==========
@@ -16,7 +16,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
 .. note:: The first cluster has index ``0`` within all ``clustering.py`` functions. When some additional information is printed with ``verbose=True`` during function execution the cluster numeration starts with ``1``.
 
 
-.. autofunction:: clustering.variable_bins
+.. autofunction:: PCA.clustering.variable_bins
 
 
 
@@ -27,9 +27,9 @@ Auxiliary functions
 -------------------
 
 
-.. autofunction:: clustering.degrade_clusters
+.. autoclass:: clustering.degrade_clusters
 
-.. autofunction:: clustering.flip_clusters
+.. autoclass:: PCA.clustering.flip_clusters
 
 .. autofunction:: clustering.get_centroids
 
