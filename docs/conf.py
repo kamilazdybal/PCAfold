@@ -1,4 +1,3 @@
-import PCA
 
 # extensions = ['sphinxcontrib.bibtex']
 extensions = [
