@@ -14,7 +14,3 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
   :width: 300
 
 .. note:: The first cluster has index ``0`` within all ``clustering.py`` functions. When some additional information is printed with ``verbose=True`` during function execution the cluster numeration starts with ``1``.
-
-See :cite:`1987:nelson` for an introduction to non-standard analysis.
-
-.. bibliography:: ../bib/refs.bib

@@ -1,1 +1,1 @@
-extensions = ['sphinxcontrib.bibtex']
+# extensions = ['sphinxcontrib.bibtex']
