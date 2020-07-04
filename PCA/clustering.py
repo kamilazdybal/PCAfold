@@ -5,23 +5,19 @@ import copy
 
 def variable_bins(var, k, verbose=False):
     """
-    This function does clustering based on dividing a variable vector `var` into
+    This function does clustering based on dividing a variable vector ``var`` into
     bins of equal lengths.
 
-    var_min                                               var_max
-       |----------|----------|----------|----------|----------|
-          bin 1      bin 2      bin 3       bin 4     bin 5
+    :param var:
+        vector of variable values.
+    :param k:
+        number of clusters to partition the data.
+    :param verbose: (optional)
+        boolean for printing clustering details.
 
-    Input:
-    ----------
-    `var`      - vector of variable values.
-    `k`        - number of clusters to partition the data.
-    `verbose`  - boolean for printing clustering details.
-
-    Output:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    **Returns:**
+    ``idx`` vector of indices classifying observations to clusters.
+    The first cluster has index 0.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -72,31 +68,19 @@ def predefined_variable_bins(var, split_values, verbose=False):
     bins such that the split is done at values specified in the `split_values`
     list.
 
-    Example:
-    ----------
-
-    split_values = [value_1, value_2, value_3]
-
-
-    var_min     value_1              value_2      value_3  var_max
-       |----------|--------------------|------------|---------|
-           bin 1           bin 2            bin 3      bin 4
-
-    Note: When a split is performed at a given value_i, the observation in `var`
+    *Note:* When a split is performed at a given value_i, the observation in `var`
     that takes exactly that value is assigned to the newly created bin.
 
-    Input:
-    ----------
-    `var`      - vector of variable values.
-    `split_values`
-               - list containing values at which the split to bins should be
-                 performed.
-    `verbose`  - boolean for printing clustering details.
+    :param var:
+        vector of variable values.
+    :param split_values:
+        list containing values at which the split to bins should be performed.
+    :param verbose:
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    **Returns:**
+    ``idx`` vector of indices classifying observations to clusters.
+    The first cluster has index 0.
     """
 
     var_min = np.min(var)
@@ -139,21 +123,18 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     rich side. When k is odd, there will be one more cluster on the rich side
     compared to the lean side.
 
-    Z_min           Z_stoich                                 Z_max
-       |-------|-------|------------|------------|------------|
-         bin 1   bin 2     bin 3        bin 4         bin 5
+    :param Z:
+        vector of mixture fraction values.
+    :param k:
+        number of clusters to partition the data.
+    :param Z_stoich:
+        stoichiometric mixture fraction.
+    :param verbose: (optional)
+        boolean for printing clustering details.
 
-    Input:
-    ----------
-    `Z`        - vector of mixture fraction values.
-    `k`        - number of clusters to partition the data.
-    `Z_stoich` - stoichiometric mixture fraction.
-    `verbose`  - boolean for printing clustering details.
-
-    Output:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    **Returns:**
+    `idx` vector of indices classifying observations to clusters.
+    The first cluster has index 0.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -214,23 +195,9 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
     `pc_source_max - pc_source_min`. Further clusters are found by clustering
     positive and negative PC-sources alternatingly into bins of equal lengths.
 
-                        -offset         +offset
-                                \     /
-     pc_source_min               | 0 |                          pc_source_max
-           |----------|----------|---|----------|----------|----------|
-              bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
-
     If `split_at_zero` is set to True, the partitioning will always find one
     cluster that is between `-offset` and 0 and another cluster that is between
     0 and `+offset`.
-
-                        -offset     0     +offset
-                                \   |   /
-     pc_source_min               |  |  |                          pc_source_max
-           |----------|----------|--|--|----------|----------|----------|
-              bin 1      bin 2    /   \   bin 5      bin 6      bin 7
-                                 /     \
-                            bin 3       bin 4
 
     Due to the nature of this clustering technique, the smallest allowed number
     of clusters is 3 if `split_at_zero=False`. This is to assure that there are
@@ -242,24 +209,23 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
     values, with negative values close to zero, with positive values close to
     zero and with high positive values.
 
-    Input:
-    ----------
-    `pc_source`- vector of variable values.
-    `k`        - number of clusters to partition the data.
-                 Cannot be smaller than 3 if `split_at_zero=False` or smaller
-                 than 4 if `split_at_zero=True`.
-    `zero_offset_percentage`
-               - percentage of |pc_source_max - pc_source_min| to take as the
-                 `offset` value.
-    `split_at_zero`
-               - boolean specifying whether partitioning should be done at
-                 PC-source=0.
-    `verbose`  - boolean for printing clustering details.
+    :param pc_source:
+        vector of variable values.
+    :param k:
+        number of clusters to partition the data.
+        Cannot be smaller than 3 if `split_at_zero=False` or smaller
+        than 4 if `split_at_zero=True`.
+    :param zero_offset_percentage: (optional)
+        percentage of ``|pc_source_max - pc_source_min|`` to take as the
+        ``offset`` value.
+    :param split_at_zero: (optional)
+        boolean specifying whether partitioning should be done at PC-source=0.
+    :param verbose: (optional)
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    **Returns:**
+    `idx` vector of indices classifying observations to clusters.
+    The first cluster has index 0.
     """
 
     # Check that the number of clusters is an integer and is larger than 2:
@@ -334,15 +300,14 @@ def kmeans(X, k):
     """
     This function performs K-Means clustering.
 
-    Input:
-    ----------
-    `X`        - conditioning variable or a data set.
-    `k`        - number of clusters to partition the data.
+    :param X:
+        conditioning variable or a data set.
+    :param k:
+        number of clusters to partition the data.
 
-    Output:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    **Returns:**
+    `idx` vector of indices classifying observations to clusters.
+    The first cluster has index 0.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -369,22 +334,25 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
 
     Input:
     ----------
-    `X`        - raw global data set, uncentered and unscaled.
-    `k`        - number of clusters to partition the data.
-    `n_pcs`    - number of Principal Components that will be used to reconstruct
-                 the data at each iteration.
-    `scaling_criteria`
-               - criterion to scale the global data set.
-    `idx_0`    - user-supplied initial idx for initializing the centroids.
-    `maximum_number_of_iterations`
-               - the maximum number of iterations that the algorithm will loop
-                 through.
-    `verbose`  - boolean for printing clustering details.
+    :param X:
+        raw global data set, uncentered and unscaled.
+    :param k: (optional)
+        number of clusters to partition the data.
+    :param n_pcs: (optional)
+        number of Principal Components that will be used to reconstruct the data
+        at each iteration.
+    :param scaling_criteria: (optional)
+        criterion to scale the global data set.
+    :param idx_0: (optional)
+        user-supplied initial idx for initializing the centroids.
+    :param maximum_number_of_iterations: (optional)
+        the maximum number of iterations that the algorithm will loop through.
+    :param verbose: (optional)
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    **Returns:**
+    `idx` vector of indices classifying observations to clusters.
+    The first cluster has index 0.
     """
 
     import PCA.PCA as PCA
@@ -588,17 +556,15 @@ def degrade_clusters(idx, verbose=False):
 
     so that the smallest cluster number is equal to 0.
 
-    Input:
-    ----------
-    `idx`      - raw vector of indices classifying observations to clusters.
-    `verbose`  - boolean for printing clustering details.
+    :param idx:
+        raw vector of indices classifying observations to clusters.
+    :param verbose:
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx_degraded`
-               - degraded vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
-    `k_update` - the updated number of clusters.
+    **Returns:**
+    ``idx_degraded`` degraded vector of indices classifying observations to
+    clusters. The first cluster has index 0.
+    ``k_update`` the updated number of clusters.
     """
 
     index = 0
@@ -628,22 +594,18 @@ def degrade_clusters(idx, verbose=False):
 def flip_clusters(idx, dictionary):
     """
     This function flips the cluster labelling according to instructions provided
-    in the dictionary. For a `dictionary = {key : value}`, a cluster with a
-    number `key` will get a number `value`.
+    in the dictionary. For a ``dictionary = {key : value}``, a cluster with a
+    number ``key`` will get a number ``value``.
 
-    Input:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
-    `dictionary`
-               - a dictionary specifying the cluster numeration flipping
-                 instructions.
+    :param idx:
+        vector of indices classifying observations to clusters.
+        The first cluster has index 0.
+    :param dictionary:
+        a dictionary specifying the cluster numeration flipping instructions.
 
-    Output:
-    ----------
-    `flipped_idx`
-               - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    **Returns:**
+    `flipped_idx` vector of indices classifying observations to clusters.
+    The first cluster has index 0.
     """
 
     flipped_idx = []
@@ -661,17 +623,15 @@ def get_centroids(X, idx):
     This function computes the centroids for the clustering specified in the
     `idx` vector.
 
-    Input:
-    ----------
-    `X`        - data set for computing the cluster centroids.
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    :param X:
+        data set for computing the cluster centroids.
+    :param idx:
+        vector of indices classifying observations to clusters.
+        The first cluster has index 0.
 
-    Output:
-    ----------
-    `centroids`
-               - matrix of cluster centroids. It has size k times number of
-                 observations.
+    **Returns:**
+    `centroids` matrix of cluster centroids. It has size k times number of
+    observations.
     """
 
     # Degrade clusters if needed:
@@ -700,24 +660,23 @@ def get_centroids(X, idx):
 def get_partition(X, idx, verbose=False):
     """
     This function performs partitioning of the data set observations according
-    to `idx` provided.
+    to ``idx`` provided.
 
-    Input:
-    ----------
-    `X`        - data set to partition.
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
-    `verbose`  - boolean for printing details.
+    :param X:
+        data set to partition.
+    :param idx:
+        vector of indices classifying observations to clusters.
+        The first cluster has index 0.
+    :param verbose:
+        boolean for printing details.
 
-    Output:
-    ----------
-    `data_in_clusters`
-               - list of `k_new` arrays that contains original data set observations
-                 in each cluster.
-    `data_idx_in_clusters`
-               - list of `k_new` arrays that contains indices of the original data
-                 set observations in each cluster.
-    `k_new`    - the updated number of clusters.
+    **Returns:**
+    ``data_in_clusters`` list of ``k_new`` arrays that contains original data
+    set observations in each cluster.
+    ``data_idx_in_clusters`` list of ``k_new`` arrays that contains indices of
+    the original data set observations in each cluster.
+    ``k_new`` the updated number of clusters.
+
     """
 
     try:
@@ -768,16 +727,15 @@ def get_populations(idx, verbose=False):
     This function computes populations (number of observations) in clusters
     specified in the `idx` vector.
 
-    Input:
-    ----------
-    `idx`      - vector of indices classifying observations to clusters.
-                 The first cluster has index 0.
+    :param idx:
+        vector of indices classifying observations to clusters.
+        The first cluster has index 0.
+    :param verbose:
+        boolean for printing details.
 
-    Output:
-    ----------
-    `populations`
-               - list of cluster populations. Each entry referes to one cluster
-                 ordered according to `idx`.
+    **Returns:**
+    ``populations`` list of cluster populations. Each entry referes to one cluster
+    ordered according to `idx`.
     """
 
     populations = []
@@ -797,7 +755,7 @@ def get_populations(idx, verbose=False):
 
 def test():
     """
-    This function tests the `clustering` module.
+    This function tests the ``clustering`` module.
     """
 
     # Test if `idx` output vectors are of type numpy.ndarray and of size (_,):

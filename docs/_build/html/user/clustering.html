@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clustering &#8212; PCA-python  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cluster-biased PCA" href="cluster-biased-pca.html" />
+    <link rel="prev" title="Principal Component Analysis" href="PCA.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <span class="target" id="module-PCA"></span><div class="section" id="clustering">
+<h1>Clustering<a class="headerlink" href="#clustering" title="Permalink to this headline">¶</a></h1>
+<p>This is a documentation for <code class="docutils literal notranslate"><span class="pre">clustering.py</span></code> module. It contains functions for classifying data sets into local clusters and performing some basic operations on clusters [1], [2].</p>
+<div class="section" id="clustering-functions">
+<h2>Clustering functions<a class="headerlink" href="#clustering-functions" title="Permalink to this headline">¶</a></h2>
+<p>Each function that clusters the data set returns a vector <code class="docutils literal notranslate"><span class="pre">idx</span></code> of type <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of size <code class="docutils literal notranslate"><span class="pre">(n_observations,)</span></code> that specifies classification of each observation from the original data set <code class="docutils literal notranslate"><span class="pre">X</span></code> to a local cluster.</p>
+<a class="reference internal image-reference" href="../_images/clustering-idx.png"><img alt="../_images/clustering-idx.png" src="../_images/clustering-idx.png" style="width: 200px;" /></a>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The first cluster has index <code class="docutils literal notranslate"><span class="pre">0</span></code> within all <code class="docutils literal notranslate"><span class="pre">clustering.py</span></code> functions. When some additional information is printed with <code class="docutils literal notranslate"><span class="pre">verbose=True</span></code> during function execution the cluster numeration starts with <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</div>
+<dl class="py function">
+<dt id="PCA.clustering.variable_bins">
+<code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">variable_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">var</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.variable_bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function does clustering based on dividing a variable vector <code class="docutils literal notranslate"><span class="pre">var</span></code> into
+bins of equal lengths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var</strong> – vector of variable values.</p></li>
+<li><p><strong>k</strong> – number of clusters to partition the data.</p></li>
+<li><p><strong>verbose</strong> – (optional)
+boolean for printing clustering details.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong>
+<code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.
+The first cluster has index 0.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="auxiliary-functions">
+<h2>Auxiliary functions<a class="headerlink" href="#auxiliary-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="PCA.clustering.degrade_clusters">
+<code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">degrade_clusters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.degrade_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>This function renumerates clusters if either of these two cases is true:</dt><dd><ol class="arabic simple">
+<li><p><cite>idx</cite> is composed of non-consecutive integers, or:</p></li>
+<li><p>the smallest cluster number in <cite>idx</cite> is not equal to 0.</p></li>
+</ol>
+</dd>
+</dl>
+<p>If from a clustering technique you get an <cite>idx</cite> that is the following:</p>
+<p><cite>[0, 0, 2, 0, 5, 10]</cite></p>
+<p>this function turns this <cite>idx</cite> to:</p>
+<p><cite>[0, 0, 1, 0, 2, 3]</cite></p>
+<p>where clusters are numbered with consecutive integers.</p>
+<p>Alternatively, if <cite>idx</cite> is:</p>
+<p><cite>[1, 1, 2, 2, 3, 3]</cite></p>
+<p>this function turns this <cite>idx</cite> to:</p>
+<p><cite>[0, 0, 1, 1, 2, 2]</cite></p>
+<p>so that the smallest cluster number is equal to 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> – raw vector of indices classifying observations to clusters.</p></li>
+<li><p><strong>verbose</strong> – boolean for printing clustering details.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong>
+<code class="docutils literal notranslate"><span class="pre">idx_degraded</span></code> degraded vector of indices classifying observations to
+clusters. The first cluster has index 0.
+<code class="docutils literal notranslate"><span class="pre">k_update</span></code> the updated number of clusters.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PCA.clustering.flip_clusters">
+<code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">flip_clusters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">dictionary</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.flip_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function flips the cluster labelling according to instructions provided
+in the dictionary. For a <code class="docutils literal notranslate"><span class="pre">dictionary</span> <span class="pre">=</span> <span class="pre">{key</span> <span class="pre">:</span> <span class="pre">value}</span></code>, a cluster with a
+number <code class="docutils literal notranslate"><span class="pre">key</span></code> will get a number <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> – vector of indices classifying observations to clusters.
+The first cluster has index 0.</p></li>
+<li><p><strong>dictionary</strong> – a dictionary specifying the cluster numeration flipping instructions.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong>
+<cite>flipped_idx</cite> vector of indices classifying observations to clusters.
+The first cluster has index 0.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PCA.clustering.get_centroids">
+<code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">get_centroids</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">idx</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.get_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function computes the centroids for the clustering specified in the
+<cite>idx</cite> vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – data set for computing the cluster centroids.</p></li>
+<li><p><strong>idx</strong> – vector of indices classifying observations to clusters.
+The first cluster has index 0.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong>
+<cite>centroids</cite> matrix of cluster centroids. It has size k times number of
+observations.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PCA.clustering.get_partition">
+<code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">get_partition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.get_partition" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function performs partitioning of the data set observations according
+to <code class="docutils literal notranslate"><span class="pre">idx</span></code> provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> – data set to partition.</p></li>
+<li><p><strong>idx</strong> – vector of indices classifying observations to clusters.
+The first cluster has index 0.</p></li>
+<li><p><strong>verbose</strong> – boolean for printing details.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong>
+<code class="docutils literal notranslate"><span class="pre">data_in_clusters</span></code> list of <code class="docutils literal notranslate"><span class="pre">k_new</span></code> arrays that contains original data
+set observations in each cluster.
+<code class="docutils literal notranslate"><span class="pre">data_idx_in_clusters</span></code> list of <code class="docutils literal notranslate"><span class="pre">k_new</span></code> arrays that contains indices of
+the original data set observations in each cluster.
+<code class="docutils literal notranslate"><span class="pre">k_new</span></code> the updated number of clusters.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="PCA.clustering.get_populations">
+<code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">get_populations</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.get_populations" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function computes populations (number of observations) in clusters
+specified in the <cite>idx</cite> vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> – vector of indices classifying observations to clusters.
+The first cluster has index 0.</p></li>
+<li><p><strong>verbose</strong> – boolean for printing details.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong>
+<code class="docutils literal notranslate"><span class="pre">populations</span></code> list of cluster populations. Each entry referes to one cluster
+ordered according to <cite>idx</cite>.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PCA-python</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PCA.html">Principal Component Analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Clustering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#clustering-functions">Clustering functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#auxiliary-functions">Auxiliary functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cluster-biased-pca.html">Cluster-biased PCA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="train-test-select.html">Train and test data selection</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/train-test-selection.html">Selecting train and test data</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="PCA.html" title="previous chapter">Principal Component Analysis</a></li>
+      <li>Next: <a href="cluster-biased-pca.html" title="next chapter">Cluster-biased PCA</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Elizabeth Armstrong, Kamila Zdybal.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/user/clustering.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
