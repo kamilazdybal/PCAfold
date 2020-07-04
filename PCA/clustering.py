@@ -531,8 +531,10 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
 def degrade_clusters(idx, verbose=False):
     """
     This function renumerates clusters if either of these two cases is true:
-        (1) ``idx`` is composed of non-consecutive integers, or:
-        (2) the smallest cluster number in ``idx`` is not equal to ``0``.
+
+    - ``idx`` is composed of non-consecutive integers, or:
+    
+    - the smallest cluster number in ``idx`` is not equal to ``0``.
 
     **Example:**
     If from a clustering technique you get an ``idx`` that is the following:
