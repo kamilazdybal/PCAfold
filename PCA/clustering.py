@@ -64,11 +64,11 @@ def variable_bins(var, k, verbose=False):
 
 def predefined_variable_bins(var, split_values, verbose=False):
     """
-    This function does clustering based on dividing a variable vector `var` into
-    bins such that the split is done at values specified in the `split_values`
+    This function does clustering based on dividing a variable vector ``var`` into
+    bins such that the split is done at values specified in the ``split_values``
     list.
 
-    *Note:* When a split is performed at a given value_i, the observation in `var`
+    *Note:* When a split is performed at a given ``value_i``, the observation in ``var``
     that takes exactly that value is assigned to the newly created bin.
 
     :param var:
@@ -117,10 +117,10 @@ def predefined_variable_bins(var, split_values, verbose=False):
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
     This function does clustering based on dividing a mixture fraction vector
-    `Z` into bins of equal lengths. The vector is first split to lean and rich
-    side and then the sides get divided further into clusters. When k is even,
+    ``Z`` into bins of equal lengths. The vector is first split to lean and rich
+    side and then the sides get divided further into clusters. When ``k`` is even,
     this function will always create equal number of clusters on the lean and
-    rich side. When k is odd, there will be one more cluster on the rich side
+    rich side. When ``k`` is odd, there will be one more cluster on the rich side
     compared to the lean side.
 
     :param Z:
@@ -189,22 +189,22 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
     This function does clustering based on bins of a PC-source vector
-    `pc_source`. By default, it finds one cluster between a negative and
+    ``pc_source``. By default, it finds one cluster between a negative and
     a positive offset from PC-source=0. The offset is computed from the input
-    parameter `zero_offset_percentage` which specifies a percentage of the range
-    `pc_source_max - pc_source_min`. Further clusters are found by clustering
+    parameter ``zero_offset_percentage`` which specifies a percentage of the range
+    ``pc_source_max - pc_source_min``. Further clusters are found by clustering
     positive and negative PC-sources alternatingly into bins of equal lengths.
 
-    If `split_at_zero` is set to True, the partitioning will always find one
-    cluster that is between `-offset` and 0 and another cluster that is between
-    0 and `+offset`.
+    If ``split_at_zero`` is set to ``True``, the partitioning will always find one
+    cluster that is between ``-offset`` and 0 and another cluster that is between
+    0 and ``+offset``.
 
     Due to the nature of this clustering technique, the smallest allowed number
-    of clusters is 3 if `split_at_zero=False`. This is to assure that there are
+    of clusters is 3 if ``split_at_zero=False``. This is to assure that there are
     at least there three clusters: with high negative values, with close to zero
     values, with high positive values.
 
-    If `split_at_zero=True`, the smallest allowed number of clusters is 4. This
+    If ``split_at_zero=True``, the smallest allowed number of clusters is 4. This
     is to assure that there are at least four clusters: with high negative
     values, with negative values close to zero, with positive values close to
     zero and with high positive values.
@@ -213,8 +213,8 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         vector of variable values.
     :param k:
         number of clusters to partition the data.
-        Cannot be smaller than 3 if `split_at_zero=False` or smaller
-        than 4 if `split_at_zero=True`.
+        Cannot be smaller than 3 if ``split_at_zero=False`` or smaller
+        than 4 if ``split_at_zero=True``.
     :param zero_offset_percentage: (optional)
         percentage of ``|pc_source_max - pc_source_min|`` to take as the
         ``offset`` value.
@@ -224,7 +224,7 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         boolean for printing clustering details.
 
     **Returns:**
-    `idx` vector of indices classifying observations to clusters.
+    ``idx`` vector of indices classifying observations to clusters.
     The first cluster has index 0.
     """
 
@@ -327,7 +327,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
     Principal Component Analysis.
 
     VQPCA algorithm will center the global data set by mean and scale the global
-    data set by the scaling specified in the `scaling_criteria` parameter.
+    data set by the scaling specified in the ``scaling_criteria`` parameter.
 
     Note that the data in local cluster clusters will still be centered by the
     mean but will not be scaled!
@@ -351,7 +351,7 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
         boolean for printing clustering details.
 
     **Returns:**
-    `idx` vector of indices classifying observations to clusters.
+    ``idx`` vector of indices classifying observations to clusters.
     The first cluster has index 0.
     """
 
@@ -531,30 +531,17 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
 def degrade_clusters(idx, verbose=False):
     """
     This function renumerates clusters if either of these two cases is true:
-        (1) `idx` is composed of non-consecutive integers, or:
-        (2) the smallest cluster number in `idx` is not equal to 0.
+        (1) ``idx`` is composed of non-consecutive integers, or:
+        (2) the smallest cluster number in ``idx`` is not equal to ``0``.
 
-    Example:
-    ----------
-    If from a clustering technique you get an `idx` that is the following:
+    **Example:**
+    If from a clustering technique you get an ``idx`` that is the following:
+    ``[0, 0, 2, 0, 5, 10]`` this function turns this ``idx`` to:
+    ``[0, 0, 1, 0, 2, 3]`` where clusters are numbered with consecutive integers.
 
-    `[0, 0, 2, 0, 5, 10]`
-
-    this function turns this `idx` to:
-
-    `[0, 0, 1, 0, 2, 3]`
-
-    where clusters are numbered with consecutive integers.
-
-    Alternatively, if `idx` is:
-
-    `[1, 1, 2, 2, 3, 3]`
-
-    this function turns this `idx` to:
-
-    `[0, 0, 1, 1, 2, 2]`
-
-    so that the smallest cluster number is equal to 0.
+    Alternatively, if ``idx`` is: ``[1, 1, 2, 2, 3, 3]`` this function turns
+    this ``idx`` to: ``[0, 0, 1, 1, 2, 2]`` so that the smallest cluster number
+    is equal to ``0``.
 
     :param idx:
         raw vector of indices classifying observations to clusters.
@@ -604,7 +591,7 @@ def flip_clusters(idx, dictionary):
         a dictionary specifying the cluster numeration flipping instructions.
 
     **Returns:**
-    `flipped_idx` vector of indices classifying observations to clusters.
+    ``flipped_idx`` vector of indices classifying observations to clusters.
     The first cluster has index 0.
     """
 
@@ -621,7 +608,7 @@ def flip_clusters(idx, dictionary):
 def get_centroids(X, idx):
     """
     This function computes the centroids for the clustering specified in the
-    `idx` vector.
+    ``idx`` vector.
 
     :param X:
         data set for computing the cluster centroids.
@@ -630,7 +617,7 @@ def get_centroids(X, idx):
         The first cluster has index 0.
 
     **Returns:**
-    `centroids` matrix of cluster centroids. It has size k times number of
+    ``centroids`` matrix of cluster centroids. It has size ``k`` times number of
     observations.
     """
 
@@ -676,7 +663,6 @@ def get_partition(X, idx, verbose=False):
     ``data_idx_in_clusters`` list of ``k_new`` arrays that contains indices of
     the original data set observations in each cluster.
     ``k_new`` the updated number of clusters.
-
     """
 
     try:
@@ -725,7 +711,7 @@ def get_partition(X, idx, verbose=False):
 def get_populations(idx, verbose=False):
     """
     This function computes populations (number of observations) in clusters
-    specified in the `idx` vector.
+    specified in the ``idx`` vector.
 
     :param idx:
         vector of indices classifying observations to clusters.
@@ -735,7 +721,7 @@ def get_populations(idx, verbose=False):
 
     **Returns:**
     ``populations`` list of cluster populations. Each entry referes to one cluster
-    ordered according to `idx`.
+    ordered according to ``idx``.
     """
 
     populations = []
