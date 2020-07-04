@@ -9,3 +9,4 @@
 *.DS_Store
 *.cpp
 build/
+*builddir/
