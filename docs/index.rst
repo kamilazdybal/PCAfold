@@ -1,7 +1,7 @@
 PCA-Python
 ==========
 
-This is a documentation for the `PCA-Python` repository.
+This is a documentation for the ``PCA-Python`` repository.
 
 .. toctree::
    :maxdepth: 1

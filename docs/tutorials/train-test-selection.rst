@@ -1,3 +1,5 @@
+.. module:: pca
+
 Selecting train and test data
 =============================
 
