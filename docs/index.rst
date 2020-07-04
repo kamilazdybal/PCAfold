@@ -1,5 +1,19 @@
 PCA-Python
+==========
 
---------
+This is a documentation for the `PCA-Python` repository.
 
-Documentation for the PCA-python repository.
+.. toctree::
+   :maxdepth: 1
+   :caption: User Guide
+
+   user/PCA
+   user/clustering
+   user/cluster-biased-pca
+   user/train-test-select
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Tutorials
+
+   tutorials/train-test-selection
