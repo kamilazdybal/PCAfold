@@ -229,7 +229,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
 
     return
 
-def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, title=False, save_plot=False, save_filename=''):
+def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the normalized eigenvalue distribution when PCA is
     performed on different versions of the reduced data sets `X_r` vs. on the
@@ -241,7 +241,8 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
     `idx_matrix`  - matrix of collected idx vectors.
     `k_list`      - list of numerical labels for the idx_matrix columns.
     `scaling`     - data scaling criterion.
-    `option`      - integer specifying biasing option. See documentation of
+    `biasing_option`
+                  - integer specifying biasing option. See documentation of
                     cluster-biased PCA for more information.
                     Can only attain values [1,2,3,4,5].
     `title`       - boolean or string specifying plot title. If set to False,
@@ -266,7 +267,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
     for i_idx, k in enumerate(k_list):
 
         idx = idx_matrix[:,i_idx]
-        (eigenvalues, _, _, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, option=option, n_iterations=1)
+        (eigenvalues, _, _, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, biasing_option=biasing_option, n_iterations=1)
 
         # Plot the eigenvalue distribution when PCA is performed on the original data set:
         if i_idx==0:
@@ -336,7 +337,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, option, titl
 
     return(min_at_q2_k, min_at_q3_k, max_at_q2_k, max_at_q3_k)
 
-def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_iterations=10, stop_iter=0, verbose=False):
+def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option=1, n_iterations=10, stop_iter=0, verbose=False):
     """
     This function gradually equilibrates cluster populations, heading towards
     the population of the smallest cluster.
@@ -352,7 +353,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     remaining columns (or entries) correspond to the biased manifold. The number
     of columns will thus always be n_iterations+1.
 
-    Note: if option==4, the `eigenvectors`, `pc_scores` and `pc_sources` are
+    Note: if biasing_option==4, the `eigenvectors`, `pc_scores` and `pc_sources` are
     lists of numpy.ndarray. For all other options, they are numpy.ndarray.
 
     Input:
@@ -363,7 +364,8 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     `scaling`     - data scaling criterion.
     `X_source`    - source terms corresponding to the state-space variables in
                     `X`.
-    `option`      - integer specifying biasing option. See documentation of
+    `biasing_option`
+                  - integer specifying biasing option. See documentation of
                     cluster-biased PCA for more information.
                     Can only attain values [1,2,3,4,5].
     `n_iterations`- number of iterations to loop over.
@@ -394,9 +396,9 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
                   - the final training indices from the equilibrated iteration.
     """
 
-    # Check that `option` parameter was passed correctly:
-    _options = [1,2,3,4,5]
-    if option not in _options:
+    # Check that `biasing_option` parameter was passed correctly:
+    _biasing_options = [1,2,3,4,5]
+    if biasing_option not in _biasing_options:
         raise ValueError("Option can only be 1-5.")
 
     (n_obs, n_vars) = np.shape(X)
@@ -411,14 +413,14 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     eigenvectors_1 = np.zeros((1, n_vars))
     eigenvectors_2 = np.zeros((1, n_vars))
     eigenvalues = np.zeros((n_vars, 1))
-    if option != 4:
+    if biasing_option != 4:
         pc_scores_1 = np.zeros((n_obs,1))
         pc_scores_2 = np.zeros((n_obs,1))
         if len(X_source) != 0:
             pc_sources_1 = np.zeros((n_obs,1))
             pc_sources_2 = np.zeros((n_obs,1))
     else:
-        # If option is 4, we need to use a list because the number of observations will decrease at each iteration:
+        # If biasing_option is 4, we need to use a list because the number of observations will decrease at each iteration:
         pc_scores_1 = []
         pc_scores_2 = []
         if len(X_source) != 0:
@@ -451,7 +453,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     global_pc_scores = pca_global.x2eta(X, nocenter=False)
 
     # Append the global PC-scores:
-    if option != 4:
+    if biasing_option != 4:
         pc_scores_1 = np.hstack((pc_scores_1, global_pc_scores[:,0:1]))
         pc_scores_2 = np.hstack((pc_scores_2, global_pc_scores[:,1:2]))
     else:
@@ -467,7 +469,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
         global_pc_sources = pca_global.x2eta(X_source, nocenter=True)
 
         # Append the global PC-sources:
-        if option != 4:
+        if biasing_option != 4:
             pc_sources_1 = np.hstack((pc_sources_1, global_pc_sources[:,0:1]))
             pc_sources_2 = np.hstack((pc_sources_2, global_pc_sources[:,1:2]))
         else:
@@ -480,7 +482,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
         eat_ups[cluster] = (populations[cluster] - N_smallest_cluster)/n_iterations
 
     if verbose == True:
-        print('Biasing will be performed with option ' + str(option) + '.')
+        print('Biasing will be performed with option ' + str(biasing_option) + '.')
 
     for iter in range(0,n_iterations):
 
@@ -510,7 +512,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
 
         (idx_train, _) = tts.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, verbose=False)
 
-        if option == 1:
+        if biasing_option == 1:
 
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
@@ -541,7 +543,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
             pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
-        elif option == 2:
+        elif biasing_option == 2:
 
             # Generate the reduced data set X_r:
             X_r = X_cs[idx_train,:]
@@ -572,7 +574,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
             pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
-        elif option == 3:
+        elif biasing_option == 3:
 
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
@@ -605,7 +607,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_scores_1 = np.hstack((pc_scores_1, pc_scores[:,0:1]))
             pc_scores_2 = np.hstack((pc_scores_2, pc_scores[:,1:2]))
 
-        elif option == 4:
+        elif biasing_option == 4:
 
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
@@ -643,7 +645,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
             pc_scores_1.append(pc_scores[:,0:1])
             pc_scores_2.append(pc_scores[:,1:2])
 
-        elif option == 5:
+        elif biasing_option == 5:
 
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
@@ -696,7 +698,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], option=1, n_it
     # Remove the first column of zeros:
     eigenvalues = eigenvalues[:,1::]
 
-    if option != 4:
+    if biasing_option != 4:
         pc_scores_1 = pc_scores_1[:,1::]
         pc_scores_2 = pc_scores_2[:,1::]
         if len(X_source) != 0:
