@@ -167,7 +167,7 @@
 <div class="section" id="clustering-functions">
 <h2>Clustering functions<a class="headerlink" href="#clustering-functions" title="Permalink to this headline">¶</a></h2>
 <p>Each function that clusters the data set returns a vector <code class="docutils literal notranslate"><span class="pre">idx</span></code> of type <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of size <code class="docutils literal notranslate"><span class="pre">(n_observations,)</span></code> that specifies classification of each observation from the original data set <code class="docutils literal notranslate"><span class="pre">X</span></code> to a local cluster.</p>
-<a class="reference internal image-reference" href="../_images/clustering-idx.png"><img alt="../_images/clustering-idx.png" src="../_images/clustering-idx.png" style="width: 400px;" /></a>
+<a class="reference internal image-reference" href="../_images/clustering-idx.png"><img alt="../_images/clustering-idx.png" class="align-center" src="../_images/clustering-idx.png" style="width: 400px;" /></a>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The first cluster has index <code class="docutils literal notranslate"><span class="pre">0</span></code> within all <code class="docutils literal notranslate"><span class="pre">idx</span></code> vectors returned. When verbose information is printed with <code class="docutils literal notranslate"><span class="pre">verbose=True</span></code> during function execution or on the plots the cluster numeration starts with <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
@@ -194,6 +194,11 @@ boolean for printing clustering details.</p></li>
 <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># var_min                                                var_max</span>
+<span class="c1">#   |----------|----------|----------|----------|----------|</span>
+<span class="c1">#      bin 1      bin 2      bin 3       bin 4     bin 5</span>
+</pre></div>
+</div>
 <dl class="py function">
 <dt id="PCA.clustering.predefined_variable_bins">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">predefined_variable_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">var</span></em>, <em class="sig-param"><span class="n">split_values</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.predefined_variable_bins" title="Permalink to this definition">¶</a></dt>
@@ -220,6 +225,11 @@ vector <code class="docutils literal notranslate"><span class="pre">var</span></
 <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># var_min     value_1              value_2      value_3  var_max</span>
+<span class="c1">#   |----------|--------------------|------------|---------|</span>
+<span class="c1">#       bin 1           bin 2            bin 3      bin 4</span>
+</pre></div>
+</div>
 <dl class="py function">
 <dt id="PCA.clustering.mixture_fraction_bins">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">mixture_fraction_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Z</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">Z_stoich</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.mixture_fraction_bins" title="Permalink to this definition">¶</a></dt>
@@ -247,6 +257,11 @@ boolean for printing clustering details.</p></li>
 <cite>idx</cite> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Z_min           Z_stoich                                 Z_max</span>
+<span class="c1">#   |-------|-------|------------|------------|------------|</span>
+<span class="c1">#     bin 1   bin 2     bin 3        bin 4         bin 5</span>
+</pre></div>
+</div>
 <dl class="py function">
 <dt id="PCA.clustering.pc_source_bins">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">pc_source_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pc_source</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">zero_offset_percentage</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">split_at_zero</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.pc_source_bins" title="Permalink to this definition">¶</a></dt>
@@ -300,6 +315,22 @@ recommended to lower the <code class="docutils literal notranslate"><span class=
 <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#                  -offset         +offset</span>
+<span class="c1">#                           \    /</span>
+<span class="c1"># pc_source_min             | 0 |                          pc_source_max</span>
+<span class="c1">#     |----------|----------|---|----------|----------|----------|</span>
+<span class="c1">#         bin 1      bin 2   bin 3  bin 4      bin 5      bin 6</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#                  -offset     0     +offset</span>
+<span class="c1">#                           \  |   /</span>
+<span class="c1"># pc_source_min             |  |  |                          pc_source_max</span>
+<span class="c1">#     |----------|----------|--|--|----------|----------|----------|</span>
+<span class="c1">#        bin 1      bin 2    /   \   bin 5      bin 6      bin 7</span>
+<span class="c1">#                           /     \</span>
+<span class="c1">#                       bin 3       bin 4</span>
+</pre></div>
+</div>
 <dl class="py function">
 <dt id="PCA.clustering.kmeans">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">kmeans</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.kmeans" title="Permalink to this definition">¶</a></dt>
@@ -358,7 +389,7 @@ number of elements in the <code class="docutils literal notranslate"><span class
 </dd></dl>
 
 <p>VQPCA algorithm used here was first proposed in [parente2009identification]. The general scheme for the iterative procedure is presented below:</p>
-<a class="reference internal image-reference" href="../_images/clustering-vqpca.png"><img alt="../_images/clustering-vqpca.png" src="../_images/clustering-vqpca.png" style="width: 700px;" /></a>
+<a class="reference internal image-reference" href="../_images/clustering-vqpca.png"><img alt="../_images/clustering-vqpca.png" class="align-center" src="../_images/clustering-vqpca.png" style="width: 700px;" /></a>
 </div>
 <div class="section" id="operations-on-clusters">
 <h2>Operations on clusters<a class="headerlink" href="#operations-on-clusters" title="Permalink to this headline">¶</a></h2>

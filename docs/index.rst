@@ -21,3 +21,4 @@ The core functionality is performing dimensionality reduction using Principal Co
 
 .. image:: images/PCA-example-subplot.png
    :width: 700
+   :align: center

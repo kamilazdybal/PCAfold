@@ -29,7 +29,7 @@ python3.5 setup.py install
 
 # Documentation
 
-Check out the [Wiki Pages](https://gitlab.multiscale.utah.edu/common/PCA-python/-/wikis/pages) for documentation.
+Check out the [Read the Docs](https://pca-python.readthedocs.io/en/latest/) documentation.
 
 # Examples
 The example file [Example.py](Example.py) demonstrates the use of preprocessing data before using PCA then transforming the variables into the principal components using a given scaling. Next, the absolute values of the eigenvectors are plotted. Finally, the regression tests are run and a statement of whether or not the tests passed is printed.

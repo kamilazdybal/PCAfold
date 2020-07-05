@@ -2,3 +2,5 @@
 
 Principal Component Analysis
 ============================
+
+.. autoclass:: PCA

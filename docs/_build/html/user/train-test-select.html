@@ -159,6 +159,21 @@
             
   <span class="target" id="module-PCA.train_test_select"></span><div class="section" id="train-and-test-data-selection">
 <h1>Train and test data selection<a class="headerlink" href="#train-and-test-data-selection" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">train_test_select.py</span></code> module contains functions for splitting data sets into train and test data for use in machine learning algorithms. The general idea is to divide the entire data set into train and test samples as presented below:</p>
+<p>However, apart from random splitting that can be achieved with the commonly used <code class="docutils literal notranslate"><span class="pre">sklearn.model_selection.train_test_split</span></code>, new methods were implemented here that allow for different sampling, such as drawing samples of train data from local clusters.</p>
+<p>All splitting functions in this module return a tuple of two variables: <code class="docutils literal notranslate"><span class="pre">(idx_train,</span> <span class="pre">idx_test)</span></code>. These contain indices of observations that went into train data or test data respectively. In your model learning algorithm you can then get the train and test observations, for instance in the following way:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Input_train</span> <span class="o">=</span> <span class="n">Input</span><span class="p">[</span><span class="n">idx_train</span><span class="p">,:]</span>
+<span class="n">Output_train</span> <span class="o">=</span> <span class="n">Output</span><span class="p">[</span><span class="n">idx_train</span><span class="p">,:]</span>
+
+<span class="n">Input_test</span> <span class="o">=</span> <span class="n">Input</span><span class="p">[</span><span class="n">idx_test</span><span class="p">,:]</span>
+<span class="n">Output_test</span> <span class="o">=</span> <span class="n">Output</span><span class="p">[</span><span class="n">idx_test</span><span class="p">,:]</span>
+</pre></div>
+</div>
+<p>All functions are equipped with <code class="docutils literal notranslate"><span class="pre">verbose=False</span></code> parameter. If it is set to <cite>True</cite> some additional information on train and test selection will be printed.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is assumed that cluster numeration inside <code class="docutils literal notranslate"><span class="pre">idx</span></code> starts from index <code class="docutils literal notranslate"><span class="pre">0</span></code>. However, anytime the information about clustering is printed verbally, the cluster numeration starts with index <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</div>
 </div>
 
 
