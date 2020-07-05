@@ -5,7 +5,7 @@ import copy
 
 def variable_bins(var, k, verbose=False):
     """
-    This function does clustering based on dividing a variable vector ``var`` into
+    This function does clustering by dividing a variable vector ``var`` into
     bins of equal lengths.
 
     :param var:
@@ -14,6 +14,9 @@ def variable_bins(var, k, verbose=False):
         number of clusters to partition the data.
     :param verbose: (optional)
         boolean for printing clustering details.
+
+    :raises ValueError:
+        if number of clusters ``k`` is not a positive integer.
 
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
@@ -63,7 +66,7 @@ def variable_bins(var, k, verbose=False):
 
 def predefined_variable_bins(var, split_values, verbose=False):
     """
-    This function does clustering based on dividing a variable vector ``var`` into
+    This function does clustering by dividing a variable vector ``var`` into
     bins such that the split is done at values specified in the ``split_values``
     list.
 
@@ -76,6 +79,10 @@ def predefined_variable_bins(var, split_values, verbose=False):
         list containing values at which the split to bins should be performed.
     :param verbose: (optional)
         boolean for printing clustering details.
+
+    :raises ValueError:
+        if any value within ``split_values`` is not within the range of
+        vector ``var`` values.
 
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
@@ -114,7 +121,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
-    This function does clustering based on dividing a mixture fraction vector
+    This function does clustering by dividing a mixture fraction vector
     ``Z`` into bins of equal lengths. The vector is first split to lean and rich
     side and then the sides get divided further into clusters. When ``k`` is even,
     this function will always create equal number of clusters on the lean and
@@ -129,6 +136,9 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         stoichiometric mixture fraction.
     :param verbose: (optional)
         boolean for printing clustering details.
+
+    :raises ValueError:
+        if number of clusters ``k`` is not a positive integer.
 
     **Returns:**
     `idx` vector of indices classifying observations to clusters.
@@ -185,8 +195,8 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
 def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
-    This function does clustering based on bins of a PC-source vector
-    ``pc_source``. By default, it finds one cluster between a negative and
+    This function does clustering by dividing a PC-source vector
+    ``pc_source`` into bins. By default, it finds one cluster between a negative and
     a positive offset from PC-source=0. The offset is computed from the input
     parameter ``zero_offset_percentage`` which specifies a percentage of the range
     ``pc_source_max - pc_source_min``. Further clusters are found by clustering
@@ -220,6 +230,20 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
     :param verbose: (optional)
         boolean for printing clustering details.
 
+    :raises ValueError:
+        if number of clusters ``k`` is not an integer or smaller than 3 when
+        ``split_at_zero=False`` or smaller than 4 when ``split_at_zero=True``.
+
+    :raises ValueError:
+        if PC-source vector ``pc_source`` has only non-negative or only
+        non-positive values. For such vectors it is recommended to use
+        ``predefined_variable_bins`` function instead.
+
+    :raises ValueError:
+        if the requested offset from zero crosses the minimum or maximum value
+        of the PC-source vector ``pc_source``. If that is the case, it is
+        recommended to lower the ``zero_offset_percentage`` value.
+
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
     """
@@ -238,10 +262,10 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
     offset = zero_offset_percentage * pc_source_range / 100
 
     # Basic checks on the PC-source vector:
-    if not (pc_source_min < 0):
+    if not (pc_source_min <= 0):
         raise ValueError("PC-source vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
 
-    if not (pc_source_max > 0):
+    if not (pc_source_max >= 0):
         raise ValueError("PC-source vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
 
     if (pc_source_min > -offset) or (pc_source_max < offset):
@@ -294,7 +318,8 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
 
 def kmeans(X, k):
     """
-    This function performs K-Means clustering.
+    This function performs K-Means clustering. It is just a wrapper for
+    ``sklearn.cluster.KMeans`` function.
 
     :param X:
         conditioning variable or a data set.
@@ -319,7 +344,12 @@ def kmeans(X, k):
 def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=1000, verbose=False):
     """
     This function performs Vector Quantization clustering using
-    Principal Component Analysis.
+    Principal Component Analysis. VQPCA assigns observations to a particular
+    cluster based on the minimum reconstruction error from PCA approximation
+    with ``n_pcs`` number of Principal Components. This is an iterative
+    procedure in which the reconstruction errors are evaluated for every
+    observation as if that observation belonged to cluster *j* and next,
+    the observation is assigned to that cluster for which the error was smallest.
 
     **Note:**
     VQPCA algorithm will center the global data set ``X`` by mean and scale by
@@ -328,12 +358,12 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
 
     :param X:
         raw global data set, uncentered and unscaled.
-    :param k: (optional)
+    :param k:
         number of clusters to partition the data.
-    :param n_pcs: (optional)
+    :param n_pcs:
         number of Principal Components (PCs) that will be used to reconstruct the data
         at each iteration.
-    :param scaling_criteria: (optional)
+    :param scaling_criteria:
         scaling critertion for the global data set.
     :param idx_0: (optional)
         user-supplied initial ``idx`` for initializing the centroids. By default
@@ -342,6 +372,10 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         the maximum number of iterations that the algorithm will loop through.
     :param verbose: (optional)
         boolean for printing clustering details.
+
+    :raises ValueError:
+        if the number of observations in the data set ``X`` does not match the
+        number of elements in the ``idx_0`` vector.
 
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
@@ -356,7 +390,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
     # Check that the provided idx_0 has the same number of entries as there are observations in X:
     if len(idx_0) > 0:
         if len(idx_0) != n_obs:
-            raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
+            raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx_0` vector.")
 
     # Initialize the iteration counter:
     iteration = 0
@@ -540,7 +574,7 @@ def degrade_clusters(idx, verbose=False):
 
     :param idx:
         raw vector of indices classifying observations to clusters.
-    :param verbose:
+    :param verbose: (optional)
         boolean for printing clustering details.
 
     **Returns:**
@@ -611,6 +645,10 @@ def get_centroids(X, idx):
         vector of indices classifying observations to clusters.
         The first cluster has index 0.
 
+    :raises ValueError:
+        if the number of observations in the data set ``X`` does not match the
+        number of elements in the ``idx`` vector.
+
     **Returns:**
     ``centroids`` matrix of cluster centroids. It has size ``k`` times number of
     observations.
@@ -641,15 +679,24 @@ def get_centroids(X, idx):
 
 def get_partition(X, idx, verbose=False):
     """
-    This function performs partitioning of the data set observations according
-    to ``idx`` provided.
+    This function partitions the observations from the original global data
+    set ``X`` into local clusters according to ``idx`` provided. It returns a
+    tuple of three variables ``(data_in_clusters, data_idx_in_clusters, k_new)``,
+    where ``data_in_clusters`` are the original observations from ``X`` divided
+    into clusters, ``data_idx_in_clusters`` are the indices of the original
+    observations divided into clusters. If any cluster is empty or has less
+    observations assigned to it that the number of variables, that cluster will
+    be removed and the observations that were assigned to it will not appear
+    in ``data_in_clusters`` nor in ``data_idx_in_clusters``. The new number of
+    clusters ``k_new`` is computed taking into account any possibly removed
+    clusters.
 
     :param X:
         data set to partition.
     :param idx:
         vector of indices classifying observations to clusters.
         The first cluster has index 0.
-    :param verbose:
+    :param verbose: (optional)
         boolean for printing details.
 
     **Returns:**
@@ -706,12 +753,14 @@ def get_partition(X, idx, verbose=False):
 def get_populations(idx, verbose=False):
     """
     This function computes populations (number of observations) in clusters
-    specified in the ``idx`` vector.
+    specified in the ``idx`` vector. As an example, if there are 100
+    observations in the first cluster and 500 observations in the second cluster
+    this function will return a list: ``[100, 500]``.
 
     :param idx:
         vector of indices classifying observations to clusters.
         The first cluster has index 0.
-    :param verbose:
+    :param verbose: (optional)
         boolean for printing details.
 
     **Returns:**

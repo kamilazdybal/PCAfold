@@ -11,9 +11,9 @@ Clustering functions
 Each function that clusters the data set returns a vector ``idx`` of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies classification of each observation from the original data set ``X`` to a local cluster.
 
 .. image:: ../images/clustering-idx.png
-  :width: 200
+  :width: 400
 
-.. note:: The first cluster has index ``0`` within all ``clustering.py`` functions. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
+.. note:: The first cluster has index ``0`` within all ``idx`` vectors returned. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 
 
 .. autofunction:: PCA.clustering.variable_bins
@@ -27,6 +27,8 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
 .. autofunction:: PCA.clustering.kmeans
 
 .. autofunction:: PCA.clustering.vqpca
+
+VQPCA algorithm used here was first proposed in [parente2009identification]. The general scheme for the iterative procedure is presented below:
 
 .. image:: ../images/clustering-vqpca.png
   :width: 700

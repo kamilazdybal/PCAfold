@@ -167,15 +167,15 @@
 <div class="section" id="clustering-functions">
 <h2>Clustering functions<a class="headerlink" href="#clustering-functions" title="Permalink to this headline">¶</a></h2>
 <p>Each function that clusters the data set returns a vector <code class="docutils literal notranslate"><span class="pre">idx</span></code> of type <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of size <code class="docutils literal notranslate"><span class="pre">(n_observations,)</span></code> that specifies classification of each observation from the original data set <code class="docutils literal notranslate"><span class="pre">X</span></code> to a local cluster.</p>
-<a class="reference internal image-reference" href="../_images/clustering-idx.png"><img alt="../_images/clustering-idx.png" src="../_images/clustering-idx.png" style="width: 200px;" /></a>
+<a class="reference internal image-reference" href="../_images/clustering-idx.png"><img alt="../_images/clustering-idx.png" src="../_images/clustering-idx.png" style="width: 400px;" /></a>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The first cluster has index <code class="docutils literal notranslate"><span class="pre">0</span></code> within all <code class="docutils literal notranslate"><span class="pre">clustering.py</span></code> functions. When verbose information is printed with <code class="docutils literal notranslate"><span class="pre">verbose=True</span></code> during function execution or on the plots the cluster numeration starts with <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>The first cluster has index <code class="docutils literal notranslate"><span class="pre">0</span></code> within all <code class="docutils literal notranslate"><span class="pre">idx</span></code> vectors returned. When verbose information is printed with <code class="docutils literal notranslate"><span class="pre">verbose=True</span></code> during function execution or on the plots the cluster numeration starts with <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </div>
 <dl class="py function">
 <dt id="PCA.clustering.variable_bins">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">variable_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">var</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.variable_bins" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function does clustering based on dividing a variable vector <code class="docutils literal notranslate"><span class="pre">var</span></code> into
+<dd><p>This function does clustering by dividing a variable vector <code class="docutils literal notranslate"><span class="pre">var</span></code> into
 bins of equal lengths.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -186,6 +186,9 @@ bins of equal lengths.</p>
 boolean for printing clustering details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if number of clusters <code class="docutils literal notranslate"><span class="pre">k</span></code> is not a positive integer.</p>
+</dd>
 </dl>
 <p><strong>Returns:</strong>
 <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
@@ -194,7 +197,7 @@ boolean for printing clustering details.</p></li>
 <dl class="py function">
 <dt id="PCA.clustering.predefined_variable_bins">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">predefined_variable_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">var</span></em>, <em class="sig-param"><span class="n">split_values</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.predefined_variable_bins" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function does clustering based on dividing a variable vector <code class="docutils literal notranslate"><span class="pre">var</span></code> into
+<dd><p>This function does clustering by dividing a variable vector <code class="docutils literal notranslate"><span class="pre">var</span></code> into
 bins such that the split is done at values specified in the <code class="docutils literal notranslate"><span class="pre">split_values</span></code>
 list.</p>
 <p><em>Note:</em> When a split is performed at a given <code class="docutils literal notranslate"><span class="pre">value_i</span></code>, the observation in <code class="docutils literal notranslate"><span class="pre">var</span></code>
@@ -208,6 +211,10 @@ that takes exactly that value is assigned to the newly created bin.</p>
 boolean for printing clustering details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if any value within <code class="docutils literal notranslate"><span class="pre">split_values</span></code> is not within the range of
+vector <code class="docutils literal notranslate"><span class="pre">var</span></code> values.</p>
+</dd>
 </dl>
 <p><strong>Returns:</strong>
 <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
@@ -216,7 +223,7 @@ boolean for printing clustering details.</p></li>
 <dl class="py function">
 <dt id="PCA.clustering.mixture_fraction_bins">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">mixture_fraction_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Z</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">Z_stoich</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.mixture_fraction_bins" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function does clustering based on dividing a mixture fraction vector
+<dd><p>This function does clustering by dividing a mixture fraction vector
 <code class="docutils literal notranslate"><span class="pre">Z</span></code> into bins of equal lengths. The vector is first split to lean and rich
 side and then the sides get divided further into clusters. When <code class="docutils literal notranslate"><span class="pre">k</span></code> is even,
 this function will always create equal number of clusters on the lean and
@@ -232,6 +239,9 @@ compared to the lean side.</p>
 boolean for printing clustering details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if number of clusters <code class="docutils literal notranslate"><span class="pre">k</span></code> is not a positive integer.</p>
+</dd>
 </dl>
 <p><strong>Returns:</strong>
 <cite>idx</cite> vector of indices classifying observations to clusters.</p>
@@ -240,8 +250,8 @@ boolean for printing clustering details.</p></li>
 <dl class="py function">
 <dt id="PCA.clustering.pc_source_bins">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">pc_source_bins</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pc_source</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">zero_offset_percentage</span><span class="o">=</span><span class="default_value">0.1</span></em>, <em class="sig-param"><span class="n">split_at_zero</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.pc_source_bins" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function does clustering based on bins of a PC-source vector
-<code class="docutils literal notranslate"><span class="pre">pc_source</span></code>. By default, it finds one cluster between a negative and
+<dd><p>This function does clustering by dividing a PC-source vector
+<code class="docutils literal notranslate"><span class="pre">pc_source</span></code> into bins. By default, it finds one cluster between a negative and
 a positive offset from PC-source=0. The offset is computed from the input
 parameter <code class="docutils literal notranslate"><span class="pre">zero_offset_percentage</span></code> which specifies a percentage of the range
 <code class="docutils literal notranslate"><span class="pre">pc_source_max</span> <span class="pre">-</span> <span class="pre">pc_source_min</span></code>. Further clusters are found by clustering
@@ -273,6 +283,18 @@ boolean specifying whether partitioning should be done at PC-source=0.</p></li>
 boolean for printing clustering details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if number of clusters <code class="docutils literal notranslate"><span class="pre">k</span></code> is not an integer or smaller than 3 when
+<code class="docutils literal notranslate"><span class="pre">split_at_zero=False</span></code> or smaller than 4 when <code class="docutils literal notranslate"><span class="pre">split_at_zero=True</span></code>.</p></li>
+<li><p><strong>ValueError</strong> – if PC-source vector <code class="docutils literal notranslate"><span class="pre">pc_source</span></code> has only non-negative or only
+non-positive values. For such vectors it is recommended to use
+<code class="docutils literal notranslate"><span class="pre">predefined_variable_bins</span></code> function instead.</p></li>
+<li><p><strong>ValueError</strong> – if the requested offset from zero crosses the minimum or maximum value
+of the PC-source vector <code class="docutils literal notranslate"><span class="pre">pc_source</span></code>. If that is the case, it is
+recommended to lower the <code class="docutils literal notranslate"><span class="pre">zero_offset_percentage</span></code> value.</p></li>
+</ul>
+</dd>
 </dl>
 <p><strong>Returns:</strong>
 <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
@@ -281,7 +303,8 @@ boolean for printing clustering details.</p></li>
 <dl class="py function">
 <dt id="PCA.clustering.kmeans">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">kmeans</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.kmeans" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function performs K-Means clustering.</p>
+<dd><p>This function performs K-Means clustering. It is just a wrapper for
+<code class="docutils literal notranslate"><span class="pre">sklearn.cluster.KMeans</span></code> function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -298,7 +321,12 @@ boolean for printing clustering details.</p></li>
 <dt id="PCA.clustering.vqpca">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">vqpca</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">n_pcs</span></em>, <em class="sig-param"><span class="n">scaling_criteria</span></em>, <em class="sig-param"><span class="n">idx_0</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">maximum_number_of_iterations</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.vqpca" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function performs Vector Quantization clustering using
-Principal Component Analysis.</p>
+Principal Component Analysis. VQPCA assigns observations to a particular
+cluster based on the minimum reconstruction error from PCA approximation
+with <code class="docutils literal notranslate"><span class="pre">n_pcs</span></code> number of Principal Components. This is an iterative
+procedure in which the reconstruction errors are evaluated for every
+observation as if that observation belonged to cluster <em>j</em> and next,
+the observation is assigned to that cluster for which the error was smallest.</p>
 <p><strong>Note:</strong>
 VQPCA algorithm will center the global data set <code class="docutils literal notranslate"><span class="pre">X</span></code> by mean and scale by
 the scaling specified in the <code class="docutils literal notranslate"><span class="pre">scaling_criteria</span></code> parameter. Data in local
@@ -307,13 +335,10 @@ clusters will be centered by the mean but will not be scaled.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – raw global data set, uncentered and unscaled.</p></li>
-<li><p><strong>k</strong> – (optional)
-number of clusters to partition the data.</p></li>
-<li><p><strong>n_pcs</strong> – (optional)
-number of Principal Components (PCs) that will be used to reconstruct the data
+<li><p><strong>k</strong> – number of clusters to partition the data.</p></li>
+<li><p><strong>n_pcs</strong> – number of Principal Components (PCs) that will be used to reconstruct the data
 at each iteration.</p></li>
-<li><p><strong>scaling_criteria</strong> – (optional)
-scaling critertion for the global data set.</p></li>
+<li><p><strong>scaling_criteria</strong> – scaling critertion for the global data set.</p></li>
 <li><p><strong>idx_0</strong> – (optional)
 user-supplied initial <code class="docutils literal notranslate"><span class="pre">idx</span></code> for initializing the centroids. By default
 random intialization is performed.</p></li>
@@ -323,11 +348,16 @@ the maximum number of iterations that the algorithm will loop through.</p></li>
 boolean for printing clustering details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the number of observations in the data set <code class="docutils literal notranslate"><span class="pre">X</span></code> does not match the
+number of elements in the <code class="docutils literal notranslate"><span class="pre">idx_0</span></code> vector.</p>
+</dd>
 </dl>
 <p><strong>Returns:</strong>
 <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
+<p>VQPCA algorithm used here was first proposed in [parente2009identification]. The general scheme for the iterative procedure is presented below:</p>
 <a class="reference internal image-reference" href="../_images/clustering-vqpca.png"><img alt="../_images/clustering-vqpca.png" src="../_images/clustering-vqpca.png" style="width: 700px;" /></a>
 </div>
 <div class="section" id="operations-on-clusters">
@@ -351,7 +381,8 @@ is equal to <code class="docutils literal notranslate"><span class="pre">0</span
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>idx</strong> – raw vector of indices classifying observations to clusters.</p></li>
-<li><p><strong>verbose</strong> – boolean for printing clustering details.</p></li>
+<li><p><strong>verbose</strong> – (optional)
+boolean for printing clustering details.</p></li>
 </ul>
 </dd>
 </dl>
@@ -394,6 +425,10 @@ The first cluster has index 0.</p>
 The first cluster has index 0.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the number of observations in the data set <code class="docutils literal notranslate"><span class="pre">X</span></code> does not match the
+number of elements in the <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector.</p>
+</dd>
 </dl>
 <p><strong>Returns:</strong>
 <code class="docutils literal notranslate"><span class="pre">centroids</span></code> matrix of cluster centroids. It has size <code class="docutils literal notranslate"><span class="pre">k</span></code> times number of
@@ -403,15 +438,25 @@ observations.</p>
 <dl class="py function">
 <dt id="PCA.clustering.get_partition">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">get_partition</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.get_partition" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function performs partitioning of the data set observations according
-to <code class="docutils literal notranslate"><span class="pre">idx</span></code> provided.</p>
+<dd><p>This function partitions the observations from the original global data
+set <code class="docutils literal notranslate"><span class="pre">X</span></code> into local clusters according to <code class="docutils literal notranslate"><span class="pre">idx</span></code> provided. It returns a
+tuple of three variables <code class="docutils literal notranslate"><span class="pre">(data_in_clusters,</span> <span class="pre">data_idx_in_clusters,</span> <span class="pre">k_new)</span></code>,
+where <code class="docutils literal notranslate"><span class="pre">data_in_clusters</span></code> are the original observations from <code class="docutils literal notranslate"><span class="pre">X</span></code> divided
+into clusters, <code class="docutils literal notranslate"><span class="pre">data_idx_in_clusters</span></code> are the indices of the original
+observations divided into clusters. If any cluster is empty or has less
+observations assigned to it that the number of variables, that cluster will
+be removed and the observations that were assigned to it will not appear
+in <code class="docutils literal notranslate"><span class="pre">data_in_clusters</span></code> nor in <code class="docutils literal notranslate"><span class="pre">data_idx_in_clusters</span></code>. The new number of
+clusters <code class="docutils literal notranslate"><span class="pre">k_new</span></code> is computed taking into account any possibly removed
+clusters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>X</strong> – data set to partition.</p></li>
 <li><p><strong>idx</strong> – vector of indices classifying observations to clusters.
 The first cluster has index 0.</p></li>
-<li><p><strong>verbose</strong> – boolean for printing details.</p></li>
+<li><p><strong>verbose</strong> – (optional)
+boolean for printing details.</p></li>
 </ul>
 </dd>
 </dl>
@@ -427,13 +472,16 @@ the original data set observations in each cluster.
 <dt id="PCA.clustering.get_populations">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">get_populations</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.get_populations" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function computes populations (number of observations) in clusters
-specified in the <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector.</p>
+specified in the <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector. As an example, if there are 100
+observations in the first cluster and 500 observations in the second cluster
+this function will return a list: <code class="docutils literal notranslate"><span class="pre">[100,</span> <span class="pre">500]</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>idx</strong> – vector of indices classifying observations to clusters.
 The first cluster has index 0.</p></li>
-<li><p><strong>verbose</strong> – boolean for printing details.</p></li>
+<li><p><strong>verbose</strong> – (optional)
+boolean for printing details.</p></li>
 </ul>
 </dd>
 </dl>

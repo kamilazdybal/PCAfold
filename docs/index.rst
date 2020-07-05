@@ -2,6 +2,7 @@ PCA-Python
 ==========
 
 This is a documentation for the ``PCA-Python`` repository.
+The core functionality is performing dimensionality reduction using Principal Component Analysis (PCA).
 
 .. toctree::
    :maxdepth: 2
@@ -17,3 +18,6 @@ This is a documentation for the ``PCA-Python`` repository.
    :caption: Tutorials
 
    tutorials/train-test-selection
+
+.. image:: images/PCA-example-subplot.png
+   :width: 700
