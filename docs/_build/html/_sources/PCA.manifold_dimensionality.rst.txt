@@ -1,0 +1,22 @@
+PCA.manifold\_dimensionality package
+====================================
+
+Submodules
+----------
+
+PCA.manifold\_dimensionality.normalized\_local\_variance module
+---------------------------------------------------------------
+
+.. automodule:: PCA.manifold_dimensionality.normalized_local_variance
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: PCA.manifold_dimensionality
+   :members:
+   :undoc-members:
+   :show-inheritance:
