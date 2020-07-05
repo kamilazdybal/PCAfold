@@ -30,6 +30,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -87,7 +88,20 @@
 <li class="toctree-l1"><a class="reference internal" href="PCA.html">Principal Component Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clustering.html">Clustering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cluster-biased-pca.html">Cluster-biased PCA</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Train and test data selection</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Train and test data selection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#select-fixed-number">Select fixed number</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#train-data">Train data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#test-data">Test data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#select-fixed-percentage">Select fixed percentage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#select-manually">Select manually</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#select-at-random">Select at random</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
 <ul>
@@ -159,9 +173,11 @@
             
   <span class="target" id="module-PCA.train_test_select"></span><div class="section" id="train-and-test-data-selection">
 <h1>Train and test data selection<a class="headerlink" href="#train-and-test-data-selection" title="Permalink to this headline">¶</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">train_test_select.py</span></code> module contains functions for splitting data sets into train and test data for use in machine learning algorithms. The general idea is to divide the entire data set into train and test samples as presented below:</p>
-<p>However, apart from random splitting that can be achieved with the commonly used <code class="docutils literal notranslate"><span class="pre">sklearn.model_selection.train_test_split</span></code>, new methods were implemented here that allow for different sampling, such as drawing samples of train data from local clusters.</p>
-<p>All splitting functions in this module return a tuple of two variables: <code class="docutils literal notranslate"><span class="pre">(idx_train,</span> <span class="pre">idx_test)</span></code>. These contain indices of observations that went into train data or test data respectively. In your model learning algorithm you can then get the train and test observations, for instance in the following way:</p>
+<p><code class="docutils literal notranslate"><span class="pre">train_test_select.py</span></code> module contains functions for splitting data sets into train and test data for use in machine learning algorithms.
+Apart from random splitting that can be achieved with the commonly used <code class="docutils literal notranslate"><span class="pre">sklearn.model_selection.train_test_split</span></code>, new methods are implemented here that allow for purposive selection, such as drawing samples at a certain amount from local clusters.
+The general idea is to divide the entire data set <code class="docutils literal notranslate"><span class="pre">X</span></code> into train and test samples as presented below:</p>
+<a class="reference internal image-reference" href="../_images/tts-train-test-select.png"><img alt="../_images/tts-train-test-select.png" class="align-center" src="../_images/tts-train-test-select.png" style="width: 350px;" /></a>
+<p>All splitting functions in this module return a tuple of two variables: <code class="docutils literal notranslate"><span class="pre">(idx_train,</span> <span class="pre">idx_test)</span></code>. These variables contain indices of observations that went into train data and test data respectively. In your model learning algorithm you can then get the train and test observations, for instance in the following way:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Input_train</span> <span class="o">=</span> <span class="n">Input</span><span class="p">[</span><span class="n">idx_train</span><span class="p">,:]</span>
 <span class="n">Output_train</span> <span class="o">=</span> <span class="n">Output</span><span class="p">[</span><span class="n">idx_train</span><span class="p">,:]</span>
 
@@ -169,10 +185,227 @@
 <span class="n">Output_test</span> <span class="o">=</span> <span class="n">Output</span><span class="p">[</span><span class="n">idx_test</span><span class="p">,:]</span>
 </pre></div>
 </div>
-<p>All functions are equipped with <code class="docutils literal notranslate"><span class="pre">verbose=False</span></code> parameter. If it is set to <cite>True</cite> some additional information on train and test selection will be printed.</p>
+<p>All functions are equipped with <code class="docutils literal notranslate"><span class="pre">verbose=False</span></code> parameter. If it is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> some additional information on train and test selection is printed.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>It is assumed that cluster numeration inside <code class="docutils literal notranslate"><span class="pre">idx</span></code> starts from index <code class="docutils literal notranslate"><span class="pre">0</span></code>. However, anytime the information about clustering is printed verbally, the cluster numeration starts with index <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>It is assumed that the first cluster has index <code class="docutils literal notranslate"><span class="pre">0</span></code> within all input <code class="docutils literal notranslate"><span class="pre">idx</span></code> vectors. When verbose information is printed with <code class="docutils literal notranslate"><span class="pre">verbose=True</span></code> during function execution or on the plots the cluster numeration starts with <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="select-fixed-number">
+<h3>Select fixed number<a class="headerlink" href="#select-fixed-number" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="PCA.train_test_select.train_test_split_fixed_number_from_idx">
+<code class="sig-prename descclassname">PCA.train_test_select.</code><code class="sig-name descname">train_test_split_fixed_number_from_idx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">perc</span></em>, <em class="sig-param"><span class="n">test_selection_option</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.train_test_select.train_test_split_fixed_number_from_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes an <code class="docutils literal notranslate"><span class="pre">idx</span></code> classifications from a clustering technique and
+samples a fixed number <code class="docutils literal notranslate"><span class="pre">n_of_samples</span></code> of observations from every cluster as
+training data.</p>
+<p><code class="docutils literal notranslate"><span class="pre">n_of_samples</span></code> is estimated based on the percentage <code class="docutils literal notranslate"><span class="pre">perc</span></code> provided. First, the
+total number of samples for training is estimated as a percentage <code class="docutils literal notranslate"><span class="pre">perc</span></code>
+from the total number of observations <code class="docutils literal notranslate"><span class="pre">n_obs</span></code>. Next, this number is divided
+equally into <code class="docutils literal notranslate"><span class="pre">k</span></code> clusters.</p>
+<p>There is a bar that no more than 50% of observations from any cluster will
+be taken for training. This is to avoid that too little samples will remain
+for test data from small clusters.</p>
+<p>Test data is then drawn from every cluster equally in a similar way, in a
+quantity equal to the number of remaining samples from the smallest cluster.</p>
+<p><strong>Example:</strong></p>
+<p>If the full data has 10 observations with indices:</p>
+<p><code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9]</span></code></p>
+<p>and a clustering technique divided the observations into clusters in the
+following way:</p>
+<p><code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1]</span></code></p>
+<p>Then, if you request 40% of the data for training, the function may return:</p>
+<p><code class="docutils literal notranslate"><span class="pre">idx_train</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">7,</span> <span class="pre">9]</span></code></p>
+<p>as the training data (where observations 0 and 1 belong to the first cluster
+and observations 7 and 9 belong to the second cluster).</p>
+<p>Test data may then become:</p>
+<p><code class="docutils literal notranslate"><span class="pre">idx_test</span> <span class="pre">=</span> <span class="pre">[3,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">8]</span></code></p>
+<p>Two options for sampling test data are implemented. If you select
+<code class="docutils literal notranslate"><span class="pre">test_selection_option=1</span></code>, all remaining samples that were not taken as
+training data become the test data. If you select <code class="docutils literal notranslate"><span class="pre">test_selection_option=2</span></code>,
+the smallest cluster is found and the remaining number of observations are
+taken as test data in that cluster. Next, the same number of observations is
+taken from all remaining larger clusters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> – vector of indices classifying observations to clusters.</p></li>
+<li><p><strong>perc</strong> – percentage of data to be selected as training data from each cluster.
+For instance, set <code class="docutils literal notranslate"><span class="pre">perc=20</span></code> if you want to select 20%.</p></li>
+<li><p><strong>test_selection_option</strong> – (optional)
+option for how the test data is selected.
+Select <code class="docutils literal notranslate"><span class="pre">test_selection_option=1</span></code> if you want all remaining samples
+to become test data.
+Select <code class="docutils literal notranslate"><span class="pre">test_selection_option=2</span></code> if you want the same number of samples
+from each cluster to become test data.</p></li>
+<li><p><strong>verbose</strong> – (optional)
+boolean for printing clustering details.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+</ul>
+</dd></dl>
+
+<div class="section" id="train-data">
+<h4>Train data<a class="headerlink" href="#train-data" title="Permalink to this headline">¶</a></h4>
+<p>Train data is always selected as an equal number of samples from local clusters but no more than 50% of the cluster’s samples will be selected (see: 50% bar). This is to avoid oversampling small clusters which might in turn result in too little test data. The number of samples <code class="docutils literal notranslate"><span class="pre">n_of_samples</span></code> is calculated based on a percentage <code class="docutils literal notranslate"><span class="pre">perc</span></code> provided:</p>
+<div class="math notranslate nohighlight">
+\[\verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_obs|}{\verb|k| \cdot 100} \Big)\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">n_obs</span></code> is the total number of samples in a data set and <code class="docutils literal notranslate"><span class="pre">k</span></code> is the number of clusters.</p>
+</div>
+<div class="section" id="test-data">
+<h4>Test data<a class="headerlink" href="#test-data" title="Permalink to this headline">¶</a></h4>
+<p>Depending on the option selected, test data will be created differently, either as all
+remaining samples that were not included in train data or as a subset of those.
+You can select the option by setting the <code class="docutils literal notranslate"><span class="pre">test_selection_option</span></code> parameter which is 1 by default.
+The scheme below presents graphically how train and test data can be selected using <code class="docutils literal notranslate"><span class="pre">test_selection_option</span></code> parameter:</p>
+<a class="reference internal image-reference" href="../_images/tts-test-selection-option.png"><img alt="../_images/tts-test-selection-option.png" class="align-center" src="../_images/tts-test-selection-option.png" style="width: 700px;" /></a>
+</div>
+</div>
+<div class="section" id="select-fixed-percentage">
+<h3>Select fixed percentage<a class="headerlink" href="#select-fixed-percentage" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="PCA.train_test_select.train_test_split_percentage_from_idx">
+<code class="sig-prename descclassname">PCA.train_test_select.</code><code class="sig-name descname">train_test_split_percentage_from_idx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">perc</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.train_test_select.train_test_split_percentage_from_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes an <code class="docutils literal notranslate"><span class="pre">idx</span></code> classifications from a clustering technique and
+samples a certain percentage <code class="docutils literal notranslate"><span class="pre">perc</span></code> from every cluster as the training data.
+The remaining percentage is the test data.</p>
+<p>If the full data has 10 observations with indices:</p>
+<p><code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9]</span></code></p>
+<p>and you requested 40% of the data to be training data, the function may
+return:</p>
+<p><code class="docutils literal notranslate"><span class="pre">idx_train</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">7]</span></code></p>
+<p>and:</p>
+<p><code class="docutils literal notranslate"><span class="pre">idx_test</span> <span class="pre">=</span> <span class="pre">[3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">8,</span> <span class="pre">9]</span></code></p>
+<p>as the remaining 60% test data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> – vector of indices classifying observations to clusters.</p></li>
+<li><p><strong>perc</strong> – percentage of data to be selected as training data from each cluster.
+For instance, set <code class="docutils literal notranslate"><span class="pre">perc=20</span></code> if you want to select 20%.</p></li>
+<li><p><strong>verbose</strong> – boolean for printing clustering details.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="select-manually">
+<h3>Select manually<a class="headerlink" href="#select-manually" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="PCA.train_test_select.train_test_split_manual_from_idx">
+<code class="sig-prename descclassname">PCA.train_test_select.</code><code class="sig-name descname">train_test_split_manual_from_idx</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">sampling_dictionary</span></em>, <em class="sig-param"><span class="n">sampling_type</span><span class="o">=</span><span class="default_value">'percentage'</span></em>, <em class="sig-param"><span class="n">bar50</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.train_test_select.train_test_split_manual_from_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes an <code class="docutils literal notranslate"><span class="pre">idx</span></code> classifications from a clustering technique
+and a dictionary <code class="docutils literal notranslate"><span class="pre">sampling_dictionary</span></code> in which you manually specify what
+perecentage or what number of samples should be taken from every cluster as
+the training data.</p>
+<p>By default, there is a bar that no more than 50% of observations from any
+cluster will be taken for training. This is to avoid that too little samples
+will remain for test data from small clusters. If the parameter <code class="docutils literal notranslate"><span class="pre">bar50</span></code> is
+set to False, this function will allow to sample more than 50% of
+observations.</p>
+<p><strong>Note:</strong></p>
+<p>This function does not run <code class="docutils literal notranslate"><span class="pre">degrade_clusters</span></code> to avoid disambiguity
+between cluster numeration inside <code class="docutils literal notranslate"><span class="pre">idx</span></code> and inside the keys of the
+<code class="docutils literal notranslate"><span class="pre">sampling_dictionary</span></code>! It will however check whether keys are consistent
+with <code class="docutils literal notranslate"><span class="pre">idx</span></code> entries and if yes it will continue running. If the <code class="docutils literal notranslate"><span class="pre">idx</span></code>
+classifies for running <code class="docutils literal notranslate"><span class="pre">degrade_clusters</span></code> this information will be printed
+as a suggestion.</p>
+<p><strong>Example:</strong></p>
+<p>If the full data has 10 observations with indices:</p>
+<p><code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9]</span></code></p>
+<p>and a clustering technique divided the observations into clusters in the
+following way:</p>
+<p><code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1,</span> <span class="pre">1]</span></code></p>
+<p>and the dictionary is: <code class="docutils literal notranslate"><span class="pre">sampling_dictionary</span> <span class="pre">=</span> <span class="pre">{0:3,</span> <span class="pre">1:1}</span></code> with the values
+representing a <code class="docutils literal notranslate"><span class="pre">number</span></code>, the function may return:</p>
+<p><code class="docutils literal notranslate"><span class="pre">idx_train</span> <span class="pre">=</span> <span class="pre">[2,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">9]</span></code></p>
+<p>so that 3 samples are taken from the first cluster and 1 sample is taken
+from the second cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> – vector of indices classifying observations to clusters.</p></li>
+<li><p><strong>sampling_dictionary</strong> – dictionary specifying manual sampling. Keys are cluster numbers and
+values are either <code class="docutils literal notranslate"><span class="pre">percentage</span></code> or <code class="docutils literal notranslate"><span class="pre">number</span></code> of samples to be taken from
+that cluster. Keys should match the cluster numbering as per <code class="docutils literal notranslate"><span class="pre">idx</span></code>.</p></li>
+<li><p><strong>sampling_type</strong> – (optional)
+string specifying whether percentage or number is given in the
+<code class="docutils literal notranslate"><span class="pre">sampling_dictionary</span></code>. Available options: <code class="docutils literal notranslate"><span class="pre">percentage</span></code> or <code class="docutils literal notranslate"><span class="pre">number</span></code>.
+The default is <code class="docutils literal notranslate"><span class="pre">percentage</span></code>.</p></li>
+<li><p><strong>bar50</strong> – (optional)
+boolean specifying whether the 50% bar should apply.</p></li>
+<li><p><strong>verbose</strong> – (optional)
+boolean for printing clustering details.</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+</ul>
+</dd></dl>
+
+</div>
+<div class="section" id="select-at-random">
+<h3>Select at random<a class="headerlink" href="#select-at-random" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt id="PCA.train_test_select.train_test_split_random">
+<code class="sig-prename descclassname">PCA.train_test_select.</code><code class="sig-name descname">train_test_split_random</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_obs</span></em>, <em class="sig-param"><span class="n">perc</span></em>, <em class="sig-param"><span class="n">idx_test</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.train_test_select.train_test_split_random" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function splits dataset into training and testing using random sampling.</p>
+<p><strong>Example:</strong></p>
+<p>If the full data has 10 observations whose indices are:</p>
+<p><code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9]</span></code></p>
+<p>and you request 40% of the data to be training data, the function may return:</p>
+<p><code class="docutils literal notranslate"><span class="pre">idx_train</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">7]</span></code></p>
+<p>and:</p>
+<p><code class="docutils literal notranslate"><span class="pre">idx_test</span> <span class="pre">=</span> <span class="pre">[3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">8,</span> <span class="pre">9]</span></code></p>
+<p>as the remaining 60% test data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_obs</strong> – number of observations in the original data set.</p></li>
+<li><p><strong>perc</strong> – percentage of data to be selected as training data from each cluster.
+Set <code class="docutils literal notranslate"><span class="pre">perc=20</span></code> if you want 20%.</p></li>
+<li><p><strong>idx_test</strong> – (optional)
+are the user-provided indices for test data. If specified, the training
+data will be selected ignoring the indices in <code class="docutils literal notranslate"><span class="pre">idx_test</span></code> and the test
+data will be returned the same as the user-provided <code class="docutils literal notranslate"><span class="pre">idx_test</span></code>.
+If not specified, all remaining samples become test data.</p></li>
+<li><p><strong>verbose</strong> – (optional)
+boolean for printing clustering details.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if the perecentage specified is too high in combination with the
+user-provided <code class="docutils literal notranslate"><span class="pre">idx_test</span></code> vector and there aren’t enough samples to
+select as train data.</p></li>
+<li><p><strong>ValueError</strong> – if the size of <code class="docutils literal notranslate"><span class="pre">idx_train</span></code> and the size of <code class="docutils literal notranslate"><span class="pre">idx_test</span></code> do not sum up
+to <code class="docutils literal notranslate"><span class="pre">n_obs</span></code>. <em>This is for unit testing and might be removed later.</em></p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Returns:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+</ul>
+</dd></dl>
+
+</div>
 </div>
 </div>
 

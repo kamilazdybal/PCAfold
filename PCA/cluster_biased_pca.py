@@ -6,7 +6,7 @@ import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 import PCA.PCA as P
 import PCA.clustering as cl
-import PCA.regression.train_test_select as tts
+import PCA.train_test_select as tts
 
 # Plotting parameters:
 csfont = {'fontname':'Charter', 'fontweight':'regular'}
@@ -27,38 +27,39 @@ font_colorbar = 16
 def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the movement of centers in the subset of the original
-    data set `X_r` with respect to the full original data set `X`.
+    data set ``X_r`` with respect to the full original data set ``X``.
 
-    NOTE: It first normalizes the variables to be in range between 0 and 1, so
-    that the means (centers) computed can be compared across variables.
+    **Note:**
 
-    Input:
-    ----------
-    `X`           - original (full) data set.
-    `idx_X_r`     - vector of indices that should be extracted from `X` to form
-                    `X_r`. It could be obtained as training indices from
-                    `training_data_generation` module.
-    `variable_names`
-                  - list of strings specifying variable names.
-    `plot_variables`
-                  - list of integers specifying indices of variables to be plotted.
-                    By default, all variables are plotted.
-    `title`       - boolean or string specifying plot title. If set to False,
-                    title will not be plotted.
-    `save_plot`   - boolean specifying whether the plot should be saved.
-    `save_filename`
-                  - plot save location/filename.
+    The original data set ``X`` is first normalized so that each variable ranges
+    from 0 to 1. Samples are then extracted from the normalized data set to form
+    ``X_r``. The normalization is done so that centers can be compared across
+    variables on one plot.
 
-    Output:
-    ----------
-    `norm_centers_X`
-                  - normalized centers of the original (full) data set `X`.
-    `norm_centers_X_r`
-                  - normalized centers of the reduced data set `X_r`.
-    `center_movement_percentage`
-                  - relative percentage specifying how the center has moved
-                    between `X` and `X_r`. The movement is measured relative to
-                    the original (full) data set `X`.
+    :param X:
+        original (full) data set.
+    :param idx_X_r:
+        vector of indices that should be extracted from ``X`` to form ``X_r``.
+        It could be obtained as training indices from
+        ``training_data_generation`` module.
+    :param variable_names: (optional)
+        list of strings specifying variable names.
+    :param plot_variables: (optional)
+        list of integers specifying indices of variables to be plotted.
+        By default, all variables are plotted.
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``False``,
+        title will not be plotted.
+    :param save_plot: (optional)
+        boolean specifying whether the plot should be saved.
+    :param save_filename: (optional)
+        plot save location/filename.
+
+    **Returns:**
+
+    - ``norm_centers_X`` - normalized centers of the original (full) data set ``X``.
+    - ``norm_centers_X_r`` - normalized centers of the reduced data set ``X_r``.
+    - ``center_movement_percentage`` - relative percentage specifying how the center has moved between ``X`` and ``X_r``. The movement is measured relative to the original (full) data set ``X``.
     """
 
     color_X = '#191b27'
@@ -127,54 +128,48 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 
 def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plot_variables=[], normalize=False, zero_norm=False, title=False, save_plot=False, save_filename=''):
     """
-    This function analyzes the movement of weights of variables on a single
-    eigenvector when PCA is performed on different versions of the reduced data
-    sets `X_r`.
+    This function analyzes the movement of weights on an eigenvector obtained
+    from a reduced data set at each iteration. The color-coding marks the
+    iteration number - if there is a consistent trend the coloring should form
+    a clear trajectory. The zero-th iteration corresponds to eigenvectors found
+    on the original data set X. The last iteration corresponds to eigenvectors
+    found on the "equilibrated" data set.
 
-    The `eigenvector_matrix` should be formed in the following way:
+    **Note:**
 
-                 T Y_1 Y_2  ...  Y_n
-                [                   ] PC-i on the original data set X
-                [                   ] PC-i on a biased set X_r(1)
-                [                   ] .
-                [                   ] .
-                [                   ] PC-i on a biased set X_r(j)
-                [                   ] .
-                [                   ] PC-i on the equilibrated data set X_r(N)
-
-    Each row is a selected i-th eigenvector (for instance PC-1) computed by
-    performing PCA on a specific (j)-th version of the reduced data set.
-    Each column are changing weights on that eigenvector of a particular
-    variable in a data set.
-
-    NOTE: This function plots absolute, normalized values of weights on each
-    variable. Columns are normalized by dividing by the maximum value. This is
+    This function plots absolute, (and optionally normalized) values of weights on each
+    variable. Columns are normalized dividing by the maximum value. This is
     done in order to compare the movement of weights equally, with the highest,
-    normalized one being equal to 1.0. You can additionally set the
-    `zero_norm=True` in order to normalize weights such that they are between
+    normalized one being equal to 1. You can additionally set the
+    ``zero_norm=True`` in order to normalize weights such that they are between
     0 and 1 (this is not done by default).
 
-    Input:
-    ----------
-    `eigenvector_matrix`
-                  - matrix of concatenated eigenvectors coming from either
-                    different data sets or from different iterations.
-    `variable_names`
-                  - list of strings specifying variable names.
-    `plot_variables`
-                  - list of integers specifying indices of variables to be plotted.
-                    By default, all variables are plotted.
-    `normalize`   - boolean specifying whether weights should be normlized at all.
-                    If set to false, the absolute values are plotted.
-    `zero_norm`   - boolean specifying whether weights should be normalized
-                    between 0 and 1. By default they are not normalized to
-                    start at 0.
-                    Only has effect if `normalize=True`.
-    `title`       - boolean or string specifying plot title. If set to False,
-                    title will not be plotted.
-    `save_plot`   - boolean specifying whether the plot should be saved.
-    `save_filename`
-                  - plot save location/filename.
+    :param eigenvector_matrix:
+        matrix of concatenated eigenvectors coming from different data sets or
+        from different iterations.
+    :param variable_names:
+        list of strings specifying variable names.
+    :param plot_variables: (optional)
+        list of integers specifying indices of variables to be plotted.
+        By default, all variables are plotted.
+    :param normalize: (optional)
+        boolean specifying whether weights should be normlized at all.
+        If set to false, the absolute values are plotted.
+    :param zero_norm: (optional)
+        boolean specifying whether weights should be normalized between 0 and 1.
+        By default they are not normalized to start at 0.
+        Only has effect if ``normalize=True``.
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``False``, title will
+        not be plotted.
+    :param save_plot: (optional)
+        boolean specifying whether the plot should be saved.
+    :param save_filename: (optional)
+        plot save location/filename.
+
+    :raises ValueError:
+        if the number of variables in ``variable_names`` list does not
+        correspond to variables in the ``eigenvectors_matrix``.
     """
 
     (n_versions, n_vars) = np.shape(eigenvector_matrix)
@@ -232,29 +227,35 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
 def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the normalized eigenvalue distribution when PCA is
-    performed on different versions of the reduced data sets `X_r` vs. on the
-    original data set `X`.
+    performed on different versions of the reduced data sets ``X_r`` vs. on the
+    original data set ``X``.
 
-    Input:
-    ----------
-    `X`           - original (full) data set.
-    `idx_matrix`  - matrix of collected idx vectors.
-    `k_list`      - list of numerical labels for the idx_matrix columns.
-    `scaling`     - data scaling criterion.
-    `biasing_option`
-                  - integer specifying biasing option. See documentation of
-                    cluster-biased PCA for more information.
-                    Can only attain values [1,2,3,4,5].
-    `title`       - boolean or string specifying plot title. If set to False,
-                    title will not be plotted.
-    `save_plot`   - boolean specifying whether the plot should be saved.
-    `save_filename`
-                  - plot save location/filename.
+    :param X:
+        original (full) data set.
+    :param idx_matrix:
+        matrix of collected idx vectors.
+    :param k_list:
+        list of numerical labels for the idx_matrix columns.
+    :param scaling:
+        data scaling criterion.
+    :param biasing_option:
+        integer specifying biasing option.
+        See documentation of cluster-biased PCA for more information.
+        Can only attain values [1,2,3,4,5].
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``False``,
+        title will not be plotted.
+    :param save_plot: (optional)
+        boolean specifying whether the plot should be saved.
+    :param save_filename: (optional)
+        plot save location/filename.
 
-    Input:
-    ----------
-    `min_at_q2_k` - label for which the eigenvalue was smallest when q=2.
-    `min_at_q3_k` - label for which the eigenvalue was smallest when q=3.
+    **Returns:**
+
+    - ``min_at_q2_k`` - label for which the eigenvalue was smallest when q=2.
+    - ``min_at_q3_k`` - label for which the eigenvalue was smallest when q=3.
+    - ``max_at_q2_k`` - label for which the eigenvalue was largest when q=2.
+    - ``max_at_q3_k`` - label for which the eigenvalue was largest when q=3.
     """
 
     n_k = len(k_list)
@@ -339,61 +340,47 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
 
 def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option=1, n_iterations=10, stop_iter=0, verbose=False):
     """
-    This function gradually equilibrates cluster populations, heading towards
-    the population of the smallest cluster.
+    This function gradually equilibrates cluster populations heading towards
+    population of the smallest cluster in ``n_iterations``.
 
-    At each iteration it generates the reduced data set `X_r(i)` made up from
-    new populations, performs PCA on that data set to find the i-th version of
+    At each iteration it generates the reduced data set ``X_r(i)`` made up from
+    new populations, performs PCA on that data set to find the ``i-th`` version of
     the eigenvectors. Depending on the option selected, it then does the
     projection of a data set (and optionally also its sources) onto the found
     eigenvectors.
 
-    The first column (or entry) inside `eigenvectors`, `pc_scores` and
-    `pc_sources` matrices corresponds to the initial manifold and all the
-    remaining columns (or entries) correspond to the biased manifold. The number
-    of columns will thus always be n_iterations+1.
+    :param X:
+        original (full) data set.
+    :param idx:
+        vector of indices classifying observations to clusters.
+        The first cluster has index 0.
+    :param scaling:
+        data scaling criterion.
+    :param X_source:
+        source terms corresponding to the state-space variables in ``X``.
+    :param biasing_option:
+        integer specifying biasing option.
+        See documentation of cluster-biased PCA for more information.
+        Can only attain values [1,2,3,4,5].
+    :param n_iterations:
+        number of iterations to loop over.
+    :param stop_iter:
+        number of iteration to stop.
+    :param verbose:
+        boolean for printing verbose details.
 
-    Note: if biasing_option==4, the `eigenvectors`, `pc_scores` and `pc_sources` are
-    lists of numpy.ndarray. For all other options, they are numpy.ndarray.
+    :raises ValueError:
+        if ``biasing_option`` is not 1, 2, 3, 4 or 5.
 
-    Input:
-    ----------
-    `X`           - original (full) data set.
-    `idx`         - vector of indices classifying observations to clusters.
-                    The first cluster has index 0.
-    `scaling`     - data scaling criterion.
-    `X_source`    - source terms corresponding to the state-space variables in
-                    `X`.
-    `biasing_option`
-                  - integer specifying biasing option. See documentation of
-                    cluster-biased PCA for more information.
-                    Can only attain values [1,2,3,4,5].
-    `n_iterations`- number of iterations to loop over.
-    `stop_iter`   - number of iteration to stop.
-    `verbose`     - boolean for printing verbose details.
+    **Returns:**
 
-    Output:
-    ----------
-    `eigenvectors_1`
-                  - collected PC-1 from each iteration.
-                    Size (n_iterations x n_vars).
-    `eigenvectors_2`
-                  - collected PC-2 from each iteration.
-                    Size (n_iterations x n_vars).
-    `pc_scores_1` - collected PC-1 scores from each iteration.
-                    Size (n_obs x n_iterations).
-    `pc_scores_2` - collected PC-2 scores from each iteration.
-                    Size (n_obs x n_iterations).
-    `pc_sources_1`- collected PC-1 sources from each iteration.
-                    Size (n_obs x n_iterations).
-                    This variable is only returned if `X_sources` was passed as
-                    an input parameter.
-    `pc_sources_2`- collected PC-2 sources from each iteration.
-                    Size (n_obs x n_iterations).
-                    This variable is only returned if `X_sources` was passed as
-                    an input parameter.
-    `idx_train`
-                  - the final training indices from the equilibrated iteration.
+    - ``eigenvalues`` - collected eigenvalues from each iteration.
+    - ``eigenvectors`` - collected eigenvectors from each iteration.
+    - ``pc_scores`` - collected PC scores from each iteration.
+    - ``pc_sources`` - collected PC-1 sources from each iteration. This variable is only returned if ``X_sources`` was passed as an input parameter.
+    - ``idx_train`` - the final training indices from the equilibrated iteration.
+    - ``X_center`` - a vector of final centers that were used to center the data set at the last (equlibration) iteration.
+    - ``X_scale`` - a vector of final scales that were used to scale the data set at the last (equlibration) iteration.
     """
 
     # Check that `biasing_option` parameter was passed correctly:

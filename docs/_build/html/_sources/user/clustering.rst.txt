@@ -71,8 +71,8 @@ VQPCA algorithm used here was first proposed in [parente2009identification]. The
   :width: 700
   :align: center
 
-Operations on clusters
-----------------------
+Auxiliary functions
+-------------------
 
 .. autofunction:: PCA.clustering.degrade_clusters
 

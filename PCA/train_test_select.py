@@ -4,14 +4,14 @@ import PCA.clustering
 
 def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, verbose=False):
     """
-    This function takes an `idx` classifications from a clustering technique and
-    samples a fixed number `n_of_samples` of observations from every cluster as
+    This function takes an ``idx`` classifications from a clustering technique and
+    samples a fixed number ``n_of_samples`` of observations from every cluster as
     training data.
 
-    `n_of_samples` is estimated based on the percentage provided. First, the
-    total number of samples for training is estimated as a percentage `perc`
-    from the total number of observations `n_obs`. Next, this number is devided
-    equally into `k` clusters.
+    ``n_of_samples`` is estimated based on the percentage ``perc`` provided. First, the
+    total number of samples for training is estimated as a percentage ``perc``
+    from the total number of observations ``n_obs``. Next, this number is divided
+    equally into ``k`` clusters.
 
     There is a bar that no more than 50% of observations from any cluster will
     be taken for training. This is to avoid that too little samples will remain
@@ -20,51 +20,53 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
     Test data is then drawn from every cluster equally in a similar way, in a
     quantity equal to the number of remaining samples from the smallest cluster.
 
-    Example:
-    ----------
+    **Example:**
+
     If the full data has 10 observations with indices:
 
-    `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
+    ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
 
     and a clustering technique divided the observations into clusters in the
     following way:
 
-    `[0, 0, 0, 0, 0, 0, 1, 1, 1, 1]`
+    ``[0, 0, 0, 0, 0, 0, 1, 1, 1, 1]``
 
     Then, if you request 40% of the data for training, the function may return:
 
-    `idx_train = [0, 1, 7, 9]`
+    ``idx_train = [0, 1, 7, 9]``
 
     as the training data (where observations 0 and 1 belong to the first cluster
     and observations 7 and 9 belong to the second cluster).
 
     Test data may then become:
 
-    `idx_test = [3, 5, 6, 8]`
+    ``idx_test = [3, 5, 6, 8]``
 
     Two options for sampling test data are implemented. If you select
-    `test_selection_option=1`, all remaining samples that were not taken as
-    training data become the test data. If you select `test_selection_option=2`,
+    ``test_selection_option=1``, all remaining samples that were not taken as
+    training data become the test data. If you select ``test_selection_option=2``,
     the smallest cluster is found and the remaining number of observations are
     taken as test data in that cluster. Next, the same number of observations is
     taken from all remaining larger clusters.
 
-    Input:
-    ----------
-    `idx`         - vector of indices classifying observations to clusters.
-                    The first cluster has index 0.
-    `perc`        - percentage of data to be selected as training data from each
-                    cluster. Set perc=20 if you want 20%.
-    `test_selection_option`
-                  - select 1 if you want all remaining samples to become test
-                    data. Select 2 if you want the same number of samples from
-                    each cluster to become test data.
-    `verbose`     - boolean for printing clustering details.
+    :param idx:
+        vector of indices classifying observations to clusters.
+    :param perc:
+        percentage of data to be selected as training data from each cluster.
+        For instance, set ``perc=20`` if you want to select 20%.
+    :param test_selection_option: (optional)
+        option for how the test data is selected.
+        Select ``test_selection_option=1`` if you want all remaining samples
+        to become test data.
+        Select ``test_selection_option=2`` if you want the same number of samples
+        from each cluster to become test data.
+    :param verbose: (optional)
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx_train`   - indices of the training data.
-    `idx_test`    - indices of the test data.
+    **Returns:**
+
+    - ``idx_train`` - indices of the training data.
+    - ``idx_test`` - indices of the test data.
     """
 
     n_obs = len(idx)
@@ -153,39 +155,39 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
 
 def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     """
-    This function takes an `idx` classifications from a clustering technique and
-    samples a certain percentage `perc` from every cluster as the training data.
+    This function takes an ``idx`` classifications from a clustering technique and
+    samples a certain percentage ``perc`` from every cluster as the training data.
     The remaining percentage is the test data.
 
     Example:
     ----------
     If the full data has 10 observations with indices:
 
-    `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
+    ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
 
     and you requested 40% of the data to be training data, the function may
     return:
 
-    `idx_train = [0, 1, 2, 7]`
+    ``idx_train = [0, 1, 2, 7]``
 
     and:
 
-    `idx_test = [3, 4, 5, 6, 8, 9]`
+    ``idx_test = [3, 4, 5, 6, 8, 9]``
 
     as the remaining 60% test data.
 
-    Input:
-    ----------
-    `idx`         - vector of indices classifying observations to clusters.
-                    The first cluster has index 0.
-    `perc`        - percentage of data to be selected as training data from each
-                    cluster. Set perc=20 if you want 20%.
-    `verbose`     - boolean for printing clustering details.
+    :param idx:
+        vector of indices classifying observations to clusters.
+    :param perc:
+        percentage of data to be selected as training data from each cluster.
+        For instance, set ``perc=20`` if you want to select 20%.
+    :param verbose:
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx_train`   - indices of the training data.
-    `idx_test`    - indices of the test data.
+    **Returns:**
+
+    - ``idx_train`` - indices of the training data.
+    - ``idx_test`` - indices of the test data.
     """
 
     # Degrade clusters if needed:
@@ -228,62 +230,64 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
 def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='percentage', bar50=True, verbose=False):
     """
-    This function takes an `idx` classifications from a clustering technique and
-    a dictionary `sampling_dictionary` in which you manually specify what
+    This function takes an ``idx`` classifications from a clustering technique
+    and a dictionary ``sampling_dictionary`` in which you manually specify what
     perecentage or what number of samples should be taken from every cluster as
     the training data.
 
     By default, there is a bar that no more than 50% of observations from any
     cluster will be taken for training. This is to avoid that too little samples
-    will remain for test data from small clusters. If the parameter `bar50` is
+    will remain for test data from small clusters. If the parameter ``bar50`` is
     set to False, this function will allow to sample more than 50% of
     observations.
 
-    | Note that this function does not `degrade_clusters` to avoid disambiguity
-    | between cluster numeration inside `idx` and inside the keys of the
-    | `sampling_dictionary`! It will however check whether keys are consistent
-    | with `idx` entries and if yes it will continue running. If the `idx`
-    | requires running `degrade_clusters`, information will be printed.
+    **Note:**
 
-    Example:
-    ----------
+    This function does not run ``degrade_clusters`` to avoid disambiguity
+    between cluster numeration inside ``idx`` and inside the keys of the
+    ``sampling_dictionary``! It will however check whether keys are consistent
+    with ``idx`` entries and if yes it will continue running. If the ``idx``
+    classifies for running ``degrade_clusters`` this information will be printed
+    as a suggestion.
+
+    **Example:**
+
     If the full data has 10 observations with indices:
 
-    `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
+    ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
 
     and a clustering technique divided the observations into clusters in the
     following way:
 
-    `[0, 0, 0, 0, 0, 0, 1, 1, 1, 1]`
+    ``[0, 0, 0, 0, 0, 0, 1, 1, 1, 1]``
 
-    and the dictionary is: `sampling_dictionary = {0:3, 1:1}` with the values
-    representing a 'number', the function may return:
+    and the dictionary is: ``sampling_dictionary = {0:3, 1:1}`` with the values
+    representing a ``number``, the function may return:
 
-    `idx_train = [2, 3, 5, 9]`
+    ``idx_train = [2, 3, 5, 9]``
 
     so that 3 samples are taken from the first cluster and 1 sample is taken
     from the second cluster.
 
-    Input:
-    ----------
-    `idx`         - vector of indices classifying observations to clusters.
-                    The first cluster has index 0.
-    `sampling_dictionary`
-                  - dictionary specifying manual sampling. Keys are cluster
-                    numbers and values are either 'percentage' or 'number' of
-                    samples to be taken from that cluster. Keys should match the
-                    cluster numbering as per `idx`.
-    `sampling_type`
-                  - string specifying whether percentage or number is given in
-                    the `sampling_dictionary`. Available options: 'percentage'
-                    or 'number'. The default is 'percentage'.
-    `bar50`       - boolean specifying whether the 50% bar should apply.
-    `verbose`     - boolean for printing clustering details.
+    :param idx:
+        vector of indices classifying observations to clusters.
+    :param sampling_dictionary:
+        dictionary specifying manual sampling. Keys are cluster numbers and
+        values are either ``percentage`` or ``number`` of samples to be taken from
+        that cluster. Keys should match the cluster numbering as per ``idx``.
+    :param sampling_type: (optional)
+        string specifying whether percentage or number is given in the
+        ``sampling_dictionary``. Available options: ``percentage`` or ``number``.
+        The default is ``percentage``.
+    :param bar50: (optional)
+        boolean specifying whether the 50% bar should apply.
+    :param verbose: (optional)
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx_train`   - indices of the training data.
-    `idx_test`    - indices of the test data.
+    **Returns:**
+
+    - ``idx_train`` - indices of the training data.
+    - ``idx_test`` - indices of the test data.
     """
 
     _sampling_type = ['percentage', 'number']
@@ -396,38 +400,48 @@ def train_test_split_random(n_obs, perc, idx_test=[], verbose=False):
     """
     This function splits dataset into training and testing using random sampling.
 
-    Example:
-    ----------
+    **Example:**
+
     If the full data has 10 observations whose indices are:
 
-    `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
+    ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
 
     and you request 40% of the data to be training data, the function may return:
 
-    `idx_train = [0, 1, 2, 7]`
+    ``idx_train = [0, 1, 2, 7]``
 
     and:
 
-    `idx_test = [3, 4, 5, 6, 8, 9]`
+    ``idx_test = [3, 4, 5, 6, 8, 9]``
 
     as the remaining 60% test data.
 
-    Input:
-    ----------
-    `n_obs`       - number of observations in the original data set.
-    `perc`        - percentage of data to be selected as training data from each
-                    cluster. Set perc=20 if you want 20%.
-    `idx_test`    - are the user-provided indices for test data. If specified,
-                    the training data will be selected ignoring the indices in
-                    `idx_test` and the test data will be returned the same as
-                    the user-provided `idx_test`.
-                    If not specified, all remaining samples become test data.
-    `verbose`     - boolean for printing clustering details.
+    :param n_obs:
+        number of observations in the original data set.
+    :param perc:
+        percentage of data to be selected as training data from each cluster.
+        Set ``perc=20`` if you want 20%.
+    :param idx_test: (optional)
+        are the user-provided indices for test data. If specified, the training
+        data will be selected ignoring the indices in ``idx_test`` and the test
+        data will be returned the same as the user-provided ``idx_test``.
+        If not specified, all remaining samples become test data.
+    :param verbose: (optional)
+        boolean for printing clustering details.
 
-    Output:
-    ----------
-    `idx_train`   - indices of the training data.
-    `idx_test`    - indices of the test data.
+    :raises ValueError:
+        if the perecentage specified is too high in combination with the
+        user-provided ``idx_test`` vector and there aren't enough samples to
+        select as train data.
+
+    :raises ValueError:
+        if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
+        to ``n_obs``. *This is for unit testing and might be removed later.*
+
+    **Returns:**
+
+    - ``idx_train`` - indices of the training data.
+    - ``idx_test`` - indices of the test data.
     """
 
     idx_full = np.arange(0,n_obs)
@@ -459,7 +473,7 @@ def train_test_split_random(n_obs, perc, idx_test=[], verbose=False):
 
 def test():
     """
-    This function tests the `training_data_generation` module.
+    This function tests the ``training_data_generation`` module.
     """
 
     try:
