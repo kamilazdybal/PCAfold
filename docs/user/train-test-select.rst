@@ -15,11 +15,8 @@ All splitting functions in this module return a tuple of two variables: ``(idx_t
 
 .. code:: python
 
-  Input_train = Input[idx_train,:]
-  Output_train = Output[idx_train,:]
-
-  Input_test = Input[idx_test,:]
-  Output_test = Output[idx_test,:]
+  X_train = X[idx_train,:]
+  X_test = X[idx_test,:]
 
 All functions are equipped with ``verbose=False`` parameter. If it is set to ``True`` some additional information on train and test selection is printed.
 

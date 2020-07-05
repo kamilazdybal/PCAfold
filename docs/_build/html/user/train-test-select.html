@@ -178,11 +178,8 @@ Apart from random splitting that can be achieved with the commonly used <code cl
 The general idea is to divide the entire data set <code class="docutils literal notranslate"><span class="pre">X</span></code> into train and test samples as presented below:</p>
 <a class="reference internal image-reference" href="../_images/tts-train-test-select.png"><img alt="../_images/tts-train-test-select.png" class="align-center" src="../_images/tts-train-test-select.png" style="width: 350px;" /></a>
 <p>All splitting functions in this module return a tuple of two variables: <code class="docutils literal notranslate"><span class="pre">(idx_train,</span> <span class="pre">idx_test)</span></code>. These variables contain indices of observations that went into train data and test data respectively. In your model learning algorithm you can then get the train and test observations, for instance in the following way:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">Input_train</span> <span class="o">=</span> <span class="n">Input</span><span class="p">[</span><span class="n">idx_train</span><span class="p">,:]</span>
-<span class="n">Output_train</span> <span class="o">=</span> <span class="n">Output</span><span class="p">[</span><span class="n">idx_train</span><span class="p">,:]</span>
-
-<span class="n">Input_test</span> <span class="o">=</span> <span class="n">Input</span><span class="p">[</span><span class="n">idx_test</span><span class="p">,:]</span>
-<span class="n">Output_test</span> <span class="o">=</span> <span class="n">Output</span><span class="p">[</span><span class="n">idx_test</span><span class="p">,:]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">X_train</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">idx_train</span><span class="p">,:]</span>
+<span class="n">X_test</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">idx_test</span><span class="p">,:]</span>
 </pre></div>
 </div>
 <p>All functions are equipped with <code class="docutils literal notranslate"><span class="pre">verbose=False</span></code> parameter. If it is set to <code class="docutils literal notranslate"><span class="pre">True</span></code> some additional information on train and test selection is printed.</p>

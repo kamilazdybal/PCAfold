@@ -30,6 +30,7 @@
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -84,7 +85,11 @@
             
               <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Principal Component Analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Principal Component Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#class-pca">Class <code class="docutils literal notranslate"><span class="pre">PCA</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="clustering.html">Clustering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cluster-biased-pca.html">Cluster-biased PCA</a></li>
 <li class="toctree-l1"><a class="reference internal" href="train-test-select.html">Train and test data selection</a></li>
@@ -159,6 +164,9 @@
             
   <span class="target" id="module-PCA.PCA"></span><div class="section" id="principal-component-analysis">
 <h1>Principal Component Analysis<a class="headerlink" href="#principal-component-analysis" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">PCA.py</span></code> module contains functions for performing Principal Component Analysis.</p>
+<div class="section" id="class-pca">
+<h2>Class <code class="docutils literal notranslate"><span class="pre">PCA</span></code><a class="headerlink" href="#class-pca" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="PCA.PCA.PCA">
 <em class="property">class </em><code class="sig-prename descclassname">PCA.PCA.</code><code class="sig-name descname">PCA</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">scaling</span><span class="o">=</span><span class="default_value">'std'</span></em>, <em class="sig-param"><span class="n">neta</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">useXTXeig</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">nocenter</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.PCA.PCA" title="Permalink to this definition">¶</a></dt>
@@ -196,6 +204,10 @@ useXTXeig = True (default): uses numpy.linalg.eigh on the covariance matrix (R)<
 </dl>
 </dd></dl>
 
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
