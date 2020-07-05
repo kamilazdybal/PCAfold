@@ -17,7 +17,6 @@ def variable_bins(var, k, verbose=False):
 
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
-    The first cluster has index 0.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -75,12 +74,11 @@ def predefined_variable_bins(var, split_values, verbose=False):
         vector of variable values.
     :param split_values:
         list containing values at which the split to bins should be performed.
-    :param verbose:
+    :param verbose: (optional)
         boolean for printing clustering details.
 
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
-    The first cluster has index 0.
     """
 
     var_min = np.min(var)
@@ -134,7 +132,6 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     **Returns:**
     `idx` vector of indices classifying observations to clusters.
-    The first cluster has index 0.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -225,7 +222,6 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
 
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
-    The first cluster has index 0.
     """
 
     # Check that the number of clusters is an integer and is larger than 2:
@@ -306,8 +302,7 @@ def kmeans(X, k):
         number of clusters to partition the data.
 
     **Returns:**
-    `idx` vector of indices classifying observations to clusters.
-    The first cluster has index 0.
+    ``idx`` vector of indices classifying observations to clusters.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -321,30 +316,28 @@ def kmeans(X, k):
 
     return(np.asarray(idx))
 
-def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=1000, verbose=False):
+def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=1000, verbose=False):
     """
     This function performs Vector Quantization clustering using
     Principal Component Analysis.
 
-    VQPCA algorithm will center the global data set by mean and scale the global
-    data set by the scaling specified in the ``scaling_criteria`` parameter.
+    **Note:**
+    VQPCA algorithm will center the global data set ``X`` by mean and scale by
+    the scaling specified in the ``scaling_criteria`` parameter. Data in local
+    clusters will be centered by the mean but will not be scaled.
 
-    Note that the data in local cluster clusters will still be centered by the
-    mean but will not be scaled!
-
-    Input:
-    ----------
     :param X:
         raw global data set, uncentered and unscaled.
     :param k: (optional)
         number of clusters to partition the data.
     :param n_pcs: (optional)
-        number of Principal Components that will be used to reconstruct the data
+        number of Principal Components (PCs) that will be used to reconstruct the data
         at each iteration.
     :param scaling_criteria: (optional)
-        criterion to scale the global data set.
+        scaling critertion for the global data set.
     :param idx_0: (optional)
-        user-supplied initial idx for initializing the centroids.
+        user-supplied initial ``idx`` for initializing the centroids. By default
+        random intialization is performed.
     :param maximum_number_of_iterations: (optional)
         the maximum number of iterations that the algorithm will loop through.
     :param verbose: (optional)
@@ -352,7 +345,6 @@ def vqpca(X, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_
 
     **Returns:**
     ``idx`` vector of indices classifying observations to clusters.
-    The first cluster has index 0.
     """
 
     import PCA.PCA as PCA
@@ -532,14 +524,15 @@ def degrade_clusters(idx, verbose=False):
     """
     This function renumerates clusters if either of these two cases is true:
 
-    - ``idx`` is composed of non-consecutive integers, or:
-    
+    - ``idx`` is composed of non-consecutive integers, or
+
     - the smallest cluster number in ``idx`` is not equal to ``0``.
 
     **Example:**
-    If from a clustering technique you get an ``idx`` that is the following:
+
+    Starting with an ``idx`` that is the following:
     ``[0, 0, 2, 0, 5, 10]`` this function turns this ``idx`` to:
-    ``[0, 0, 1, 0, 2, 3]`` where clusters are numbered with consecutive integers.
+    ``[0, 0, 1, 0, 2, 3]``, where clusters are numbered with consecutive integers.
 
     Alternatively, if ``idx`` is: ``[1, 1, 2, 2, 3, 3]`` this function turns
     this ``idx`` to: ``[0, 0, 1, 1, 2, 2]`` so that the smallest cluster number
