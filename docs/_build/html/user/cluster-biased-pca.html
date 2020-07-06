@@ -37,7 +37,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Train and test data selection" href="train-test-select.html" />
+    <link rel="next" title="Manifold dimensionality" href="manifold-dimensionality.html" />
     <link rel="prev" title="Clustering" href="clustering.html" /> 
 </head>
 
@@ -118,6 +118,7 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="manifold-dimensionality.html">Manifold dimensionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="train-test-select.html">Train and test data selection</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -245,8 +246,8 @@ Source terms <span class="math notranslate nohighlight">\(\mathbf{S}\)</span> ha
 <code class="sig-prename descclassname">PCA.cluster_biased_pca.</code><code class="sig-name descname">analyze_centers_movement</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">idx_X_r</span></em>, <em class="sig-param"><span class="n">variable_names</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">plot_variables</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_plot</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">save_filename</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.cluster_biased_pca.analyze_centers_movement" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function analyzes the movement of centers in the subset of the original
 data set <code class="docutils literal notranslate"><span class="pre">X_r</span></code> with respect to the full original data set <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p>
-<p><strong>Note:</strong></p>
-<p>The original data set <code class="docutils literal notranslate"><span class="pre">X</span></code> is first normalized so that each variable ranges
+<p><em>Note:</em>
+The original data set <code class="docutils literal notranslate"><span class="pre">X</span></code> is first normalized so that each variable ranges
 from 0 to 1. Samples are then extracted from the normalized data set to form
 <code class="docutils literal notranslate"><span class="pre">X_r</span></code>. The normalization is done so that centers can be compared across
 variables on one plot.</p>
@@ -271,13 +272,15 @@ boolean specifying whether the plot should be saved.</p></li>
 plot save location/filename.</p></li>
 </ul>
 </dd>
-</dl>
-<p><strong>Returns:</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">norm_centers_X</span></code> - normalized centers of the original (full) data set <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">norm_centers_X_r</span></code> - normalized centers of the reduced data set <code class="docutils literal notranslate"><span class="pre">X_r</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">center_movement_percentage</span></code> - relative percentage specifying how the center has moved between <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">X_r</span></code>. The movement is measured relative to the original (full) data set <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>norm_centers_X</strong> - normalized centers of the original (full) data set <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
+<li><p><strong>norm_centers_X_r</strong> - normalized centers of the reduced data set <code class="docutils literal notranslate"><span class="pre">X_r</span></code>.</p></li>
+<li><p><strong>center_movement_percentage</strong> - relative percentage specifying how the center has moved between <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">X_r</span></code>. The movement is measured relative to the original (full) data set <code class="docutils literal notranslate"><span class="pre">X</span></code>.</p></li>
 </ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <div class="section" id="plotting-example">
@@ -299,8 +302,8 @@ iteration number - if there is a consistent trend the coloring should form
 a clear trajectory. The zero-th iteration corresponds to eigenvectors found
 on the original data set X. The last iteration corresponds to eigenvectors
 found on the “equilibrated” data set.</p>
-<p><strong>Note:</strong></p>
-<p>This function plots absolute, (and optionally normalized) values of weights on each
+<p><em>Note:</em>
+This function plots absolute, (and optionally normalized) values of weights on each
 variable. Columns are normalized dividing by the maximum value. This is
 done in order to compare the movement of weights equally, with the highest,
 normalized one being equal to 1. You can additionally set the
@@ -384,14 +387,16 @@ boolean specifying whether the plot should be saved.</p></li>
 plot save location/filename.</p></li>
 </ul>
 </dd>
-</dl>
-<p><strong>Returns:</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">min_at_q2_k</span></code> - label for which the eigenvalue was smallest when q=2.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">min_at_q3_k</span></code> - label for which the eigenvalue was smallest when q=3.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_at_q2_k</span></code> - label for which the eigenvalue was largest when q=2.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">max_at_q3_k</span></code> - label for which the eigenvalue was largest when q=3.</p></li>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>min_at_q2_k</strong> - label for which the eigenvalue was smallest when q=2.</p></li>
+<li><p><strong>min_at_q3_k</strong> - label for which the eigenvalue was smallest when q=3.</p></li>
+<li><p><strong>max_at_q2_k</strong> - label for which the eigenvalue was largest when q=2.</p></li>
+<li><p><strong>max_at_q3_k</strong> - label for which the eigenvalue was largest when q=3.</p></li>
 </ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <div class="section" id="id2">
@@ -431,17 +436,19 @@ Can only attain values [1,2,3,4,5].</p></li>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><strong>ValueError</strong> – if <code class="docutils literal notranslate"><span class="pre">biasing_option</span></code> is not 1, 2, 3, 4 or 5.</p>
 </dd>
-</dl>
-<p><strong>Returns:</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">eigenvalues</span></code> - collected eigenvalues from each iteration.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">eigenvectors</span></code> - collected eigenvectors from each iteration.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pc_scores</span></code> - collected PC scores from each iteration.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pc_sources</span></code> - collected PC-1 sources from each iteration. This variable is only returned if <code class="docutils literal notranslate"><span class="pre">X_sources</span></code> was passed as an input parameter.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - the final training indices from the equilibrated iteration.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">X_center</span></code> - a vector of final centers that were used to center the data set at the last (equlibration) iteration.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">X_scale</span></code> - a vector of final scales that were used to scale the data set at the last (equlibration) iteration.</p></li>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>eigenvalues</strong> - collected eigenvalues from each iteration.</p></li>
+<li><p><strong>eigenvectors</strong> - collected eigenvectors from each iteration.</p></li>
+<li><p><strong>pc_scores</strong> - collected PC scores from each iteration.</p></li>
+<li><p><strong>pc_sources</strong> - collected PC-1 sources from each iteration. This variable is only returned if <code class="docutils literal notranslate"><span class="pre">X_sources</span></code> was passed as an input parameter.</p></li>
+<li><p><strong>idx_train</strong> - the final training indices from the equilibrated iteration.</p></li>
+<li><p><strong>X_center</strong> - a vector of final centers that were used to center the data set at the last (equlibration) iteration.</p></li>
+<li><p><strong>X_scale</strong> - a vector of final scales that were used to scale the data set at the last (equlibration) iteration.</p></li>
 </ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 <div class="section" id="equilibration">
@@ -471,7 +478,7 @@ This is presented in the scheme below:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="train-test-select.html" class="btn btn-neutral float-right" title="Train and test data selection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="manifold-dimensionality.html" class="btn btn-neutral float-right" title="Manifold dimensionality" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="clustering.html" class="btn btn-neutral float-left" title="Clustering" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

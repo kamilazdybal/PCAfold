@@ -11,6 +11,7 @@ The core functionality is performing dimensionality reduction using Principal Co
    user/PCA
    user/clustering
    user/cluster-biased-pca
+   user/manifold-dimensionality
    user/train-test-select
 
 .. toctree::

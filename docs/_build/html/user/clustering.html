@@ -92,6 +92,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="cluster-biased-pca.html">Cluster-biased PCA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manifold-dimensionality.html">Manifold dimensionality</a></li>
 <li class="toctree-l1"><a class="reference internal" href="train-test-select.html">Train and test data selection</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Tutorials</span></p>
@@ -190,9 +191,13 @@ boolean for printing clustering details.</p></li>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><strong>ValueError</strong> – if number of clusters <code class="docutils literal notranslate"><span class="pre">k</span></code> is not a positive integer.</p>
 </dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>idx</strong> - vector of indices classifying observations to clusters.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># var_min                                                var_max</span>
@@ -206,7 +211,8 @@ boolean for printing clustering details.</p></li>
 <dd><p>This function does clustering by dividing a variable vector <code class="docutils literal notranslate"><span class="pre">var</span></code> into
 bins such that the split is done at values specified in the <code class="docutils literal notranslate"><span class="pre">split_values</span></code>
 list.</p>
-<p><em>Note:</em> When a split is performed at a given <code class="docutils literal notranslate"><span class="pre">value_i</span></code>, the observation in <code class="docutils literal notranslate"><span class="pre">var</span></code>
+<p><em>Note:</em>
+When a split is performed at a given <code class="docutils literal notranslate"><span class="pre">value_i</span></code>, the observation in <code class="docutils literal notranslate"><span class="pre">var</span></code>
 that takes exactly that value is assigned to the newly created bin.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -221,9 +227,13 @@ boolean for printing clustering details.</p></li>
 <dd class="field-even"><p><strong>ValueError</strong> – if any value within <code class="docutils literal notranslate"><span class="pre">split_values</span></code> is not within the range of
 vector <code class="docutils literal notranslate"><span class="pre">var</span></code> values.</p>
 </dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>idx</strong> - vector of indices classifying observations to clusters.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># var_min     value_1              value_2      value_3  var_max</span>
@@ -253,9 +263,13 @@ boolean for printing clustering details.</p></li>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><p><strong>ValueError</strong> – if number of clusters <code class="docutils literal notranslate"><span class="pre">k</span></code> is not a positive integer.</p>
 </dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>idx</strong> - vector of indices classifying observations to clusters.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<cite>idx</cite> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Z_min           Z_stoich                                 Z_max</span>
@@ -311,9 +325,13 @@ of the PC-source vector <code class="docutils literal notranslate"><span class="
 recommended to lower the <code class="docutils literal notranslate"><span class="pre">zero_offset_percentage</span></code> value.</p></li>
 </ul>
 </dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>idx</strong> - vector of indices classifying observations to clusters.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">#                  -offset         +offset</span>
@@ -333,23 +351,6 @@ recommended to lower the <code class="docutils literal notranslate"><span class=
 </pre></div>
 </div>
 <dl class="py function">
-<dt id="PCA.clustering.kmeans">
-<code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">kmeans</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">k</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.kmeans" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function performs K-Means clustering. It is just a wrapper for
-<code class="docutils literal notranslate"><span class="pre">sklearn.cluster.KMeans</span></code> function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>X</strong> – conditioning variable or a data set.</p></li>
-<li><p><strong>k</strong> – number of clusters to partition the data.</p></li>
-</ul>
-</dd>
-</dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
-</dd></dl>
-
-<dl class="py function">
 <dt id="PCA.clustering.vqpca">
 <code class="sig-prename descclassname">PCA.clustering.</code><code class="sig-name descname">vqpca</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">k</span></em>, <em class="sig-param"><span class="n">n_pcs</span></em>, <em class="sig-param"><span class="n">scaling_criteria</span></em>, <em class="sig-param"><span class="n">idx_0</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">maximum_number_of_iterations</span><span class="o">=</span><span class="default_value">1000</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.clustering.vqpca" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function performs Vector Quantization clustering using
@@ -359,7 +360,7 @@ with <code class="docutils literal notranslate"><span class="pre">n_pcs</span></
 procedure in which the reconstruction errors are evaluated for every
 observation as if that observation belonged to cluster <em>j</em> and next,
 the observation is assigned to that cluster for which the error was smallest.</p>
-<p><strong>Note:</strong>
+<p><em>Note:</em>
 VQPCA algorithm will center the global data set <code class="docutils literal notranslate"><span class="pre">X</span></code> by mean and scale by
 the scaling specified in the <code class="docutils literal notranslate"><span class="pre">scaling_criteria</span></code> parameter. Data in local
 clusters will be centered by the mean but will not be scaled.</p>
@@ -384,9 +385,13 @@ boolean for printing clustering details.</p></li>
 <dd class="field-even"><p><strong>ValueError</strong> – if the number of observations in the data set <code class="docutils literal notranslate"><span class="pre">X</span></code> does not match the
 number of elements in the <code class="docutils literal notranslate"><span class="pre">idx_0</span></code> vector.</p>
 </dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>idx</strong> - vector of indices classifying observations to clusters.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">idx</span></code> vector of indices classifying observations to clusters.</p>
 </dd></dl>
 
 <p>VQPCA algorithm used here was first proposed in [parente2009identification]. The general scheme for the iterative procedure is presented below:</p>
@@ -417,11 +422,14 @@ is equal to <code class="docutils literal notranslate"><span class="pre">0</span
 boolean for printing clustering details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>idx_degraded</strong> degraded vector of indices classifying observations to clusters. The first cluster has index 0.</p></li>
+<li><p><strong>k_update</strong> - the updated number of clusters.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">idx_degraded</span></code> degraded vector of indices classifying observations to
-clusters. The first cluster has index 0.
-<code class="docutils literal notranslate"><span class="pre">k_update</span></code> the updated number of clusters.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -438,10 +446,13 @@ The first cluster has index 0.</p></li>
 <li><p><strong>dictionary</strong> – a dictionary specifying the cluster numeration flipping instructions.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>flipped_idx</strong> - vector of indices classifying observations to clusters. The first cluster has index 0.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">flipped_idx</span></code> vector of indices classifying observations to clusters.
-The first cluster has index 0.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -461,10 +472,13 @@ The first cluster has index 0.</p></li>
 <dd class="field-even"><p><strong>ValueError</strong> – if the number of observations in the data set <code class="docutils literal notranslate"><span class="pre">X</span></code> does not match the
 number of elements in the <code class="docutils literal notranslate"><span class="pre">idx</span></code> vector.</p>
 </dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>centroids</strong> - matrix of cluster centroids. It has size <code class="docutils literal notranslate"><span class="pre">k</span></code> times number of observations.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">centroids</span></code> matrix of cluster centroids. It has size <code class="docutils literal notranslate"><span class="pre">k</span></code> times number of
-observations.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -491,13 +505,15 @@ The first cluster has index 0.</p></li>
 boolean for printing details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>data_in_clusters</strong> - list of <code class="docutils literal notranslate"><span class="pre">k_new</span></code> arrays that contains original data set observations in each cluster.</p></li>
+<li><p><strong>data_idx_in_clusters</strong> - list of <code class="docutils literal notranslate"><span class="pre">k_new</span></code> arrays that contains indices of the original data set observations in each cluster.</p></li>
+<li><p><strong>k_new</strong> - the updated number of clusters.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">data_in_clusters</span></code> list of <code class="docutils literal notranslate"><span class="pre">k_new</span></code> arrays that contains original data
-set observations in each cluster.
-<code class="docutils literal notranslate"><span class="pre">data_idx_in_clusters</span></code> list of <code class="docutils literal notranslate"><span class="pre">k_new</span></code> arrays that contains indices of
-the original data set observations in each cluster.
-<code class="docutils literal notranslate"><span class="pre">k_new</span></code> the updated number of clusters.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -516,10 +532,13 @@ The first cluster has index 0.</p></li>
 boolean for printing details.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>populations</strong> - list of cluster populations. Each entry referes to one cluster ordered according to <code class="docutils literal notranslate"><span class="pre">idx</span></code>.</p></li>
+</ul>
+</p>
+</dd>
 </dl>
-<p><strong>Returns:</strong>
-<code class="docutils literal notranslate"><span class="pre">populations</span></code> list of cluster populations. Each entry referes to one cluster
-ordered according to <code class="docutils literal notranslate"><span class="pre">idx</span></code>.</p>
 </dd></dl>
 
 </div>

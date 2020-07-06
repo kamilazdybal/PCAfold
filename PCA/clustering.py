@@ -18,8 +18,8 @@ def variable_bins(var, k, verbose=False):
     :raises ValueError:
         if number of clusters ``k`` is not a positive integer.
 
-    **Returns:**
-    ``idx`` vector of indices classifying observations to clusters.
+    :return:
+        - **idx** - vector of indices classifying observations to clusters.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -70,7 +70,8 @@ def predefined_variable_bins(var, split_values, verbose=False):
     bins such that the split is done at values specified in the ``split_values``
     list.
 
-    *Note:* When a split is performed at a given ``value_i``, the observation in ``var``
+    *Note:*
+    When a split is performed at a given ``value_i``, the observation in ``var``
     that takes exactly that value is assigned to the newly created bin.
 
     :param var:
@@ -84,8 +85,8 @@ def predefined_variable_bins(var, split_values, verbose=False):
         if any value within ``split_values`` is not within the range of
         vector ``var`` values.
 
-    **Returns:**
-    ``idx`` vector of indices classifying observations to clusters.
+    :return:
+        - **idx** - vector of indices classifying observations to clusters.
     """
 
     var_min = np.min(var)
@@ -140,8 +141,8 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     :raises ValueError:
         if number of clusters ``k`` is not a positive integer.
 
-    **Returns:**
-    `idx` vector of indices classifying observations to clusters.
+    :return:
+        - **idx** - vector of indices classifying observations to clusters.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -244,8 +245,8 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         of the PC-source vector ``pc_source``. If that is the case, it is
         recommended to lower the ``zero_offset_percentage`` value.
 
-    **Returns:**
-    ``idx`` vector of indices classifying observations to clusters.
+    :return:
+        - **idx** - vector of indices classifying observations to clusters.
     """
 
     # Check that the number of clusters is an integer and is larger than 2:
@@ -316,31 +317,6 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
 
     return(idx)
 
-def kmeans(X, k):
-    """
-    This function performs K-Means clustering. It is just a wrapper for
-    ``sklearn.cluster.KMeans`` function.
-
-    :param X:
-        conditioning variable or a data set.
-    :param k:
-        number of clusters to partition the data.
-
-    **Returns:**
-    ``idx`` vector of indices classifying observations to clusters.
-    """
-
-    # Check that the number of clusters is an integer and is non-zero:
-    if not (isinstance(k, int) and k > 0):
-        raise ValueError("The number of clusters must be a positive integer.")
-
-    from sklearn.cluster import KMeans
-
-    kmeans = KMeans(n_clusters=k, precompute_distances=True, algorithm='auto').fit(X)
-    idx = kmeans.labels_
-
-    return(np.asarray(idx))
-
 def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=1000, verbose=False):
     """
     This function performs Vector Quantization clustering using
@@ -351,7 +327,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
     observation as if that observation belonged to cluster *j* and next,
     the observation is assigned to that cluster for which the error was smallest.
 
-    **Note:**
+    *Note:*
     VQPCA algorithm will center the global data set ``X`` by mean and scale by
     the scaling specified in the ``scaling_criteria`` parameter. Data in local
     clusters will be centered by the mean but will not be scaled.
@@ -377,8 +353,8 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         if the number of observations in the data set ``X`` does not match the
         number of elements in the ``idx_0`` vector.
 
-    **Returns:**
-    ``idx`` vector of indices classifying observations to clusters.
+    :return:
+        - **idx** - vector of indices classifying observations to clusters.
     """
 
     import PCA.PCA as PCA
@@ -577,10 +553,9 @@ def degrade_clusters(idx, verbose=False):
     :param verbose: (optional)
         boolean for printing clustering details.
 
-    **Returns:**
-    ``idx_degraded`` degraded vector of indices classifying observations to
-    clusters. The first cluster has index 0.
-    ``k_update`` the updated number of clusters.
+    :return:
+        - **idx_degraded** degraded vector of indices classifying observations to clusters. The first cluster has index 0.
+        - **k_update** - the updated number of clusters.
     """
 
     index = 0
@@ -619,9 +594,8 @@ def flip_clusters(idx, dictionary):
     :param dictionary:
         a dictionary specifying the cluster numeration flipping instructions.
 
-    **Returns:**
-    ``flipped_idx`` vector of indices classifying observations to clusters.
-    The first cluster has index 0.
+    :return:
+        - **flipped_idx** - vector of indices classifying observations to clusters. The first cluster has index 0.
     """
 
     flipped_idx = []
@@ -649,9 +623,8 @@ def get_centroids(X, idx):
         if the number of observations in the data set ``X`` does not match the
         number of elements in the ``idx`` vector.
 
-    **Returns:**
-    ``centroids`` matrix of cluster centroids. It has size ``k`` times number of
-    observations.
+    :return:
+        - **centroids** - matrix of cluster centroids. It has size ``k`` times number of observations.
     """
 
     # Degrade clusters if needed:
@@ -699,12 +672,10 @@ def get_partition(X, idx, verbose=False):
     :param verbose: (optional)
         boolean for printing details.
 
-    **Returns:**
-    ``data_in_clusters`` list of ``k_new`` arrays that contains original data
-    set observations in each cluster.
-    ``data_idx_in_clusters`` list of ``k_new`` arrays that contains indices of
-    the original data set observations in each cluster.
-    ``k_new`` the updated number of clusters.
+    :return:
+        - **data_in_clusters** - list of ``k_new`` arrays that contains original data set observations in each cluster.
+        - **data_idx_in_clusters** - list of ``k_new`` arrays that contains indices of the original data set observations in each cluster.
+        - **k_new** - the updated number of clusters.
     """
 
     try:
@@ -763,9 +734,8 @@ def get_populations(idx, verbose=False):
     :param verbose: (optional)
         boolean for printing details.
 
-    **Returns:**
-    ``populations`` list of cluster populations. Each entry referes to one cluster
-    ordered according to ``idx``.
+    :return:
+        - **populations** - list of cluster populations. Each entry referes to one cluster ordered according to ``idx``.
     """
 
     populations = []
@@ -829,20 +799,6 @@ def test():
         (n_obs,) = np.shape(idx_3)
     except:
         print('Test of mixture_fraction_bins failed.')
-        return 0
-
-    try:
-        idx_4 = kmeans(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, 2)
-    except:
-        print('Test of kmeans failed.')
-        return 0
-    if not isinstance(idx_4, np.ndarray):
-        print('Test of kmeans failed.')
-        return 0
-    try:
-        (n_obs,) = np.shape(idx_4)
-    except:
-        print('Test of kmeans failed.')
         return 0
 
     try:

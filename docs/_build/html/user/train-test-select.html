@@ -38,7 +38,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Selecting train and test data" href="../tutorials/train-test-selection.html" />
-    <link rel="prev" title="Cluster-biased PCA" href="cluster-biased-pca.html" /> 
+    <link rel="prev" title="Manifold dimensionality" href="manifold-dimensionality.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="PCA.html">Principal Component Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="clustering.html">Clustering</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cluster-biased-pca.html">Cluster-biased PCA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manifold-dimensionality.html">Manifold dimensionality</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Train and test data selection</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#select-fixed-number">Select fixed number</a><ul>
@@ -241,11 +242,13 @@ boolean for printing clustering details.</p></li>
 </ul>
 </dd>
 </dl>
-<p><strong>Returns:</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+<dl class="simple">
+<dt>:return:*</dt><dd><ul class="simple">
+<li><p><strong>idx_train</strong> - indices of the training data.</p></li>
+<li><p><strong>idx_test</strong> - indices of the test data.</p></li>
 </ul>
+</dd>
+</dl>
 </dd></dl>
 
 <div class="section" id="train-data">
@@ -272,6 +275,7 @@ The scheme below presents graphically how train and test data can be selected us
 <dd><p>This function takes an <code class="docutils literal notranslate"><span class="pre">idx</span></code> classifications from a clustering technique and
 samples a certain percentage <code class="docutils literal notranslate"><span class="pre">perc</span></code> from every cluster as the training data.
 The remaining percentage is the test data.</p>
+<p><strong>Example:</strong></p>
 <p>If the full data has 10 observations with indices:</p>
 <p><code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9]</span></code></p>
 <p>and you requested 40% of the data to be training data, the function may
@@ -289,12 +293,14 @@ For instance, set <code class="docutils literal notranslate"><span class="pre">p
 <li><p><strong>verbose</strong> – boolean for printing clustering details.</p></li>
 </ul>
 </dd>
-</dl>
-<p><strong>Returns:</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>idx_train</strong> - indices of the training data.</p></li>
+<li><p><strong>idx_test</strong> - indices of the test data.</p></li>
 </ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -312,8 +318,8 @@ cluster will be taken for training. This is to avoid that too little samples
 will remain for test data from small clusters. If the parameter <code class="docutils literal notranslate"><span class="pre">bar50</span></code> is
 set to False, this function will allow to sample more than 50% of
 observations.</p>
-<p><strong>Note:</strong></p>
-<p>This function does not run <code class="docutils literal notranslate"><span class="pre">degrade_clusters</span></code> to avoid disambiguity
+<p><em>Note:</em>
+This function does not run <code class="docutils literal notranslate"><span class="pre">degrade_clusters</span></code> to avoid disambiguity
 between cluster numeration inside <code class="docutils literal notranslate"><span class="pre">idx</span></code> and inside the keys of the
 <code class="docutils literal notranslate"><span class="pre">sampling_dictionary</span></code>! It will however check whether keys are consistent
 with <code class="docutils literal notranslate"><span class="pre">idx</span></code> entries and if yes it will continue running. If the <code class="docutils literal notranslate"><span class="pre">idx</span></code>
@@ -347,12 +353,14 @@ boolean specifying whether the 50% bar should apply.</p></li>
 boolean for printing clustering details.</p></li>
 </ul>
 </dd>
-</dl>
-<p><strong>Returns:</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>idx_train</strong> - indices of the training data.</p></li>
+<li><p><strong>idx_test</strong> - indices of the test data.</p></li>
 </ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -394,12 +402,14 @@ select as train data.</p></li>
 to <code class="docutils literal notranslate"><span class="pre">n_obs</span></code>. <em>This is for unit testing and might be removed later.</em></p></li>
 </ul>
 </dd>
-</dl>
-<p><strong>Returns:</strong></p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_train</span></code> - indices of the training data.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">idx_test</span></code> - indices of the test data.</p></li>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>idx_train</strong> - indices of the training data.</p></li>
+<li><p><strong>idx_test</strong> - indices of the test data.</p></li>
 </ul>
+</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
@@ -417,7 +427,7 @@ to <code class="docutils literal notranslate"><span class="pre">n_obs</span></co
         <a href="../tutorials/train-test-selection.html" class="btn btn-neutral float-right" title="Selecting train and test data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="cluster-biased-pca.html" class="btn btn-neutral float-left" title="Cluster-biased PCA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="manifold-dimensionality.html" class="btn btn-neutral float-left" title="Manifold dimensionality" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

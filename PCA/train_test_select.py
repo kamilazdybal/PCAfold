@@ -63,10 +63,9 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
     :param verbose: (optional)
         boolean for printing clustering details.
 
-    **Returns:**
-
-    - ``idx_train`` - indices of the training data.
-    - ``idx_test`` - indices of the test data.
+    :return:*
+        - **idx_train** - indices of the training data.
+        - **idx_test** - indices of the test data.
     """
 
     n_obs = len(idx)
@@ -159,8 +158,8 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     samples a certain percentage ``perc`` from every cluster as the training data.
     The remaining percentage is the test data.
 
-    Example:
-    ----------
+    **Example:**
+
     If the full data has 10 observations with indices:
 
     ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
@@ -184,10 +183,9 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     :param verbose:
         boolean for printing clustering details.
 
-    **Returns:**
-
-    - ``idx_train`` - indices of the training data.
-    - ``idx_test`` - indices of the test data.
+    :return:
+        - **idx_train** - indices of the training data.
+        - **idx_test** - indices of the test data.
     """
 
     # Degrade clusters if needed:
@@ -241,8 +239,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
     set to False, this function will allow to sample more than 50% of
     observations.
 
-    **Note:**
-
+    *Note:*
     This function does not run ``degrade_clusters`` to avoid disambiguity
     between cluster numeration inside ``idx`` and inside the keys of the
     ``sampling_dictionary``! It will however check whether keys are consistent
@@ -284,10 +281,9 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
     :param verbose: (optional)
         boolean for printing clustering details.
 
-    **Returns:**
-
-    - ``idx_train`` - indices of the training data.
-    - ``idx_test`` - indices of the test data.
+    :return:
+        - **idx_train** - indices of the training data.
+        - **idx_test** - indices of the test data.
     """
 
     _sampling_type = ['percentage', 'number']
@@ -438,10 +434,9 @@ def train_test_split_random(n_obs, perc, idx_test=[], verbose=False):
         if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
         to ``n_obs``. *This is for unit testing and might be removed later.*
 
-    **Returns:**
-
-    - ``idx_train`` - indices of the training data.
-    - ``idx_test`` - indices of the test data.
+    :return:
+        - **idx_train** - indices of the training data.
+        - **idx_test** - indices of the test data.
     """
 
     idx_full = np.arange(0,n_obs)

@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
 import matplotlib.cm as cm
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
@@ -8,29 +7,32 @@ import PCA.PCA as P
 import PCA.clustering as cl
 import PCA.train_test_select as tts
 
-# Plotting parameters:
-csfont = {'fontname':'Charter', 'fontweight':'regular'}
-hfont = {'fontname':'Charter', 'fontweight':'bold'}
-ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
-rcParams["font.family"] = "serif"
-rcParams["font.serif"] = "Charter"
-rcParams['font.size'] = 16
+def plotting_styles():
 
-font_axes = 18
-font_labels = 24
-font_annotations = 18
-font_title = 18
-font_text = 16
-font_legend = 20
-font_colorbar = 16
+    from matplotlib import rcParams
+
+    # Plotting parameters:
+    csfont = {'fontname':'Charter', 'fontweight':'regular'}
+    hfont = {'fontname':'Charter', 'fontweight':'bold'}
+    ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
+    rcParams["font.family"] = "serif"
+    rcParams["font.serif"] = "Charter"
+    rcParams['font.size'] = 16
+
+    font_axes = 18
+    font_labels = 24
+    font_annotations = 18
+    font_title = 18
+    font_text = 16
+    font_legend = 20
+    font_colorbar = 16
 
 def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=False, save_plot=False, save_filename=''):
     """
     This function analyzes the movement of centers in the subset of the original
     data set ``X_r`` with respect to the full original data set ``X``.
 
-    **Note:**
-
+    *Note:*
     The original data set ``X`` is first normalized so that each variable ranges
     from 0 to 1. Samples are then extracted from the normalized data set to form
     ``X_r``. The normalization is done so that centers can be compared across
@@ -55,11 +57,10 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     :param save_filename: (optional)
         plot save location/filename.
 
-    **Returns:**
-
-    - ``norm_centers_X`` - normalized centers of the original (full) data set ``X``.
-    - ``norm_centers_X_r`` - normalized centers of the reduced data set ``X_r``.
-    - ``center_movement_percentage`` - relative percentage specifying how the center has moved between ``X`` and ``X_r``. The movement is measured relative to the original (full) data set ``X``.
+    :return:
+        - **norm_centers_X** - normalized centers of the original (full) data set ``X``.
+        - **norm_centers_X_r** - normalized centers of the reduced data set ``X_r``.
+        - **center_movement_percentage** - relative percentage specifying how the center has moved between ``X`` and ``X_r``. The movement is measured relative to the original (full) data set ``X``.
     """
 
     color_X = '#191b27'
@@ -135,8 +136,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     on the original data set X. The last iteration corresponds to eigenvectors
     found on the "equilibrated" data set.
 
-    **Note:**
-
+    *Note:*
     This function plots absolute, (and optionally normalized) values of weights on each
     variable. Columns are normalized dividing by the maximum value. This is
     done in order to compare the movement of weights equally, with the highest,
@@ -250,12 +250,11 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
     :param save_filename: (optional)
         plot save location/filename.
 
-    **Returns:**
-
-    - ``min_at_q2_k`` - label for which the eigenvalue was smallest when q=2.
-    - ``min_at_q3_k`` - label for which the eigenvalue was smallest when q=3.
-    - ``max_at_q2_k`` - label for which the eigenvalue was largest when q=2.
-    - ``max_at_q3_k`` - label for which the eigenvalue was largest when q=3.
+    :return:
+        - **min_at_q2_k** - label for which the eigenvalue was smallest when q=2.
+        - **min_at_q3_k** - label for which the eigenvalue was smallest when q=3.
+        - **max_at_q2_k** - label for which the eigenvalue was largest when q=2.
+        - **max_at_q3_k** - label for which the eigenvalue was largest when q=3.
     """
 
     n_k = len(k_list)
@@ -372,15 +371,14 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3, 4 or 5.
 
-    **Returns:**
-
-    - ``eigenvalues`` - collected eigenvalues from each iteration.
-    - ``eigenvectors`` - collected eigenvectors from each iteration.
-    - ``pc_scores`` - collected PC scores from each iteration.
-    - ``pc_sources`` - collected PC-1 sources from each iteration. This variable is only returned if ``X_sources`` was passed as an input parameter.
-    - ``idx_train`` - the final training indices from the equilibrated iteration.
-    - ``X_center`` - a vector of final centers that were used to center the data set at the last (equlibration) iteration.
-    - ``X_scale`` - a vector of final scales that were used to scale the data set at the last (equlibration) iteration.
+    :return:
+        - **eigenvalues** - collected eigenvalues from each iteration.
+        - **eigenvectors** - collected eigenvectors from each iteration.
+        - **pc_scores** - collected PC scores from each iteration.
+        - **pc_sources** - collected PC-1 sources from each iteration. This variable is only returned if ``X_sources`` was passed as an input parameter.
+        - **idx_train** - the final training indices from the equilibrated iteration.
+        - **X_center** - a vector of final centers that were used to center the data set at the last (equlibration) iteration.
+        - **X_scale** - a vector of final scales that were used to scale the data set at the last (equlibration) iteration.
     """
 
     # Check that `biasing_option` parameter was passed correctly:

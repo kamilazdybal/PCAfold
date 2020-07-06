@@ -61,8 +61,6 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
   #                           /     \
   #                       bin 3       bin 4
 
-.. autofunction:: PCA.clustering.kmeans
-
 .. autofunction:: PCA.clustering.vqpca
 
 VQPCA algorithm used here was first proposed in [parente2009identification]. The general scheme for the iterative procedure is presented below:

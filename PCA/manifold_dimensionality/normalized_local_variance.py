@@ -5,10 +5,12 @@ from cykernel import k_pure_python_cython as cython_kernel_evaluate
 def norm_local_var(xi, yi, keys, sigma_values=np.logspace(-6, 1, 160)):
     """
     Compute a normalized local variance using kernel regression with varying bandwidth sigma
+
     :param xi: independent variable values (size: # observations x # independent variables)
     :param yi: dependent variable values (size: # observations x # dependent variables)
     :param keys: list of strings corresponding to the names of the dependent variables (for saving values in a dictionary)
     :param sigma_values: array of bandwidth values to loop over
+
     :return:
       sigma_values: the array of bandwidth values
       error_dict: dictionary of the local variance for each dependent variable over the bandwidth

@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Manifold dimensionality &mdash; PCA-python  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Train and test data selection" href="train-test-select.html" />
+    <link rel="prev" title="Cluster-biased PCA" href="cluster-biased-pca.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> PCA-python
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="PCA.html">Principal Component Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="clustering.html">Clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cluster-biased-pca.html">Cluster-biased PCA</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Manifold dimensionality</a></li>
+<li class="toctree-l1"><a class="reference internal" href="train-test-select.html">Train and test data selection</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/train-test-selection.html">Selecting train and test data</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PCA-python</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Manifold dimensionality</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/user/manifold-dimensionality.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-PCA.manifold_dimensionality.normalized_local_variance"></span><div class="section" id="manifold-dimensionality">
+<h1>Manifold dimensionality<a class="headerlink" href="#manifold-dimensionality" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt id="PCA.manifold_dimensionality.normalized_local_variance.norm_local_var">
+<code class="sig-prename descclassname">PCA.manifold_dimensionality.normalized_local_variance.</code><code class="sig-name descname">norm_local_var</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xi</span></em>, <em class="sig-param"><span class="n">yi</span></em>, <em class="sig-param"><span class="n">keys</span></em>, <em class="sig-param"><span class="n">sigma_values</span><span class="o">=</span><span class="default_value">array([1e-06, 1.10668789e-06, 1.22475808e-06, 1.35542494e-06, 1.50003236e-06, 1.66006765e-06, 1.83717676e-06, 2.03318127e-06, 2.25009709e-06, 2.4901552e-06, 2.7558246e-06, 3.04983771e-06, 3.37521845e-06, 3.73531338e-06, 4.13382608e-06, 4.57485526e-06, 5.06293691e-06, 5.60309096e-06, 6.20087291e-06, 6.86243095e-06, 7.59456922e-06, 8.40481777e-06, 9.30151004e-06, 1.02938685e-05, 1.13920996e-05, 1.26074987e-05, 1.39525661e-05, 1.54411359e-05, 1.70885181e-05, 1.8911656e-05, 2.09293007e-05, 2.31622036e-05, 2.56333302e-05, 2.8368096e-05, 3.13946283e-05, 3.47440549e-05, 3.84508248e-05, 4.25530621e-05, 4.70929585e-05, 5.21172068e-05, 5.76774816e-05, 6.38309703e-05, 7.06409618e-05, 7.81774969e-05, 8.6518089e-05, 9.57485213e-05, 0.000105963729, 0.000117268775, 0.000129779933, 0.000143625881, 0.000158949023, 0.000175906958, 0.0001946741, 0.000215443469, 0.000238428678, 0.00026386613, 0.000292017451, 0.000323172176, 0.000357650733, 0.000395807735, 0.000438035626, 0.000484768723, 0.000536487674, 0.000593724411, 0.000657067615, 0.000727168772, 0.000804748873, 0.000890605832, 0.000985622688, 0.00109077669, 0.00120714935, 0.00133593757, 0.00147846593, 0.00163620034, 0.0018107631, 0.00200394959, 0.00221774674, 0.00245435346, 0.00271620325, 0.00300598924, 0.00332669188, 0.00368160962, 0.00407439278, 0.00450908114, 0.00499014549, 0.00552253357, 0.00611172102, 0.00676376763, 0.00748537972, 0.00828397908, 0.00916777932, 0.0101458703, 0.0112283118, 0.0124262367, 0.0137519657, 0.0152191339, 0.0168428311, 0.0186397572, 0.0206283936, 0.0228291933, 0.0252647918, 0.0279602391, 0.030943258, 0.0342445288, 0.0378980053, 0.0419412635, 0.0464158883, 0.0513679015, 0.0568482344, 0.0629132526, 0.0696253347, 0.0770535146, 0.0852741914, 0.0943719149, 0.104440255, 0.115582766, 0.127914047, 0.141560926, 0.156663763, 0.173377889, 0.19187521, 0.212345971, 0.235000714, 0.260072444, 0.287819024, 0.318525829, 0.352508677, 0.390117083, 0.431737851, 0.477799051, 0.528774423, 0.58518825, 0.647620749, 0.71671404, 0.793178748, 0.877801314, 0.971452083, 1.07509425, 1.18979379, 1.31673038, 1.45720956, 1.61267617, 1.78472919, 1.97513818, 2.1858615, 2.41906645, 2.67715155, 2.96277119, 3.278863, 3.62867797, 4.01581396, 4.44425267, 4.91840061, 5.44313438, 6.0238509, 6.66652284, 7.37776008, 8.16487773, 9.0359713, 10.0])</span></em><span class="sig-paren">)</span><a class="headerlink" href="#PCA.manifold_dimensionality.normalized_local_variance.norm_local_var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a normalized local variance using kernel regression with varying bandwidth sigma</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xi</strong> – independent variable values (size: # observations x # independent variables)</p></li>
+<li><p><strong>yi</strong> – dependent variable values (size: # observations x # dependent variables)</p></li>
+<li><p><strong>keys</strong> – list of strings corresponding to the names of the dependent variables (for saving values in a dictionary)</p></li>
+<li><p><strong>sigma_values</strong> – array of bandwidth values to loop over</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>sigma_values: the array of bandwidth values
+error_dict: dictionary of the local variance for each dependent variable over the bandwidth
+ierror_dict: dictionary of the index for the observation contributing most to the local variance for each dependent variable
+error_inf_dict: dictionary of the global variance for each dependent variable
+sigma_rise_dict: dictionary of the bandwidth where the normalized variance increases by 10% for each dependent variable
+integral_dict: dictionary of the integral of the normalized variance over the bandwidth for each dependent variable</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="train-test-select.html" class="btn btn-neutral float-right" title="Train and test data selection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="cluster-biased-pca.html" class="btn btn-neutral float-left" title="Cluster-biased PCA" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Elizabeth Armstrong, Kamila Zdybal
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
