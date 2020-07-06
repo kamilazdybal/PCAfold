@@ -3,7 +3,7 @@
 Clustering
 ==========
 
-``clustering.py`` module contains functions for classifying data sets into local clusters and performing some basic operations on clusters :cite:`everitt2009`, :cite:`kaufman2009finding`.
+``clustering.py`` module contains functions for classifying data sets into local clusters and performing some basic operations on clusters :cite:`Everitt2009`, :cite:`Kaufman2009`.
 
 Clustering functions
 --------------------
@@ -63,7 +63,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
 
 .. autofunction:: PCA.clustering.vqpca
 
-VQPCA algorithm used here was first proposed in :cite:`parente2009identification`. The general scheme for the iterative procedure is presented below:
+VQPCA algorithm used here was first proposed in :cite:`Parente2009`. The general scheme for the iterative procedure is presented below:
 
 .. image:: ../images/clustering-vqpca.png
   :width: 700
@@ -85,4 +85,4 @@ Auxiliary functions
 Bibliography
 ------------
 
-.. bibliography:: refs.bib
+.. bibliography:: clustering.bib

@@ -4,7 +4,7 @@ Train and test data selection
 =============================
 
 ``train_test_select.py`` module contains functions for splitting data sets into train and test data for use in machine learning algorithms.
-Apart from random splitting that can be achieved with the commonly used ``sklearn.model_selection.train_test_split``, new methods are implemented here that allow for purposive selection, such as drawing samples at a certain amount from local clusters.
+Apart from random splitting that can be achieved with the commonly used ``sklearn.model_selection.train_test_split``, new methods are implemented here that allow for purposive sampling, such as drawing samples at a certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
 The general idea is to divide the entire data set ``X`` into train and test samples as presented below:
 
 .. image:: ../images/tts-train-test-select.png
@@ -67,3 +67,8 @@ Select at random
 ^^^^^^^^^^^^^^^^
 
 .. autofunction:: PCA.train_test_select.train_test_split_random
+
+Bibliography
+------------
+
+.. bibliography:: train-test-select.bib
