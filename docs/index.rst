@@ -1,16 +1,12 @@
-PCA-Python
-==========
+insertPyName
+============
 
-This is a documentation for the ``PCA-Python`` repository.
-The core functionality is performing dimensionality reduction using Principal Component Analysis (PCA).
+``insertPyName`` is a Python library for obtaining and analyzing empirical low-dimensional manifolds using Principal Component Analysis (PCA).
 
-General notions
----------------
+The general overview for the usage of modules is presented below:
 
-It is assumed that the raw data set ``X`` that is an input parameter for many functions in this project has dimensions ``(n_observations, n_variables)``:
-
-.. image:: images/data-set.png
-  :width: 300
+.. image:: images/PCA-Python-overview.png
+  :width: 700
   :align: center
 
 .. toctree::
