@@ -32,6 +32,11 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     This function analyzes the movement of centers in the subset of the original
     data set ``X_r`` with respect to the full original data set ``X``.
 
+    It returns the normalized centers of the original data set
+    ``norm_centers_X`` and normalized centers of the reduced data set
+    ``norm_centers_X_r``. It also returns the percentage of the centers movement
+    ``center_movement_percentage`` (the same as is plotted in the figure).
+
     *Note:*
     The original data set ``X`` is first normalized so that each variable ranges
     from 0 to 1. Samples are then extracted from the normalized data set to form
@@ -131,9 +136,9 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     """
     This function analyzes the movement of weights on an eigenvector obtained
     from a reduced data set at each iteration. The color-coding marks the
-    iteration number - if there is a consistent trend the coloring should form
+    iteration number. If there is a consistent trend, the coloring should form
     a clear trajectory. The zero-th iteration corresponds to eigenvectors found
-    on the original data set X. The last iteration corresponds to eigenvectors
+    on the original data set ``X``. The last iteration corresponds to eigenvectors
     found on the "equilibrated" data set.
 
     *Note:*
