@@ -3,7 +3,7 @@
 Clustering
 ==========
 
-``clustering.py`` module contains functions for classifying data sets into local clusters and performing some basic operations on clusters [1], [2].
+``clustering.py`` module contains functions for classifying data sets into local clusters and performing some basic operations on clusters :cite:`everitt2009`, :cite:`kaufman2009finding`.
 
 Clustering functions
 --------------------

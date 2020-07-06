@@ -1,9 +1,0 @@
-PCA-python
-==========
-
-.. toctree::
-   :maxdepth: 4
-
-   Example
-   PCA
-   setup
