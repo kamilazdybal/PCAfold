@@ -63,7 +63,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
 
 .. autofunction:: PCA.clustering.vqpca
 
-VQPCA algorithm used here was first proposed in [parente2009identification]. The general scheme for the iterative procedure is presented below:
+VQPCA algorithm used here was first proposed in :cite:`parente2009identification` Hey hey. The general scheme for the iterative procedure is presented below:
 
 .. image:: ../images/clustering-vqpca.png
   :width: 700
@@ -81,3 +81,8 @@ Auxiliary functions
 .. autofunction:: PCA.clustering.get_partition
 
 .. autofunction:: PCA.clustering.get_populations
+
+Bibliography
+------------
+
+.. bibliography:: refs.bib

@@ -63,7 +63,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, v
     :param verbose: (optional)
         boolean for printing clustering details.
 
-    :return:*
+    :return:
         - **idx_train** - indices of the training data.
         - **idx_test** - indices of the test data.
     """
