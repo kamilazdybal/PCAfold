@@ -10,3 +10,4 @@
 *.cpp
 build/
 *builddir/
+*_build
