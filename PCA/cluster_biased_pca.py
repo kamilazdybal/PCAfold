@@ -67,17 +67,17 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     color_X_r = '#ff2f18'
     marker_size = 50
 
-    (n_obs_X, n_vars_X) = np.shape(X)
+    (n_observations_X, n_variables_X) = np.shape(X)
 
     if len(variable_names) != 0:
-        n_vars = len(variable_names)
+        n_variables = len(variable_names)
     else:
-        variable_names = ['X_' + str(i) for i in range(0, n_vars_X)]
+        variable_names = ['X_' + str(i) for i in range(0, n_variables_X)]
 
     if len(plot_variables) != 0:
         X = X[:,plot_variables]
         variable_names = [variable_names[i] for i in plot_variables]
-        (_, n_vars) = np.shape(X)
+        (_, n_variables) = np.shape(X)
 
     X_normalized = (X - np.min(X, axis=0))
     X_normalized = X_normalized / np.max(X_normalized, axis=0)
@@ -92,9 +92,9 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     # Compute the relative percentage by how much the center has moved:
     center_movement_percentage = (norm_centers_X_r - norm_centers_X) / norm_centers_X * 100
 
-    x_range = np.arange(1, n_vars+1)
+    x_range = np.arange(1, n_variables+1)
 
-    fig, ax = plt.subplots(figsize=(n_vars, 6))
+    fig, ax = plt.subplots(figsize=(n_variables, 6))
 
     plt.scatter(x_range, norm_centers_X, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1)
     plt.scatter(x_range, norm_centers_X_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1)
@@ -102,7 +102,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     plt.xticks(x_range, variable_names, fontsize=font_annotations, **csfont)
     plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
-    plt.xlim(0, n_vars+1.5)
+    plt.xlim(0, n_variables+1.5)
     plt.grid(alpha=0.3)
 
     if title != False:
@@ -172,18 +172,18 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         correspond to variables in the ``eigenvectors_matrix``.
     """
 
-    (n_versions, n_vars) = np.shape(eigenvector_matrix)
+    (n_versions, n_variables) = np.shape(eigenvector_matrix)
 
     # Check that the number of columns in the eigenvector matrix is equal to the
     # number of elements in the `variable_names` vector:
-    if len(variable_names) != n_vars:
+    if len(variable_names) != n_variables:
         raise ValueError("The number of variables in the eigenvector matrix is not equal to the number of variable names.")
 
     if len(plot_variables) != 0:
 
         eigenvector_matrix = eigenvector_matrix[:,plot_variables]
         variable_names = [variable_names[i] for i in plot_variables]
-        (_, n_vars) = np.shape(eigenvector_matrix)
+        (_, n_variables) = np.shape(eigenvector_matrix)
 
     # Normalize each column inside `eigenvector_weights`:
     if normalize == True:
@@ -194,11 +194,11 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
     else:
         eigenvector_matrix = np.abs(eigenvector_matrix)
 
-    x_range = np.arange(0,n_vars)
+    x_range = np.arange(0,n_variables)
     color_range = np.arange(0, n_versions)
 
     # Plot the eigenvector weights movement:
-    fig, ax = plt.subplots(figsize=(n_vars, 6))
+    fig, ax = plt.subplots(figsize=(n_variables, 6))
 
     for idx, variable in enumerate(variable_names):
         scat = ax.scatter(np.repeat(idx, n_versions), eigenvector_matrix[:,idx], c=color_range, cmap=plt.cm.Spectral)
@@ -211,7 +211,7 @@ def analyze_eigenvector_weights_movement(eigenvector_matrix, variable_names, plo
         plt.ylabel('Absolute weight [-]', fontsize=font_labels, **csfont)
 
     plt.ylim(-0.05,1.05)
-    plt.xlim(-1, n_vars)
+    plt.xlim(-1, n_variables)
     plt.grid(alpha=0.3)
 
     if title != False:
@@ -258,11 +258,11 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
     """
 
     n_k = len(k_list)
-    (n_obs, n_vars) = np.shape(X)
-    x_range = np.arange(1, n_vars+1)
+    (n_observations, n_variables) = np.shape(X)
+    x_range = np.arange(1, n_variables+1)
     colors = plt.cm.Blues(np.linspace(0.3,1,n_k))
 
-    fig, ax = plt.subplots(figsize=(n_vars, 6))
+    fig, ax = plt.subplots(figsize=(n_variables, 6))
 
     for i_idx, k in enumerate(k_list):
 
@@ -271,7 +271,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
 
         # Plot the eigenvalue distribution when PCA is performed on the original data set:
         if i_idx==0:
-            original_distribution = plt.plot(np.arange(1, n_vars+1), eigenvalues[:,0], 'r-', linewidth=3, label='Original')
+            original_distribution = plt.plot(np.arange(1, n_variables+1), eigenvalues[:,0], 'r-', linewidth=3, label='Original')
 
             # Initialize the minimum eigenvalue at q=2 and q=3:
             min_at_q2 = eigenvalues[1,0]
@@ -297,34 +297,34 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
             max_at_q3_k = k
 
         # Plot the eigenvalue distribution from the current equilibrated X_r for the current idx:
-        plt.plot(np.arange(1, n_vars+1), eigenvalues[:,-1], 'o--', c=colors[i_idx], label='$k=' + str(k) + '$')
+        plt.plot(np.arange(1, n_variables+1), eigenvalues[:,-1], 'o--', c=colors[i_idx], label='$k=' + str(k) + '$')
 
     plt.xticks(x_range, fontsize=font_annotations, **csfont)
     plt.xlabel('q [-]', fontsize=font_labels, **csfont)
     plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
-    plt.xlim(0, n_vars+1.5)
+    plt.xlim(0, n_variables+1.5)
     plt.grid(alpha=0.3)
 
     if min_at_q2_k==0:
-        plt.text(n_vars/3, 0.93, 'Min at $q=2$: Original, $\lambda=' + str(round(min_at_q2,3)) + '$')
+        plt.text(n_variables/3, 0.93, 'Min at $q=2$: Original, $\lambda=' + str(round(min_at_q2,3)) + '$')
     else:
-        plt.text(n_vars/3, 0.93, 'Min at $q=2$: $k=' + str(min_at_q2_k) + '$, $\lambda=' + str(round(min_at_q2,3)) + '$')
+        plt.text(n_variables/3, 0.93, 'Min at $q=2$: $k=' + str(min_at_q2_k) + '$, $\lambda=' + str(round(min_at_q2,3)) + '$')
 
     if min_at_q3_k==0:
-        plt.text(n_vars/3, 0.79, 'Min at $q=3$: Original, $\lambda=' + str(round(min_at_q3,3)) + '$')
+        plt.text(n_variables/3, 0.79, 'Min at $q=3$: Original, $\lambda=' + str(round(min_at_q3,3)) + '$')
     else:
-        plt.text(n_vars/3, 0.79, 'Min at $q=3$: $k=' + str(min_at_q3_k) + '$, $\lambda=' + str(round(min_at_q3,3)) + '$')
+        plt.text(n_variables/3, 0.79, 'Min at $q=3$: $k=' + str(min_at_q3_k) + '$, $\lambda=' + str(round(min_at_q3,3)) + '$')
 
     if max_at_q2_k==0:
-        plt.text(n_vars/3, 0.86, 'Max at $q=2$: Original, $\lambda=' + str(round(max_at_q2,3)) + '$')
+        plt.text(n_variables/3, 0.86, 'Max at $q=2$: Original, $\lambda=' + str(round(max_at_q2,3)) + '$')
     else:
-        plt.text(n_vars/3, 0.86, 'Max at $q=2$: $k=' + str(max_at_q2_k) + '$, $\lambda=' + str(round(max_at_q2,3)) + '$')
+        plt.text(n_variables/3, 0.86, 'Max at $q=2$: $k=' + str(max_at_q2_k) + '$, $\lambda=' + str(round(max_at_q2,3)) + '$')
 
     if max_at_q3_k==0:
-        plt.text(n_vars/3, 0.72, 'Max at $q=3$: Original, $\lambda=' + str(round(max_at_q3,3)) + '$')
+        plt.text(n_variables/3, 0.72, 'Max at $q=3$: Original, $\lambda=' + str(round(max_at_q3,3)) + '$')
     else:
-        plt.text(n_vars/3, 0.72, 'Max at $q=3$: $k=' + str(max_at_q3_k) + '$, $\lambda=' + str(round(max_at_q3,3)) + '$')
+        plt.text(n_variables/3, 0.72, 'Max at $q=3$: $k=' + str(max_at_q3_k) + '$, $\lambda=' + str(round(max_at_q3,3)) + '$')
 
     lgnd = plt.legend(fontsize=font_legend-2, loc="upper right")
     plt.setp(lgnd.texts, **csfont)
@@ -386,7 +386,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option
     if biasing_option not in _biasing_options:
         raise ValueError("Option can only be 1-5.")
 
-    (n_obs, n_vars) = np.shape(X)
+    (n_observations, n_variables) = np.shape(X)
     populations = cl.get_populations(idx)
     N_smallest_cluster = np.min(populations)
     k = len(populations)
@@ -395,15 +395,15 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option
         print(populations)
 
     # Initialize matrices:
-    eigenvectors_1 = np.zeros((1, n_vars))
-    eigenvectors_2 = np.zeros((1, n_vars))
-    eigenvalues = np.zeros((n_vars, 1))
+    eigenvectors_1 = np.zeros((1, n_variables))
+    eigenvectors_2 = np.zeros((1, n_variables))
+    eigenvalues = np.zeros((n_variables, 1))
     if biasing_option != 4:
-        pc_scores_1 = np.zeros((n_obs,1))
-        pc_scores_2 = np.zeros((n_obs,1))
+        pc_scores_1 = np.zeros((n_observations,1))
+        pc_scores_2 = np.zeros((n_observations,1))
         if len(X_source) != 0:
-            pc_sources_1 = np.zeros((n_obs,1))
-            pc_sources_2 = np.zeros((n_obs,1))
+            pc_sources_1 = np.zeros((n_observations,1))
+            pc_sources_2 = np.zeros((n_observations,1))
     else:
         # If biasing_option is 4, we need to use a list because the number of observations will decrease at each iteration:
         pc_scores_1 = []
@@ -432,7 +432,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option
     eigenvectors_2 = np.vstack((eigenvectors_2, global_eigenvectors[:,1].T))
 
     # Append the global eigenvalues:
-    eigenvalues = np.hstack((eigenvalues, np.reshape(global_eigenvalues, (n_vars, 1))/maximum_global_eigenvalue))
+    eigenvalues = np.hstack((eigenvalues, np.reshape(global_eigenvalues, (n_variables, 1))/maximum_global_eigenvalue))
 
     # Compute global PC-scores:
     global_pc_scores = pca_global.x2eta(X, nocenter=False)
@@ -674,7 +674,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option
         eigenvectors_2 = np.vstack((eigenvectors_2, eigenvectors[:,1].T))
 
         # Append the local eigenvalues:
-        eigenvalues = np.hstack((eigenvalues, np.reshape(local_eigenvalues, (n_vars, 1))/maximum_local_eigenvalue))
+        eigenvalues = np.hstack((eigenvalues, np.reshape(local_eigenvalues, (n_variables, 1))/maximum_local_eigenvalue))
 
     # Remove the first row of zeros:
     eigenvectors_1 = eigenvectors_1[1::,:]

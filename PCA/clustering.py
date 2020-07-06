@@ -361,11 +361,11 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
     import numpy.linalg
     from sklearn.decomposition import PCA as sklPCA
 
-    (n_obs, n_vars) = np.shape(X)
+    (n_observations, n_variables) = np.shape(X)
 
     # Check that the provided idx_0 has the same number of entries as there are observations in X:
     if len(idx_0) > 0:
-        if len(idx_0) != n_obs:
+        if len(idx_0) != n_observations:
             raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx_0` vector.")
 
     # Initialize the iteration counter:
@@ -392,8 +392,8 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
     # Populate the initial eigenvectors and scalings matrices (scalings will not
     # be updated later in the algorithm since we do not scale the data locally):
     for i in range(0,k):
-        eigenvectors.append(np.eye(n_vars, n_pcs))
-        scalings.append(np.ones((n_vars,)))
+        eigenvectors.append(np.eye(n_variables, n_pcs))
+        scalings.append(np.ones((n_variables,)))
 
     # Center and scale the data:
     (X_pre_processed, _, _) = PCA.center_scale(X, scaling_criteria)
@@ -407,7 +407,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
     else:
 
         # Initialize centroids automatically as observations uniformly selected from X:
-        centroids_indices = [int(i) for i in np.linspace(0, n_obs-1, k+2)]
+        centroids_indices = [int(i) for i in np.linspace(0, n_observations-1, k+2)]
         centroids_indices.pop()
         centroids_indices.pop(0)
         centroids = X_pre_processed[centroids_indices, :]
@@ -419,7 +419,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
             print('\nIteration: ' + str(iteration) + '\n----------')
 
         # Initialize the reconstruction error matrix:
-        sq_rec_err = np.zeros((n_obs, k))
+        sq_rec_err = np.zeros((n_observations, k))
 
         # Initialize the convergence of the cluster centroids:
         centroids_convergence = 0
@@ -431,7 +431,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         for j in range(0,k):
 
             D = np.diag(scalings[j])
-            C_mat = np.tile(centroids[j, :], (n_obs, 1))
+            C_mat = np.tile(centroids[j, :], (n_observations, 1))
 
             result = np.dot(numpy.linalg.inv(D), np.dot(eigenvectors[j], np.dot(np.transpose(eigenvectors[j]), D)))
             rec_err_os = (X_pre_processed - C_mat - np.dot((X_pre_processed - C_mat), result))
@@ -466,7 +466,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
             print('Global mean recontruction error at iteration ' + str(iteration) + ' is ' + str(eps_rec_new) + '.\n')
 
         # Find the new cluster centroids:
-        centroids_new = np.zeros((k, n_vars))
+        centroids_new = np.zeros((k, n_variables))
 
         for j in range(0,k):
             centroids_new[j, :] = np.mean(nz_X_k[j], axis=0)
@@ -504,7 +504,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
 
             # Perform PCA:
             centered_nz_X_k = nz_X_k[j] - np.mean(nz_X_k[j], axis=0)
-            covariance_matrix = np.dot(np.transpose(centered_nz_X_k), centered_nz_X_k) / (n_obs-1)
+            covariance_matrix = np.dot(np.transpose(centered_nz_X_k), centered_nz_X_k) / (n_observations-1)
             L, PCs = numpy.linalg.eig(covariance_matrix)
             PCs = np.real(PCs)
 
@@ -525,7 +525,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
     # Check that the number of entries inside idx is the same as the number of observations:
-    if len(idx) != n_obs:
+    if len(idx) != n_observations:
         raise ValueError("The number of entires inside `idx` is not equal to the number of observations in the data set `X`.")
 
     return(np.asarray(idx))
@@ -631,17 +631,17 @@ def get_centroids(X, idx):
     if len(np.unique(idx)) != (np.max(idx)+1):
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
-    (n_obs, n_vars) = np.shape(X)
+    (n_observations, n_variables) = np.shape(X)
 
     # Check if the number of indices in `idx` is the same as the number of observations in a data set:
-    if n_obs != len(idx):
+    if n_observations != len(idx):
         raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
 
     # Find the number of clusters:
     k = len(np.unique(idx))
 
     # Initialize the centroids matrix:
-    centroids = np.zeros((k, n_vars))
+    centroids = np.zeros((k, n_variables))
 
     # Compute the centroids:
     for i in range(0,k):
@@ -679,10 +679,10 @@ def get_partition(X, idx, verbose=False):
     """
 
     try:
-        (n_obs, n_vars) = np.shape(X)
+        (n_observations, n_variables) = np.shape(X)
     except:
-        (n_obs, ) = np.shape(X)
-        n_vars = 1
+        (n_observations, ) = np.shape(X)
+        n_variables = 1
 
     # Remove empty clusters from indexing:
     if len(np.unique(idx)) != (np.max(idx)+1):
@@ -703,12 +703,12 @@ def get_partition(X, idx, verbose=False):
         idx_clust.append(indices_to_append)
         n_points[i] = len(indices_to_append)
 
-        if ((n_points[i] < n_vars) and (n_points[i] > 0)):
+        if ((n_points[i] < n_variables) and (n_points[i] > 0)):
             if verbose==True:
                 print('Too few points (' + str(int(n_points[i])) + ') in cluster ' + str(i) + ', cluster will be removed.')
 
     # Find those cluster numbers where the number of observations is not less than number of variables:
-    nz_idx = np.argwhere(n_points >= n_vars).ravel()
+    nz_idx = np.argwhere(n_points >= n_variables).ravel()
 
     # Compute the new number of clusters taking into account removed clusters:
     k_new = len(nz_idx)
@@ -768,7 +768,7 @@ def test():
         print('Test of variable_bins failed.')
         return 0
     try:
-        (n_obs,) = np.shape(idx_1)
+        (n_observations,) = np.shape(idx_1)
     except:
         print('Test of variable_bins failed.')
         return 0
@@ -782,7 +782,7 @@ def test():
         print('Test of predefined_variable_bins failed.')
         return 0
     try:
-        (n_obs,) = np.shape(idx_2)
+        (n_observations,) = np.shape(idx_2)
     except:
         print('Test of predefined_variable_bins failed.')
         return 0
@@ -796,7 +796,7 @@ def test():
         print('Test of mixture_fraction_bins failed.')
         return 0
     try:
-        (n_obs,) = np.shape(idx_3)
+        (n_observations,) = np.shape(idx_3)
     except:
         print('Test of mixture_fraction_bins failed.')
         return 0
@@ -810,7 +810,7 @@ def test():
         print('Test of vqpca failed.')
         return 0
     try:
-        (n_obs,) = np.shape(idx_5)
+        (n_observations,) = np.shape(idx_5)
     except:
         print('Test of vqpca failed.')
         return 0
@@ -824,7 +824,7 @@ def test():
         print('Test of pc_source_bins failed.')
         return 0
     try:
-        (n_obs,) = np.shape(idx_6)
+        (n_observations,) = np.shape(idx_6)
     except:
         print('Test of pc_source_bins failed.')
         return 0
