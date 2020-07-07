@@ -1,9 +1,9 @@
 insertPyName
 ============
 
-``insertPyName`` is a Python library for obtaining and analyzing empirical low-dimensional manifolds using Principal Component Analysis (PCA).
+*insertPyName* is a Python library for generating and analyzing empirical low-dimensional manifolds obtained via Principal Component Analysis.
 
-The general overview for the usage of modules is presented below:
+The general overview for the usage of *insertPyName* modules is presented below:
 
 .. image:: images/PCA-Python-overview.png
   :width: 700

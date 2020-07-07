@@ -37,9 +37,9 @@ Train data is always selected as an equal number of samples from local clusters 
 
 .. math::
 
-    \verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_obs|}{\verb|k| \cdot 100} \Big)
+    \verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_observations|}{\verb|k| \cdot 100} \Big)
 
-where ``n_obs`` is the total number of samples in a data set and ``k`` is the number of clusters.
+where ``n_observations`` is the total number of samples in a data set and ``k`` is the number of clusters.
 
 Test data
 """""""""
