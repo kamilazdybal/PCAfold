@@ -1,9 +1,9 @@
-.. module:: PCA.clustering
+.. module:: PCA.clustering_data_data
 
 Clustering
 ==========
 
-``clustering.py`` module contains functions for classifying data sets into local clusters and performing some basic operations on clusters :cite:`Everitt2009`, :cite:`Kaufman2009`.
+``clustering_data.py`` module contains functions for classifying data sets into local clusters and performing some basic operations on clusters :cite:`Everitt2009`, :cite:`Kaufman2009`.
 
 Clustering functions
 --------------------
@@ -16,7 +16,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
 
 .. note:: The first cluster has index ``0`` within all ``idx`` vectors returned. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 
-.. autofunction:: PCA.clustering.variable_bins
+.. autofunction:: PCA.clustering_data.variable_bins
 
 .. code:: python
 
@@ -24,7 +24,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
   #   |----------|----------|----------|----------|----------|
   #      bin 1      bin 2      bin 3       bin 4     bin 5
 
-.. autofunction:: PCA.clustering.predefined_variable_bins
+.. autofunction:: PCA.clustering_data.predefined_variable_bins
 
 .. code:: python
 
@@ -32,7 +32,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
   #   |----------|--------------------|------------|---------|
   #       bin 1           bin 2            bin 3      bin 4
 
-.. autofunction:: PCA.clustering.mixture_fraction_bins
+.. autofunction:: PCA.clustering_data.mixture_fraction_bins
 
 .. code:: python
 
@@ -40,7 +40,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
   #   |-------|-------|------------|------------|------------|
   #     bin 1   bin 2     bin 3        bin 4         bin 5
 
-.. autofunction:: PCA.clustering.pc_source_bins
+.. autofunction:: PCA.clustering_data.pc_source_bins
 
 .. code:: python
 
@@ -61,7 +61,7 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
   #                           /     \
   #                       bin 3       bin 4
 
-.. autofunction:: PCA.clustering.vqpca
+.. autofunction:: PCA.clustering_data.vqpca
 
 VQPCA algorithm used here was first proposed in :cite:`Parente2009`. The general scheme for the iterative procedure is presented below:
 
@@ -72,15 +72,15 @@ VQPCA algorithm used here was first proposed in :cite:`Parente2009`. The general
 Auxiliary functions
 -------------------
 
-.. autofunction:: PCA.clustering.degrade_clusters
+.. autofunction:: PCA.clustering_data.degrade_clusters
 
-.. autofunction:: PCA.clustering.flip_clusters
+.. autofunction:: PCA.clustering_data.flip_clusters
 
-.. autofunction:: PCA.clustering.get_centroids
+.. autofunction:: PCA.clustering_data.get_centroids
 
-.. autofunction:: PCA.clustering.get_partition
+.. autofunction:: PCA.clustering_data.get_partition
 
-.. autofunction:: PCA.clustering.get_populations
+.. autofunction:: PCA.clustering_data.get_populations
 
 Bibliography
 ------------

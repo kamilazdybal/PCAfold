@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import PCA.clustering
+import PCA.clustering_data as cl
 
 def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, bar50=True, verbose=False):
     """
@@ -75,7 +75,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
 
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = PCA.clustering.degrade_clusters(idx, verbose=False)
+        (idx, k_new) = cl.degrade_clusters(idx, verbose=False)
 
     # Vector of indices 0..n_observations:
     idx_full = np.arange(0,n_observations)
@@ -200,7 +200,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = PCA.clustering.degrade_clusters(idx, verbose=False)
+        (idx, k_new) = cl.degrade_clusters(idx, verbose=False)
 
     n_observations = len(idx)
     idx_full = np.arange(0,n_observations)

@@ -1,10 +1,10 @@
-insertPyName
+PCAfold
 ============
 
-*insertPyName* is a Python library for generating and analyzing empirical low-dimensional manifolds obtained via Principal Component Analysis (PCA).
+*PCAfold* is a Python library for generating and analyzing empirical low-dimensional manifolds obtained via Principal Component Analysis (PCA).
 It incorporates data pre-processing, clustering and sampling techniques using PCA under the hood.
 
-A general overview for how *insertPyName* modules can combine into one workflow is presented below:
+A general overview for how *PCAfold* modules can combine into one workflow is presented below:
 
 .. image:: images/PCA-Python-overview.png
   :width: 700

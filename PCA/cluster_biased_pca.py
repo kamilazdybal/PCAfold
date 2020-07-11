@@ -4,7 +4,7 @@ import matplotlib.cm as cm
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 import PCA.PCA as P
-import PCA.clustering as cl
+import PCA.clustering_data as cl
 import PCA.train_test_select as tts
 
 def plotting_styles():
