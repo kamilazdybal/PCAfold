@@ -18,48 +18,48 @@ Each function that clusters the data set returns a vector ``idx`` of type ``nump
 
 .. autofunction:: PCA.clustering_data.variable_bins
 
-.. code:: python
+.. code-block:: text
 
-  # var_min                                                var_max
-  #   |----------|----------|----------|----------|----------|
-  #      bin 1      bin 2      bin 3       bin 4     bin 5
+   var_min                                                var_max
+     |----------|----------|----------|----------|----------|
+        bin 1      bin 2      bin 3       bin 4     bin 5
 
 .. autofunction:: PCA.clustering_data.predefined_variable_bins
 
-.. code:: python
+.. code-block:: text
 
-  # var_min     value_1              value_2      value_3  var_max
-  #   |----------|--------------------|------------|---------|
-  #       bin 1           bin 2            bin 3      bin 4
+   var_min     value_1              value_2      value_3  var_max
+     |----------|--------------------|------------|---------|
+         bin 1           bin 2            bin 3      bin 4
 
 .. autofunction:: PCA.clustering_data.mixture_fraction_bins
 
-.. code:: python
+.. code-block:: text
 
-  # Z_min           Z_stoich                                 Z_max
-  #   |-------|-------|------------|------------|------------|
-  #     bin 1   bin 2     bin 3        bin 4         bin 5
+   Z_min           Z_stoich                                 Z_max
+     |-------|-------|------------|------------|------------|
+       bin 1   bin 2     bin 3        bin 4         bin 5
 
 .. autofunction:: PCA.clustering_data.pc_source_bins
 
-.. code:: python
+.. code-block:: text
 
-  #                  -offset         +offset
-  #                           \    /
-  # pc_source_min             | 0 |                          pc_source_max
-  #     |----------|----------|---|----------|----------|----------|
-  #         bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
+                    -offset         +offset
+                             \    /
+   pc_source_min             | 0 |                          pc_source_max
+       |----------|----------|---|----------|----------|----------|
+           bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
 
 
-.. code:: python
+.. code-block:: text
 
-  #                  -offset     0     +offset
-  #                           \  |   /
-  # pc_source_min             |  |  |                          pc_source_max
-  #     |----------|----------|--|--|----------|----------|----------|
-  #        bin 1      bin 2    /   \   bin 5      bin 6      bin 7
-  #                           /     \
-  #                       bin 3       bin 4
+                    -offset     0     +offset
+                             \  |   /
+   pc_source_min             |  |  |                          pc_source_max
+       |----------|----------|--|--|----------|----------|----------|
+          bin 1      bin 2    /   \   bin 5      bin 6      bin 7
+                             /     \
+                         bin 3       bin 4
 
 .. autofunction:: PCA.clustering_data.vqpca
 

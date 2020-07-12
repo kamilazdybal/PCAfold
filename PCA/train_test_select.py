@@ -90,7 +90,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
     n_of_samples = int(perc*n_observations/k/100)
 
     if verbose == True:
-        print("The number of samples that will be select from each cluster is " + str(n_of_samples) + ".\n")
+        print("The number of train samples that will be select from each cluster is " + str(n_of_samples) + ".\n")
 
     smallest_cluster_size = n_observations
 
@@ -111,7 +111,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
             cluster_train = np.array(random.sample(cluster, int(0.5*len(cluster))))
 
             if verbose == True:
-                print("Cluster " + str(cl+1) + ": taking " + str(int(0.5*len(cluster))) + " training samples out of " + str(len(cluster)) + " observations (%.1f" % (int(0.5*len(cluster))/len(cluster)*100) + "%).")
+                print("Cluster " + str(cl+1) + ": taking " + str(int(0.5*len(cluster))) + " train samples out of " + str(len(cluster)) + " observations (%.1f" % (int(0.5*len(cluster))/len(cluster)*100) + "%).")
 
         else:
 
@@ -119,7 +119,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
             cluster_train = np.array(random.sample(cluster, n_of_samples))
 
             if verbose == True:
-                print("Cluster " + str(cl+1) + ": taking " + str(n_of_samples) + " training samples out of " + str(len(cluster)) + " observations (%.1f" % (n_of_samples/len(cluster)*100) + "%).")
+                print("Cluster " + str(cl+1) + ": taking " + str(n_of_samples) + " train samples out of " + str(len(cluster)) + " observations (%.1f" % (n_of_samples/len(cluster)*100) + "%).")
 
         idx_train = np.concatenate((idx_train, cluster_train))
 
@@ -145,7 +145,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
                 print("Cluster " + str(cl+1) + ": taking " + str(minimum_test_samples) + " test samples out of " + str(len(cluster_test[cl])) + " remaining observations (%.1f" % (minimum_test_samples/len(cluster_test[cl])*100) + "%).")
 
     if verbose == True:
-        print('\nSelected ' + str(np.size(idx_train)) + ' training samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
+        print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
 
     if (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
         raise ValueError("Sizes of train and test data do not sum up to the total number of observations.")
@@ -164,7 +164,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     *Note:*
     If the clusters sizes are comparable, using this function is not recommended
     as it might give similar train sample distribution as random sampling
-    (`train_test_split_random`). It might still be useful in cases where one
+    (``train_test_split_random``). It might still be useful in cases where one
     cluster is significantly smaller than others and there is a chance that this
     cluster will not get reflected in the train data if random sampling was used.
 
@@ -223,10 +223,10 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
         idx_test = np.concatenate((idx_test, cluster_test))
 
         if verbose == True:
-            print("Cluster " + str(cl+1) + ": taking " + str(len(cluster_train)) + " training samples out of " + str(len(cluster)) + " observations (%.1f" % (len(cluster_train)/len(cluster)*100) + "%).")
+            print("Cluster " + str(cl+1) + ": taking " + str(len(cluster_train)) + " train samples out of " + str(len(cluster)) + " observations (%.1f" % (len(cluster_train)/len(cluster)*100) + "%).")
 
     if verbose == True:
-        print('\nSelected ' + str(np.size(idx_train)) + ' training samples (' + str(perc) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(100-perc) + '%).\n')
+        print('\nSelected ' + str(np.size(idx_train)) + ' train samples (' + str(perc) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(100-perc) + '%).\n')
 
     if np.size(idx_test) + np.size(idx_train) != n_observations:
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
@@ -380,7 +380,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
             idx_test = np.concatenate((idx_test, cluster_test))
 
             if verbose == True:
-                print("Cluster " + str(key+1) + ": taking " + str(len(cluster_train)) + " training samples out of " + str(len(cluster)) + " observations (%.1f" % (len(cluster_train)/len(cluster)*100) + "%).")
+                print("Cluster " + str(key+1) + ": taking " + str(len(cluster_train)) + " train samples out of " + str(len(cluster)) + " observations (%.1f" % (len(cluster_train)/len(cluster)*100) + "%).")
 
     # Sampling the user-specified number of observations:
     if sampling_type == 'number':
@@ -406,10 +406,10 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
             idx_test = np.concatenate((idx_test, cluster_test))
 
             if verbose == True:
-                print("Cluster " + str(key+1) + ": taking " + str(len(cluster_train)) + " training samples out of " + str(len(cluster)) + " observations (%.1f" % (len(cluster_train)/len(cluster)*100) + "%).")
+                print("Cluster " + str(key+1) + ": taking " + str(len(cluster_train)) + " train samples out of " + str(len(cluster)) + " observations (%.1f" % (len(cluster_train)/len(cluster)*100) + "%).")
 
     if verbose == True:
-        print('\nSelected ' + str(np.size(idx_train)) + ' training samples (' + str(round(np.size(idx_train)/n_observations*100,1)) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(round(np.size(idx_test)/n_observations*100,1)) + '%).\n')
+        print('\nSelected ' + str(np.size(idx_train)) + ' train samples (' + str(round(np.size(idx_train)/n_observations*100,1)) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(round(np.size(idx_test)/n_observations*100,1)) + '%).\n')
 
     idx_train = np.sort(idx_train.astype(int))
     idx_test = np.sort(idx_test.astype(int))
@@ -490,7 +490,7 @@ def train_test_split_random(n_observations, perc, idx_test=[], verbose=False):
     n_test = len(idx_test)
 
     if verbose == True:
-        print('Selected ' + str(np.size(idx_train)) + ' training samples (' + str(round(n_train/n_observations*100, 1)) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(round(n_test/n_observations*100,1)) + '%).\n')
+        print('Selected ' + str(np.size(idx_train)) + ' train samples (' + str(round(n_train/n_observations*100, 1)) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(round(n_test/n_observations*100,1)) + '%).\n')
 
     if len(idx_test) == 0 and (np.size(idx_test) + np.size(idx_train) != n_observations):
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
