@@ -53,7 +53,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
     taken from all remaining larger clusters.
 
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
     :param perc:
         percentage of data to be selected as training data from each cluster.
         For instance, set ``perc=20`` if you want to select 20%.
@@ -179,7 +179,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     as the remaining 60% test data.
 
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
     :param perc:
         percentage of data to be selected as training data from each cluster.
         For instance, set ``perc=20`` if you want to select 20%.
@@ -277,7 +277,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
     from the second cluster.
 
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
     :param sampling_dictionary:
         dictionary specifying manual sampling. Keys are cluster numbers and
         values are either ``percentage`` or ``number`` of samples to be taken from
@@ -447,7 +447,7 @@ def train_test_split_random(idx, perc, idx_test=[], verbose=False):
     as the remaining 60% test data.
 
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
     :param perc:
         percentage of data to be selected as training data from each cluster.
         Set ``perc=20`` if you want 20%.
@@ -512,7 +512,7 @@ def print_verbose_information(idx, idx_train, idx_test):
     ``verbose=True``.
 
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
     :param idx_train:
         indices of the train data.
     :param idx_test:

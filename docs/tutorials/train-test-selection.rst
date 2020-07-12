@@ -18,7 +18,7 @@ First, we generate a synthetic data set that is composed of four distinct cluste
   :width: 350
   :align: center
 
-The only inputs that we are going to need are ``idx`` (vector of cluster classifications) and ``n_observations`` (the total number of observations in the data set).
+The only information about the original data set that will be needed is ``idx`` - vector of cluster classifications.
 
 .. note::
 
