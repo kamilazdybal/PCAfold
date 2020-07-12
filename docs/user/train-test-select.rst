@@ -79,9 +79,8 @@ clusters. You can for instance pass the ``idx_test`` resulting from
 
 .. code:: python
 
-  (idx_train, idx_test) = train_test_split_fixed_number_from_idx(idx, perc)
-  (idx_train, idx_test) = train_test_split_random(n_observations, perc, idx_test)
-
+  (_, idx_test) = train_test_split_fixed_number_from_idx(idx, perc)
+  (idx_train, idx_test) = train_test_split_random(idx, perc, idx_test)
 
 Bibliography
 ------------

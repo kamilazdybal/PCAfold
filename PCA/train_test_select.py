@@ -71,7 +71,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
         to ``n_observations``. *This is for unit testing only.*
 
     :return:
-        - **idx_train** - indices of the training data.
+        - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
 
@@ -142,23 +142,9 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
     if (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
         raise ValueError("Sizes of train and test data do not sum up to the total number of observations.")
 
-    # Print detailed information on clustering:
+    # Print detailed information on sampling:
     if verbose == True:
-
-        cluster_populations = cld.get_populations(idx)
-
-        for cl in range(0,k):
-            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
-            print("Cluster " + str(cl+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl])*100) + "%).")
-
-        print("")
-
-        for cl in range(0,k):
-            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
-            test_indices = [t_id for t_id in idx_test if idx[t_id,]==cl]
-            print("Cluster " + str(cl+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl] - len(train_indices))*100) + "%).")
-
-        print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
+        print_verbose_information(idx, idx_train, idx_test)
 
     return (idx_train, idx_test)
 
@@ -205,7 +191,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
         to ``n_observations``. *This is for unit testing only.*
 
     :return:
-        - **idx_train** - indices of the training data.
+        - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
 
@@ -218,6 +204,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     idx_train = []
     idx_test = []
 
+    # Find the number of clusters:
     k = np.size(np.unique(idx))
 
     # Get clusters and split them into training and test indices:
@@ -239,23 +226,9 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     if np.size(idx_test) + np.size(idx_train) != n_observations:
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
-    # Print detailed information on clustering:
+    # Print detailed information on sampling:
     if verbose == True:
-
-        cluster_populations = cld.get_populations(idx)
-
-        for cl in range(0,k):
-            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
-            print("Cluster " + str(cl+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl])*100) + "%).")
-
-        print("")
-
-        for cl in range(0,k):
-            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
-            test_indices = [t_id for t_id in idx_test if idx[t_id,]==cl]
-            print("Cluster " + str(cl+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl] - len(train_indices))*100) + "%).")
-
-        print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
+        print_verbose_information(idx, idx_train, idx_test)
 
     return (idx_train, idx_test)
 
@@ -333,7 +306,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
         to ``n_observations``. *This is for unit testing only.*
 
     :return:
-        - **idx_train** - indices of the training data.
+        - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
 
@@ -345,6 +318,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
 
     n_observations = len(idx)
 
+    # Find the number of clusters:
     k = np.size(np.unique(idx))
 
     # Vector of indices 0..n_observations:
@@ -437,31 +411,16 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
     if np.size(idx_test) + np.size(idx_train) != n_observations:
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
-    # Print detailed information on clustering:
+    # Print detailed information on sampling:
     if verbose == True:
-
-        cluster_populations = cld.get_populations(idx)
-
-        for cl in range(0,k):
-            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
-            print("Cluster " + str(cl+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl])*100) + "%).")
-
-        print("")
-
-        for cl in range(0,k):
-            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
-            test_indices = [t_id for t_id in idx_test if idx[t_id,]==cl]
-            print("Cluster " + str(cl+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl] - len(train_indices))*100) + "%).")
-
-        print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
+        print_verbose_information(idx, idx_train, idx_test)
 
     return (idx_train, idx_test)
 
-def train_test_split_random(n_observations, perc, idx_test=[], verbose=False):
+def train_test_split_random(idx, perc, idx_test=[], verbose=False):
     """
-    This function allows to sample train data at random from the entire data set.
-    It is enough to provide the number of observations ``n_observations`` that
-    the original data set has and the percentage ``perc`` to be selected.
+    This function takes an ``idx`` classifications from a clustering technique and
+    samples train data at random from the entire data set.
 
     *Note:*
     If the parameter ``idx_test`` is not provided, test data will be selected as
@@ -487,8 +446,8 @@ def train_test_split_random(n_observations, perc, idx_test=[], verbose=False):
 
     as the remaining 60% test data.
 
-    :param n_observations:
-        number of observations in the original data set.
+    :param idx:
+        vector of indices classifying observations to clusters.
     :param perc:
         percentage of data to be selected as training data from each cluster.
         Set ``perc=20`` if you want 20%.
@@ -510,9 +469,14 @@ def train_test_split_random(n_observations, perc, idx_test=[], verbose=False):
         to ``n_observations``. *This is for unit testing only.*
 
     :return:
-        - **idx_train** - indices of the training data.
+        - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
+
+    n_observations = len(idx)
+
+    # Find the number of clusters:
+    k = np.size(np.unique(idx))
 
     idx_full = np.arange(0,n_observations)
     idx_test = np.array(idx_test)
@@ -530,20 +494,51 @@ def train_test_split_random(n_observations, perc, idx_test=[], verbose=False):
     n_train = len(idx_train)
     n_test = len(idx_test)
 
-    if verbose == True:
-        print('Selected ' + str(np.size(idx_train)) + ' train samples (' + str(round(n_train/n_observations*100, 1)) + '%) and ' + str(np.size(idx_test)) + ' test samples (' + str(round(n_test/n_observations*100,1)) + '%).\n')
-
     idx_train = np.sort(idx_train.astype(int))
     idx_test = np.sort(idx_test.astype(int))
 
     if len(idx_test) == 0 and (np.size(idx_test) + np.size(idx_train) != n_observations):
         raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
+    # Print detailed information on sampling:
+    if verbose == True:
+        print_verbose_information(idx, idx_train, idx_test)
+
     return (idx_train, idx_test)
+
+def print_verbose_information(idx, idx_train, idx_test):
+    """
+    This function prints detailed information on train and test sampling when
+    ``verbose=True``.
+
+    :param idx:
+        vector of indices classifying observations to clusters.
+    :param idx_train:
+        indices of the train data.
+    :param idx_test:
+        indices of the test data.
+    """
+
+    cluster_populations = cld.get_populations(idx)
+    k = np.size(np.unique(idx))
+    n_observations = len(idx)
+
+    for cl in range(0,k):
+        train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
+        print("Cluster " + str(cl+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl])*100) + "%).")
+
+    print("")
+
+    for cl in range(0,k):
+        train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl]
+        test_indices = [t_id for t_id in idx_test if idx[t_id,]==cl]
+        print("Cluster " + str(cl+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl] - len(train_indices))*100) + "%).")
+
+    print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
 
 def test():
     """
-    This function tests the ``training_data_generation`` module.
+    This function performs regression testing of this module.
     """
 
     try:
@@ -554,19 +549,22 @@ def test():
         return 0
 
     try:
-        (idx_train, idx_test) = train_test_split_random(10, 40, idx_test=[1,2], verbose=False)
+        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
+        (idx_train, idx_test) = train_test_split_random(idx, 40, idx_test=[1,2], verbose=False)
     except Exception:
         print('Test of train_test_split_random failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = train_test_split_random(10, 40, idx_test=[1,2,3,4,5,6], verbose=False)
+        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
+        (idx_train, idx_test) = train_test_split_random(idx, 40, idx_test=[1,2,3,4,5,6], verbose=False)
     except Exception:
         print('Test of train_test_split_random failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = train_test_split_random(10, 40, idx_test=[1,2,3,4,5,6,7], verbose=False)
+        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
+        (idx_train, idx_test) = train_test_split_random(idx, 40, idx_test=[1,2,3,4,5,6,7], verbose=False)
         print('Test of train_test_split_random failed.')
         return 0
     except Exception:
