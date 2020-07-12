@@ -184,19 +184,19 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
   Cluster 1: taking 9 train samples out of 100 observations (9.0%).
   Cluster 2: taking 26 train samples out of 250 observations (10.4%).
-  Cluster 3: taking 46 train samples out of 400 observations (11.5%).
-  Cluster 4: taking 44 train samples out of 500 observations (8.8%).
+  Cluster 3: taking 42 train samples out of 400 observations (10.5%).
+  Cluster 4: taking 48 train samples out of 500 observations (9.6%).
 
   Cluster 1: taking 91 test samples out of 91 remaining observations (100.0%).
   Cluster 2: taking 224 test samples out of 224 remaining observations (100.0%).
-  Cluster 3: taking 354 test samples out of 354 remaining observations (100.0%).
-  Cluster 4: taking 456 test samples out of 456 remaining observations (100.0%).
+  Cluster 3: taking 358 test samples out of 358 remaining observations (100.0%).
+  Cluster 4: taking 452 test samples out of 452 remaining observations (100.0%).
 
   Selected 125 train samples (10.0%) and 1125 test samples (90.0%).
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-random.png
+.. image:: ../images/tutorial-train-test-select-random-doc.png
   :width: 700
   :align: center
 
