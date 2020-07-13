@@ -64,7 +64,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
         Select ``test_selection_option=2`` if you want the same number of samples
         from each cluster to become test data.
     :param verbose: (optional)
-        boolean for printing clustering details.
+        boolean for printing sampling details.
 
     :raises ValueError:
         if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
@@ -184,7 +184,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
         percentage of data to be selected as training data from each cluster.
         For instance, set ``perc=20`` if you want to select 20%.
     :param verbose:
-        boolean for printing clustering details.
+        boolean for printing sampling details.
 
     :raises ValueError:
         if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
@@ -289,7 +289,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
     :param bar50: (optional)
         boolean specifying whether the 50% bar should apply.
     :param verbose: (optional)
-        boolean for printing clustering details.
+        boolean for printing sampling details.
 
     :raises ValueError:
         if ``sampling_type`` is not ``'percentage'`` or ``'number'``.
@@ -457,7 +457,7 @@ def train_test_split_random(idx, perc, idx_test=[], verbose=False):
         data will be returned the same as the user-provided ``idx_test``.
         If not specified, all remaining samples become test data.
     :param verbose: (optional)
-        boolean for printing clustering details.
+        boolean for printing sampling details.
 
     :raises ValueError:
         if the perecentage specified is too high in combination with the

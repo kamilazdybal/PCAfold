@@ -356,7 +356,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], biasing_option
     :param X:
         original (full) data set.
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
         The first cluster has index 0.
     :param scaling:
         data scaling criterion.

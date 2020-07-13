@@ -19,7 +19,7 @@ def variable_bins(var, k, verbose=False):
         if number of clusters ``k`` is not a positive integer.
 
     :return:
-        - **idx** - vector of indices classifying observations to clusters.
+        - **idx** - vector of cluster classifications.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -86,7 +86,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
         vector ``var`` values.
 
     :return:
-        - **idx** - vector of indices classifying observations to clusters.
+        - **idx** - vector of cluster classifications.
     """
 
     var_min = np.min(var)
@@ -142,7 +142,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         if number of clusters ``k`` is not a positive integer.
 
     :return:
-        - **idx** - vector of indices classifying observations to clusters.
+        - **idx** - vector of cluster classifications.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -246,7 +246,7 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         recommended to lower the ``zero_offset_percentage`` value.
 
     :return:
-        - **idx** - vector of indices classifying observations to clusters.
+        - **idx** - vector of cluster classifications.
     """
 
     # Check that the number of clusters is an integer and is larger than 2:
@@ -354,7 +354,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         number of elements in the ``idx_0`` vector.
 
     :return:
-        - **idx** - vector of indices classifying observations to clusters.
+        - **idx** - vector of cluster classifications.
     """
 
     import PCA.PCA as PCA
@@ -549,12 +549,12 @@ def degrade_clusters(idx, verbose=False):
     is equal to ``0``.
 
     :param idx:
-        raw vector of indices classifying observations to clusters.
+        raw vector of cluster classifications.
     :param verbose: (optional)
         boolean for printing clustering details.
 
     :return:
-        - **idx_degraded** degraded vector of indices classifying observations to clusters. The first cluster has index 0.
+        - **idx_degraded** degraded vector of cluster classifications. The first cluster has index 0.
         - **k_update** - the updated number of clusters.
     """
 
@@ -589,13 +589,13 @@ def flip_clusters(idx, dictionary):
     number ``key`` will get a number ``value``.
 
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
         The first cluster has index 0.
     :param dictionary:
         a dictionary specifying the cluster numeration flipping instructions.
 
     :return:
-        - **flipped_idx** - vector of indices classifying observations to clusters. The first cluster has index 0.
+        - **flipped_idx** - vector of cluster classifications. The first cluster has index 0.
     """
 
     flipped_idx = []
@@ -616,7 +616,7 @@ def get_centroids(X, idx):
     :param X:
         data set for computing the cluster centroids.
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
         The first cluster has index 0.
 
     :raises ValueError:
@@ -667,7 +667,7 @@ def get_partition(X, idx, verbose=False):
     :param X:
         data set to partition.
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
         The first cluster has index 0.
     :param verbose: (optional)
         boolean for printing details.
@@ -729,7 +729,7 @@ def get_populations(idx, verbose=False):
     this function will return a list: ``[100, 500]``.
 
     :param idx:
-        vector of indices classifying observations to clusters.
+        vector of cluster classifications.
         The first cluster has index 0.
     :param verbose: (optional)
         boolean for printing details.
