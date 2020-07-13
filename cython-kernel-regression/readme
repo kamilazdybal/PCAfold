@@ -1,5 +1,0 @@
-First run this to build the cython module (cykernel ;)):
-
-python3 setup.py install
-
-Then you can import the module as in the kernel-testing.py file. Run that to see a simple demo.

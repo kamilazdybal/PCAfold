@@ -357,7 +357,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         - **idx** - vector of cluster classifications.
     """
 
-    import PCA.PCA as PCA
+    import PCAfold.pca_impl as PCA
     import numpy.linalg
     from sklearn.decomposition import PCA as sklPCA
 

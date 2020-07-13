@@ -8,7 +8,7 @@ In this tutorial we present how train and test samples can be selected using the
 
 .. code::
 
-  import PCA.train_test_select as tts
+  import PCAfold.train_test_select as tts
 
 First, we generate a synthetic data set that is composed of four distinct clusters that have imbalanced number of observations (100, 250, 400 and 500 - 1250 total number of observations):
 

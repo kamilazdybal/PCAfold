@@ -13,17 +13,8 @@ Clone the `PCA-python` repository and move into the `PCA-python` directory creat
 git clone http://gitlab.multiscale.utah.edu/common/PCA-python.git
 cd PCA-python
 ```
-
-The `manifold_dimensionality` package in `PCA-python` requires the installation of the cythonized kernel regression function found in the `PCA-python/cython-kernel-regression` directory.
-Navigate to the `cython-kernel-regression` directory and run the `setup.py` script located there.
+Run the `setup.py` script as below to complete the installation.
 ```
-cd cython-kernel-regression
-python3.5 setup.py install
-```
-
-Navigate back to the main directory and run the `setup.py` script as below to complete the installation.
-```
-cd ..
 python3.5 setup.py install
 ```
 

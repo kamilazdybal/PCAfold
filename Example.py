@@ -1,4 +1,4 @@
-import PCA.PCA as P
+import PCAfold.pca_impl as P
 import numpy as np
 
 # matrix phi has a constant variable -> needs to be preprocessed before using PCA
