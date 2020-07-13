@@ -144,7 +144,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
 
     # Print detailed information on sampling:
     if verbose == True:
-        print_verbose_information(idx, idx_train, idx_test)
+        _print_verbose_information(idx, idx_train, idx_test)
 
     return (idx_train, idx_test)
 
@@ -228,7 +228,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
     # Print detailed information on sampling:
     if verbose == True:
-        print_verbose_information(idx, idx_train, idx_test)
+        _print_verbose_information(idx, idx_train, idx_test)
 
     return (idx_train, idx_test)
 
@@ -413,7 +413,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
 
     # Print detailed information on sampling:
     if verbose == True:
-        print_verbose_information(idx, idx_train, idx_test)
+        _print_verbose_information(idx, idx_train, idx_test)
 
     return (idx_train, idx_test)
 
@@ -502,11 +502,11 @@ def train_test_split_random(idx, perc, idx_test=[], verbose=False):
 
     # Print detailed information on sampling:
     if verbose == True:
-        print_verbose_information(idx, idx_train, idx_test)
+        _print_verbose_information(idx, idx_train, idx_test)
 
     return (idx_train, idx_test)
 
-def print_verbose_information(idx, idx_train, idx_test):
+def _print_verbose_information(idx, idx_train, idx_test):
     """
     This function prints detailed information on train and test sampling when
     ``verbose=True``.
