@@ -11,7 +11,11 @@ The general idea is to divide the entire data set ``X`` into train and test samp
   :width: 350
   :align: center
 
-All splitting functions in this module return a tuple of two variables: ``(idx_train, idx_test)``. These variables contain indices of observations that went into train data and test data respectively. In your model learning algorithm you can then get the train and test observations, for instance in the following way:
+All splitting functions in this module return a tuple of two variables: ``(idx_train, idx_test)``.
+Both ``idx_train`` and ``idx_test`` are vectors of integers of type ``numpy.ndarray`` and of size ``(_,)``.
+These variables contain indices of observations that went into train data and test data respectively.
+
+In your model learning algorithm you can then get the train and test observations, for instance in the following way:
 
 .. code:: python
 

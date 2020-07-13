@@ -8,7 +8,7 @@ Clustering
 Clustering functions
 --------------------
 
-Each function that clusters the data set returns a vector ``idx`` of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies classification of each observation from the original data set ``X`` to a local cluster.
+Each function that clusters the data set returns a vector of integers ``idx`` of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies classification of each observation from the original data set ``X`` to a local cluster.
 
 .. image:: ../images/clustering-idx.png
   :width: 400
