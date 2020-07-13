@@ -1,4 +1,4 @@
-.. module:: PCA.PCA
+.. module:: PCA.pca_impl
 
 Principal Component Analysis
 ============================

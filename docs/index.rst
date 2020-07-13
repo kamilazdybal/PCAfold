@@ -11,7 +11,7 @@ It incorporates data pre-processing, clustering and sampling techniques using PC
 A general overview for how **PCAfold** modules can combine into one workflow is presented below:
 
 .. image:: images/PCA-Python-overview.png
-  :width: 700
+  :width: 500
   :align: center
 
 Each module's functionalities can also be used as a standalone tool for performing a specific task.
