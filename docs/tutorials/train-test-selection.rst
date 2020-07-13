@@ -202,9 +202,9 @@ The visual result of this sampling can be seen below:
 
 .. note::
 
-  Random sampling will typically give a very similar sample distribution as percentage sampling, unless there is/are cluster/s that are significantly smaller than other clusters.
+  Random sampling will typically give a very similar sample distribution as percentage sampling.
 
 Maintaining fixed test data
 """""""""""""""""""""""""""
 
-In this example we further illustrate how ``idx_test`` input parameter can be used.
+In this example we further illustrate how ``idx_test`` input parameter can be utilized. Suppose that in every cluster you have a very distinct set of observations on which you would always like to test your model. You can point out those observations to the random sampling function through the use of ``idx_test`` vector.
