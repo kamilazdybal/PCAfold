@@ -666,11 +666,11 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
 
     return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, X_center, X_scale)
 
-def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option=1, n_clusters=4, n_components=2, resample_n_times=10, verbose=False):
+def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, verbose=False):
     """
-    This function performs re-sampling based K-Means clustering on
+    This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-sources at equilibration step. Resampling is done
-    ``resample_n_times`` times. At each step the current ``idx`` containing
+    ``n_resamples`` times. At each step the current ``idx`` containing
     cluster classifications is saved in the global ``idx_matrix``.
 
     :param X:
@@ -688,7 +688,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     :param n_components:
         number of Principal Components that will be used (this directly
         translates to how many first PC-sources the partitioning is based on).
-    :param resample_n_times:
+    :param n_resamples:
         number of times that the re-sampling will be performed.
     :param verbose:
         boolean for printing verbose details.
@@ -697,7 +697,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
         if ``biasing_option`` is not 1, 2, 3, 4 or 5.
 
     :return:
-        - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, resample_n_times+1)``.
+        - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
     """
 
     # Check that `biasing_option` parameter was passed correctly:
@@ -708,7 +708,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     (n_observations, n_variables) = np.shape(X)
 
     # Initialize idx_matrix:
-    idx_matrix = np.zeros((n_observations, resample_n_times+1))
+    idx_matrix = np.zeros((n_observations, n_resamples+1))
 
     from sklearn.preprocessing import StandardScaler
     from sklearn.cluster import KMeans
@@ -726,7 +726,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     idx = kmeans.labels_
     idx_matrix[:,0] = idx
 
-    for iter in range(0,resample_n_times):
+    for iter in range(0,n_resamples):
 
         (_, _, _, pc_sources_matrix, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=X_source, n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, verbose=verbose)
         scaler = StandardScaler()
@@ -737,11 +737,11 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
 
     return(idx_matrix)
 
-def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, resample_n_times=10, verbose=False):
+def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, verbose=False):
     """
-    This function performs re-sampling based K-Means clustering on
+    This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-scores at equilibration step. Resampling is done
-    ``resample_n_times`` times. At each step the current ``idx`` containing
+    ``n_resamples`` times. At each step the current ``idx`` containing
     cluster classifications is saved in the global ``idx_matrix``.
 
     :param X:
@@ -757,7 +757,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     :param n_components:
         number of Principal Components that will be used (this directly
         translates to how many first PC-scores the partitioning is based on).
-    :param resample_n_times:
+    :param n_resamples:
         number of times that the re-sampling will be performed.
     :param verbose:
         boolean for printing verbose details.
@@ -766,7 +766,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         if ``biasing_option`` is not 1, 2, 3, 4 or 5.
 
     :return:
-        - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, resample_n_times+1)``.
+        - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
     """
 
     # Check that `biasing_option` parameter was passed correctly:
@@ -777,7 +777,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     (n_observations, n_variables) = np.shape(X)
 
     # Initialize idx_matrix:
-    idx_matrix = np.zeros((n_observations, resample_n_times+1))
+    idx_matrix = np.zeros((n_observations, n_resamples+1))
 
     from sklearn.preprocessing import StandardScaler
     from sklearn.cluster import KMeans
@@ -795,7 +795,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     idx = kmeans.labels_
     idx_matrix[:,0] = idx
 
-    for iter in range(0,resample_n_times):
+    for iter in range(0,n_resamples):
 
         (_, _, pc_scores_matrix, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, verbose=verbose)
         scaler = StandardScaler()
