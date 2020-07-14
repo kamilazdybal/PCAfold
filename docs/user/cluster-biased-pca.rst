@@ -174,3 +174,10 @@ This function returns 3D arrays ``eigenvectors``, ``pc_scores`` and ``pc_sources
 .. image:: ../images/cbpca-equlibrate-outputs.png
     :width: 700
     :align: center
+
+Re-sample at equilibration using K-Means clustering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_sources
+
+.. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_scores

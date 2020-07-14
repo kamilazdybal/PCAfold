@@ -1,6 +1,4 @@
 import numpy as np
-import random
-import time
 import copy
 
 def variable_bins(var, k, verbose=False):
