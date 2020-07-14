@@ -124,7 +124,7 @@ Three weight normalization variants are available:
 
 If you do not wish to plot all variables present in a data set, use the ``plot_variables`` list as an input parameter to select indices of variables to plot:
 
-.. image:: ../images/pre_selected_vars.png
+.. image:: ../images/documentation-plot-pre-selected-variables.png
     :width: 280
     :align: center
 
