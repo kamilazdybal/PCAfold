@@ -13,7 +13,6 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../PCAfold/'))
-# sys.path.insert(0, os.path.abspath('/Users/kamilazdybal/anaconda3/envs/spitfire/lib/python3.7/site-packages/'))
 
 # -- Project information -----------------------------------------------------
 
