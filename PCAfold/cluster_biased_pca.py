@@ -698,6 +698,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
 
     :return:
         - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
+        - **idx** - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``, but is returned separately in case this is the only needed variable.
     """
 
     # Check that `biasing_option` parameter was passed correctly:
@@ -735,7 +736,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
         idx = kmeans.labels_
         idx_matrix[:,iter+1] = idx
 
-    return(idx_matrix)
+    return(idx_matrix, idx)
 
 def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, verbose=False):
     """
@@ -767,6 +768,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
 
     :return:
         - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
+        - **idx** - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``, but is returned separately in case this is the only needed variable.
     """
 
     # Check that `biasing_option` parameter was passed correctly:
@@ -804,4 +806,4 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         idx = kmeans.labels_
         idx_matrix[:,iter+1] = idx
 
-    return(idx_matrix)
+    return(idx_matrix, idx)
