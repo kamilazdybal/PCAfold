@@ -3,9 +3,11 @@
 # Dependencies
 
 `PCA-python` requires `python3` (developed with `python3.5`) and the following packages:
-- `numpy`
-- `scipy`
 - `matplotlib`
+- `numpy`
+- `random`
+- `scipy`
+- `sklearn`
 
 # Installation
 Clone the `PCA-python` repository and move into the `PCA-python` directory created:
