@@ -1,4 +1,4 @@
-.. module:: PCAfold.train_test_select
+.. module:: train_test_select
 
 Train and test data selection
 =============================

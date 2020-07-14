@@ -1,4 +1,4 @@
-.. module:: PCAfold.clustering_data
+.. module:: clustering_data
 
 Clustering
 ==========

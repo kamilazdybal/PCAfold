@@ -1,4 +1,4 @@
-.. module:: PCAfold.pca_impl
+.. module:: pca_impl
 
 Principal Component Analysis
 ============================

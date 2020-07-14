@@ -13,13 +13,14 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../PCAfold/'))
-sys.path.insert(0, os.path.abspath('../'))
+# sys.path.insert(0, os.path.abspath('/Users/kamilazdybal/anaconda3/envs/spitfire/lib/python3.7/site-packages/'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'PCAfold'
 copyright = '2020, Elizabeth Armstrong, Kamila Zdybal'
 author = 'Elizabeth Armstrong, Kamila Zdybal'
+release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
 

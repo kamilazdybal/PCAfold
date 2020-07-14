@@ -1,4 +1,4 @@
-.. module:: PCAfold.cluster_biased_pca
+.. module:: cluster_biased_pca
 
 Cluster-biased PCA
 ==================
