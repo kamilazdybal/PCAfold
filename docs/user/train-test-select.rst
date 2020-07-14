@@ -1,4 +1,4 @@
-.. module:: PCA.train_test_select
+.. module:: PCAfold.train_test_select
 
 Train and test data selection
 =============================
@@ -32,7 +32,7 @@ Functions
 Select fixed number
 ^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.train_test_select.train_test_split_fixed_number_from_idx
+.. autofunction:: PCAfold.train_test_select.train_test_split_fixed_number_from_idx
 
 Train data
 """"""""""
@@ -60,17 +60,17 @@ The scheme below presents graphically how train and test data can be selected us
 Select fixed percentage
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.train_test_select.train_test_split_percentage_from_idx
+.. autofunction:: PCAfold.train_test_select.train_test_split_percentage_from_idx
 
 Select manually
 ^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.train_test_select.train_test_split_manual_from_idx
+.. autofunction:: PCAfold.train_test_select.train_test_split_manual_from_idx
 
 Select at random
 ^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.train_test_select.train_test_split_random
+.. autofunction:: PCAfold.train_test_select.train_test_split_random
 
 Maintaining fixed test data
 """""""""""""""""""""""""""

@@ -8,4 +8,4 @@ In this tutorial we present the main functionalities of the ``cluster_biased_pca
 
 .. code::
 
-  import PCA.cluster_biased_pca as cbpca
+  import PCAfold.cluster_biased_pca as cbpca

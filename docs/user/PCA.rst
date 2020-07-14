@@ -1,9 +1,9 @@
-.. module:: PCA.pca_impl
+.. module:: PCAfold.pca_impl
 
 Principal Component Analysis
 ============================
 
-``PCA.py`` module contains functions for performing Principal Component Analysis.
+``pca_impl.py`` module contains functions for performing Principal Component Analysis.
 
 It is assumed that the raw data set ``X`` on which PCA is performed has dimensions ``(n_observations, n_variables)``:
 
@@ -14,7 +14,6 @@ It is assumed that the raw data set ``X`` on which PCA is performed has dimensio
 Class ``PCA``
 -------------
 
-.. autoclass:: PCA
 
 
 

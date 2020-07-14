@@ -12,12 +12,12 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../PCA/'))
+sys.path.insert(0, os.path.abspath('../PCAfold/'))
 sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'PCA-python'
+project = 'PCAfold'
 copyright = '2020, Elizabeth Armstrong, Kamila Zdybal'
 author = 'Elizabeth Armstrong, Kamila Zdybal'
 

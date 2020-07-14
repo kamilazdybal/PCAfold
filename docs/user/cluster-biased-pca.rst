@@ -1,4 +1,4 @@
-.. module:: PCA.cluster_biased_pca
+.. module:: PCAfold.cluster_biased_pca
 
 Cluster-biased PCA
 ==================
@@ -77,7 +77,7 @@ Functions
 Analyze centers movement
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.cluster_biased_pca.analyze_centers_movement
+.. autofunction:: PCAfold.cluster_biased_pca.analyze_centers_movement
 
 Plotting example
 """"""""""""""""
@@ -97,7 +97,7 @@ If you do not wish to plot all variables present in a data set, use the ``plot_v
 Analyze eigenvector weights movement
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.cluster_biased_pca.analyze_eigenvector_weights_movement
+.. autofunction:: PCAfold.cluster_biased_pca.analyze_eigenvector_weights_movement
 
 Plotting example
 """"""""""""""""
@@ -131,7 +131,7 @@ If you do not wish to plot all variables present in a data set, use the ``plot_v
 Analyze eigenvalue distribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.cluster_biased_pca.analyze_eigenvalue_distribution
+.. autofunction:: PCAfold.cluster_biased_pca.analyze_eigenvalue_distribution
 
 Plotting example
 """"""""""""""""
@@ -146,7 +146,7 @@ This function will produce a plot that shows the eigenvalues distribution for th
 Equilibrate cluster populations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCA.cluster_biased_pca.equilibrate_cluster_populations
+.. autofunction:: PCAfold.cluster_biased_pca.equilibrate_cluster_populations
 
 Equilibration
 """""""""""""
