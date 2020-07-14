@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import PCAfold.clustering_data as cld
+from PCAfold import clustering_data as cld
 
 def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, bar50=True, verbose=False):
     """

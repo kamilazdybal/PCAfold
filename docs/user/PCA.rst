@@ -14,7 +14,7 @@ It is assumed that the raw data set ``X`` on which PCA is performed has dimensio
 Class ``PCA``
 -------------
 
-
+.. autoclass:: PCAfold.pca_impl.PCA
 
 
 Functions

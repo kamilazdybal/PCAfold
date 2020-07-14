@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
-import PCAfold.pca_impl as P
-import PCAfold.clustering_data as cl
-import PCAfold.train_test_select as tts
+from PCAfold import pca_impl as P
+from PCAfold import clustering_data as cld
+from PCAfold import train_test_select as tts
 #
 # def plotting_styles(func):
 #
@@ -401,7 +401,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
         raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
 
     (n_observations, n_variables) = np.shape(X)
-    populations = cl.get_populations(idx)
+    populations = cld.get_populations(idx)
     N_smallest_cluster = np.min(populations)
     k = len(populations)
 
