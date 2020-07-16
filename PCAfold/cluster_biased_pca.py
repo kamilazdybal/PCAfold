@@ -237,7 +237,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
 
     return
 
-def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, title=False, save_plot=False, save_filename=''):
+def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, title=False, save_plot=False, save_filename='', random_seed=None):
     """
     This function analyzes the normalized eigenvalue distribution when PCA is
     performed on different versions of the reduced data sets ``X_r`` vs. on the
@@ -280,7 +280,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
     for i_idx, k in enumerate(k_list):
 
         idx = idx_matrix[:,i_idx]
-        (eigenvalues, _, _, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, biasing_option=biasing_option, n_iterations=1)
+        (eigenvalues, _, _, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, biasing_option=biasing_option, n_iterations=1, random_seed=random_seed)
 
         # Plot the eigenvalue distribution when PCA is performed on the original data set:
         if i_idx==0:
@@ -350,7 +350,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
 
     return(min_at_q2_k, min_at_q3_k, max_at_q2_k, max_at_q3_k)
 
-def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1, biasing_option=1, n_iterations=10, stop_iter=0, verbose=False):
+def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1, biasing_option=1, n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
     """
     This function gradually equilibrates cluster populations heading towards
     population of the smallest cluster in ``n_iterations``.
@@ -380,11 +380,16 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
         number of iterations to loop over.
     :param stop_iter:
         index of iteration to stop.
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param verbose:
         boolean for printing verbose details.
 
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3, 4 or 5.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
 
     :return:
         - **eigenvalues** - collected eigenvalues from each iteration.
@@ -400,6 +405,10 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
     _biasing_options = [1,2,3,5]
     if biasing_option not in _biasing_options:
         raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
+
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
 
     (n_observations, n_variables) = np.shape(X)
     populations = cld.get_populations(idx)
@@ -457,7 +466,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
         eat_ups[cluster] = (populations[cluster] - N_smallest_cluster)/n_iterations
 
     if verbose == True:
-        print('Biasing will be performed with option ' + str(biasing_option) + '.')
+        print('Biasing is performed with option ' + str(biasing_option) + '.')
 
     # Perform PCA on the reduced data set X_r(i): ------------------------------
     for iter in range(0,n_iterations):
@@ -486,7 +495,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
             print("\nAt iteration " + str(iter+1) + " taking samples:")
             print(sampling_dictionary)
 
-        (idx_train, _) = tts.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, verbose=False)
+        (idx_train, _) = tts.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, random_seed=random_seed, verbose=False)
 
         # Biasing option 1 -----------------------------------------------------
         if biasing_option == 1:
@@ -666,7 +675,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
 
     return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, X_center, X_scale)
 
-def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, verbose=False):
+def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-sources at equilibration step. Resampling is done
@@ -690,11 +699,16 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
         translates to how many first PC-sources the partitioning is based on).
     :param n_resamples:
         number of times that the re-sampling will be performed.
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param verbose:
         boolean for printing verbose details.
 
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3, 4 or 5.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
 
     :return:
         - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
@@ -705,6 +719,10 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     _biasing_options = [1,2,3,5]
     if biasing_option not in _biasing_options:
         raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
+
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
 
     (n_observations, n_variables) = np.shape(X)
 
@@ -729,7 +747,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
 
     for iter in range(0,n_resamples):
 
-        (_, _, _, pc_sources_matrix, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=X_source, n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, verbose=verbose)
+        (_, _, _, pc_sources_matrix, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=X_source, n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=verbose)
         scaler = StandardScaler()
         current_equilibrated_pc_sources_pp = scaler.fit_transform(pc_sources_matrix[:,:,-1])
         kmeans = KMeans(n_clusters=n_clusters).fit(current_equilibrated_pc_sources_pp)
@@ -738,7 +756,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
 
     return(idx_matrix, idx)
 
-def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, verbose=False):
+def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-scores at equilibration step. Resampling is done
@@ -760,11 +778,16 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         translates to how many first PC-scores the partitioning is based on).
     :param n_resamples:
         number of times that the re-sampling will be performed.
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param verbose:
         boolean for printing verbose details.
 
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3, 4 or 5.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
 
     :return:
         - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
@@ -775,6 +798,10 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     _biasing_options = [1,2,3,5]
     if biasing_option not in _biasing_options:
         raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
+
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
 
     (n_observations, n_variables) = np.shape(X)
 
@@ -799,7 +826,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
 
     for iter in range(0,n_resamples):
 
-        (_, _, pc_scores_matrix, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, verbose=verbose)
+        (_, _, pc_scores_matrix, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=verbose)
         scaler = StandardScaler()
         current_equilibrated_pc_scores_pp = scaler.fit_transform(pc_scores_matrix[:,:,-1])
         kmeans = KMeans(n_clusters=n_clusters).fit(current_equilibrated_pc_scores_pp)
