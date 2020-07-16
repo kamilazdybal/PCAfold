@@ -2,7 +2,7 @@ import numpy as np
 import random
 from PCAfold import clustering_data as cld
 
-def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, bar50=True, verbose=False):
+def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, bar50=True, random_seed=None, verbose=False):
     """
     This function takes an ``idx`` classifications from a clustering technique
     and samples a fixed number of observations from every cluster as training
@@ -63,8 +63,13 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
         to become test data.
         Select ``test_selection_option=2`` if you want the same number of samples
         from each cluster to become test data.
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param verbose: (optional)
         boolean for printing sampling details.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
 
     :raises ValueError:
         if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
@@ -74,6 +79,10 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
         - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
+
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
 
     n_observations = len(idx)
 
@@ -97,6 +106,10 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
 
     # Get clusters and split them into training and test indices:
     for cl in range(0,k):
+
+        if random_seed != None:
+            random.seed(random_seed)
+
         cluster = []
         for i, id in enumerate(idx):
             if id == cl:
@@ -148,7 +161,7 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
 
     return (idx_train, idx_test)
 
-def train_test_split_percentage_from_idx(idx, perc, verbose=False):
+def train_test_split_percentage_from_idx(idx, perc, random_seed=None, verbose=False):
     """
     This function takes an ``idx`` classifications from a clustering technique and
     samples a certain percentage ``perc`` from every cluster as the training data.
@@ -183,8 +196,13 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
     :param perc:
         percentage of data to be selected as training data from each cluster.
         For instance, set ``perc=20`` if you want to select 20%.
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param verbose:
         boolean for printing sampling details.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
 
     :raises ValueError:
         if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
@@ -194,6 +212,10 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
         - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
+
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
 
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
@@ -209,7 +231,12 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
     # Get clusters and split them into training and test indices:
     for cl in range(0,k):
+
         cluster = []
+
+        if random_seed != None:
+            random.seed(random_seed)
+
         for i, id in enumerate(idx):
             if id == cl:
                 cluster.append(idx_full[i])
@@ -232,7 +259,7 @@ def train_test_split_percentage_from_idx(idx, perc, verbose=False):
 
     return (idx_train, idx_test)
 
-def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='percentage', bar50=True, verbose=False):
+def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='percentage', bar50=True, random_seed=None, verbose=False):
     """
     This function takes an ``idx`` classifications from a clustering technique
     and a dictionary ``sampling_dictionary`` in which you manually specify what
@@ -288,11 +315,16 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
         The default is ``percentage``.
     :param bar50: (optional)
         boolean specifying whether the 50% bar should apply.
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param verbose: (optional)
         boolean for printing sampling details.
 
     :raises ValueError:
         if ``sampling_type`` is not ``'percentage'`` or ``'number'``.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
 
     :raises ValueError:
         if the number of entries in ``sampling_dictionary`` does not match the
@@ -309,6 +341,10 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
         - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
+
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
 
     _sampling_type = ['percentage', 'number']
 
@@ -371,7 +407,12 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
 
         # Get clusters and split them into training and test indices:
         for key, value in sampling_dictionary.items():
+
             cluster = []
+
+            if random_seed != None:
+                random.seed(random_seed)
+
             for i, id in enumerate(idx):
                 if id == key:
                     cluster.append(idx_full[i])
@@ -387,7 +428,12 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
 
         # Get clusters and split them into training and test indices:
         for key, value in sampling_dictionary.items():
+
             cluster = []
+
+            if random_seed != None:
+                random.seed(random_seed)
+
             for i, id in enumerate(idx):
                 if id == key:
                     cluster.append(idx_full[i])
@@ -417,7 +463,7 @@ def train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='pe
 
     return (idx_train, idx_test)
 
-def train_test_split_random(idx, perc, idx_test=[], verbose=False):
+def train_test_split_random(idx, perc, idx_test=[], random_seed=None, verbose=False):
     """
     This function takes an ``idx`` classifications from a clustering technique and
     samples train data at random from the entire data set.
@@ -456,8 +502,13 @@ def train_test_split_random(idx, perc, idx_test=[], verbose=False):
         data will be selected ignoring the indices in ``idx_test`` and the test
         data will be returned the same as the user-provided ``idx_test``.
         If not specified, all remaining samples become test data.
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param verbose: (optional)
         boolean for printing sampling details.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
 
     :raises ValueError:
         if the perecentage specified is too high in combination with the
@@ -473,6 +524,10 @@ def train_test_split_random(idx, perc, idx_test=[], verbose=False):
         - **idx_test** - indices of the test data.
     """
 
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
+
     n_observations = len(idx)
 
     # Find the number of clusters:
@@ -480,6 +535,9 @@ def train_test_split_random(idx, perc, idx_test=[], verbose=False):
 
     idx_full = np.arange(0,n_observations)
     idx_test = np.array(idx_test)
+
+    if random_seed != None:
+        random.seed(random_seed)
 
     if len(idx_test) != 0:
         idx_full_no_test = np.setdiff1d(idx_full, idx_test)
@@ -541,110 +599,118 @@ def test():
     This function performs regression testing of this module.
     """
 
+    idx = np.array([0,0,0,0,0,0,0,1,1,1,1])
+
+    # Tests of `train_test_split_fixed_number_from_idx`: -----------------------
     try:
-        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
         (idx_train, idx_test) = train_test_split_fixed_number_from_idx(idx, 40, test_selection_option=1, verbose=False)
     except Exception:
-        print('Test of train_test_split_fixed_number_from_idx failed.')
+        print('Test (01) of train_test_split_fixed_number_from_idx failed.')
         return 0
 
+    # Tests of `train_test_split_fixed_percentage_from_idx`: -------------------
     try:
-        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
-        (idx_train, idx_test) = train_test_split_random(idx, 40, idx_test=[1,2], verbose=False)
+        (idx_train, idx_test) = train_test_split_percentage_from_idx(idx, 20, verbose=False)
     except Exception:
-        print('Test of train_test_split_random failed.')
+        print('Test (01) of train_test_split_fixed_percentage_from_idx failed.')
         return 0
 
+    # Tests of `train_test_split_manual_from_idx`: -----------------------------
     try:
-        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
-        (idx_train, idx_test) = train_test_split_random(idx, 40, idx_test=[1,2,3,4,5,6], verbose=False)
-    except Exception:
-        print('Test of train_test_split_random failed.')
-        return 0
-
-    try:
-        idx = [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]
-        (idx_train, idx_test) = train_test_split_random(idx, 40, idx_test=[1,2,3,4,5,6,7], verbose=False)
-        print('Test of train_test_split_random failed.')
+        (idx_train, idx_test) = train_test_split_manual_from_idx(idx, {1:1, 2:1}, verbose=False)
+        print('Test (01) of train_test_split_manual_from_idx failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,1,1,1,1], {1:1, 2:1}, verbose=False)
-        print('Test of train_test_split_manual_from_idx failed.')
+        (idx_train, idx_test) = train_test_split_manual_from_idx(idx, {0:1, 1:1}, verbose=False)
+    except Exception:
+        print('Test (02) of train_test_split_manual_from_idx failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = train_test_split_manual_from_idx(idx, {0:1, 1:1}, sampling_type='perc', verbose=False)
+        print('Test (03) of train_test_split_manual_from_idx failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,1,1,1,1], {0:1, 1:1}, verbose=False)
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:10, 1:10}, 'percentage', verbose=False)
     except Exception:
-        print('Test of train_test_split_manual_from_idx failed.')
+        print('Test (04) of train_test_split_manual_from_idx failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,1,1,1,1], {0:1, 1:1}, 'perc', verbose=False)
-        print('Test of train_test_split_manual_from_idx failed.')
-        return 0
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:50, 1:50}, 'percentage', verbose=False)
     except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:10, 1:10}, 'percentage', verbose=False)
-    except Exception:
-        print('Test of train_test_split_manual_from_idx failed.')
+        print('Test (05) of train_test_split_manual_from_idx failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:50, 1:50}, 'percentage', verbose=False)
-    except Exception:
-        print('Test of train_test_split_manual_from_idx failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:60, 1:60}, 'percentage', verbose=False)
-        print('Test of train_test_split_manual_from_idx failed.')
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:60, 1:60}, 'percentage', verbose=False)
+        print('Test (06) of train_test_split_manual_from_idx failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:20, 1:20}, 'number', verbose=False)
-        print('Test of train_test_split_manual_from_idx failed.')
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:20, 1:20}, 'number', verbose=False)
+        print('Test (07) of train_test_split_manual_from_idx failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:5, 1:6}, 'number', verbose=False)
-        print('Test of train_test_split_manual_from_idx failed.')
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:5, 1:6}, 'number', verbose=False)
+        print('Test (08) of train_test_split_manual_from_idx failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:2, 1:2}, 'number', verbose=False)
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:2, 1:2}, 'number', verbose=False)
     except Exception:
-        print('Test of train_test_split_manual_from_idx failed.')
+        print('Test (09) of train_test_split_manual_from_idx failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:5, 1:5}, 'number', verbose=False)
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:5, 1:5}, 'number', verbose=False)
     except Exception:
-        print('Test of train_test_split_manual_from_idx failed.')
+        print('Test (10) of train_test_split_manual_from_idx failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:2.2, 1:1}, 'number', verbose=False)
-        print('Test of train_test_split_manual_from_idx failed.')
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:2.2, 1:1}, 'number', verbose=False)
+        print('Test (11) of train_test_split_manual_from_idx failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = train_test_split_manual_from_idx([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1], {0:20, 1:-20}, 'percentage', verbose=False)
-        print('Test of train_test_split_manual_from_idx failed.')
+        (idx_train, idx_test) = train_test_split_manual_from_idx(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), {0:20, 1:-20}, 'percentage', verbose=False)
+        print('Test (12) of train_test_split_manual_from_idx failed.')
+        return 0
+    except Exception:
+        pass
+
+    # Tests of `train_test_split_random`: --------------------------------------
+    try:
+        (idx_train, idx_test) = train_test_split_random(np.array([1, 1, 1, 1, 1, 1, 2, 2, 2, 2]), 40, idx_test=[1,2], verbose=False)
+    except Exception:
+        print('Test (01) of train_test_split_random failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = train_test_split_random(np.array([1, 1, 1, 1, 1, 1, 2, 2, 2, 2]), 40, idx_test=[1,2,3,4,5,6], verbose=False)
+    except Exception:
+        print('Test (02) of train_test_split_random failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = train_test_split_random(np.array([1, 1, 1, 1, 1, 1, 2, 2, 2, 2]), 40, idx_test=[1,2,3,4,5,6,7], verbose=False)
+        print('Test (03) of train_test_split_random failed.')
         return 0
     except Exception:
         pass
