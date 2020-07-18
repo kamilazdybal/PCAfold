@@ -180,15 +180,15 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 .. code-block:: text
 
-  Cluster 1: taking 9 train samples out of 100 observations (9.0%).
-  Cluster 2: taking 26 train samples out of 250 observations (10.4%).
-  Cluster 3: taking 42 train samples out of 400 observations (10.5%).
-  Cluster 4: taking 48 train samples out of 500 observations (9.6%).
+  Cluster 1: taking 10 train samples out of 100 observations (10.0%).
+  Cluster 2: taking 23 train samples out of 250 observations (9.2%).
+  Cluster 3: taking 51 train samples out of 400 observations (12.8%).
+  Cluster 4: taking 41 train samples out of 500 observations (8.2%).
 
-  Cluster 1: taking 91 test samples out of 91 remaining observations (100.0%).
-  Cluster 2: taking 224 test samples out of 224 remaining observations (100.0%).
-  Cluster 3: taking 358 test samples out of 358 remaining observations (100.0%).
-  Cluster 4: taking 452 test samples out of 452 remaining observations (100.0%).
+  Cluster 1: taking 90 test samples out of 90 remaining observations (100.0%).
+  Cluster 2: taking 227 test samples out of 227 remaining observations (100.0%).
+  Cluster 3: taking 349 test samples out of 349 remaining observations (100.0%).
+  Cluster 4: taking 459 test samples out of 459 remaining observations (100.0%).
 
   Selected 125 train samples (10.0%) and 1125 test samples (90.0%).
 
@@ -206,3 +206,33 @@ Maintaining fixed test data
 """""""""""""""""""""""""""
 
 In this example we further illustrate how ``idx_test`` input parameter can be utilized. Suppose that in every cluster you have a very distinct set of observations on which you would always like to test your model. You can point out those observations to the random sampling function through the use of ``idx_test`` vector.
+
+We simulate this situation by appending additional samples to the previously defined data set. Those can be seen in the figure below as small clouds next to each cluster:
+
+.. image:: ../images/tutorial-train-test-select-original-data-set-appended-doc.png
+  :width: 350
+  :align: center
+
+If we know the indices of points that represent the appended clouds, stored in ``idx_test``, then we can use that array of indices as an input parameter. The function will maintain those samples as test data and train data will be sampled ignoring the indices in ``idx_test``.
+
+With ``verbose=True`` we will see some detailed information on sampling:
+
+.. code-block:: text
+
+  Cluster 1: taking 88 train samples out of 120 observations (73.3%).
+  Cluster 2: taking 211 train samples out of 270 observations (78.1%).
+  Cluster 3: taking 344 train samples out of 420 observations (81.9%).
+  Cluster 4: taking 421 train samples out of 520 observations (81.0%).
+
+  Cluster 1: taking 20 test samples out of 32 remaining observations (62.5%).
+  Cluster 2: taking 20 test samples out of 59 remaining observations (33.9%).
+  Cluster 3: taking 20 test samples out of 76 remaining observations (26.3%).
+  Cluster 4: taking 20 test samples out of 99 remaining observations (20.2%).
+
+  Selected 1064 train samples (80.0%) and 80 test samples (6.0%).
+
+The visual result of this sampling can be seen below:
+
+.. image:: ../images/tutorial-train-test-select-random-with-idx-test-doc.png
+  :width: 700
+  :align: center
