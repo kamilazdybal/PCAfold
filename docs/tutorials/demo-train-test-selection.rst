@@ -205,15 +205,19 @@ The visual result of this sampling can be seen below:
 Maintaining fixed test data
 """""""""""""""""""""""""""
 
-In this example we further illustrate how ``idx_test`` input parameter can be utilized. Suppose that in every cluster you have a very distinct set of observations on which you would always like to test your model. You can point out those observations to the random sampling function through the use of ``idx_test`` vector.
+In this example we further illustrate how ``idx_test`` input parameter can be utilized.
+Suppose that in every cluster you have a very distinct set of observations on which you would always like to test your model.
+You can point out those observations to the random sampling function through the use of ``idx_test`` vector.
 
-We simulate this situation by appending additional samples to the previously defined data set. Those can be seen in the figure below as small clouds next to each cluster:
+We simulate this situation by appending additional samples to the previously defined data set.
+We add 20 samples in each cluster - those can be seen in the figure below as small clouds next to each cluster:
 
 .. image:: ../images/tutorial-train-test-select-original-data-set-appended-doc.png
   :width: 350
   :align: center
 
-If we know the indices of points that represent the appended clouds, stored in ``idx_test``, then we can use that array of indices as an input parameter. The function will maintain those samples as test data and train data will be sampled ignoring the indices in ``idx_test``.
+If we know the indices of points that represent the appended clouds, stored in ``idx_test``, then we can use that array of indices as an input parameter.
+The function will maintain those samples as test data and train data will be sampled ignoring the indices in ``idx_test``.
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
