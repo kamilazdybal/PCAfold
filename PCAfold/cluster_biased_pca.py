@@ -675,10 +675,11 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
 
     return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, X_center, X_scale)
 
-def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, random_seed=None, verbose=False):
+def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=20, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
-    ``n_components`` first PC-sources at equilibration step. Resampling is done
+    ``n_components`` first PC-sources at equilibration step. Re-sampling is done
+    until convergence of cluster centroids is reached but for a maximum of
     ``n_resamples`` times. At each step the current ``idx`` containing
     cluster classifications is saved in the global ``idx_matrix``.
 
@@ -726,11 +727,15 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
 
     (n_observations, n_variables) = np.shape(X)
 
+    centroids_threshold = 0.01
+    converged = False
+
     # Initialize idx_matrix:
     idx_matrix = np.zeros((n_observations, n_resamples+1))
 
     from sklearn.preprocessing import StandardScaler
     from sklearn.cluster import KMeans
+    from numpy import linalg
 
     # Perform global PCA to obtain initial PC-sources:
     pca_global = P.PCA(X, scaling, n_components, useXTXeig=True)
@@ -745,7 +750,12 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     idx = kmeans.labels_
     idx_matrix[:,0] = idx
 
+    current_centroids = cld.get_centroids(X, idx)
+    current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
+
     for iter in range(0,n_resamples):
+
+        old_centroids = current_centroids
 
         (_, _, _, pc_sources_matrix, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=X_source, n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=verbose)
         scaler = StandardScaler()
@@ -754,12 +764,26 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
         idx = kmeans.labels_
         idx_matrix[:,iter+1] = idx
 
-    return(idx_matrix, idx)
+        current_centroids = cld.get_centroids(X, idx)
+        current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
 
-def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=10, random_seed=None, verbose=False):
+        distance_between_centroids = linalg.norm((current_centroids - old_centroids))
+
+        if verbose==True:
+            print('Current norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
+
+        if distance_between_centroids <= centroids_threshold:
+            converged = True
+            print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
+            break
+
+    return(idx_matrix, idx, converged)
+
+def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=20, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
-    ``n_components`` first PC-scores at equilibration step. Resampling is done
+    ``n_components`` first PC-scores at equilibration step. Re-sampling is done
+    until convergence of cluster centroids is reached but for a maximum of
     ``n_resamples`` times. At each step the current ``idx`` containing
     cluster classifications is saved in the global ``idx_matrix``.
 
@@ -805,11 +829,15 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
 
     (n_observations, n_variables) = np.shape(X)
 
+    centroids_threshold = 0.01
+    converged = False
+
     # Initialize idx_matrix:
     idx_matrix = np.zeros((n_observations, n_resamples+1))
 
     from sklearn.preprocessing import StandardScaler
     from sklearn.cluster import KMeans
+    from numpy import linalg
 
     # Perform global PCA to obtain initial PC-scores:
     pca_global = P.PCA(X, scaling, n_components, useXTXeig=True)
@@ -824,7 +852,12 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     idx = kmeans.labels_
     idx_matrix[:,0] = idx
 
+    current_centroids = cld.get_centroids(X, idx)
+    current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
+
     for iter in range(0,n_resamples):
+
+        old_centroids = current_centroids
 
         (_, _, pc_scores_matrix, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=verbose)
         scaler = StandardScaler()
@@ -833,4 +866,17 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         idx = kmeans.labels_
         idx_matrix[:,iter+1] = idx
 
-    return(idx_matrix, idx)
+        current_centroids = cld.get_centroids(X, idx)
+        current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
+
+        distance_between_centroids = linalg.norm((current_centroids - old_centroids))
+
+        if verbose==True:
+            print('Current norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
+
+        if distance_between_centroids <= centroids_threshold:
+            converged = True
+            print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
+            break
+
+    return(idx_matrix, idx, converged)
