@@ -69,6 +69,9 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
         boolean for printing sampling details.
 
     :raises ValueError:
+        if ``test_selection_option`` is not equal to 1 or 2.
+
+    :raises ValueError:
         if ``random_seed`` is not an integer.
 
     :raises ValueError:
@@ -79,6 +82,11 @@ def train_test_split_fixed_number_from_idx(idx, perc, test_selection_option=1, b
         - **idx_train** - indices of the train data.
         - **idx_test** - indices of the test data.
     """
+
+    # Check that `test_selection_option` parameter was passed correctly:
+    _test_selection_option = [1,2]
+    if test_selection_option not in _test_selection_option:
+        raise ValueError("Test selection option can only be 1 or 2.")
 
     if random_seed != None:
         if not isinstance(random_seed, int):
