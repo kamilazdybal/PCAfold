@@ -1,6 +1,18 @@
 import numpy as np
 import copy
 
+def _print_verbose_information(var, idx, bins_borders):
+
+    k = len(np.unique(idx))
+
+    print('Border values for bins:')
+    print(bins_borders)
+    print('')
+
+    for cl in range(0,k):
+        print("Bounds for cluster " + str(cl+1) + ":")
+        print("\t" + str(round(np.min(var[np.argwhere(idx==cl)]), 4)) + ", " + str(round(np.max(var[np.argwhere(idx==cl)]), 4)))
+
 def variable_bins(var, k, verbose=False):
     """
     This function does clustering by dividing a variable vector ``var`` into
@@ -49,17 +61,10 @@ def variable_bins(var, k, verbose=False):
     if np.size(np.unique(idx)) != k:
         (idx, k) = degrade_clusters(idx, verbose)
 
-    if verbose==True:
-        print('Border values for each bin are:')
-        print(bins_borders)
-        print('')
-
     idx = np.asarray(idx)
 
     if verbose==True:
-        for cl in range(0,k):
-            print("Bounds for cluster " + str(cl+1) + ":")
-            print("\t" + str(round(np.min(var[np.argwhere(idx==cl)]), 4)) + ", " + str(round(np.max(var[np.argwhere(idx==cl)]), 4)))
+        _print_verbose_information(var, idx, bins_borders)
 
     return(idx)
 
@@ -117,7 +122,12 @@ def predefined_variable_bins(var, split_values, verbose=False):
     if np.size(np.unique(idx)) != k:
         (idx, k) = degrade_clusters(idx, verbose)
 
-    return(np.asarray(idx))
+    idx = np.asarray(idx)
+
+    if verbose==True:
+        _print_verbose_information(var, idx, bins_borders)
+
+    return(idx)
 
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
@@ -163,10 +173,10 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     else:
 
         # Z-space lower than stoichiometric mixture fraction:
-        borders_lean = np.linspace(min_Z, Z_stoich, np.ceil(n_bins_borders/2))
+        borders_lean = np.linspace(min_Z, Z_stoich, int(np.ceil(n_bins_borders/2)))
 
         # Z-space higher than stoichiometric mixture fraction:
-        borders_rich = np.linspace(Z_stoich, max_Z, np.ceil((n_bins_borders+1)/2))
+        borders_rich = np.linspace(Z_stoich, max_Z, int(np.ceil((n_bins_borders+1)/2)))
 
         # Combine the two partitions:
         borders = np.concatenate((borders_lean[0:-1], borders_rich))
@@ -181,17 +191,18 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         idx_clust.append(np.where((Z >= borders[bin]) & (Z <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
-    if verbose==True:
-        print('Border values for each bin are:')
-        print(borders)
-
     idx = [int(i) for i in idx]
 
     # Degrade clusters if needed:
     if len(np.unique(idx)) != (np.max(idx)+1):
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
-    return(np.asarray(idx))
+    idx = np.asarray(idx)
+
+    if verbose==True:
+        _print_verbose_information(Z, idx, borders)
+
+    return(idx)
 
 def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
@@ -278,10 +289,10 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         n_bins_borders = k
 
     # Generate cluster borders on the negative side:
-    borders_negative = np.linspace(pc_source_min, -offset, np.ceil(n_bins_borders/2))
+    borders_negative = np.linspace(pc_source_min, -offset, int(np.ceil(n_bins_borders/2)))
 
     # Generate cluster borders on the positive side:
-    borders_positive = np.linspace(offset, pc_source_max, np.ceil((n_bins_borders+1)/2))
+    borders_positive = np.linspace(offset, pc_source_max, int(np.ceil((n_bins_borders+1)/2)))
 
     # Combine the two partitions:
     if split_at_zero:
@@ -306,13 +317,7 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
     if verbose==True:
-        print('Border values for each bin are:')
-        print(borders)
-
-    if verbose==True:
-        for cl in range(0,k):
-            print("Bounds for cluster " + str(cl+1) + ":")
-            print("\t" + str(np.min(pc_source[np.argwhere(idx==cl)])) + ", " + str(np.max(pc_source[np.argwhere(idx==cl)])))
+        _print_verbose_information(pc_source, idx, borders)
 
     return(idx)
 
