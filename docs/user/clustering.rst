@@ -18,48 +18,35 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 
 .. autofunction:: PCAfold.clustering_data.variable_bins
 
-.. code-block:: text
-
-   var_min                                                var_max
-     |----------|----------|----------|----------|----------|
-        bin 1      bin 2      bin 3       bin 4     bin 5
+.. image:: ../images/clustering-variable-bins.png
+  :width: 500
+  :align: centers
 
 .. autofunction:: PCAfold.clustering_data.predefined_variable_bins
 
-.. code-block:: text
-
-   var_min     value_1              value_2      value_3  var_max
-     |----------|--------------------|------------|---------|
-         bin 1           bin 2            bin 3      bin 4
+.. image:: ../images/clustering-predefined-variable-bins.png
+  :width: 500
+  :align: centers
 
 .. autofunction:: PCAfold.clustering_data.mixture_fraction_bins
 
-.. code-block:: text
-
-   Z_min           Z_stoich                                 Z_max
-     |-------|-------|------------|------------|------------|
-       bin 1   bin 2     bin 3        bin 4         bin 5
+.. image:: ../images/clustering-mixture-fraction-bins.png
+  :width: 500
+  :align: centers
 
 .. autofunction:: PCAfold.clustering_data.pc_source_bins
 
-.. code-block:: text
+With ``split_at_zero=False``:
 
-                    -offset         +offset
-                             \    /
-   pc_source_min             | 0 |                          pc_source_max
-       |----------|----------|---|----------|----------|----------|
-           bin 1      bin 2   bin 3  bin 4      bin 5      bin 6
+.. image:: ../images/clustering-pc-source-bins.png
+  :width: 500
+  :align: centers
 
+With ``split_at_zero=True`:
 
-.. code-block:: text
-
-                    -offset     0     +offset
-                             \  |   /
-   pc_source_min             |  |  |                          pc_source_max
-       |----------|----------|--|--|----------|----------|----------|
-          bin 1      bin 2    /   \   bin 5      bin 6      bin 7
-                             /     \
-                         bin 3       bin 4
+.. image:: ../images/clustering-pc-source-bins-zero-split.png
+  :width: 500
+  :align: center
 
 .. autofunction:: PCAfold.clustering_data.vqpca
 
