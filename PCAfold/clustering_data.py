@@ -52,13 +52,14 @@ def variable_bins(var, k, verbose=False):
     if verbose==True:
         print('Border values for each bin are:')
         print(bins_borders)
+        print('')
 
     idx = np.asarray(idx)
 
     if verbose==True:
         for cl in range(0,k):
             print("Bounds for cluster " + str(cl+1) + ":")
-            print("\t" + str(np.min(var[np.argwhere(idx==cl)])) + ", " + str(np.max(var[np.argwhere(idx==cl)])))
+            print("\t" + str(round(np.min(var[np.argwhere(idx==cl)]), 4)) + ", " + str(round(np.max(var[np.argwhere(idx==cl)]), 4)))
 
     return(idx)
 
