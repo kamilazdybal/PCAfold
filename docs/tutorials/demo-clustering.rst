@@ -6,6 +6,71 @@ Clustering
 
 In this tutorial we present the main functionalities of the ``clustering_data`` module. To import the module:
 
-.. code::
+.. code:: python
 
-  import PCAfold.clustering_data as cld
+  import PCAfold.clustering_data as cl
+
+First, we generate a synthetic two-dimensional data set:
+
+.. code:: python
+
+  x = np.linspace(-1,1,100)
+  y = -x**2 + 1
+
+Which can be seen below:
+
+.. image:: ../images/clustering-original-data-set.png
+  :width: 350
+  :align: center
+
+Cluster into variable bins
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This clustering will divide the data set into equal bins of a one-dimensional variable vector.
+
+.. code:: python
+
+  (idx_variable_bins) = cl.variable_bins(x, 4, verbose=True)
+
+With ``verbose=True`` we will see some detailed information on clustering:
+
+.. code-block:: text
+
+  Border values for each bin are:
+  [-1.0, -0.5, 0.0, 0.5, 1.0]
+
+  Bounds for cluster 1:
+  	-1.0, -0.5152
+  Bounds for cluster 2:
+  	-0.4949, -0.0101
+  Bounds for cluster 3:
+  	0.0101, 0.4949
+  Bounds for cluster 4:
+  	0.5152, 1.0
+
+The visual result of this clustering can be seen below:
+
+.. image:: ../images/tutorial-clustering-variable-bins-k4.png
+  :width: 350
+  :align: center
+
+Cluster into pre-defined variable bins
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user.
+
+.. code:: python
+
+  (idx_predefined_variable_bins) = cl.predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
+
+With ``verbose=True`` we will see some detailed information on clustering:
+
+.. code-block:: text
+
+  Border values for each bin are:
+
+The visual result of this clustering can be seen below:
+
+.. image:: ../images/tutorial-clustering-predefined-variable-bins-k4.png
+  :width: 350
+  :align: center

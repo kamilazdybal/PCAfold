@@ -89,16 +89,6 @@ Analyze eigenvalue distribution
 
 .. autofunction:: PCAfold.cluster_biased_pca.analyze_eigenvalue_distribution
 
-Plotting example
-""""""""""""""""
-
-This function will produce a plot that shows the eigenvalues distribution for the original data set and for different versions of the equilibrated data set. Example of a plot:
-
-.. image:: ../images/documentation-eigenvalues.png
-    :width: 500
-    :align: center
-
-
 Equilibrate cluster populations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -6,7 +6,7 @@ Train and test data selection
 
 In this tutorial we present how train and test samples can be selected using the ``train_test_select`` module. To import the module:
 
-.. code::
+.. code:: python
 
   import PCAfold.train_test_select as tts
 

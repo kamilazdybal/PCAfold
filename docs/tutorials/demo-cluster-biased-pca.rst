@@ -6,7 +6,7 @@ Cluster-biased PCA
 
 In this tutorial we present the main functionalities of the ``cluster_biased_pca`` module. To import the module:
 
-.. code::
+.. code:: python
 
   import PCAfold.cluster_biased_pca as cbpca
 
@@ -60,4 +60,16 @@ If you do not wish to plot all variables present in a data set, use the ``plot_v
 
 .. image:: ../images/documentation-plot-pre-selected-variables.png
     :width: 280
+    :align: center
+
+Analyze eigenvalue distribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Plotting example
+""""""""""""""""
+
+This function will produce a plot that shows the eigenvalues distribution for the original data set and for different versions of the equilibrated data set. Example of a plot:
+
+.. image:: ../images/documentation-eigenvalues.png
+    :width: 500
     :align: center
