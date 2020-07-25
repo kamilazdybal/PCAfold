@@ -17,13 +17,14 @@ First, we generate a synthetic two-dimensional data set:
   var = np.linspace(-1,1,100)
   y = -var**2 + 1
 
-Clustering into bins of a one-dimensional vector will be performed based on ``var``.
-
 Which can be seen below:
 
 .. image:: ../images/tutorial-clustering-original-data-set.png
   :width: 350
   :align: center
+
+Let's start with clustering the data set according to bins of a single vector.
+This clustering will be performed based on ``var``.
 
 Cluster into variable bins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -38,7 +39,7 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 .. code-block:: text
 
-  Border values for each bin are:
+  Border values for bins:
   [-1.0, -0.5, 0.0, 0.5, 1.0]
 
   Bounds for cluster 1:
@@ -85,5 +86,105 @@ With ``verbose=True`` we will see some detailed information on clustering:
 The visual result of this clustering can be seen below:
 
 .. image:: ../images/tutorial-clustering-predefined-variable-bins-k4.png
+  :width: 350
+  :align: center
+
+Cluster into bins of PC-source
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This partitioning relies on unbalanced vector which, in principle, is assumed to have a lot of observations whose values are close to zero and relatively few observations with values away from zero.
+This function can be used to separate close-to-zero observations into one cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
+
+Without splitting at zero ``split_at_zero=False``
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+.. code:: python
+
+  (idx_pc_source_bins) = cl.pc_source_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
+
+With ``verbose=True`` we will see some detailed information on clustering:
+
+.. code-block:: text
+
+  Border values for bins:
+  [-1.  -0.2  0.2  1. ]
+
+  Bounds for cluster 1:
+  	-1.0, -0.2121
+  Bounds for cluster 2:
+  	-0.1919, 0.1919
+  Bounds for cluster 3:
+  	0.2121, 1.0
+
+The visual result of this clustering can be seen below:
+
+.. image:: ../images/tutorial-clustering-pc-source-bins-k3.png
+  :width: 350
+  :align: center
+
+With splitting at zero ``split_at_zero=True``
+"""""""""""""""""""""""""""""""""""""""""""""
+
+.. code:: python
+
+  (idx_pc_source_bins_split_at_zero) = cl.pc_source_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+
+With ``verbose=True`` we will see some detailed information on clustering:
+
+.. code-block:: text
+
+  Border values for bins:
+  [-1.  -0.2  0.   0.2  1. ]
+
+  Bounds for cluster 1:
+  -1.0, -0.2121
+  Bounds for cluster 2:
+  -0.1919, -0.0101
+  Bounds for cluster 3:
+  0.0101, 0.1919
+  Bounds for cluster 4:
+  0.2121, 1.0
+
+The visual result of this clustering can be seen below:
+
+.. image:: ../images/tutorial-clustering-pc-source-bins-split-at-zero-k4.png
+  :width: 350
+  :align: center
+
+Cluster into bins of mixture fraction vector
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this example, we partition the data set according to bins of mixture fraction vector.
+We generate a new synthetic data set based on a mixture fraction vector which attains values between 0 and 1.
+The partitioning function will also require specifying the value for stoichiometric mixture fraction.
+
+.. code:: python
+
+  Z = np.linspace(0,1,100)
+  y_Z = (-25/9)*Z**2 + (20/9)*Z + (5/9)
+
+.. code:: python
+
+  (idx_mixture_fraction_bins) = cl.mixture_fraction_bins(Z, 4, 0.4, verbose=True)
+
+With ``verbose=True`` we will see some detailed information on clustering:
+
+.. code-block:: text
+
+  Border values for bins:
+  [0.  0.2 0.4 0.7 1. ]
+
+  Bounds for cluster 1:
+  	0.0, 0.1919
+  Bounds for cluster 2:
+  	0.202, 0.3939
+  Bounds for cluster 3:
+  	0.404, 0.697
+  Bounds for cluster 4:
+  	0.7071, 1.0
+
+The visual result of this clustering can be seen below:
+
+.. image:: ../images/tutorial-clustering-mixture-fraction-bins-k4.png
   :width: 350
   :align: center
