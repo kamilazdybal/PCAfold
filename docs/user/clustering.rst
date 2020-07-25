@@ -19,33 +19,33 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 .. autofunction:: PCAfold.clustering_data.variable_bins
 
 .. image:: ../images/clustering-variable-bins.png
-  :width: 500
-  :align: centers
+  :width: 700
+  :align: center
 
 .. autofunction:: PCAfold.clustering_data.predefined_variable_bins
 
 .. image:: ../images/clustering-predefined-variable-bins.png
-  :width: 500
-  :align: centers
+  :width: 700
+  :align: center
 
 .. autofunction:: PCAfold.clustering_data.mixture_fraction_bins
 
 .. image:: ../images/clustering-mixture-fraction-bins.png
-  :width: 500
-  :align: centers
+  :width: 700
+  :align: center
 
 .. autofunction:: PCAfold.clustering_data.pc_source_bins
 
 With ``split_at_zero=False``:
 
 .. image:: ../images/clustering-pc-source-bins.png
-  :width: 500
-  :align: centers
+  :width: 700
+  :align: center
 
-With ``split_at_zero=True`:
+With ``split_at_zero=True``:
 
 .. image:: ../images/clustering-pc-source-bins-zero-split.png
-  :width: 500
+  :width: 700
   :align: center
 
 .. autofunction:: PCAfold.clustering_data.vqpca
