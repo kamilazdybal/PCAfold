@@ -18,23 +18,31 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 
 .. autofunction:: PCAfold.clustering_data.variable_bins
 
+An example of how a vector can be partitioned with this function is presented below:
+
 .. image:: ../images/clustering-variable-bins.png
-  :width: 700
+  :width: 600
   :align: center
 
 .. autofunction:: PCAfold.clustering_data.predefined_variable_bins
 
+An example of how a vector can be partitioned with this function is presented below:
+
 .. image:: ../images/clustering-predefined-variable-bins.png
-  :width: 700
+  :width: 600
   :align: center
 
 .. autofunction:: PCAfold.clustering_data.mixture_fraction_bins
 
+An example of how a vector can be partitioned with this function is presented below:
+
 .. image:: ../images/clustering-mixture-fraction-bins.png
-  :width: 700
+  :width: 600
   :align: center
 
 .. autofunction:: PCAfold.clustering_data.pc_source_bins
+
+Two examples of how a vector can be partitioned with this function are presented below.
 
 With ``split_at_zero=False``:
 

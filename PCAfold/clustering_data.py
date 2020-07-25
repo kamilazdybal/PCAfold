@@ -72,7 +72,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
     """
     This function does clustering by dividing a variable vector ``var`` into
     bins such that the split is done at values specified in the ``split_values``
-    list.
+    list. In general: ``split_values = [value_1, value_2, ..., value_n]``.
 
     *Note:*
     When a split is performed at a given ``value_i``, the observation in ``var``
