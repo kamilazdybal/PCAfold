@@ -350,7 +350,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
 
     return(min_at_q2_k, min_at_q3_k, max_at_q2_k, max_at_q3_k)
 
-def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1, biasing_option=1, n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
+def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components, biasing_option, n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
     """
     This function gradually equilibrates cluster populations heading towards
     population of the smallest cluster in ``n_iterations``.
@@ -376,13 +376,13 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
         integer specifying biasing option.
         See documentation of cluster-biased PCA for more information.
         Can only attain values [1,2,3,4,5].
-    :param n_iterations:
+    :param n_iterations: (optional)
         number of iterations to loop over.
-    :param stop_iter:
+    :param stop_iter: (optional)
         index of iteration to stop.
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
-    :param verbose:
+    :param verbose: (optional)
         boolean for printing verbose details.
 
     :raises ValueError:
@@ -675,7 +675,7 @@ def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=1
 
     return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, X_center, X_scale)
 
-def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=20, random_seed=None, verbose=False):
+def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-sources at equilibration step. Re-sampling is done
@@ -698,11 +698,13 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     :param n_components:
         number of Principal Components that will be used (this directly
         translates to how many first PC-sources the partitioning is based on).
-    :param n_resamples:
+    :param n_resamples: (optional)
         number of times that the re-sampling will be performed.
+    :param idx_all: (optional)
+        boolean specifying whether all ``idx`` vectors should be returned (``idx_all=True``) or only the last one (``idx_all=False``).
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
-    :param verbose:
+    :param verbose: (optional)
         boolean for printing verbose details.
 
     :raises ValueError:
@@ -712,8 +714,9 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
         if ``random_seed`` is not an integer.
 
     :return:
-        - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
-        - **idx** - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``, but is returned separately in case this is the only needed variable.
+        - **idx_matrix** (returned if ``idx_all=True``) - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
+        - **idx** (returned if ``idx_all=False``) - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``.
+        - **converged** - boolean specifying whether the re-sampling algorithm have converged based on cluster centroids movement.
     """
 
     # Check that `biasing_option` parameter was passed correctly:
@@ -777,9 +780,12 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
             print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
             break
 
-    return(idx_matrix, idx, converged)
+    if idx_all:
+        return(idx_matrix, converged)
+    else:
+        return(idx, converged)
 
-def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option=1, n_clusters=4, n_components=2, n_resamples=20, random_seed=None, verbose=False):
+def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-scores at equilibration step. Re-sampling is done
@@ -800,11 +806,13 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     :param n_components:
         number of Principal Components that will be used (this directly
         translates to how many first PC-scores the partitioning is based on).
-    :param n_resamples:
+    :param n_resamples: (optional)
         number of times that the re-sampling will be performed.
+    :param idx_all: (optional)
+        boolean specifying whether all ``idx`` vectors should be returned (``idx_all=True``) or only the last one (``idx_all=False``).
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
-    :param verbose:
+    :param verbose: (optional)
         boolean for printing verbose details.
 
     :raises ValueError:
@@ -814,8 +822,9 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         if ``random_seed`` is not an integer.
 
     :return:
-        - **idx_matrix** - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
-        - **idx** - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``, but is returned separately in case this is the only needed variable.
+        - **idx_matrix** (returned if ``idx_all=True``) - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
+        - **idx** (returned if ``idx_all=False``) - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``.
+        - **converged** - boolean specifying whether the re-sampling algorithm have converged based on cluster centroids movement.
     """
 
     # Check that `biasing_option` parameter was passed correctly:
@@ -879,4 +888,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
             print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
             break
 
-    return(idx_matrix, idx, converged)
+    if idx_all:
+        return(idx_matrix, converged)
+    else:
+        return(idx, converged)

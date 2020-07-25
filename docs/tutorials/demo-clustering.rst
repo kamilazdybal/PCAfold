@@ -29,7 +29,7 @@ This clustering will be performed based on ``var``.
 Cluster into variable bins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This clustering will divide the data set into equal bins of a one-dimensional variable vector.
+This clustering will divide the data set based on equal bins of a variable vector.
 
 .. code:: python
 
