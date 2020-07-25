@@ -350,7 +350,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
 
     return(min_at_q2_k, min_at_q3_k, max_at_q2_k, max_at_q3_k)
 
-def equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components, biasing_option, n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
+def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_option, X_source=[], n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
     """
     This function gradually equilibrates cluster populations heading towards
     population of the smallest cluster in ``n_iterations``.
