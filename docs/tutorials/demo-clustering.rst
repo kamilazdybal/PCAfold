@@ -156,12 +156,15 @@ Cluster into bins of mixture fraction vector
 
 In this example, we partition the data set according to bins of mixture fraction vector.
 We generate a new synthetic data set based on a mixture fraction vector which attains values between 0 and 1.
-The partitioning function will also require specifying the value for stoichiometric mixture fraction.
 
 .. code:: python
 
   Z = np.linspace(0,1,100)
   y_Z = (-25/9)*Z**2 + (20/9)*Z + (5/9)
+
+The partitioning function will also require specifying the value for stoichiometric mixture fraction ``Z_stoich``.
+For this example let's take ``Z_stoich=0.4``.
+Note that the first split will be performed at ``Z_stoich`` and further splits will be performed automatically on lean and rich sides.
 
 .. code:: python
 
