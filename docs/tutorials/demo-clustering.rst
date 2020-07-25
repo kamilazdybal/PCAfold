@@ -14,12 +14,14 @@ First, we generate a synthetic two-dimensional data set:
 
 .. code:: python
 
-  x = np.linspace(-1,1,100)
-  y = -x**2 + 1
+  var = np.linspace(-1,1,100)
+  y = -var**2 + 1
+
+Clustering into bins of a one-dimensional vector will be performed based on ``var``.
 
 Which can be seen below:
 
-.. image:: ../images/clustering-original-data-set.png
+.. image:: ../images/tutorial-clustering-original-data-set.png
   :width: 350
   :align: center
 
@@ -30,7 +32,7 @@ This clustering will divide the data set into equal bins of a one-dimensional va
 
 .. code:: python
 
-  (idx_variable_bins) = cl.variable_bins(x, 4, verbose=True)
+  (idx_variable_bins) = cl.variable_bins(var, 4, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -57,17 +59,28 @@ The visual result of this clustering can be seen below:
 Cluster into pre-defined variable bins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user.
+This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user. Let's specify the split values as ``split_values = [-0.6, 0.4, 0.8]``
 
 .. code:: python
 
-  (idx_predefined_variable_bins) = cl.predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
+  split_values = [-0.6, 0.4, 0.8]
+  (idx_predefined_variable_bins) = cl.predefined_variable_bins(var, split_values, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
 .. code-block:: text
 
-  Border values for each bin are:
+  Border values for bins:
+  [-1.0, -0.6, 0.4, 0.8, 1.0]
+
+  Bounds for cluster 1:
+  	-1.0, -0.6162
+  Bounds for cluster 2:
+  	-0.596, 0.3939
+  Bounds for cluster 3:
+  	0.4141, 0.798
+  Bounds for cluster 4:
+  	0.8182, 1.0
 
 The visual result of this clustering can be seen below:
 
