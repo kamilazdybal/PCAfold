@@ -29,7 +29,7 @@ This clustering will be performed based on ``var``.
 --------------------------------------------------------------------------------
 
 Cluster into variable bins
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------
 
 This clustering will divide the data set based on equal bins of a variable vector.
 
@@ -60,7 +60,7 @@ The visual result of this clustering can be seen below:
   :align: center
 
 Cluster into pre-defined variable bins
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------
 
 This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user. Let's specify the split values as ``split_values = [-0.6, 0.4, 0.8]``
 
@@ -92,13 +92,13 @@ The visual result of this clustering can be seen below:
   :align: center
 
 Cluster into bins of PC-source
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------
 
 This partitioning relies on unbalanced vector which, in principle, is assumed to have a lot of observations whose values are close to zero and relatively few observations with values away from zero.
 This function can be used to separate close-to-zero observations into one cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
 
 Without splitting at zero ``split_at_zero=False``
-"""""""""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -125,7 +125,7 @@ The visual result of this clustering can be seen below:
   :align: center
 
 With splitting at zero ``split_at_zero=True``
-"""""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
@@ -154,7 +154,7 @@ The visual result of this clustering can be seen below:
   :align: center
 
 Cluster into bins of mixture fraction vector
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------------------
 
 In this example, we partition the data set according to bins of mixture fraction vector.
 We generate a new synthetic data set based on a mixture fraction vector which attains values between 0 and 1.
