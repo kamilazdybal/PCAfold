@@ -91,8 +91,8 @@ The visual result of this clustering can be seen below:
   :width: 350
   :align: center
 
-Cluster into bins of PC-source
-------------------------------
+Cluster into bins of PC-source vector
+-------------------------------------
 
 This partitioning relies on unbalanced vector which, in principle, is assumed to have a lot of observations whose values are close to zero and relatively few observations with values away from zero.
 This function can be used to separate close-to-zero observations into one cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
