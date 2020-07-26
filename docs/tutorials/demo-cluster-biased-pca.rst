@@ -18,8 +18,8 @@ This data set has 11 variables and 50,000 observations. To load the data set:
   import numpy as np
   import pandas as pd
 
-  state_space = pd.read_csv('COH2_slf_50000_state_space.csv', sep = ',', header=None).to_numpy()
-  source_state_space = pd.read_csv('COH2_slf_50000_state_space_sources.csv', sep = ',', header=None).to_numpy()
+  state_space = pd.read_csv('data-state-space.csv', sep = ',', header=None).to_numpy()
+  source_state_space = pd.read_csv('data-state-space-sources.csv', sep = ',', header=None).to_numpy()
 
 Cluster-biased PCA starts with clustering the data set using any algorithm of choice. In this example we use K-Means algorithm and partition the data set into 4 clusters:
 
