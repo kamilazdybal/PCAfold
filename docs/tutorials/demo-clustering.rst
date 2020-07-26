@@ -14,6 +14,8 @@ First, we generate a synthetic two-dimensional data set:
 
 .. code:: python
 
+  import numpy as np
+  
   var = np.linspace(-1,1,100)
   y = -var**2 + 1
 
