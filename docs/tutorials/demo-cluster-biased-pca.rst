@@ -37,26 +37,18 @@ Cluster-biased PCA starts with clustering the data set using any algorithm of ch
 
 --------------------------------------------------------------------------------
 
-Analyze centers movement
-------------------------
-
-Plotting example
-^^^^^^^^^^^^^^^^
-
-This function will produce a plot that shows the normalized centers and a percentage by which the new centers have moved with respect to the original ones. Example of a plot:
-
-.. image:: ../images/relative_centers_movement.png
-    :width: 500
-    :align: center
-
-If you do not wish to plot all variables present in a data set, use the ``plot_variables`` list as an input parameter to select indices of variables to plot:
-
-.. image:: ../images/relative_centers_movement_selected_variables.png
-    :width: 260
-    :align: center
-
 Equilibrate cluster populations iteratively
 -------------------------------------------
+
+This function begins with performing PCA on the original data set and then in
+``n_iterations`` it will gradually decrease the number of populations in each cluster larger than the smallest cluster.
+At each iteration we obtain a new sampled data set on which PCA is performed.
+At the last iteration, the number of populations in each cluster are equal and finally PCA is performed at the equilibrated data set.
+A schematic representation of this procedure is presented in the figure below:
+
+.. image:: ../images/cluster-biased-PCA-equilibration.png
+    :width: 700
+    :align: center
 
 .. code:: python
 
@@ -98,14 +90,30 @@ With ``verbose=True`` we will see some detailed information on number of samples
   At iteration 10 taking samples:
   {0: 5315, 1: 5315, 2: 5315, 3: 5315}
 
-This function begins with performing PCA on the original data set and then in
-``n_iterations`` it will gradually decrease the number of populations in each cluster larger than the smallest cluster.
-At each iteration we obtain a new sampled data set on which PCA is performed.
-At the last iteration, the number of populations in each cluster are equal and finally PCA is performed at the equilibrated data set.
-A schematic representation of this procedure is presented in the figure below:
+Analyze centers movement
+------------------------
 
-.. image:: ../images/cluster-biased-PCA-equilibration.png
-    :width: 700
+This function compares centers computed on the original data set *(as-is)* versus on the sampled data set.
+The ``idx_train`` that is an input parameter could for instance be obtained from ``equilibrate_cluster_populations``
+and will thus represent the equilibrated data set sampled from the original data set.
+
+.. code:: python
+
+  (centers_X, centers_X_r, perc) = cbpca.analyze_centers_movement(state_space, idx_train, variable_names=state_space_names, title=title, save_plot=save_plots, save_filename='')
+
+Plotting example
+^^^^^^^^^^^^^^^^
+
+This function will produce a plot that shows the normalized centers and a percentage by which the new centers have moved with respect to the original ones. Example of a plot:
+
+.. image:: ../images/relative_centers_movement.png
+    :width: 500
+    :align: center
+
+If you do not wish to plot all variables present in a data set, use the ``plot_variables`` list as an input parameter to select indices of variables to plot:
+
+.. image:: ../images/relative_centers_movement_selected_variables.png
+    :width: 260
     :align: center
 
 Analyze eigenvector weights movement
