@@ -37,6 +37,8 @@ The only information about the original data set that will be needed is ``idx`` 
     k = 0
     train_indices_k = [t_id for t_id in idx_train if idx[t_id,]==k]
 
+--------------------------------------------------------------------------------
+
 Select fixed number
 ^^^^^^^^^^^^^^^^^^^
 

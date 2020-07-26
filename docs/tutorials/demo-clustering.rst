@@ -26,6 +26,8 @@ Which can be seen below:
 Let's start with clustering the data set according to bins of a single vector.
 This clustering will be performed based on ``var``.
 
+--------------------------------------------------------------------------------
+
 Cluster into variable bins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 

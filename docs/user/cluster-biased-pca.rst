@@ -10,8 +10,10 @@ The general methodology for cluster-biased PCA is presented in the scheme below:
 .. image:: ../images/cluster-biased-PCA-scheme-sampling-highlighted.png
   :width: 700
 
+--------------------------------------------------------------------------------
+
 Biasing options
-----------------
+---------------
 
 This section explains the choice for ``biasing_option`` input parameter in some of the functions in this module.
 
@@ -70,6 +72,7 @@ In this option, the reduced data set is only found in order to compute its cente
     :width: 700
     :align: center
 
+--------------------------------------------------------------------------------
 
 Functions
 ---------
@@ -127,3 +130,8 @@ Re-sample at equilibration using K-Means clustering
 .. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_sources
 
 .. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_scores
+
+--------------------------------------------------------------------------------
+
+Bibliography
+------------

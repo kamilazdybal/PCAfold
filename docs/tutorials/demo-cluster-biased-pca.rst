@@ -12,6 +12,8 @@ In this tutorial we present the main functionalities of the ``cluster_biased_pca
 
 As an example, we use a data set describing combustion of syngas in air.
 
+--------------------------------------------------------------------------------
+
 Analyze centers movement
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -29,6 +31,12 @@ If you do not wish to plot all variables present in a data set, use the ``plot_v
 .. image:: ../images/relative_centers_movement_selected_variables.png
     :width: 260
     :align: center
+
+Equilibrate cluster populations iteratively
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
 
 Analyze eigenvector weights movement
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

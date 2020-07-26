@@ -26,6 +26,8 @@ All functions are equipped with ``verbose=False`` parameter. If it is set to ``T
 
 .. note:: It is assumed that the first cluster has index ``0`` within all input ``idx`` vectors. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 
+--------------------------------------------------------------------------------
+
 Functions
 ---------
 
@@ -85,6 +87,8 @@ clusters. You can for instance pass the ``idx_test`` resulting from
 
   (_, idx_test) = train_test_split_fixed_number_from_idx(idx, perc)
   (idx_train, idx_test) = train_test_split_random(idx, perc, idx_test)
+
+--------------------------------------------------------------------------------
 
 Bibliography
 ------------

@@ -3,10 +3,17 @@
 Clustering
 ==========
 
-``clustering_data.py`` module contains functions for classifying data sets into local clusters and performing some basic operations on clusters :cite:`Everitt2009`, :cite:`Kaufman2009`.
+``clustering_data.py`` module contains functions for classifying data sets into
+local clusters and performing some basic operations on clusters :cite:`Everitt2009`,
+:cite:`Kaufman2009`.
+
+--------------------------------------------------------------------------------
+
+Functions
+---------
 
 Clustering functions
---------------------
+^^^^^^^^^^^^^^^^^^^^
 
 Each function that clusters the data set returns a vector of integers ``idx`` of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies classification of each observation from the original data set ``X`` to a local cluster.
 
@@ -67,7 +74,7 @@ The general scheme for the iterative procedure is presented below:
   :align: center
 
 Auxiliary functions
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: PCAfold.clustering_data.degrade_clusters
 
@@ -78,6 +85,8 @@ Auxiliary functions
 .. autofunction:: PCAfold.clustering_data.get_partition
 
 .. autofunction:: PCAfold.clustering_data.get_populations
+
+--------------------------------------------------------------------------------
 
 Bibliography
 ------------
