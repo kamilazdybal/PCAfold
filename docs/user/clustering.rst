@@ -58,7 +58,9 @@ With ``split_at_zero=True``:
 
 .. autofunction:: PCAfold.clustering_data.vqpca
 
-VQPCA algorithm used here was first proposed in :cite:`Parente2009`. The general scheme for the iterative procedure is presented below:
+VQPCA algorithm was first proposed in :cite:`Kambhatla1997` and later its
+modified version, that we present here, was developed in :cite:`Parente2009`.
+The general scheme for the iterative procedure is presented below:
 
 .. image:: ../images/clustering-vqpca.png
   :width: 700
