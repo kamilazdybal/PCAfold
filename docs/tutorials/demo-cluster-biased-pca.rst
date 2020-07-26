@@ -21,7 +21,7 @@ This data set has 11 variables and 50,000 observations. To load the data set:
   state_space = pd.read_csv('COH2_slf_50000_state_space.csv', sep = ',', header=None).to_numpy()
   source_state_space = pd.read_csv('COH2_slf_50000_state_space_sources.csv', sep = ',', header=None).to_numpy()
 
-Cluster-biased PCA starts with clustering the data set using any algorithm of choice. In this example, we use K-Means clustering into 4  clusters:
+Cluster-biased PCA starts with clustering the data set using any algorithm of choice. In this example we use K-Means algorithm and partition the data set into 4 clusters:
 
 .. code:: python
 
@@ -62,7 +62,7 @@ Equilibrate cluster populations iteratively
 
   (eigenvalues, eigenvectors, pc_scores, pc_sources, idx_train, X_center, X_scale) = cbpca.equilibrate_cluster_populations(state_space, idx, scaling=scal_crit, X_source=source_state_space, n_components=n_components, biasing_option=biasing_option, n_iterations=10, stop_iter=0, verbose=True)
 
-With ``verbose=True`` we will see some detailed information on number of samples in each cluster:
+With ``verbose=True`` we will see some detailed information on number of samples in each cluster at each iteration:
 
 .. code-block:: text
 
@@ -121,7 +121,6 @@ To access the first eigenvector one can simply do:
 .. code:: python
 
   eigenvectors[:,0,:]
-
 
 similarly, to access the second eigenvector:
 
