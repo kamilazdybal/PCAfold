@@ -30,7 +30,7 @@ Each module's functionalities can also be used as a standalone tool for performi
 
 .. toctree::
    :maxdepth: 2
-   :caption: Tutorials
+   :caption: Tutorials & Demos
 
    tutorials/demo-clustering
    tutorials/demo-cluster-biased-pca
