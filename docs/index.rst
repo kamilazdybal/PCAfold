@@ -32,6 +32,7 @@ Each module's functionalities can also be used as a standalone tool for performi
    :maxdepth: 2
    :caption: Tutorials & Demos
 
+   tutorials/demo-pca
    tutorials/demo-clustering
    tutorials/demo-cluster-biased-pca
    tutorials/demo-train-test-selection
