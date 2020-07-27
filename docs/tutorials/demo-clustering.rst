@@ -15,7 +15,7 @@ First, we generate a synthetic two-dimensional data set:
 .. code:: python
 
   import numpy as np
-  
+
   var = np.linspace(-1,1,100)
   y = -var**2 + 1
 
@@ -96,7 +96,7 @@ The visual result of this clustering can be seen below:
 Cluster into bins of PC-source vector
 -------------------------------------
 
-This partitioning relies on unbalanced vector which, in principle, is assumed to have a lot of observations whose values are close to zero and relatively few observations with values away from zero.
+This partitioning relies on unbalanced PC-source vector which, in principle, is assumed to have a lot of observations whose values are close to zero and relatively few observations with values away from zero.
 This function can be used to separate close-to-zero observations into one cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
 
 Without splitting at zero ``split_at_zero=False``
