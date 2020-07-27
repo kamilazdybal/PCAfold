@@ -42,7 +42,7 @@ We generate a synthetic data set on which the global PCA will be performed:
 This data set can be seen below:
 
 .. image:: ../images/tutorial-pca-data-set-for-global-pca.png
-  :width: 500
+  :width: 350
   :align: center
 
 We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
@@ -74,7 +74,7 @@ Similarly, we generate another synthetic data set that is composed of two distin
 This data set can be seen below:
 
 .. image:: ../images/tutorial-pca-data-set-for-local-pca.png
-  :width: 500
+  :width: 350
   :align: center
 
 We use K-Means clustering algorithm to obtain cluster classifications and centroids for each cluster:
