@@ -15,9 +15,8 @@ Global versus local PCA
 .. note:: This tutorial was generated from a Jupyter notebook that can be
           accessed `here <https://gitlab.multiscale.utah.edu/common/PCA-python/-/blob/regression/docs/tutorials/demo-global-local-PCA.ipynb>`_.
 
-In this tutorial we present how global and local PCA can be performed on a synthetic data set.
-
-For the purpose of this example we only need to import the ``PCA`` class:
+In this example we present how global and local PCA can be performed on a synthetic data set.
+Here we will only need to import the ``PCA`` class:
 
 .. code:: python
 
@@ -40,7 +39,7 @@ We generate a synthetic data set on which the global PCA will be performed:
 
   Dataset_global = np.hstack((x_global[:,np.newaxis], y_global[:,np.newaxis]))
 
-PCA can then be performed to obtain PC-scores, eigenvectors and eigenvalues:
+We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
 
 .. code:: python
 
@@ -50,16 +49,20 @@ PCA can then be performed to obtain PC-scores, eigenvectors and eigenvalues:
   eigenvectors_global = pca.Q
   eigenvalues_global = pca.L
 
-Similarly we generate another synthetic data set ``Dataset_local`` that is composed of two distinct clouds of points.
+Similarly, we generate another synthetic data set ``Dataset_local`` that is composed of two distinct clouds of points.
 We can use K-Means clustering algorithm to obtain cluster classifications and centroids for each cluster:
 
 .. code:: python
+
+  from sklearn.cluster import KMeans
 
   kmeans = KMeans(n_clusters=2, random_state=0).fit(Dataset_local)
   idx = kmeans.labels_
   centroids = kmeans.cluster_centers_
 
-Local PCA function can be easily constructed using the existing features of the ``PCA`` class:
+Local PCA function can be easily constructed using the existing features of the ``PCA`` class.
+This function will perform the standard PCA transformation on local portions of the data set identified by K-Means algorithm.
+An example function is shown below:
 
 .. code:: python
 
@@ -86,7 +89,6 @@ Local PCA function can be easily constructed using the existing features of the 
       return (eigenvectors, eigenvalues, PC_scores)
 
 Finally, we plot the identified global and local eigenvectors on top of the sythetic data sets.
-
 The visual result of performing PCA globally and locally can be seen below:
 
 .. image:: ../images/tutorial-pca-global-local-pca.png
