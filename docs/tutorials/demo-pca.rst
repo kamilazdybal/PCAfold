@@ -39,6 +39,12 @@ We generate a synthetic data set on which the global PCA will be performed:
 
   Dataset_global = np.hstack((x_global[:,np.newaxis], y_global[:,np.newaxis]))
 
+This data set can be seen below:
+
+.. image:: ../images/tutorial-pca-data-set-for-global-pca.png
+  :width: 500
+  :align: center
+
 We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
 
 .. code:: python
@@ -49,8 +55,29 @@ We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
   eigenvectors_global = pca.Q
   eigenvalues_global = pca.L
 
-Similarly, we generate another synthetic data set ``Dataset_local`` that is composed of two distinct clouds of points.
-We can use K-Means clustering algorithm to obtain cluster classifications and centroids for each cluster:
+Similarly, we generate another synthetic data set that is composed of two distinct clouds of points:
+
+.. code:: python
+
+  mean_local_1 = [0,1]
+  mean_local_2 = [6, 4]
+  covariance_local_1 = [[2, 0.5], [0.5, 0.5]]
+  covariance_local_2 = [[3, 0.3], [0.3, 0.5]]
+
+  x_noise_1, y_noise_1 = np.random.multivariate_normal(mean_local_1, covariance_local_1, n_points).T
+  x_noise_2, y_noise_2 = np.random.multivariate_normal(mean_local_2, covariance_local_2, n_points).T
+  x_local = np.concatenate([x_noise_1, x_noise_2])
+  y_local = np.concatenate([y_noise_1, y_noise_2])
+
+  Dataset_local = np.hstack((x_local[:,np.newaxis], y_local[:,np.newaxis]))
+
+This data set can be seen below:
+
+.. image:: ../images/tutorial-pca-data-set-for-local-pca.png
+  :width: 500
+  :align: center
+
+We use K-Means clustering algorithm to obtain cluster classifications and centroids for each cluster:
 
 .. code:: python
 
