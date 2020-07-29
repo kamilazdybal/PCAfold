@@ -8,12 +8,21 @@ def center_scale(X, scaling, nocenter=False):
     """
     Centers and scales data - used in constructing PCA objects
 
-    Example:
-      xs = center_scale( X, opts )
+    **Example:**
 
-    :param X: uncentered, unscaled data
-    :param scaling: the scaling methodology
-    :return: the centered and scaled data (Xout), the value for centering (xbar), the value for scaling (d)
+    .. code:: python
+
+        xs = center_scale( X )
+
+    :param X:
+        uncentered, unscaled data
+    :param scaling:
+        the scaling methodology
+
+    :return:
+        - **Xout** - the centered and scaled data
+        - **xbar** - the value for centering
+        - **d** - the value for scaling
     """
     Xout = np.zeros_like(X, dtype=float)
     xbar = X.mean(axis=0)
@@ -72,12 +81,17 @@ def center_scale(X, scaling, nocenter=False):
 
 def inv_center_scale(x, xcenter, xscale):
     """
-    Invert whatever scaling and centering was done by center_scale
+    Invert whatever scaling and centering was done by ``center_scale`` function.
 
-    :param x: the dataset you want to un-center and un-scale
-    :param xcenter: the centering done on the original dataset X
-    :param xscale: the scaling done on the original dataset X
-    :return: the unmanipulated/original dataset (X)
+    :param x:
+        the dataset you want to un-center and un-scale.
+    :param xcenter:
+        the centering done on the original dataset ``X``.
+    :param xscale:
+        the scaling done on the original dataset ``X``.
+
+    :return:
+        - **X** - the unmanipulated/original dataset.
     """
     X = np.zeros_like(x, dtype=float)
     for i in range(0, len(xcenter)):
@@ -87,10 +101,11 @@ def inv_center_scale(x, xcenter, xscale):
 
 class preprocess:
     """
-    class for preprocessing data which will check for the constant values and remove them, saving whatever manipulations
-    were done so a user can manipulate new data in the same way
+    Class for preprocessing data which will check for the constant values and
+    remove them, saving whatever manipulations were done so a user can
+    manipulate new data in the same way.
 
-    Could make more complicated ones as needed
+    Could make more complicated ones as needed.
     """
 
     def __init__(self, X):
@@ -99,15 +114,24 @@ class preprocess:
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
-    Remove any constant variables (columns) in the data X
-    Specifically preprocessing for PCA so the eigenvalue calculation doesn't break
+    Remove any constant variables (columns) in the data ``X``.
+    Specifically pre-processing for PCA so the eigenvalue calculation
+    doesn't break.
 
-    :param X: original data
-    :param maxtol: tolerance for the maximum absolute value of a column (variable) in X to be saved
-    :param rangetol: tolerance for the range (max-min) over the maximum absolute value of a column (variable) in X to
-                     be saved
-    :return: the manipulated data (manipulated), the indices of columns removed from X (idx_removed), the original
-             data X (original), the indices of columns retained in X (idx_retained)
+    :param X:
+        original data.
+    :param maxtol:
+        tolerance for the maximum absolute value of a column (variable) in
+        ``X`` to be saved.
+    :param rangetol:
+        tolerance for the range (max-min) over the maximum absolute value of
+        a column (variable) in X to be saved.
+
+    :return:
+        - **manipulated** - the manipulated data.
+        - **idx_removed** - the indices of columns removed from ``X``.
+        - **original** - the original data ``X``.
+        - **idx_retained** - the indices of columns retained in ``X``.
     """
     npts, nvar = X.shape
     original = np.copy(X)
@@ -130,34 +154,42 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
 
 class PCA:
     """
-    A class to support Principal Component Analysis
+    A class to support Principal Component Analysis.
 
-    Examples:
+    **Example:**
+
+    .. code:: python
+
         pca = PCA(X)
 
-    :param X: matrix of data to apply PCA to. Variables are in columns and
-             observations are in rows.  Must have more observations than
-             variables.
+    :param X:
+        matrix of data to apply PCA to. Variables are in columns and
+        observations are in rows.  Must have more observations than
+        variables.
+        *Note*: If a variable (column) is constant in the matrix ``X``, an error will
+        arise telling the user to preprocess the data to remove that variable. The
+        preprocess class can do this for the user.
+    :param scaling: (optional)
+        default is ``'AUTO'``
 
-             NOTE: If a variable (column) is constant in the matrix X, an error will
-             arise telling the user to preprocess the data to remove that variable. The
-             preprocess class can do this for the user.
-    :param scaling: (optional) default is 'AUTO'
-                    'NONE'          no scaling
-                    'AUTO' 'STD'    scale by std
-                    'PARETO'        scale by std^2
-                    'VAST'          scale by std^2 / mean
-                    'VAST_2'        scale by std^2 * kurtosis^2 / mean
-                    'VAST_3'        scale by std^2 * kurtosis^2 / max
-                    'VAST_4'        scale by std^2 * kurtosis^2 / (max - min)
-                    'RANGE'         scale by (max-min)
-                    'LEVEL'         scale by mean
-                    'MAX'           scale by max value
-                    'POISSON'       scale by sqrt(mean)
-    :param neta: (optional) number of retained eigenvalues - default is all
-    :param useXTXeig: (optional) method for obtaining the eigenvalues (L) and eigenvectors (Q)
-                      useXTXeig = False: uses singular-value decomposition (from scipy.linalg.svd)
-                      useXTXeig = True (default): uses numpy.linalg.eigh on the covariance matrix (R)
+            * ``'NONE'``          no scaling
+            * ``'AUTO'`` ``'STD'`` scale by :math:`\sigma`
+            * ``'PARETO'``        scale by :math:`\sigma^2`
+            * ``'VAST'``          scale by :math:`\sigma^2 / {mean}`
+            * ``'VAST_2'``        scale by :math:`\sigma^2 \cdot kurtosis^2 / mean`
+            * ``'VAST_3'``        scale by :math:`\sigma^2 \cdot kurtosis^2 / max`
+            * ``'VAST_4'``        scale by :math:`\sigma^2 \cdot kurtosis^2 / (max - min)`
+            * ``'RANGE'``         scale by :math:`(max-min)`
+            * ``'LEVEL'``         scale by :math:`mean`
+            * ``'MAX'``           scale by :math:`max`
+            * ``'POISSON'``       scale by :math:`\sqrt{mean}`
+    :param neta: (optional)
+        number of retained eigenvalues - default is all
+    :param useXTXeig: (optional)
+        method for obtaining the eigenvalues ``L`` and eigenvectors ``Q``:
+
+            * ``useXTXeig=False`` uses singular-value decomposition (from ``scipy.linalg.svd``)
+            * ``useXTXeig=True`` (default) uses ``numpy.linalg.eigh`` on the covariance matrix ``R``
 
     """
 
@@ -206,16 +238,20 @@ class PCA:
         """
         Calculate the principal components given the original data.
 
-        :param X: a set of observations of variables x (observations in rows),
-                  unscaled, uncentered. These do not need to be the same
-                  observations as were used to construct the PCA object. They
-                  could be, e.g. functions of those variables.
-        :param nocenter:[OPTIONAL] Defaults to centering. A nonzero argument here
-                        will result in no centering being applied, even though it may
-                        be present in the original PCA transformation. Use this
-                        option only if you know what you are doing. PC source terms
-                        are an example of where we want this to be flagged.
-        :return: the principal components (eta)
+        :param X:
+            a set of observations of variables x (observations in rows),
+            unscaled, uncentered. These do not need to be the same
+            observations as were used to construct the PCA object. They
+            could be, e.g. functions of those variables.
+        :param nocenter: (optional)
+            Defaults to centering. A nonzero argument here will result in no
+            centering being applied, even though it may be present in the
+            original PCA transformation. Use this option only if you know what
+            you are doing. PC source terms are an example of where we want this
+            to be flagged.
+
+        :return:
+            - **eta** - the principal components.
         """
         neta = self.neta
         npts, nvar = X.shape
@@ -235,14 +271,20 @@ class PCA:
 
     def eta2x(self, eta):
         """
-        Calculate the principal components (or reconstructed variables)
+        Calculate the principal components (or reconstructed variables).
 
-        Example:
-            eta = pca.eta2x(x) : calculate the principal components
-            xrec = pca.eta2x(eta) : calculate reconstructed variables
+        **Example:**
 
-        :param eta: the PCs
-        :return: the unscaled, uncentered approximation to the data (X)
+        .. code:: python
+
+            eta = pca.eta2x(x) # calculate the principal components
+            xrec = pca.eta2x(eta) # calculate reconstructed variables
+
+        :param eta:
+            the PCs.
+
+        :return:
+            - **X** - the unscaled, uncentered approximation to the data.
         """
         npts, neta = eta.shape
         assert neta == self.neta, "Number of variables provided inconsistent with number of PCs."
@@ -252,16 +294,22 @@ class PCA:
 
     def calculate_r2(self, X):
         """
-        Calculates R-squared values.
+        Calculates coefficient of determination :math:`R^2` values.
+        Given the data used to construct the PCA, this calculates the
+        :math:`R^2` values for the reduced representation of the data.
+        If all of the eigenvalues are retained, then this should be unity.
 
-        r2 = pca.calculate_r2( X )
+        **Example:**
 
-        Given the data used to construct the PCA, this calculates the R2 values
-        for the reduced representation of the data.  If all of the eigenvalues
-        are retained, then this should be unity.
+        .. code:: python
 
-        :param X: data used to construct the PCA
-        :return: R2 values for the reduced representation of the data (r2)
+            r2 = pca.calculate_r2( X )
+
+        :param X:
+            data used to construct the PCA.
+
+        :return:
+            - **r2** coefficient of determination values for the reduced representation of the data.
         """
         npts, nvar = X.shape
         assert (npts > nvar), "Need more observations than variables."
@@ -274,14 +322,23 @@ class PCA:
 
     def data_consistency_check(self, X, errorsAreFatal=True):
         """
-        Checks if the supplied data matrix X is consistent with the PCA object
+        Checks if the supplied data matrix ``X`` is consistent with the PCA object.
 
-        pca.data_consistency_check( X, errorsAreFatal )
+        **Example:**
 
-        :param X: the independent variables
-        :param errorsAreFatal: (OPTIONAL) flag indicating if an error should be raised
-%                               if an incompatibility is detected - default is True
-        :return: boolean for whether or not supplied data matrix X is consistent with the PCA object (okay)
+        .. code:: python
+
+            pca.data_consistency_check( X, errorsAreFatal )
+
+        :param X:
+            the independent variables.
+        :param errorsAreFatal: (optional)
+            flag indicating if an error should be raised if an incompatibility
+            is detected - default is True.
+
+        :return:
+            - **okay** - boolean for whether or not supplied data matrix ``X``\
+            is consistent with the PCA object.
         """
         npts, nvar = X.shape
         self.neta = nvar
@@ -295,20 +352,33 @@ class PCA:
 
     def convergence(self, X, nmax, names=[], printwidth=10):
         """
-        Print r2 values as a function of number of retained eigenvalues.
+        Print :math:`R^2` values as a function of number of retained eigenvalues.
 
-        pca.convergence( X, nmax )
-        pca.convergence( X, nmax, names )
+        **Example:**
 
-        :param X: the original dataset
-        :param nmax: the maximum number of PCs to consider
-        :param names: (OPTIONAL) the names of the variables - otherwise variables are numbered
-        :param printwidth: (OPTIONAL) width of columns printed out
-        :return: [nmax,nvar] matrix containing the R^2 values for each variable as a
-                 function of the number of retained eigenvalues.
+        .. code:: python
 
-        Example:
-            pca.convergence(X,5) prints R^2 values retaining 1-5 eigenvalues
+            pca.convergence( X, nmax )
+            pca.convergence( X, nmax, names )
+
+        Print :math:`R^2` values retaining 1-5 eigenvalues:
+
+        .. code:: python
+
+            pca.convergence(X,5)
+
+        :param X:
+            the original dataset.
+        :param nmax:
+            the maximum number of PCs to consider.
+        :param names: (optional)
+            the names of the variables - otherwise variables are numbered.
+        :param printwidth: (optional)
+            width of columns printed out.
+
+        :return:
+            - **r2** matrix ``(nmax,nvar)`` containing the :math:`R^2` values\
+            for each variable as a function of the number of retained eigenvalues.
         """
         npts, nvar = X.shape
         r2 = np.zeros((nmax, nvar))
@@ -347,13 +417,22 @@ class PCA:
         """
         Produces a bar plot of the weight of each state variable in the eigenvectors
 
-        pca.eig_bar_plot_maker( neig )
+        **Example:**
 
-        :param neig: Number of eigenvectors that you want to keep in the plot
-        :param DataName: list containing the names of the variables
-        :param barWidth: (OPTIONAL) width of each bar in the plot
-        :param plotABS: (OPTIONAL) default False - plots the eigenvectors keeping their sign
-                                   if True - plots the absolute value of the eigenvectors
+        .. code:: python
+
+            pca.eig_bar_plot_maker( neig )
+
+        :param neig:
+            number of eigenvectors that you want to keep in the plot
+        :param DataName:
+            list containing the names of the variables
+        :param barWidth: (optional)
+            width of each bar in the plot
+        :param plotABS: (optional)
+            default False - plots the eigenvectors keeping their sign
+            if True - plots the absolute value of the eigenvectors
+
         :return: (plot)
         """
         assert (neig <= self.nvar), "Number of eigenvectors specified is greater than the number of variables"
@@ -379,10 +458,13 @@ class PCA:
 
     def plot_convergence(self, npc=0):
         """
-        Plot the eigenvalues (bars) and the cumulative sum (line) to visualize the percent variance in the data
-        explained by each principal component individually and by each principal component cumulatively
+        Plot the eigenvalues (bars) and the cumulative sum (line) to visualize
+        the percent variance in the data explained by each principal component
+        individually and by each principal component cumulatively.
 
-        :param npc: (OPTIONAL) how many principal components you want to visualize (default is all)
+        :param npc: (optional)
+            how many principal components you want to visualize (default is all).
+
         :return: (plot)
         """
         if npc == 0:
@@ -402,28 +484,36 @@ class PCA:
         """
         Extract principal variables from a PCA
 
-        Example:
-          ikeep = principal_variables()
-          ikeep = principal_variables('B4')
-          ikeep = principal_variables('M2', X )
+        **Example:**
 
-        :param method: [OPTIONAL] the method for determining the principal variables.
-                       The following methods are currently supported:
-                    "B4" : selects principal variables based on the variables
-                           contained in the eigenvectors corresponding to the
-                           largest eigenvalues.
-                    "B2" : selects pvs based on variables contained in the smallest
-                           eigenvalues.  These are discarded and the remaining
-                           variables are used as the principal variables.  This is
-                           the default method.
-                    "M2" : At each iteration, each remaining variable is analyzed
-                           via PCA.  This is a very expensive method.
+        .. code:: python
 
-        :param x: [OPTIONAL] data arranged with observations in rows and
-                  variables in columns.  Note that this is only required for the
-                  "M2" method.
-        :return: a vector of indices of retained variables (ikeep)
+            ikeep = principal_variables()
+            ikeep = principal_variables('B4')
+            ikeep = principal_variables('M2', X )
+
+        :param method: (optional)
+            the method for determining the principal variables.
+            The following methods are currently supported:
+
+            * ``'B4'`` - selects principal variables based on the variables\
+            contained in the eigenvectors corresponding to the largest\
+            eigenvalues.
+            * ``'B2'`` - selects pvs based on variables contained in the\
+            smallest eigenvalues.  These are discarded and the remaining\
+            variables are used as the principal variables.  This is the default\
+            method.
+            * ``'M2'`` - at each iteration, each remaining variable is analyzed\
+            via PCA. This is a very expensive method.
+
+        :param x: (optional)
+            data arranged with observations in rows and variables in columns.
+            Note that this is only required for the ``'M2'`` method.
+
+        :return:
+            - **ikeep** - a vector of indices of retained variables
         """
+
         method = method.upper()
 
         if method == 'B2':  # B2 Method of Jolliffe (1972)
@@ -527,15 +617,22 @@ class PCA:
         """
         Evaluate r2 values as a function of the number of retained eigenvalues.
 
-        Examples:
+        **Example:**
+
+        .. code:: python
+
             r2, neta = pca.r2converge( data )
             r2, neta = pca.r2converge( data, names, 'r2.csv' )
 
-        :param data: the data to fit
-        :param names: [optional] names of the data
-        :param fname: [optional] file to output r2 information to
-        :return: r2 - [neta,nvar] The r2 values.  Each column is a different variable and
-%                     each row is for a different number of retained pcs.
+        :param data:
+            the data to fit.
+        :param names: (optional)
+            names of the data.
+        :param fname: (optional)
+            file to output r2 information to.
+
+        :return:
+            - **r2** - [neta,nvar] The r2 values.  Each column is a different variable and each row is for a different number of retained pcs.
         """
         nvar = self.nvar
         neta = np.arange(nvar) + 1
@@ -589,17 +686,21 @@ class PCA:
     def write_file_for_cpp(self, filename):
         """
         Writes the eigenvector matrix, centering and scaling vectors to .txt
-        for reading into C++
+        for reading into C++.
+        *Note*: This function writes only the eigenvector matrix, centering and
+        scaling factors - not all of the pca properties.
 
-        Example:
-          pca = PCA( x );
-          pca.wite2file('pcaData.txt');
+        **Example:**
 
-        :param filename: path (including name of text file) for destination of data file
-        :return: (creates the .txt file in the destination specified by filename)
+        .. code:: python
 
-        NOTE: This function writes only the eigenvector matrix, centering and
-        scaling factors - not all of the pca properties
+            pca = PCA( x )
+            pca.wite2file('pcaData.txt')
+
+        :param filename:
+            path (including name of text file) for destination of data file
+
+        :return: (creates the ``.txt`` file in the destination specified by filename)
         """
 
         fid = open(filename, 'w')
@@ -628,40 +729,44 @@ class PCA:
 
     def set_retained_eigenvalues(self, method='SCREE GRAPH', option=None):
         """
-        Help determine how many eigenvalues to retain
+        Help determine how many eigenvalues to retain.
+        The following methods are available:
 
-        Example:
+        - ``'TOTAL VARIANCE'`` retain the eigenvalues needed to account for a\
+        specific percentage of the total variance (i.e. 80%). The required\
+        number of PCs is then the smallest value of m for which this chosen\
+        percentage is exceeded.
+
+        * ``'INDIVIDUAL VARIANCE'`` retain the components whose eigenvalues are\
+        greater than the average of the eigenvalues :cite:`Kaiser1960` or than 0.7\
+        times he average of the eigenvalues :cite:`Jolliffe2002`. For a correlation\
+        matrix this average equals 1.
+
+        * ``'BROKEN STICK'`` select the retained PCs according to the Broken\
+        Stick Model.
+
+        * ``'SCREE GRAPH'`` use the scree graph, a plot of the eigenvalues\
+        agaist their indexes, and look for a natural break between the large\
+        and small eigenvalues.
+
+        **Example:**
+
+        .. code:: python
+
             pca = pca.set_retained_eigenvalues( method )
 
         This function provides a few methods to select the number of eigenvalues
         to be retained in the PCA reduction.
 
-        :param method: (optional) method to use in selecting retained eigenvalues.
-                       Default is 'SCREE GRAPH'
-        :param option: (optional) if not supplied, information will be obtained
-                       interactively.  Only used for the 'TOTAL VARIANCE' and
-                       'INDIVIDUAL VARIANCE' methods.
-        :return: the PCA object with the number of retained eigenvalues set on it. (pca)
+        :param method: (optional)
+            method to use in selecting retained eigenvalues.
+            Default is ``'SCREE GRAPH'``
+        :param option: (optional)
+            if not supplied, information will be obtained interactively.
+            Only used for the ``'TOTAL VARIANCE'`` and ``'INDIVIDUAL VARIANCE'`` methods.
 
-        The following methods are available:
-        'TOTAL VARIANCE'      retain the eigenvalues needed to account for a
-                              specific percentage of the total variance (i.e.
-                              80%). The required number of PCs is then the
-                              smallest value of m for which this chosen
-                              percentage is exceeded.
-
-        'INDIVIDUAL VARIANCE' retain the components whose eigenvalues are
-                              greater than the average of the eigenvalues
-                              (Kaiser, 1960) or than 0.7 times he average of the
-                              eigenvalues (Joliffe 1972). For a correlation
-                              matrix this average equals 1.
-
-        'BROKEN STICK'        select the retained PCs according to the
-                              Broken Stick Model.
-
-        'SCREE GRAPH'         use the scree graph, a plot of the eigenvalues
-                              agaist their indexes, and look for a natural break
-                              between the large and small eigenvalues.
+        :return:
+            - **pca** - the PCA object with the number of retained eigenvalues set on it.
         """
         pca = cp.copy(self)
         neig = len(pca.L)
@@ -721,9 +826,12 @@ class PCA:
 
     def u_scores(self, X):
         """
-        Calculate the u scores (principal components)
+        Calculate the U-scores (Principal Components).
 
-        Example:
+        **Example:**
+
+        .. code:: python
+
             uscores = pca.u_scores(X)
 
         U-scores = obtained by using the U-vectors, i.e. the eigenvectors of the
@@ -732,31 +840,39 @@ class PCA:
 
         This is entirely equivalent to x2eta.
 
-        :param X: a set of observations of variables x (observations in rows),
-                  unscaled, uncentered. These do not need to be the same
-                  observations as were used to construct the PCA object. They
-                  could be, e.g. functions of those variables.
-        :return:  u scores or principal components (eta)
+        :param X:
+            a set of observations of variables x (observations in rows),
+            unscaled, uncentered. These do not need to be the same
+            observations as were used to construct the PCA object. They
+            could be, e.g. functions of those variables.
+
+        :return:
+            - **uscores** - U-scores or principal components (``eta``)
         """
         return self.x2eta(X)
 
     def w_scores(self, X):
         """
-        Calculates the w scores
+        Calculates the W-scores.
 
-        Example:
+        **Example:**
+
+        .. code:: python
+
             wscores = pca.w_scores( X )
 
         W-scores = The U vectors are scaled by the inverse of the eigenvalues
-        square root, i.e. V = L^-0.5 * U. The W-scores are still uncorrelated and
+        square root, i.e. :math:`V = L^{-0.5} \cdot U`. The W-scores are still uncorrelated and
         have variances equal unity.
 
-        :param X: a set of observations of variables x (observations in rows),
-                  unscaled, uncentered. These do not need to be the same
-                  observations as were used to construct the PCA object. They
-                  could be, e.g. functions of those variables.
-        :return:  u scores or principal components (eta)
-        :return: w scores
+        :param X:
+            a set of observations of variables x (observations in rows),
+            unscaled, uncentered. These do not need to be the same
+            observations as were used to construct the PCA object. They
+            could be, e.g. functions of those variables.
+
+        :return:
+            - **wscores** - W-scores or principal components
         """
         eval = self.L[0:self.neta]
         return self.x2eta(X).dot(np.diag(1 / np.sqrt(eval)))
@@ -764,9 +880,14 @@ class PCA:
     def __eq__(a, b):
         """
         Compares two PCA objects for equality.
-        :param a: first PCA object
-        :param b: second PCA object
-        :return: boolean for (a == b)
+
+        :param a:
+            first PCA object.
+        :param b:
+            second PCA object.
+
+        :return:
+            - **iseq** - boolean for ``(a == b)``.
         """
         iseq = False
         scalErr = np.abs(a.XScale - b.XScale) / np.max(np.abs(a.XScale))
@@ -787,9 +908,14 @@ class PCA:
     def __ne__(a, b):
         """
         Tests two PCA objects for inequality.
-        :param a: first PCA object
-        :param b: second PCA object
-        :return: boolean for (a != b)
+
+        :param a:
+            first PCA object.
+        :param b:
+            second PCA object.
+
+        :return:
+            - **result** - boolean for ``(a != b)``.
         """
         result = not (a == b)
 
