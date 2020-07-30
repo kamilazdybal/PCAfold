@@ -21,7 +21,7 @@ The only information about the original data set that will be needed is ``idx`` 
 .. note::
 
   ``idx_train`` and ``idx_test`` that are outputs of sampling functions in this module have different interpretation than ``idx``. They are vectors containing observation index, *not* cluster classifications.
-  For instance, if train samples are composed of the first, second and tenth observation: ``idx_train=[0,1,9]``.
+  For instance, if train samples are composed of the first, second and tenth observation then ``idx_train=[0,1,9]``.
 
   You can find which cluster each observation in ``idx_train`` (or ``idx_test``) belongs to, for instance through:
 
@@ -30,12 +30,20 @@ The only information about the original data set that will be needed is ``idx`` 
     idx[idx_train,]
     idx[idx_test,]
 
-  You can also extract a subset of ``idx_train`` that are indices belonging to a particular cluster. For instance for a first cluster you can extract them by:
+  You can also extract a subset of ``idx_train`` that are indices belonging to a particular cluster.
+  For instance, for the first cluster you can extract them by:
 
   .. code::
 
-    k = 0
-    train_indices_k = [t_id for t_id in idx_train if idx[t_id,]==k]
+    train_indices_in_cluster_1 = [id for id in idx_train if idx[id,]==0]
+
+  for the second cluster:
+
+  .. code::
+
+    train_indices_in_cluster_2 = [id for id in idx_train if idx[id,]==1]
+
+  and so on.
 
 --------------------------------------------------------------------------------
 

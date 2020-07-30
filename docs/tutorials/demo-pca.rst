@@ -49,7 +49,6 @@ We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
 
 .. code:: python
 
-  # Perform PCA:
   pca = PCA(Dataset_global, 'none', 2, useXTXeig=True)
   PC_scores_global = pca.x2eta(Dataset_global, nocenter=False)
   eigenvectors_global = pca.Q
@@ -60,7 +59,7 @@ Similarly, we generate another synthetic data set that is composed of two distin
 .. code:: python
 
   mean_local_1 = [0,1]
-  mean_local_2 = [6, 4]
+  mean_local_2 = [6,4]
   covariance_local_1 = [[2, 0.5], [0.5, 0.5]]
   covariance_local_2 = [[3, 0.3], [0.3, 0.5]]
 
