@@ -35,13 +35,13 @@ The only information about the original data set that will be needed is ``idx`` 
 
   .. code::
 
-    train_indices_in_cluster_1 = [id for id in idx_train if idx[id,]==0]
+    train_indices_in_cluster_1 = [i for i in idx_train if idx[i,]==0]
 
   for the second cluster:
 
   .. code::
 
-    train_indices_in_cluster_2 = [id for id in idx_train if idx[id,]==1]
+    train_indices_in_cluster_2 = [i for i in idx_train if idx[i,]==1]
 
   and so on.
 
