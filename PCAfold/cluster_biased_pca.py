@@ -27,7 +27,7 @@ font_legend = 20
 font_colorbar = 16
 
 # @plotting_styles
-def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=False, save_plot=False, save_filename=''):
+def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
     """
     This function analyzes the movement of centers in the subset of the original
     data set ``X_r`` with respect to the full original data set ``X``.
@@ -57,8 +57,6 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     :param title: (optional)
         boolean or string specifying plot title. If set to ``False``,
         title will not be plotted.
-    :param save_plot: (optional)
-        boolean specifying whether the plot should be saved.
     :param save_filename: (optional)
         plot save location/filename.
 
@@ -110,7 +108,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     plt.xlim(0, n_variables+1.5)
     plt.grid(alpha=0.3)
 
-    if title != False:
+    if title != None:
         plt.title(title, fontsize=font_title, **csfont)
 
     for i, value in enumerate(center_movement_percentage):
@@ -127,12 +125,12 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     lgnd.legendHandles[1]._sizes = [marker_size]
     plt.setp(lgnd.texts, **csfont)
 
-    if save_plot == True:
-        plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
+    if save_filename != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return (norm_centers_X, norm_centers_X_r, center_movement_percentage)
 
-def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, title=False, save_plot=False, save_filename=''):
+def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, title=None, save_filename=None):
     """
     This function analyzes the movement of weights on an eigenvector obtained
     from a reduced data set at each iteration. The color-coding marks the
@@ -175,8 +173,6 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
     :param title: (optional)
         boolean or string specifying plot title. If set to ``False``, title will
         not be plotted.
-    :param save_plot: (optional)
-        boolean specifying whether the plot should be saved.
     :param save_filename: (optional)
         plot save location/filename.
 
@@ -227,17 +223,17 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
     plt.xlim(-1, n_variables)
     plt.grid(alpha=0.3)
 
-    if title != False:
+    if title != None:
         plt.title(title, fontsize=font_title, **csfont)
 
     cbar = plt.colorbar(scat, ticks=[0, round((n_versions-1)/2), n_versions-1])
 
-    if save_plot == True:
-        plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
+    if save_plot != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return
 
-def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, title=False, save_plot=False, save_filename='', random_seed=None):
+def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, random_seed=None, title=None, save_filename=None):
     """
     This function analyzes the normalized eigenvalue distribution when PCA is
     performed on different versions of the reduced data sets ``X_r`` vs. on the
@@ -255,11 +251,11 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
         integer specifying biasing option.
         See documentation of cluster-biased PCA for more information.
         Can only attain values [1,2,3,4,5].
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
     :param title: (optional)
         boolean or string specifying plot title. If set to ``False``,
         title will not be plotted.
-    :param save_plot: (optional)
-        boolean specifying whether the plot should be saved.
     :param save_filename: (optional)
         plot save location/filename.
 
