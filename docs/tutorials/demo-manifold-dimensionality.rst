@@ -9,5 +9,3 @@ In this tutorial we present the main functionalities of the ``normalized_local_v
 .. code:: python
 
   import PCAfold.normalized_local_variance as nlv
-
---------------------------------------------------------------------------------
