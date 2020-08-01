@@ -127,5 +127,7 @@ Re-sample at equilibration using K-Means clustering
 
 .. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_scores
 
+--------------------------------------------------------------------------------
+
 Bibliography
 ------------

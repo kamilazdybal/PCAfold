@@ -63,6 +63,8 @@ Functions within ``PCA`` class
 
 .. autofunction:: PCAfold.pca_impl.PCA.w_scores
 
+--------------------------------------------------------------------------------
+
 Bibliography
 ------------
 

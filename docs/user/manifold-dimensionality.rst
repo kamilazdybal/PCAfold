@@ -15,5 +15,7 @@ Class ``VarianceData``
 
 .. autoclass:: PCAfold.normalized_local_variance.VarianceData
 
+--------------------------------------------------------------------------------
+
 Bibliography
 ------------

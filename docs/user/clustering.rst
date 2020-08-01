@@ -84,6 +84,8 @@ Auxiliary functions
 
 .. autofunction:: PCAfold.clustering_data.get_populations
 
+--------------------------------------------------------------------------------
+
 Bibliography
 ------------
 
