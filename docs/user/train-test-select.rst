@@ -1,11 +1,12 @@
-.. module:: train_test_select
+.. module:: sampling
 
 Train and test data selection
 =============================
 
-``train_test_select.py`` module contains functions for splitting data sets into train and test data for use in machine learning algorithms.
-Apart from random splitting that can be achieved with the commonly used `sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_, new methods are implemented here that allow for purposive sampling, such as drawing samples at a certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
-The general idea is to divide the entire data set ``X`` into train and test samples as presented below:
+``sampling.py`` module contains functions for splitting data sets into train and test data for use in machine learning algorithms.
+Apart from random splitting that can be achieved with the commonly used `sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_, new methods are implemented here that allow for purposive sampling, such as drawing samples at certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
+
+The general idea is to divide the entire data set ``X`` (or its portion) into train and test samples as presented below:
 
 .. image:: ../images/tts-train-test-select.png
   :width: 350
@@ -28,13 +29,18 @@ All functions are equipped with ``verbose=False`` parameter. If it is set to ``T
 
 --------------------------------------------------------------------------------
 
-Functions
----------
+Class ``TrainTestSelect``
+------------------------------------------
+
+.. autoclass:: PCAfold.sampling.TrainTestSelect
+
+Functions within ``TrainTestSelect`` class
+------------------------------------------
 
 Select fixed number
 ^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.train_test_select.train_test_split_fixed_number_from_idx
+.. autofunction:: PCAfold.sampling.TrainTestSelect.number
 
 Train data
 """"""""""
@@ -62,31 +68,17 @@ The scheme below presents graphically how train and test data can be selected us
 Select fixed percentage
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.train_test_select.train_test_split_percentage_from_idx
+.. autofunction:: PCAfold.sampling.TrainTestSelect.percentage
 
 Select manually
 ^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.train_test_select.train_test_split_manual_from_idx
+.. autofunction:: PCAfold.sampling.TrainTestSelect.manual
 
 Select at random
 ^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.train_test_select.train_test_split_random
-
-Maintaining fixed test data
-"""""""""""""""""""""""""""
-
-A possible use-case for the ``idx_test`` input parameter could be when random
-sampling should be benchmarked with other sampling such as sampling from local
-clusters. You can for instance pass the ``idx_test`` resulting from
-``train_test_split_fixed_number_from_idx`` as the input parameter for
-``train_test_split_random``:
-
-.. code:: python
-
-  (_, idx_test) = train_test_split_fixed_number_from_idx(idx, perc)
-  (idx_train, idx_test) = train_test_split_random(idx, perc, idx_test)
+.. autofunction:: PCAfold.sampling.TrainTestSelect.random
 
 --------------------------------------------------------------------------------
 
