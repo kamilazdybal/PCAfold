@@ -1,7 +1,8 @@
 .. module:: sampling
 
+#############################
 Train and test data selection
-=============================
+#############################
 
 ``sampling.py`` module contains functions for splitting data sets into train and test data for use in machine learning algorithms.
 Apart from random splitting that can be achieved with the commonly used `sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_, new methods are implemented here that allow for purposive sampling, such as drawing samples at certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
@@ -27,23 +28,22 @@ All functions are equipped with ``verbose=False`` parameter. If it is set to ``T
 
 .. note:: It is assumed that the first cluster has index ``0`` within all input ``idx`` vectors. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 
---------------------------------------------------------------------------------
-
+*************************
 Class ``TrainTestSelect``
-------------------------------------------
+*************************
 
 .. autoclass:: PCAfold.sampling.TrainTestSelect
 
 Functions within ``TrainTestSelect`` class
-------------------------------------------
+==========================================
 
 Select fixed number
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.number
 
 Train data
-""""""""""
+^^^^^^^^^^
 
 Train data is always selected as an equal number of samples from local clusters but no more than 50% of the cluster's samples will be selected (see: 50% bar). This is to avoid oversampling small clusters which might in turn result in too little test data. The number of samples ``n_of_samples`` is calculated based on a percentage ``perc`` provided:
 
@@ -54,7 +54,7 @@ Train data is always selected as an equal number of samples from local clusters 
 where ``n_observations`` is the total number of samples in a data set and ``k`` is the number of clusters.
 
 Test data
-"""""""""
+^^^^^^^^^
 
 Depending on the option selected, test data will be created differently, either as all
 remaining samples that were not included in train data or as a subset of those.
@@ -66,23 +66,22 @@ The scheme below presents graphically how train and test data can be selected us
   :align: center
 
 Select fixed percentage
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.percentage
 
 Select manually
-^^^^^^^^^^^^^^^
+---------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.manual
 
 Select at random
-^^^^^^^^^^^^^^^^
+----------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.random
 
---------------------------------------------------------------------------------
-
+*************************
 Bibliography
-------------
+*************************
 
 .. bibliography:: train-test-select.bib
