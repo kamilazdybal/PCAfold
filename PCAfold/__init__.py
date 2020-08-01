@@ -17,10 +17,7 @@ from .cluster_biased_pca import analyze_eigenvector_weights_movement
 from .cluster_biased_pca import analyze_eigenvalue_distribution
 from .cluster_biased_pca import equilibrate_cluster_populations
 
-from .train_test_select import train_test_split_fixed_number_from_idx
-from .train_test_select import train_test_split_percentage_from_idx
-from .train_test_select import train_test_split_manual_from_idx
-from .train_test_select import train_test_split_random
+from .sampling import TrainTestSelect
 
 from .clustering_data import variable_bins
 from .clustering_data import predefined_variable_bins
