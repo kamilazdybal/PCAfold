@@ -10,7 +10,7 @@ Apart from random splitting that can be achieved with the commonly used `sklearn
 The general idea is to divide the entire data set ``X`` (or its portion) into train and test samples as presented below:
 
 .. image:: ../images/tts-train-test-select.png
-  :width: 350
+  :width: 700
   :align: center
 
 All splitting functions in this module return a tuple of two variables: ``(idx_train, idx_test)``.
