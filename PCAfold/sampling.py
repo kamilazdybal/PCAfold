@@ -76,6 +76,16 @@ class TrainTestSelect:
     """
     This class enables selecting train and test data samples.
 
+    **Example:**
+
+    .. code::
+
+      from PCAfold import TrainTestSelect
+      import numpy as np
+
+      idx = np.array([0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2])
+      selection = TrainTestSelect(idx, idx_test=[5,6,20], bar_50=True, random_seed=100, verbose=True)
+
     :param idx:
         vector of cluster classifications.
     :param idx_test: (optional)
@@ -122,10 +132,17 @@ class TrainTestSelect:
 
     def number(self, perc, test_selection_option=1):
         """
-        This function takes an ``idx`` classifications from a clustering technique
-        and samples fixed number of observations from every cluster as training
+        This function takes an ``idx`` classifications into :math:`k` clusters
+        from a clustering technique and samples fixed number of observations
+        from every cluster as training
         data. In general, this results in a balanced representation of features
         identified by a clustering algorithm in the train data.
+
+        **Example:**
+
+        .. code::
+
+          (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
         **Train data**
 
@@ -277,9 +294,16 @@ class TrainTestSelect:
 
     def percentage(self, perc, test_selection_option=1):
         """
-        This function takes an ``idx`` classifications from a clustering technique and
+        This function takes an ``idx`` classifications into :math:`k` clusters
+        from a clustering technique and
         samples a certain percentage ``perc`` from every cluster as the training data.
         The remaining percentage is the test data.
+
+        **Example:**
+
+        .. code::
+
+          (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
         *Note:*
         If the clusters sizes are comparable, using this function is not recommended
@@ -372,7 +396,8 @@ class TrainTestSelect:
 
     def manual(self, sampling_dictionary, sampling_type='percentage', test_selection_option=1):
         """
-        This function takes an ``idx`` classifications from a clustering technique
+        This function takes an ``idx`` classifications into :math:`k` clusters
+        from a clustering technique
         and a dictionary ``sampling_dictionary`` in which you manually specify what
         ``'percentage'`` (or what ``'number'``) of samples will be
         selected as the train data from each cluster. The dictionary keys are
@@ -380,6 +405,12 @@ class TrainTestSelect:
         percentage or number of train samples to be selected. The default dictionary
         values are percentage but you can select ``sampling_type='number'`` in order
         to interpret the values as a number of samples.
+
+        **Example:**
+
+        .. code::
+
+          (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
         *Note:*
         This function does not run ``degrade_clusters`` to avoid disambiguity
@@ -565,8 +596,26 @@ class TrainTestSelect:
 
     def random(self, perc, test_selection_option=1):
         """
-        This function takes an ``idx`` classifications from a clustering technique and
+        This function takes an ``idx`` classifications into :math:`k` clusters
+        from a clustering technique and
         samples train data at random from the entire data set.
+
+        **Example:**
+
+        .. code::
+
+          (idx_train, idx_test) = selection.random(20, test_selection_option=1)
+
+        Due to the nature of this sampling technique, it is not necessary to
+        have ``idx`` classifications since random samples can also be selected
+        from unclassified data sets. You can achieve that by generating a dummy
+        ``idx`` vector. For instance:
+
+        .. code::
+
+          idx = np.zeros(n_observations)
+          selection = TrainTestSelect(idx)
+          (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         **Example:**
 

@@ -34,16 +34,6 @@ Class ``TrainTestSelect``
 
 .. autoclass:: PCAfold.sampling.TrainTestSelect
 
-**Example:**
-
-.. code::
-
-  from PCAfold import TrainTestSelect
-  import numpy as np
-
-  idx = np.array([0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2])
-  selection = TrainTestSelect(idx, idx_test=[5,6,20], bar_50=True, random_seed=100, verbose=True)
-
 Functions within ``TrainTestSelect`` class
 ==========================================
 
@@ -51,12 +41,6 @@ Select fixed number
 -------------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.number
-
-**Example:**
-
-.. code::
-
-  (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
 Train data
 ^^^^^^^^^^
@@ -91,12 +75,6 @@ Select fixed percentage
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.percentage
 
-**Example:**
-
-.. code::
-
-  (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
-
 Train data
 ^^^^^^^^^^
 
@@ -116,12 +94,6 @@ Select manually
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.manual
 
-**Example:**
-
-.. code::
-
-  (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
-
 Train data
 ^^^^^^^^^^
 
@@ -140,12 +112,6 @@ Select at random
 ----------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.random
-
-**Example:**
-
-.. code::
-
-  (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
 Train data
 ^^^^^^^^^^
