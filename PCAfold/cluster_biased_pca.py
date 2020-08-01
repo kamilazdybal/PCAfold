@@ -4,7 +4,7 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from PCAfold import pca_impl as P
 from PCAfold import clustering_data as cld
-from PCAfold import train_test_select as tts
+from PCAfold import sampling
 #
 # def plotting_styles(func):
 #
@@ -491,7 +491,8 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
             print("\nAt iteration " + str(iter+1) + " taking samples:")
             print(sampling_dictionary)
 
-        (idx_train, _) = tts.train_test_split_manual_from_idx(idx, sampling_dictionary, sampling_type='number', bar50=False, random_seed=random_seed, verbose=False)
+        sampling_object = sampling.TrainTestSelect(idx, bar50=False, random_seed=random_seed)
+        (idx_train, _) = sampling_object.manual(sampling_dictionary, sampling_type='number')
 
         # Biasing option 1 -----------------------------------------------------
         if biasing_option == 1:
