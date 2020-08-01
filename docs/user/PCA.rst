@@ -11,8 +11,6 @@ It is assumed that the raw data set ``X`` on which PCA is performed has dimensio
   :width: 300
   :align: center
 
---------------------------------------------------------------------------------
-
 Functions
 ---------
 
@@ -30,8 +28,6 @@ Remove constant variables from a data set
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: PCAfold.pca_impl.remove_constant_vars
-
---------------------------------------------------------------------------------
 
 Class ``PCA``
 -------------
@@ -66,8 +62,6 @@ Functions within ``PCA`` class
 .. autofunction:: PCAfold.pca_impl.PCA.u_scores
 
 .. autofunction:: PCAfold.pca_impl.PCA.w_scores
-
---------------------------------------------------------------------------------
 
 Bibliography
 ------------

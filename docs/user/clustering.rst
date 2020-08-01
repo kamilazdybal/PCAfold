@@ -7,8 +7,6 @@ Clustering
 local clusters and performing some basic operations on clusters :cite:`Everitt2009`,
 :cite:`Kaufman2009`.
 
---------------------------------------------------------------------------------
-
 Functions
 ---------
 
@@ -85,8 +83,6 @@ Auxiliary functions
 .. autofunction:: PCAfold.clustering_data.get_partition
 
 .. autofunction:: PCAfold.clustering_data.get_populations
-
---------------------------------------------------------------------------------
 
 Bibliography
 ------------
