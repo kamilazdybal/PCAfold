@@ -76,24 +76,24 @@ class TrainTestSelect:
     """
     This class enables selecting train and test data samples.
 
-    **Example:**
+    **Usage example:**
 
     .. code::
 
       from PCAfold import TrainTestSelect
       import numpy as np
 
-      idx = np.array([0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2])
-      selection = TrainTestSelect(idx, idx_test=[5,6,20], bar_50=True, random_seed=100, verbose=True)
+      idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+      selection = TrainTestSelect(idx, idx_test=[5,9], bar_50=True, random_seed=100, verbose=True)
 
     :param idx:
         vector of cluster classifications.
     :param idx_test: (optional)
-        are the user-provided indices for test data. If specified, the training
+        vector or list of user-provided indices for test data. If specified, the training
         data will be selected ignoring the indices in ``idx_test`` and the test
         data will be returned the same as the user-provided ``idx_test``.
-        If not specified, test samples will be selected according to a
-        method specified by ``test_selection_option`` parameter.
+        If not specified, test samples will be selected according to the
+        ``test_selection_option`` parameter (see documentation for each sampling function).
         Using this parameter may be useful if training a machine learning model on
         fixed test samples is desired.
     :param bar_50: (optional)
@@ -138,10 +138,15 @@ class TrainTestSelect:
         data. In general, this results in a balanced representation of features
         identified by a clustering algorithm in the train data.
 
-        **Example:**
+        **Usage example:**
 
         .. code::
 
+          from PCAfold import TrainTestSelect
+          import numpy as np
+
+          idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+          selection = TrainTestSelect(idx)
           (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
         **Train data**
@@ -299,10 +304,15 @@ class TrainTestSelect:
         samples a certain percentage ``perc`` from every cluster as the training data.
         The remaining percentage is the test data.
 
-        **Example:**
+        **Usage example:**
 
         .. code::
 
+          from PCAfold import TrainTestSelect
+          import numpy as np
+
+          idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+          selection = TrainTestSelect(idx)
           (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
         *Note:*
@@ -406,10 +416,15 @@ class TrainTestSelect:
         values are percentage but you can select ``sampling_type='number'`` in order
         to interpret the values as a number of samples.
 
-        **Example:**
+        **Usage example:**
 
         .. code::
 
+          from PCAfold import TrainTestSelect
+          import numpy as np
+
+          idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+          selection = TrainTestSelect(idx)
           (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
         *Note:*
@@ -600,10 +615,15 @@ class TrainTestSelect:
         from a clustering technique and
         samples train data at random from the entire data set.
 
-        **Example:**
+        **Usage example:**
 
         .. code::
 
+          from PCAfold import TrainTestSelect
+          import numpy as np
+
+          idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+          selection = TrainTestSelect(idx)
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         Due to the nature of this sampling technique, it is not necessary to
@@ -612,6 +632,9 @@ class TrainTestSelect:
         ``idx`` vector. For instance:
 
         .. code::
+
+          from PCAfold import TrainTestSelect
+          import numpy as np
 
           idx = np.zeros(n_observations)
           selection = TrainTestSelect(idx)
