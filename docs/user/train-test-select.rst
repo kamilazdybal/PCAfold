@@ -61,13 +61,18 @@ Select fixed number
 Train data
 ^^^^^^^^^^
 
-Train data is always selected as an equal number of samples from local clusters but no more than 50% of the cluster's samples will be selected (see: 50% bar). This is to avoid oversampling small clusters which might in turn result in too little test data. The number of samples ``n_of_samples`` is calculated based on a percentage ``perc`` provided:
+Train data is always selected as an equal number of samples from local clusters.
+By default (``bar_50=True``) no more than 50% of the cluster's samples will be
+selected. This is to avoid oversampling small clusters which might in turn
+result in too little test data.
+The number of samples ``n_of_samples`` that should be taken from each cluster
+is calculated based on a percentage ``perc`` provided:
 
 .. math::
 
-    \verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_observations|}{\verb|k| \cdot 100} \Big)
+    \verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_observations|}{k \cdot 100} \Big)
 
-where ``n_observations`` is the total number of samples in a data set and ``k`` is the number of clusters.
+where ``n_observations`` is the total number of samples in a data set and :math:`k` is the number of clusters.
 
 Test data
 ^^^^^^^^^
@@ -92,6 +97,20 @@ Select fixed percentage
 
   (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
+Train data
+^^^^^^^^^^
+
+Train data is always selected as an equal number of samples from local clusters.
+By default (``bar_50=True``) no more than 50% of the cluster's samples will be
+selected. This is to avoid oversampling small clusters which might in turn
+result in too little test data.
+
+Test data
+^^^^^^^^^
+
+Depending on the option selected, test data will be created differently, either as all
+remaining samples that were not included in train data or as a subset of those.
+
 Select manually
 ---------------
 
@@ -103,6 +122,20 @@ Select manually
 
   (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
+Train data
+^^^^^^^^^^
+
+Train data is always selected as an equal number of samples from local clusters.
+By default (``bar_50=True``) no more than 50% of the cluster's samples will be
+selected. This is to avoid oversampling small clusters which might in turn
+result in too little test data.
+
+Test data
+^^^^^^^^^
+
+Depending on the option selected, test data will be created differently, either as all
+remaining samples that were not included in train data or as a subset of those.
+
 Select at random
 ----------------
 
@@ -113,6 +146,20 @@ Select at random
 .. code::
 
   (idx_train, idx_test) = selection.random(20, test_selection_option=1)
+
+Train data
+^^^^^^^^^^
+
+Train data is always selected as an equal number of samples from local clusters.
+By default (``bar_50=True``) no more than 50% of the cluster's samples will be
+selected. This is to avoid oversampling small clusters which might in turn
+result in too little test data.
+
+Test data
+^^^^^^^^^
+
+Depending on the option selected, test data will be created differently, either as all
+remaining samples that were not included in train data or as a subset of those.
 
 --------------------------------------------------------------------------------
 

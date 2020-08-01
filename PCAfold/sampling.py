@@ -9,20 +9,6 @@ def _perform_checks(idx, idx_test, bar_50, random_seed, verbose):
 
     It will run at each class initialization.
 
-    :param idx:
-        vector of cluster classifications.
-    :param idx_test: (optional)
-        are the user-provided indices for test data. If specified, the training
-        data will be selected ignoring the indices in ``idx_test`` and the test
-        data will be returned the same as the user-provided ``idx_test``.
-        If not specified, all remaining samples become test data.
-    :param bar_50: (optional)
-        boolean specifying whether the 50% bar should apply.
-    :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
-    :param verbose: (optional)
-        boolean for printing sampling details.
-
     :raises ValueError:
         if ``idx`` vector has length zero.
     :raises ValueError:
@@ -98,8 +84,15 @@ class TrainTestSelect:
         data will be returned the same as the user-provided ``idx_test``.
         If not specified, test samples will be selected according to a
         method specified by ``test_selection_option`` parameter.
+        Using this parameter may be useful if training a machine learning model on
+        fixed test samples is desired.
     :param bar_50: (optional)
         boolean specifying whether the 50% bar should apply.
+        If set to ``True`` (default) there is a bar that no more than 50% of
+        observations from any cluster can be taken as train data. This is to
+        avoid that too little samples in small clusters remain for test data.
+        If set to ``False`` it will be allowed to sample more than 50% of
+        observations from any cluster.
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
     :param verbose: (optional)
@@ -130,27 +123,30 @@ class TrainTestSelect:
     def number(self, perc, test_selection_option=1):
         """
         This function takes an ``idx`` classifications from a clustering technique
-        and samples a fixed number of observations from every cluster as training
-        data. This in general results in under-representing large cluster and
-        over-representing small clusters.
+        and samples fixed number of observations from every cluster as training
+        data. In general, this results in a balanced representation of features
+        identified by a clustering algorithm in the train data.
 
-        The number of samples is estimated based on the percentage ``perc`` provided.
-        First, the total number of samples for training is estimated as a percentage
-        ``perc`` from the total number of observations ``n_observations``.
-        Next, this number is divided equally into ``k`` clusters.
+        **Train data**
 
-        By default, there is a bar that no more than 50% of observations from any
-        cluster will be taken for training. This is to avoid that too little samples
-        will remain for test data from small clusters. If the parameter ``bar_50`` is
-        set to False, this function will allow to sample more than 50% of
-        observations.
+        The number of train samples is estimated based on the percentage
+        ``perc`` provided.
+        First, the total number of samples for training is estimated as a
+        percentage ``perc`` from the total number of observations in a data set.
+        Next, this number is divided equally into :math:`k` clusters.
 
-        Test data is then drawn from every cluster equally in a similar way, in a
-        quantity equal to the number of remaining samples from the smallest cluster.
+        **Test data**
+
+        Two options for sampling test data are implemented. If you select
+        ``test_selection_option=1``, all remaining samples that were not taken as
+        training data become the test data. If you select ``test_selection_option=2``,
+        the smallest cluster is found and the remaining number of observations are
+        taken as test data in that cluster. Next, the same number of observations is
+        taken from all remaining larger clusters.
 
         **Example:**
 
-        If the full data has 10 observations with indices:
+        If the data set has 10 observations with indices:
 
         ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
 
@@ -169,13 +165,6 @@ class TrainTestSelect:
         Test data may then become:
 
         ``idx_test = [3, 5, 6, 8]``
-
-        Two options for sampling test data are implemented. If you select
-        ``test_selection_option=1``, all remaining samples that were not taken as
-        training data become the test data. If you select ``test_selection_option=2``,
-        the smallest cluster is found and the remaining number of observations are
-        taken as test data in that cluster. Next, the same number of observations is
-        taken from all remaining larger clusters.
 
         :param perc:
             percentage of data to be selected as training data from each cluster.
@@ -392,12 +381,6 @@ class TrainTestSelect:
         values are percentage but you can select ``sampling_type='number'`` in order
         to interpret the values as a number of samples.
 
-        By default, there is a bar that no more than 50% of observations from any
-        cluster will be taken for training. This is to avoid that too little samples
-        will remain for test data from small clusters. If the parameter ``bar_50`` is
-        set to False, this function will allow to sample more than 50% of
-        observations.
-
         *Note:*
         This function does not run ``degrade_clusters`` to avoid disambiguity
         between cluster numeration inside ``idx`` and inside the keys of the
@@ -584,14 +567,6 @@ class TrainTestSelect:
         """
         This function takes an ``idx`` classifications from a clustering technique and
         samples train data at random from the entire data set.
-
-        *Note:*
-        If the parameter ``idx_test`` is not provided, test data will be selected as
-        all remaining samples that didn't go into train data. Optionally, you may
-        provide the parameter ``idx_test`` that forces the function to maintain this
-        set of test data and the train data will be selected ignoring the indices in
-        ``idx_test``. This may be useful if training a machine learning model on
-        fixed test samples is desired.
 
         **Example:**
 
