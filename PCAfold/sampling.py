@@ -152,12 +152,16 @@ class TrainTestSelect:
         ``perc`` provided.
         First, the total number of samples for training is estimated as a
         percentage ``perc`` from the total number of observations in a data set.
-        Next, this number is divided equally into :math:`k` clusters.
+        Next, this number is divided equally into :math:`k` clusters:
+
+        .. math::
+
+            \verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_observations|}{k \cdot 100} \Big)
 
         **Test data**
 
         Two options for sampling test data are implemented. If you select
-        ``test_selection_option=1``, all remaining samples that were not taken as
+        ``test_selection_option=1`` all remaining samples that were not taken as
         training data become the test data. If you select ``test_selection_option=2``,
         the smallest cluster is found and the remaining number of observations are
         taken as test data in that cluster. Next, the same number of observations is
@@ -318,11 +322,19 @@ class TrainTestSelect:
           (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
         *Note:*
-        If the clusters sizes are comparable, using this function is not recommended
-        as it might give similar train sample distribution as random sampling
-        (``TrainTestSelect.random``). It might still be useful in cases where one
-        cluster is significantly smaller than others and there is a chance that this
-        cluster will not get reflected in the train data if random sampling was used.
+        If the cluster sizes are comparable, this function will give a similar
+        train sample distribution as random sampling (``TrainTestSelect.random``).
+        This sampling can be useful in cases where one cluster is significantly
+        smaller than others and there is a chance that this cluster will not get
+        reflected in the train data if random sampling was used.
+
+        **Train data**
+
+        *To be determined...*
+
+        **Test data**
+
+        *To be determined...*
 
         **Example:**
 
@@ -471,6 +483,14 @@ class TrainTestSelect:
         with ``idx`` entries and if yes it will continue running. If the ``idx``
         classifies for running ``degrade_clusters`` this information will be printed
         as a suggestion.
+
+        **Train data**
+
+        *To be determined...*
+
+        **Test data**
+
+        *To be determined...*
 
         **Example:**
 
@@ -698,6 +718,14 @@ class TrainTestSelect:
           selection = TrainTestSelect(idx)
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
+        **Train data**
+
+        *To be determined...*
+
+        **Test data**
+
+        *To be determined...*
+
         **Example:**
 
         If the full data has 10 observations whose indices are:
@@ -737,6 +765,10 @@ class TrainTestSelect:
             - **idx_test** - indices of the test data.
         """
 
+        # Check if `perc` parameter was passed correctly:
+        if (perc < 0) or (perc > 100):
+            raise ValueError("Percentage has to be between 0-100.")
+
         # Check that `test_selection_option` parameter was passed correctly:
         _test_selection_option = [1,2]
         if test_selection_option not in _test_selection_option:
@@ -748,8 +780,9 @@ class TrainTestSelect:
 
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
-        idx_full = np.arange(0,n_observations)
-        idx_test = np.array(self.idx_test)
+        idx_full = np.arange(0, n_observations)
+        idx_test = np.unique(np.array(self.idx_test))
+        idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
         # Find the number of clusters:
         k = np.size(np.unique(self.idx))
@@ -767,13 +800,18 @@ class TrainTestSelect:
             idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
             idx_test = np.setdiff1d(idx_full, idx_train)
 
-        n_train = len(idx_train)
-        n_test = len(idx_test)
+
+
+
+
+
+
 
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
 
-        if len(idx_test) == 0 and (np.size(idx_test) + np.size(idx_train) != n_observations):
+        # Unit test check:
+        if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
             raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
         # Print detailed information on sampling:

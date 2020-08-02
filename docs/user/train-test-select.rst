@@ -42,19 +42,6 @@ Select fixed number
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.number
 
-Train data
-^^^^^^^^^^
-
-Train data is always selected as an equal number of samples from local clusters.
-The number of samples ``n_of_samples`` that should be taken from each cluster
-is calculated based on a percentage ``perc`` provided:
-
-.. math::
-
-    \verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_observations|}{k \cdot 100} \Big)
-
-where ``n_observations`` is the total number of samples in a data set and :math:`k` is the number of clusters.
-
 Test data
 ^^^^^^^^^
 
@@ -77,6 +64,8 @@ Test data
 
 Depending on the option selected, test data will be created differently, either as all
 remaining samples that were not included in train data or as a subset of those.
+You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
+The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
 
 .. image:: ../images/tts-test-selection-option-percentage.png
   :width: 700
@@ -92,6 +81,8 @@ Test data
 
 Depending on the option selected, test data will be created differently, either as all
 remaining samples that were not included in train data or as a subset of those.
+You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
+The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
 
 .. image:: ../images/tts-test-selection-option-manual.png
   :width: 700
@@ -107,6 +98,8 @@ Test data
 
 Depending on the option selected, test data will be created differently, either as all
 remaining samples that were not included in train data or as a subset of those.
+You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
+The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
 
 .. image:: ../images/tts-test-selection-option-random.png
   :width: 700
