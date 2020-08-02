@@ -227,15 +227,16 @@ You can point out those observations when initializing ``TrainTestSelect`` objec
 
 We simulate this situation by appending additional samples to the previously defined data set.
 We add 20 samples in each cluster - those can be seen in the figure below as smaller clouds next to each cluster:
+
+.. image:: ../images/tutorial-train-test-select-original-data-set-appended-doc.png
+  :width: 350
+  :align: center
+
 If we know the indices of points that represent the appended clouds, stored in ``idx_test``, then we can use that array of indices as an input parameter:
 
 .. code:: python
 
   sample = TrainTestSelect(idx, idx_test=idx_test, bar_50=True, random_seed=None, verbose=True)
-
-.. image:: ../images/tutorial-train-test-select-original-data-set-appended-doc.png
-  :width: 350
-  :align: center
 
 The sampling function will maintain those samples as test data and train data will be sampled ignoring the indices in ``idx_test``.
 Note also that if ``idx_test`` is passed it overwrites the ``test_selection_option`` parameter.
