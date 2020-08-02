@@ -234,11 +234,10 @@ class TrainTestSelect:
         # Find the number of clusters:
         k = np.size(np.unique(self.idx))
 
-        # Fixed number of samples that will be taken from every cluster as the training data:
+        # Calculate fixed number of samples that will be taken from every cluster as the training data:
         n_of_samples = int(perc*n_observations/k/100)
 
         # Initialize auxiliary variables:
-        smallest_cluster_size = n_observations
         idx_train = []
         cluster_test = []
 
@@ -254,16 +253,12 @@ class TrainTestSelect:
                 if id == cl_id:
                     cluster.append(idx_full_no_test[i])
 
-            if len(cluster) < smallest_cluster_size:
-                smallest_cluster_size = len(cluster)
-
             # Selection of training data:
             if int(len(cluster)) < n_of_samples:
                 raise ValueError("The requested percentage requires taking more samples from cluster " + str(cl_id+1) + " than there are available observations in that cluster. Consider lowering the percentage or use a different sampling function.")
             else:
                 cluster_train = np.array(random.sample(cluster, n_of_samples))
-
-            idx_train = np.concatenate((idx_train, cluster_train))
+                idx_train = np.concatenate((idx_train, cluster_train))
 
             if self._using_user_defined_idx_test==False:
 
@@ -384,34 +379,59 @@ class TrainTestSelect:
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
         idx_full = np.arange(0,n_observations)
-        idx_train = []
-        idx_test = []
+        idx_test = np.unique(np.array(self.idx_test))
+        idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
         # Find the number of clusters:
         k = np.size(np.unique(self.idx))
 
+        # Initialize auxiliary variables:
+        idx_train = []
+
+        # Get cluster populations:
+        cluster_populations = clustering_data.get_populations(self.idx)
+
         # Get clusters and split them into training and test indices:
         for cl_id in range(0,k):
-
-            cluster = []
 
             if self.random_seed != None:
                 random.seed(self.random_seed)
 
-            for i, id in enumerate(self.idx):
+            # Variable `cluster` contains indices of observations that are allowed to be selected as train samples in a particular cluster:
+            cluster = []
+            for i, id in enumerate(self.idx[idx_full_no_test]):
                 if id == cl_id:
-                    cluster.append(idx_full[i])
+                    cluster.append(idx_full_no_test[i])
 
-            cluster_train = np.array(random.sample(cluster, int(len(cluster)*perc/100)))
-            cluster_test = np.setdiff1d(cluster, cluster_train)
+            # Selection of training data:
+            if int(len(cluster)) < int(cluster_populations[cl_id]*perc/100):
+                raise ValueError("The requested percentage requires taking more samples from cluster " + str(cl_id+1) + " than there are available observations in that cluster. Consider lowering the percentage or use a different sampling function.")
+            else:
+                cluster_train = np.array(random.sample(cluster, int(cluster_populations[cl_id]*perc/100)))
+                idx_train = np.concatenate((idx_train, cluster_train))
 
-            idx_train = np.concatenate((idx_train, cluster_train))
-            idx_test = np.concatenate((idx_test, cluster_test))
+            if (self._using_user_defined_idx_test==False):
+
+                if test_selection_option == 1:
+
+                    cluster_test = np.setdiff1d(cluster, cluster_train)
+                    idx_test = np.concatenate((idx_test, cluster_test))
+
+                if test_selection_option == 2:
+
+                    # Check if there is enough test samples to select:
+                    if perc > 50:
+                        raise ValueError("Percentage is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
+                    else:
+                        cluster_test = np.setdiff1d(cluster, cluster_train)
+                        cluster_test_sampled = np.array(random.sample(list(cluster_test), int(cluster_populations[cl_id]*perc/100)))
+                        idx_test = np.concatenate((idx_test, cluster_test_sampled))
 
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
 
-        if np.size(idx_test) + np.size(idx_train) != n_observations:
+        # Unit test check:
+        if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
             raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
         # Print detailed information on sampling:
@@ -895,13 +915,71 @@ def _test():
 
     # ##########################################################################
 
-    sampling = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]), idx_test=[], random_seed=None, verbose=False)
+    idx_percentage = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
+    sampling = TrainTestSelect(idx_percentage, idx_test=[], random_seed=None, verbose=False)
 
     try:
-        (idx_train, idx_test) = sampling.percentage(20)
+        (idx_train, idx_test) = sampling.percentage(0, test_selection_option=1)
     except Exception:
         print('Test (01) of `TrainTestSelect.percentage` failed.')
         return 0
+
+    try:
+        (idx_train, idx_test) = sampling.percentage(20, test_selection_option=1)
+    except Exception:
+        print('Test (02) of `TrainTestSelect.percentage` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.percentage(60, test_selection_option=1)
+    except Exception:
+        print('Test (03) of `TrainTestSelect.percentage` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.percentage(100, test_selection_option=1)
+    except Exception:
+        print('Test (04) of `TrainTestSelect.percentage` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.percentage(10, test_selection_option=2)
+    except Exception:
+        print('Test (05) of `TrainTestSelect.percentage` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.percentage(50, test_selection_option=2)
+    except Exception:
+        print('Test (06) of `TrainTestSelect.percentage` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.percentage(60, test_selection_option=2)
+        print('Test (07) of `TrainTestSelect.percentage` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        (idx_train, idx_test) = sampling.percentage(100, test_selection_option=2)
+        print('Test (07) of `TrainTestSelect.percentage` failed.')
+        return 0
+    except Exception:
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # ##########################################################################
 
