@@ -4,11 +4,12 @@
 Train and test data selection
 =============================
 
-In this tutorial we present how train and test samples can be selected using the ``train_test_select`` module. To import the module:
+In this tutorial we present how train and test samples can be selected using the ``sampling`` module.
+Here we will only need to import the ``TrainTestSelect`` class:
 
 .. code:: python
 
-  import PCAfold.train_test_select as tts
+  from PCAfold import TrainTestSelect
 
 First, we generate a synthetic data set that is composed of four distinct clusters that have imbalanced number of observations (100, 250, 400 and 500 - 1250 total number of observations):
 
@@ -50,7 +51,7 @@ The only information about the original data set that will be needed is ``idx`` 
 Select fixed number
 -------------------
 
-We first select fixed number of samples using function ``train_test_split_fixed_number_from_idx``. Let's request 15% of the total data to be train data. The function calculates that it needs to select 46 samples from each cluster, which will amount to 14.7% of total samples in the data set.
+We first select fixed number of samples using ``TrainTestSelect.number`` function . Let's request 15% of the total data to be train data. The function calculates that it needs to select 46 samples from each cluster, which will amount to 14.7% of total samples in the data set.
 
 Select test data with ``test_selection_option=1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -59,7 +60,8 @@ Since there are two ways in which test data can be selected, we start with ``tes
 
 .. code:: python
 
-  (idx_train, idx_test) = tts.train_test_split_fixed_number_from_idx(idx, 15, test_selection_option=1, bar50=True, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  (idx_train, idx_test) = sample.number(15, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
@@ -90,7 +92,8 @@ We then request ``test_selection_option=2`` which will select fixed number of te
 
 .. code:: python
 
-  (idx_train, idx_test) = tts.train_test_split_fixed_number_from_idx(idx, 15, test_selection_option=2, bar50=True, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  (idx_train, idx_test) = sample.number(15, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
@@ -121,7 +124,8 @@ Next, we select a percentage of samples from each cluster using function ``train
 
 .. code:: python
 
-  (idx_train, idx_test) = tts.train_test_split_percentage_from_idx(idx, 10, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  (idx_train, idx_test) = sample.percentage(10)
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
@@ -153,7 +157,8 @@ We should also change ``sampling_type`` to ``'number'`` so that samples are sele
 
 .. code:: python
 
-  (idx_train, idx_test) = tts.train_test_split_manual_from_idx(idx, {0:4, 1:5, 2:10, 3:2}, sampling_type='number', bar50=True, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  (idx_train, idx_test) = sample.manual({0:4, 1:5, 2:10, 3:2}, sampling_type='number')
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
@@ -184,7 +189,8 @@ Finally, we select random samples using function ``train_test_split_random``. Le
 
 .. code:: python
 
-  (idx_train, idx_test) = tts.train_test_split_random(idx, 10, idx_test=[], verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  (idx_train, idx_test) = sample.random(10)
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
@@ -213,25 +219,30 @@ The visual result of this sampling can be seen below:
   Random sampling will typically give a very similar sample distribution as percentage sampling.
 
 Maintaining fixed test data
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
 
 In this example we further illustrate how ``idx_test`` input parameter can be utilized.
 Suppose that in every cluster you have a very distinct set of observations on which you would always like to test your model.
-You can point out those observations to the random sampling function through the use of ``idx_test`` vector.
+You can point out those observations when initializing ``TrainTestSelect`` object through the use of ``idx_test`` vector.
 
 We simulate this situation by appending additional samples to the previously defined data set.
 We add 20 samples in each cluster - those can be seen in the figure below as smaller clouds next to each cluster:
+If we know the indices of points that represent the appended clouds, stored in ``idx_test``, then we can use that array of indices as an input parameter:
+
+.. code:: python
+
+  sample = TrainTestSelect(idx, idx_test=idx_test, bar_50=True, random_seed=None, verbose=True)
 
 .. image:: ../images/tutorial-train-test-select-original-data-set-appended-doc.png
   :width: 350
   :align: center
 
-If we know the indices of points that represent the appended clouds, stored in ``idx_test``, then we can use that array of indices as an input parameter.
-The function will maintain those samples as test data and train data will be sampled ignoring the indices in ``idx_test``.
+The sampling function will maintain those samples as test data and train data will be sampled ignoring the indices in ``idx_test``.
+Note also that if ``idx_test`` is passed it overwrites the ``test_selection_option`` parameter.
 
 .. code:: python
 
-  (idx_train, idx_test) = tts.train_test_split_random(idx_t, 80, idx_test=idx_test, verbose=True)
+  (idx_train, idx_test) = sample.random(80)
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
