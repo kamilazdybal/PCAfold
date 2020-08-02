@@ -129,8 +129,8 @@ class TrainTestSelect:
 
     def number(self, perc, test_selection_option=1):
         """
-        This function takes an ``idx`` classifications into :math:`k` clusters
-        from a clustering technique and samples fixed number of observations
+        This function uses classifications into :math:`k` clusters
+        and samples fixed number of observations
         from every cluster as training
         data. In general, this results in a balanced representation of features
         identified by a clustering algorithm in the train data.
@@ -264,11 +264,13 @@ class TrainTestSelect:
 
                 # Selection of test data - all data that remains is test data:
                 if test_selection_option == 1:
+
                     cluster_test = np.setdiff1d(cluster, cluster_train)
                     idx_test = np.concatenate((idx_test, cluster_test))
 
         # Selection of test data - equal samples from each cluster:
                 if test_selection_option == 2:
+
                     cluster_test.append(np.setdiff1d(cluster, cluster_train))
 
         if self._using_user_defined_idx_test==False:
@@ -300,8 +302,7 @@ class TrainTestSelect:
 
     def percentage(self, perc, test_selection_option=1):
         """
-        This function takes an ``idx`` classifications into :math:`k` clusters
-        from a clustering technique and
+        This function uses classifications into :math:`k` clusters and
         samples a certain percentage ``perc`` from every cluster as the training data.
         The remaining percentage is the test data.
 
@@ -410,8 +411,9 @@ class TrainTestSelect:
                 cluster_train = np.array(random.sample(cluster, int(cluster_populations[cl_id]*perc/100)))
                 idx_train = np.concatenate((idx_train, cluster_train))
 
-            if (self._using_user_defined_idx_test==False):
+            if self._using_user_defined_idx_test==False:
 
+                # Selection of test data - all data that remains is test data:
                 if test_selection_option == 1:
 
                     cluster_test = np.setdiff1d(cluster, cluster_train)
@@ -442,8 +444,7 @@ class TrainTestSelect:
 
     def manual(self, sampling_dictionary, sampling_type='percentage', test_selection_option=1):
         """
-        This function takes an ``idx`` classifications into :math:`k` clusters
-        from a clustering technique
+        This function uses classifications into :math:`k` clusters
         and a dictionary ``sampling_dictionary`` in which you manually specify what
         ``'percentage'`` (or what ``'number'``) of samples will be
         selected as the train data from each cluster. The dictionary keys are
@@ -528,50 +529,14 @@ class TrainTestSelect:
             - **idx_test** - indices of the test data.
         """
 
-        if len(self.idx_test) != 0:
-
-            using_user_defined_idx_test = True
-
-            if self.verbose==True:
-                print('User defined test samples will be used. `train_test_select` parameter is ignored.')
-
-        else:
-
-            using_user_defined_idx_test = False
-
-            # Check that `test_selection_option` parameter was passed correctly:
-            _test_selection_option = [1,2]
-            if test_selection_option not in _test_selection_option:
-                raise ValueError("Test selection option can only be 1 or 2.")
-
-        _sampling_type = ['percentage', 'number']
-
-        # Check if degrading clusters is needed and if yes print a message:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
-            print("----------\nConsider running `degrade_clusters` on `idx`!\n----------")
-
-        # Initialize vector of indices 0..n_observations:
-        n_observations = len(self.idx)
-        idx_full = np.arange(0,n_observations)
-        idx_train = []
-        idx_test = []
-
-        # Find the number of clusters:
-        k = np.size(np.unique(self.idx))
-
         # Check that sampling_type is passed correctly:
+        _sampling_type = ['percentage', 'number']
         if sampling_type not in _sampling_type:
             raise ValueError("Variable `sampling_type` has to be one of the following: 'percentage' or 'number'.")
 
         # Check that dictionary has consistend number of entries with respect to `idx`:
         if len(np.unique(self.idx)) != len(sampling_dictionary.keys()):
             raise ValueError("The number of entries inside `sampling_dictionary` does not match the number of clusters specified in `idx`.")
-
-        # Check that no percentage is higher than 50%:
-        if sampling_type == 'percentage' and self.bar_50 == True:
-            for key, value in sampling_dictionary.items():
-                if value > 50:
-                    raise ValueError("Error in cluster number " + str(key) + ". Percentage in `sampling_dictionary` cannot be higher than 50%.")
 
         # Check that keys and values are properly defined:
         for key, value in sampling_dictionary.items():
@@ -584,13 +549,8 @@ class TrainTestSelect:
             if not (isinstance(key, int) and key >= 0):
                 raise ValueError("Error in cluster number " + str(key) + ". Key must be a non-negative integer.")
 
-            # Check that percentage is between 0 and 50:
-            if sampling_type == 'percentage' and self.bar_50 == True:
-                if not (value >= 0 and value <= 50):
-                    raise ValueError("Error in cluster number " + str(key) + ". The percentage must be between 0% and 50%.")
-
             # Check that percentage is between 0 and 100:
-            if sampling_type == 'percentage' and self.bar_50 == False:
+            if sampling_type == 'percentage':
                 if not (value >= 0 and value <= 100):
                     raise ValueError("Error in cluster number " + str(key) + ". The percentage must be between 0% and 100%.")
 
@@ -599,26 +559,64 @@ class TrainTestSelect:
                 if not (isinstance(value, int) and value >= 0):
                     raise ValueError("Error in cluster number " + str(key) + ". The number must be a non-negative integer.")
 
+        # Check that `test_selection_option` parameter was passed correctly:
+        _test_selection_option = [1,2]
+        if test_selection_option not in _test_selection_option:
+            raise ValueError("Test selection option can only be 1 or 2.")
+
+        # Check if degrading clusters is needed and if yes print a message:
+        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+            print("----------\nConsider running `degrade_clusters` on `idx`!\n----------")
+
+        # Initialize vector of indices 0..n_observations:
+        n_observations = len(self.idx)
+        idx_full = np.arange(0,n_observations)
+        idx_test = np.unique(np.array(self.idx_test))
+        idx_full_no_test = np.setdiff1d(idx_full, idx_test)
+
+        # Find the number of clusters:
+        k = np.size(np.unique(self.idx))
+
+        # Initialize auxiliary variables:
+        idx_train = []
+
+        # Get cluster populations:
+        cluster_populations = clustering_data.get_populations(self.idx)
+
         # Sampling the user-specified percentage of observations:
         if sampling_type == 'percentage':
 
             # Get clusters and split them into training and test indices:
             for key, value in sampling_dictionary.items():
 
-                cluster = []
-
                 if self.random_seed != None:
                     random.seed(self.random_seed)
 
-                for i, id in enumerate(self.idx):
+                cluster = []
+                for i, id in enumerate(self.idx[idx_full_no_test]):
                     if id == key:
-                        cluster.append(idx_full[i])
+                        cluster.append(idx_full_no_test[i])
 
+                # Selection of training data:
                 cluster_train = np.array(random.sample(cluster, int(len(cluster)*value/100)))
-                cluster_test = np.setdiff1d(cluster, cluster_train)
-
                 idx_train = np.concatenate((idx_train, cluster_train))
-                idx_test = np.concatenate((idx_test, cluster_test))
+
+                if self._using_user_defined_idx_test==False:
+
+                    # Selection of test data - all data that remains is test data:
+                    if test_selection_option == 1:
+
+                        cluster_test = np.setdiff1d(cluster, cluster_train)
+                        idx_test = np.concatenate((idx_test, cluster_test))
+
+                    if test_selection_option == 2:
+
+                        if value > 50:
+                            raise ValueError("Percentage in cluster " + str(key+1) + " is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
+
+                        cluster_test = np.setdiff1d(cluster, cluster_train)
+                        cluster_test_sampled = np.array(random.sample(list(cluster_test), int(len(cluster)*value/100)))
+                        idx_test = np.concatenate((idx_test, cluster_test_sampled))
 
         # Sampling the user-specified number of observations:
         if sampling_type == 'number':
@@ -626,32 +624,42 @@ class TrainTestSelect:
             # Get clusters and split them into training and test indices:
             for key, value in sampling_dictionary.items():
 
-                cluster = []
-
                 if self.random_seed != None:
                     random.seed(self.random_seed)
 
-                for i, id in enumerate(self.idx):
+                cluster = []
+                for i, id in enumerate(self.idx[idx_full_no_test]):
                     if id == key:
-                        cluster.append(idx_full[i])
+                        cluster.append(idx_full_no_test[i])
 
-                # Check that the number of requested observations from that cluster does not exceed 50% of observations in that cluster:
-                if value > 0.5*len(cluster) and self.bar_50==True:
-                    raise ValueError("Error in cluster number " + str(key) + ". The number of samples in `sampling_dictionary` cannot exceed 50% of observations in a cluster.")
-
-                if value > len(cluster) and self.bar_50==False:
-                    raise ValueError("Error in cluster number " + str(key) + ". The number of samples in `sampling_dictionary` cannot exceed the number of observations in a cluster.")
+                if value > len(cluster):
+                    raise ValueError("Error in cluster number " + str(key+1) + ". The number of samples in `sampling_dictionary` cannot exceed the number of observations in a cluster.")
 
                 cluster_train = np.array(random.sample(cluster, value))
-                cluster_test = np.setdiff1d(cluster, cluster_train)
-
                 idx_train = np.concatenate((idx_train, cluster_train))
-                idx_test = np.concatenate((idx_test, cluster_test))
+
+                if self._using_user_defined_idx_test==False:
+
+                    # Selection of test data - all data that remains is test data:
+                    if test_selection_option == 1:
+
+                        cluster_test = np.setdiff1d(cluster, cluster_train)
+                        idx_test = np.concatenate((idx_test, cluster_test))
+
+                    if test_selection_option == 2:
+
+                        if value > int(cluster_populations[key]*0.5):
+                            raise ValueError("Number of samples in cluster " + str(key+1) + " is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
+
+                        cluster_test = np.setdiff1d(cluster, cluster_train)
+                        cluster_test_sampled = np.array(random.sample(list(cluster_test), value))
+                        idx_test = np.concatenate((idx_test, cluster_test_sampled))
 
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
 
-        if np.size(idx_test) + np.size(idx_train) != n_observations:
+        # Unit test check:
+        if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
             raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
         # Print detailed information on sampling:
@@ -662,8 +670,7 @@ class TrainTestSelect:
 
     def random(self, perc, test_selection_option=1):
         """
-        This function takes an ``idx`` classifications into :math:`k` clusters
-        from a clustering technique and
+        This function uses classifications into :math:`k` clusters and
         samples train data at random from the entire data set.
 
         **Usage example:**
@@ -730,21 +737,10 @@ class TrainTestSelect:
             - **idx_test** - indices of the test data.
         """
 
-        if len(self.idx_test) != 0:
-
-            using_user_defined_idx_test = True
-
-            if self.verbose==True:
-                print('User defined test samples will be used. `train_test_select` parameter is ignored.')
-
-        else:
-
-            using_user_defined_idx_test = False
-
-            # Check that `test_selection_option` parameter was passed correctly:
-            _test_selection_option = [1,2]
-            if test_selection_option not in _test_selection_option:
-                raise ValueError("Test selection option can only be 1 or 2.")
+        # Check that `test_selection_option` parameter was passed correctly:
+        _test_selection_option = [1,2]
+        if test_selection_option not in _test_selection_option:
+            raise ValueError("Test selection option can only be 1 or 2.")
 
         # Degrade clusters if needed:
         if len(np.unique(self.idx)) != (np.max(self.idx)+1):
@@ -785,10 +781,6 @@ class TrainTestSelect:
             _print_verbose_information(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
-
-
-
-
 
 def _test():
     """
@@ -968,26 +960,14 @@ def _test():
     except Exception:
         pass
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     # ##########################################################################
 
     # Tests of `TrainTestSelect.manual`:
 
     # ##########################################################################
 
-    sampling = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]), idx_test=[], random_seed=None, verbose=False)
+    idx_manual = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
+    sampling = TrainTestSelect(idx_manual, idx_test=[], random_seed=None, verbose=False)
 
     try:
         (idx_train, idx_test) = sampling.manual({1:1, 2:1})
@@ -1009,64 +989,94 @@ def _test():
     except Exception:
         pass
 
-    sampling = TrainTestSelect(np.array([0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1]), idx_test=[], random_seed=None, verbose=False)
-
     try:
-        (idx_train, idx_test) = sampling.manual({0:10, 1:10}, 'percentage')
+        (idx_train, idx_test) = sampling.manual({0:10, 1:10}, sampling_type='percentage', test_selection_option=1)
     except Exception:
         print('Test (04) of `TrainTestSelect.manual` failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:50, 1:50}, 'percentage')
+        (idx_train, idx_test) = sampling.manual({0:50, 1:50}, sampling_type='percentage', test_selection_option=1)
     except Exception:
         print('Test (05) of `TrainTestSelect.manual` failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:60, 1:60}, 'percentage')
+        (idx_train, idx_test) = sampling.manual({0:60, 1:60}, sampling_type='percentage', test_selection_option=1)
     except Exception:
         print('Test (06) of `TrainTestSelect.manual` failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:20, 1:20}, 'number')
+        (idx_train, idx_test) = sampling.manual({0:20, 1:20}, sampling_type='number', test_selection_option=1)
         print('Test (07) of `TrainTestSelect.manual` failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:5, 1:6}, 'number')
+        (idx_train, idx_test) = sampling.manual({0:5, 1:6}, sampling_type='number', test_selection_option=1)
     except Exception:
         print('Test (08) of `TrainTestSelect.manual` failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:2, 1:2}, 'number')
+        (idx_train, idx_test) = sampling.manual({0:2, 1:2}, sampling_type='number', test_selection_option=1)
     except Exception:
         print('Test (09) of `TrainTestSelect.manual` failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:5, 1:5}, 'number')
+        (idx_train, idx_test) = sampling.manual({0:5, 1:5}, sampling_type='number', test_selection_option=1)
     except Exception:
         print('Test (10) of `TrainTestSelect.manual` failed.')
         return 0
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:2.2, 1:1}, 'number')
+        (idx_train, idx_test) = sampling.manual({0:2.2, 1:1}, sampling_type='number', test_selection_option=1)
         print('Test (11) of `TrainTestSelect.manual` failed.')
         return 0
     except Exception:
         pass
 
     try:
-        (idx_train, idx_test) = sampling.manual({0:20, 1:-20}, 'percentage')
+        (idx_train, idx_test) = sampling.manual({0:20, 1:-20}, sampling_type='percentage', test_selection_option=1)
         print('Test (12) of `TrainTestSelect.manual` failed.')
         return 0
     except Exception:
         pass
+
+    try:
+        (idx_train, idx_test) = sampling.manual({0:10, 1:10}, sampling_type='percentage', test_selection_option=2)
+    except Exception:
+        print('Test (13) of `TrainTestSelect.manual` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.manual({0:50, 1:50}, sampling_type='percentage', test_selection_option=2)
+    except Exception:
+        print('Test (14) of `TrainTestSelect.manual` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.manual({0:51, 1:10}, sampling_type='percentage', test_selection_option=2)
+        print('Test (15) of `TrainTestSelect.manual` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        (idx_train, idx_test) = sampling.manual({0:15, 1:2}, sampling_type='number', test_selection_option=2)
+        print('Test (16) of `TrainTestSelect.manual` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        (idx_train, idx_test) = sampling.manual({0:1, 1:0}, sampling_type='number', test_selection_option=2)
+    except Exception:
+        print('Test (17) of `TrainTestSelect.manual` failed.')
+        return 0
 
     # ##########################################################################
 
