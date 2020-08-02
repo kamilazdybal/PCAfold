@@ -120,7 +120,7 @@ The visual result of this sampling can be seen below:
 Select fixed percentage
 -----------------------
 
-Next, we select a percentage of samples from each cluster using function ``train_test_split_percentage_from_idx``. Let's request 10% of the total data to be train data. The function will select 10% of samples from each cluster. All remaining data samples will become test data.
+Next, we select a percentage of samples from each cluster using function ``TrainTestSelect.percentage``. Let's request 10% of the total data to be train data. The function will select 10% of samples from each cluster. All remaining data samples will become test data.
 
 .. code:: python
 
@@ -152,7 +152,7 @@ The visual result of this sampling can be seen below:
 Select manually
 ---------------
 
-We select samples manually from each cluster using function ``train_test_split_manual_from_idx``. Let's request 4, 5, 10 and 2 samples from clusters 1, 2, 3 and 4 respectively. The sampling dictionary will thus have to be: ``sampling_dictionary={0:4, 1:5, 2:10, 3:2}``. Note that the function will still select those samples randomly from each cluster.
+We select samples manually from each cluster using function ``TrainTestSelect.manual``. Let's request 4, 5, 10 and 2 samples from clusters 1, 2, 3 and 4 respectively. The sampling dictionary will thus have to be: ``sampling_dictionary={0:4, 1:5, 2:10, 3:2}``. Note that the function will still select those samples randomly from each cluster.
 We should also change ``sampling_type`` to ``'number'`` so that samples are selected on number and not percentage basis.
 
 .. code:: python
@@ -185,7 +185,7 @@ The visual result of this sampling can be seen below:
 Select at random
 ----------------
 
-Finally, we select random samples using function ``train_test_split_random``. Let's request 10% of the total data to be train data.
+Finally, we select random samples using function ``TrainTestSelect.random``. Let's request 10% of the total data to be train data.
 
 .. code:: python
 
@@ -221,7 +221,7 @@ The visual result of this sampling can be seen below:
 Maintaining fixed test data
 ---------------------------
 
-In this example we further illustrate how ``idx_test`` input parameter can be utilized.
+In this example we further illustrate how maintaining fixed test data functionality can be utilized.
 Suppose that in every cluster you have a very distinct set of observations on which you would always like to test your model.
 You can point out those observations when initializing ``TrainTestSelect`` object through the use of ``idx_test`` vector.
 
@@ -265,3 +265,6 @@ The visual result of this sampling can be seen below:
 .. image:: ../images/tutorial-train-test-select-random-with-idx-test-doc.png
   :width: 700
   :align: center
+
+Combining sampling functions in series
+--------------------------------------
