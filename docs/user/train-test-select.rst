@@ -46,9 +46,6 @@ Train data
 ^^^^^^^^^^
 
 Train data is always selected as an equal number of samples from local clusters.
-By default (``bar_50=True``) no more than 50% of the cluster's samples will be
-selected. This is to avoid oversampling small clusters which might in turn
-result in too little test data.
 The number of samples ``n_of_samples`` that should be taken from each cluster
 is calculated based on a percentage ``perc`` provided:
 
@@ -66,7 +63,7 @@ remaining samples that were not included in train data or as a subset of those.
 You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
 The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
 
-.. image:: ../images/tts-test-selection-option.png
+.. image:: ../images/tts-test-selection-option-number.png
   :width: 700
   :align: center
 
@@ -75,57 +72,45 @@ Select fixed percentage
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.percentage
 
-Train data
-^^^^^^^^^^
-
-Train data is always selected as an equal number of samples from local clusters.
-By default (``bar_50=True``) no more than 50% of the cluster's samples will be
-selected. This is to avoid oversampling small clusters which might in turn
-result in too little test data.
-
 Test data
 ^^^^^^^^^
 
 Depending on the option selected, test data will be created differently, either as all
 remaining samples that were not included in train data or as a subset of those.
+
+.. image:: ../images/tts-test-selection-option-percentage.png
+  :width: 700
+  :align: center
 
 Select manually
 ---------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.manual
 
-Train data
-^^^^^^^^^^
-
-Train data is always selected as an equal number of samples from local clusters.
-By default (``bar_50=True``) no more than 50% of the cluster's samples will be
-selected. This is to avoid oversampling small clusters which might in turn
-result in too little test data.
-
 Test data
 ^^^^^^^^^
 
 Depending on the option selected, test data will be created differently, either as all
 remaining samples that were not included in train data or as a subset of those.
+
+.. image:: ../images/tts-test-selection-option-manual.png
+  :width: 700
+  :align: center
 
 Select at random
 ----------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.random
 
-Train data
-^^^^^^^^^^
-
-Train data is always selected as an equal number of samples from local clusters.
-By default (``bar_50=True``) no more than 50% of the cluster's samples will be
-selected. This is to avoid oversampling small clusters which might in turn
-result in too little test data.
-
 Test data
 ^^^^^^^^^
 
 Depending on the option selected, test data will be created differently, either as all
 remaining samples that were not included in train data or as a subset of those.
+
+.. image:: ../images/tts-test-selection-option-random.png
+  :width: 700
+  :align: center
 
 --------------------------------------------------------------------------------
 

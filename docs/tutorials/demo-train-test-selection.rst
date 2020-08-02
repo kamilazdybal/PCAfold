@@ -60,7 +60,7 @@ Since there are two ways in which test data can be selected, we start with ``tes
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.number(15, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -92,7 +92,7 @@ We then request ``test_selection_option=2`` which will select fixed number of te
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.number(15, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -124,7 +124,7 @@ Next, we select a percentage of samples from each cluster using function ``Train
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.percentage(10)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -157,7 +157,7 @@ We should also change ``sampling_type`` to ``'number'`` so that samples are sele
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.manual({0:4, 1:5, 2:10, 3:2}, sampling_type='number')
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -189,7 +189,7 @@ Finally, we select random samples using function ``TrainTestSelect.random``. Let
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], bar_50=True, random_seed=None, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.random(10)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -236,7 +236,7 @@ If we know the indices of points that represent the appended clouds, stored in `
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=idx_test, bar_50=True, random_seed=None, verbose=True)
+  sample = TrainTestSelect(idx, idx_test=idx_test, random_seed=None, verbose=True)
 
 The sampling function will maintain those samples as test data and train data will be sampled ignoring the indices in ``idx_test``.
 Note also that if ``idx_test`` is passed it overwrites the ``test_selection_option`` parameter.
@@ -267,5 +267,5 @@ The visual result of this sampling can be seen below:
   :width: 700
   :align: center
 
-Combining sampling functions in series
---------------------------------------
+Chaining sampling functions
+---------------------------
