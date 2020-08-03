@@ -32,11 +32,6 @@ def _perform_class_init_checks(idx, idx_test, random_seed, verbose):
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
 
-def _unit_test():
-
-    pass
-
-
 def _print_verbose_information(idx, idx_train, idx_test):
     """
     This private function prints detailed information on train and test sampling when
@@ -186,6 +181,9 @@ class TrainTestSelect:
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
+
+        :raises ValueError:
+            if ``perc`` is not a number between 0-100.
 
         :raises ValueError:
             if ``test_selection_option`` is not equal to 1 or 2.
@@ -351,6 +349,12 @@ class TrainTestSelect:
             of the remaining samples as test data.
 
         :raises ValueError:
+            if ``perc`` is not a number between 0-100.
+
+        :raises ValueError:
+            if ``test_selection_option`` is not equal to 1 or 2.
+
+        :raises ValueError:
             if the perecentage specified is too high in combination with the
             user-provided ``idx_test`` vector and there aren't enough samples to
             select as train data.
@@ -466,7 +470,7 @@ class TrainTestSelect:
 
         *Note:*
         This function does not run ``degrade_clusters`` to avoid disambiguity
-        between cluster numeration inside ``idx`` and inside the keys of the
+        between cluster classifications inside ``idx`` and inside the keys of the
         ``sampling_dictionary``! It will however check whether keys are consistent
         with ``idx`` entries and if yes it will continue running. If the ``idx``
         classifies for running ``degrade_clusters`` this information will be printed
@@ -505,9 +509,9 @@ class TrainTestSelect:
             sampling_dictionary = {0:n_1, 1:n_2, 2:n_3}
 
         :param sampling_dictionary:
-            dictionary specifying manual sampling. Keys are cluster numbers and
+            dictionary specifying manual sampling. Keys are cluster classifications and
             values are either ``percentage`` or ``number`` of samples to be taken from
-            that cluster. Keys should match the cluster numbering as per ``idx``.
+            that cluster. Keys should match the cluster classifications as per ``idx``.
         :param sampling_type: (optional)
             string specifying whether percentage or number is given in the
             ``sampling_dictionary``. Available options: ``percentage`` or ``number``.
@@ -525,6 +529,15 @@ class TrainTestSelect:
         :raises ValueError:
             if the number of entries in ``sampling_dictionary`` does not match the
             number of clusters specified in ``idx``.
+
+        :raises ValueError:
+            if any ``value`` in ``sampling_dictionary`` is not a number between 0-100 when ``sampling_type='percentage'``.
+
+        :raises ValueError:
+            if any ``value`` in ``sampling_dictionary`` is not a non-negative integer when ``sampling_type='number'``.
+
+        :raises ValueError:
+            if ``test_selection_option`` is not equal to 1 or 2.
 
         :raises ValueError:
             if the perecentage specified is too high in combination with the
@@ -563,7 +576,7 @@ class TrainTestSelect:
             # Check that percentage is between 0 and 100:
             if sampling_type == 'percentage':
                 if not (value >= 0 and value <= 100):
-                    raise ValueError("Error in cluster number " + str(key) + ". The percentage must be between 0% and 100%.")
+                    raise ValueError("Error in cluster number " + str(key) + ". The percentage has to be between 0-100.")
 
             # Check that number is a non-negative integer:
             if sampling_type == 'number':
@@ -743,6 +756,12 @@ class TrainTestSelect:
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
+
+        :raises ValueError:
+            if ``perc`` is not a number between 0-100.
+
+        :raises ValueError:
+            if ``test_selection_option`` is not equal to 1 or 2.
 
         :raises ValueError:
             if the perecentage specified is too high in combination with the
