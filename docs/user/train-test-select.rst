@@ -13,6 +13,12 @@ The general idea is to divide the entire data set ``X`` (or its portion) into tr
   :width: 700
   :align: center
 
+**Train data** is always sampled in the same way for a given sampling function.
+Depending on the option selected, **test data** will be sampled differently, either as all
+remaining samples that were not included in train data or as a subset of those.
+You can select the option by setting the ``test_selection_option`` parameter for each sampling function.
+Reach out to the documentation for a specific sampling function to see what options are available.
+
 All splitting functions in this module return a tuple of two variables: ``(idx_train, idx_test)``.
 Both ``idx_train`` and ``idx_test`` are vectors of integers of type ``numpy.ndarray`` and of size ``(_,)``.
 These variables contain indices of observations that went into train data and test data respectively.
@@ -42,68 +48,20 @@ Select fixed number
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.number
 
-Test data
-^^^^^^^^^
-
-Depending on the option selected, test data will be created differently, either as all
-remaining samples that were not included in train data or as a subset of those.
-You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
-The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
-
-.. image:: ../images/tts-test-selection-option-number.png
-  :width: 700
-  :align: center
-
 Select fixed percentage
 -----------------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.percentage
-
-Test data
-^^^^^^^^^
-
-Depending on the option selected, test data will be created differently, either as all
-remaining samples that were not included in train data or as a subset of those.
-You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
-The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
-
-.. image:: ../images/tts-test-selection-option-percentage.png
-  :width: 700
-  :align: center
 
 Select manually
 ---------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.manual
 
-Test data
-^^^^^^^^^
-
-Depending on the option selected, test data will be created differently, either as all
-remaining samples that were not included in train data or as a subset of those.
-You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
-The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
-
-.. image:: ../images/tts-test-selection-option-manual.png
-  :width: 700
-  :align: center
-
 Select at random
 ----------------
 
 .. autofunction:: PCAfold.sampling.TrainTestSelect.random
-
-Test data
-^^^^^^^^^
-
-Depending on the option selected, test data will be created differently, either as all
-remaining samples that were not included in train data or as a subset of those.
-You can select the option by setting the ``test_selection_option`` parameter which is 1 by default.
-The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
-
-.. image:: ../images/tts-test-selection-option-random.png
-  :width: 700
-  :align: center
 
 --------------------------------------------------------------------------------
 

@@ -76,7 +76,7 @@ class TrainTestSelect:
     """
     This class enables selecting train and test data samples.
 
-    **Usage example:**
+    **Example:**
 
     .. code::
 
@@ -89,13 +89,13 @@ class TrainTestSelect:
     :param idx:
         vector of cluster classifications.
     :param idx_test: (optional)
-        vector or list of user-provided indices for test data. If specified, the training
+        vector or list of user-provided indices for test data. If specified, train
         data will be selected ignoring the indices in ``idx_test`` and the test
         data will be returned the same as the user-provided ``idx_test``.
         If not specified, test samples will be selected according to the
         ``test_selection_option`` parameter (see documentation for each sampling function).
-        Using this parameter may be useful if training a machine learning model on
-        fixed test samples is desired.
+        Setting fixed ``idx_test`` parameter may be useful if training a machine
+        learning model on specific test samples is desired.
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
     :param verbose: (optional)
@@ -129,13 +129,12 @@ class TrainTestSelect:
 
     def number(self, perc, test_selection_option=1):
         """
-        This function uses classifications into :math:`k` clusters
-        and samples fixed number of observations
-        from every cluster as training
-        data. In general, this results in a balanced representation of features
-        identified by a clustering algorithm in the train data.
+        This function uses classifications into :math:`k` clusters and samples
+        fixed number of observations from every cluster as training data.
+        In general, this results in a balanced representation of features
+        identified by a clustering algorithm.
 
-        **Usage example:**
+        **Example:**
 
         .. code::
 
@@ -146,7 +145,7 @@ class TrainTestSelect:
           selection = TrainTestSelect(idx)
           (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
-        **Train data**
+        **Train data:**
 
         The number of train samples is estimated based on the percentage
         ``perc`` provided.
@@ -160,52 +159,39 @@ class TrainTestSelect:
 
             \\verb|n_of_samples| = \\verb|int| \Big( \\frac{\\verb|perc| \cdot \\verb|n_observations|}{k \cdot 100} \Big)
 
-        **Test data**
+        **Test data:**
 
         Two options for sampling test data are implemented. If you select
         ``test_selection_option=1`` all remaining samples that were not taken as
-        training data become the test data. If you select ``test_selection_option=2``,
-        the smallest cluster is found and the remaining number of observations are
-        taken as test data in that cluster. Next, the same number of observations is
-        taken from all remaining larger clusters.
+        train data become the test data. If you select ``test_selection_option=2``,
+        the smallest cluster is found and the remaining number of observations
+        :math:`m` are taken as test data in that cluster. Next, the same number
+        of samples :math:`m` is taken from all remaining larger clusters.
 
-        **Example:**
+        The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
 
-        If the data set has 10 observations with indices:
+        .. image:: ../images/sampling-test-selection-option-number.png
+          :width: 700
+          :align: center
 
-        ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
-
-        and a clustering technique divided the observations into clusters in the
-        following way:
-
-        ``[0, 0, 0, 0, 0, 0, 1, 1, 1, 1]``
-
-        Then, if you request 40% of the data for training, the function may return:
-
-        ``idx_train = [0, 1, 7, 9]``
-
-        as the training data (where observations 0 and 1 belong to the first cluster
-        and observations 7 and 9 belong to the second cluster).
-
-        Test data may then become:
-
-        ``idx_test = [3, 5, 6, 8]``
+        Here :math:`n` and :math:`m` are fixed numbers for each cluster.
+        In general, :math:`n \\neq m`.
 
         :param perc:
-            percentage of data to be selected as training data from each cluster.
+            percentage of data to be selected as training data from the entire data set.
             For instance, set ``perc=20`` if you want to select 20%.
         :param test_selection_option: (optional)
             option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
-            Select ``test_selection_option=2`` if you want the same number of samples
-            from each cluster to become test data.
+            Select ``test_selection_option=2`` if you want to select a subset
+            of the remaining samples as test data.
 
         :raises ValueError:
             if ``test_selection_option`` is not equal to 1 or 2.
 
         :raises ValueError:
-            if the perecentage specified is too high in combination with the
+            if the percentage specified is too high in combination with the
             user-provided ``idx_test`` vector and there aren't enough samples to
             select as train data.
 
@@ -310,11 +296,10 @@ class TrainTestSelect:
         """
         This function uses classifications into :math:`k` clusters and
         samples a certain percentage ``perc`` from every cluster as the training data.
-        The remaining percentage is the test data.
 
-        **Usage example:**
+        **Example:**
 
-        .. code::
+        .. code:: python
 
           from PCAfold import TrainTestSelect
           import numpy as np
@@ -328,32 +313,32 @@ class TrainTestSelect:
         train sample distribution as random sampling (``TrainTestSelect.random``).
         This sampling can be useful in cases where one cluster is significantly
         smaller than others and there is a chance that this cluster will not get
-        reflected in the train data if random sampling was used.
+        covereed in the train data if random sampling was used.
 
-        **Train data**
+        **Train data:**
 
-        *To be determined...*
+        The number of train samples is estimated based on the percentage ``perc`` provided.
+        First, the size of the :math:`i^{th}` cluster is estimated ``cluster_size_i``
+        and then a percentage ``perc`` of that number is selected.
 
-        **Test data**
+        **Test data:**
 
-        *To be determined...*
+        Two options for sampling test data are implemented. If you select
+        ``test_selection_option=1`` all remaining samples that were not taken as
+        train data become the test data. If you select
+        ``test_selection_option=2`` the same procedure will be used to select
+        test data as was used to select train data (only allowed if the number of samples
+        taken as train data from any cluster did not exceed 50% of observations
+        in that cluster).
 
-        **Example:**
+        The scheme below presents graphically how train and test data can be
+        selected using ``test_selection_option`` parameter:
 
-        If the full data has 10 observations with indices:
+        .. image:: ../images/sampling-test-selection-option-percentage.png
+          :width: 700
+          :align: center
 
-        ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
-
-        and you requested 40% of the data to be training data, the function may
-        return:
-
-        ``idx_train = [0, 1, 2, 7]``
-
-        and:
-
-        ``idx_test = [3, 4, 5, 6, 8, 9]``
-
-        as the remaining 60% test data.
+        Here :math:`p` is the percentage ``perc`` provided.
 
         :param perc:
             percentage of data to be selected as training data from each cluster.
@@ -362,7 +347,8 @@ class TrainTestSelect:
             option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
-            Select ``test_selection_option=2`` if you want ... *[to be determined]*
+            Select ``test_selection_option=2`` if you want to select a subset
+            of the remaining samples as test data.
 
         :raises ValueError:
             if the perecentage specified is too high in combination with the
@@ -462,14 +448,14 @@ class TrainTestSelect:
         and a dictionary ``sampling_dictionary`` in which you manually specify what
         ``'percentage'`` (or what ``'number'``) of samples will be
         selected as the train data from each cluster. The dictionary keys are
-        cluster numerations as per ``idx`` and the dictionary values are either
+        cluster classifications as per ``idx`` and the dictionary values are either
         percentage or number of train samples to be selected. The default dictionary
         values are percentage but you can select ``sampling_type='number'`` in order
         to interpret the values as a number of samples.
 
-        **Usage example:**
+        **Example:**
 
-        .. code::
+        .. code:: python
 
           from PCAfold import TrainTestSelect
           import numpy as np
@@ -486,32 +472,37 @@ class TrainTestSelect:
         classifies for running ``degrade_clusters`` this information will be printed
         as a suggestion.
 
-        **Train data**
+        **Train data:**
 
-        *To be determined...*
+        The number of train samples selected from each cluster is estimated based
+        on the ``sampling_dictionary``. For ``key : value``, percentage ``value``
+        (or number ``value``) of samples will be selected from cluster ``key``.
 
-        **Test data**
+        **Test data:**
 
-        *To be determined...*
+        Two options for sampling test data are implemented.
+        If you select ``test_selection_option=1`` all remaining samples that
+        were not taken as train data become the test data.
+        If you select
+        ``test_selection_option=2`` the same procedure will be used to select
+        test data as was used to select train data (only allowed if the number
+        of samples taken as train data from any cluster did not exceed 50%
+        of observations in that cluster).
 
-        **Example:**
+        The scheme below presents graphically how train and test data can be
+        selected using ``test_selection_option`` parameter:
 
-        If the full data has 10 observations with indices:
+        .. image:: ../images/sampling-test-selection-option-manual.png
+          :width: 700
+          :align: center
 
-        ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
+        Here it is understood that :math:`n_1` train samples were requested from
+        the first cluster, :math:`n_2` from the second cluster and :math:`n_3`
+        from the third cluster. This can be achieved by setting:
 
-        and a clustering technique divided the observations into clusters in the
-        following way:
+        .. code:: python
 
-        ``[0, 0, 0, 0, 0, 0, 1, 1, 1, 1]``
-
-        and the dictionary is: ``sampling_dictionary = {0:3, 1:1}`` with the values
-        representing a ``number``, the function may return:
-
-        ``idx_train = [2, 3, 5, 9]``
-
-        so that 3 samples are taken from the first cluster and 1 sample is taken
-        from the second cluster.
+            sampling_dictionary = {0:n_1, 1:n_2, 2:n_3}
 
         :param sampling_dictionary:
             dictionary specifying manual sampling. Keys are cluster numbers and
@@ -525,7 +516,8 @@ class TrainTestSelect:
             option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
-            Select ``test_selection_option=2`` if you want ... *[to be determined]*
+            Select ``test_selection_option=2`` if you want to select a subset
+            of the remaining samples as test data.
 
         :raises ValueError:
             if ``sampling_type`` is not ``'percentage'`` or ``'number'``.
@@ -533,9 +525,6 @@ class TrainTestSelect:
         :raises ValueError:
             if the number of entries in ``sampling_dictionary`` does not match the
             number of clusters specified in ``idx``.
-
-        :raises ValueError:
-            if the number of samples exceeds 50% in any cluster when ``bar_50=True``.
 
         :raises ValueError:
             if the perecentage specified is too high in combination with the
@@ -692,12 +681,11 @@ class TrainTestSelect:
 
     def random(self, perc, test_selection_option=1):
         """
-        This function uses classifications into :math:`k` clusters and
-        samples train data at random from the entire data set.
+        This function samples train data at random from the entire data set.
 
-        **Usage example:**
+        **Example:**
 
-        .. code::
+        .. code:: python
 
           from PCAfold import TrainTestSelect
           import numpy as np
@@ -709,9 +697,10 @@ class TrainTestSelect:
         Due to the nature of this sampling technique, it is not necessary to
         have ``idx`` classifications since random samples can also be selected
         from unclassified data sets. You can achieve that by generating a dummy
-        ``idx`` vector. For instance:
+        ``idx`` vector that has the same number of observations
+        ``n_observations`` as your data set. For instance:
 
-        .. code::
+        .. code:: python
 
           from PCAfold import TrainTestSelect
           import numpy as np
@@ -720,29 +709,30 @@ class TrainTestSelect:
           selection = TrainTestSelect(idx)
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
-        **Train data**
+        **Train data:**
 
-        *To be determined...*
+        The total number of train samples is computed as a percentage ``perc``
+        from the total number of observations in a data set. These samples are
+        then drawn at random from the entire data set, independent of cluster
+        classifications.
 
-        **Test data**
+        **Test data:**
 
-        *To be determined...*
+        Two options for sampling test data are implemented. If you select
+        ``test_selection_option=1`` all remaining samples that were not taken
+        as train data become the test data. If you select
+        ``test_selection_option=2`` the same procedure is used to select
+        test data as was used to select train data
+        (only allowed if ``perc`` is less than 50%).
 
-        **Example:**
+        The scheme below presents graphically how train and test data can be
+        selected using ``test_selection_option`` parameter:
 
-        If the full data has 10 observations whose indices are:
+        .. image:: ../images/sampling-test-selection-option-random.png
+          :width: 700
+          :align: center
 
-        ``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]``
-
-        and you request 40% of the data to be training data, the function may return:
-
-        ``idx_train = [0, 1, 2, 7]``
-
-        and:
-
-        ``idx_test = [3, 4, 5, 6, 8, 9]``
-
-        as the remaining 60% test data.
+        Here :math:`p` is the percentage ``perc`` provided.
 
         :param perc:
             percentage of data to be selected as training data from each cluster.
@@ -751,7 +741,8 @@ class TrainTestSelect:
             option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
-            Select ``test_selection_option=2`` if you want ... *[to be determined]*
+            Select ``test_selection_option=2`` if you want to select a subset
+            of the remaining samples as test data.
 
         :raises ValueError:
             if the perecentage specified is too high in combination with the
