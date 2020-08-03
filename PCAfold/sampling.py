@@ -151,12 +151,14 @@ class TrainTestSelect:
         The number of train samples is estimated based on the percentage
         ``perc`` provided.
         First, the total number of samples for training is estimated as a
-        percentage ``perc`` from the total number of observations in a data set.
-        Next, this number is divided equally into :math:`k` clusters:
+        percentage ``perc`` from the total number of observations ``n_observations`` in a data set.
+        Next, this number is divided equally into :math:`k` clusters. The
+        result ``n_of_samples`` is the number of samples that will be selected
+        from each cluster:
 
         .. math::
 
-            \verb|n_of_samples| = \verb|int| \Big( \frac{\verb|perc| \cdot \verb|n_observations|}{k \cdot 100} \Big)
+            \\verb|n_of_samples| = \\verb|int| \Big( \\frac{\\verb|perc| \cdot \\verb|n_observations|}{k \cdot 100} \Big)
 
         **Test data**
 
@@ -790,22 +792,30 @@ class TrainTestSelect:
         if self.random_seed != None:
             random.seed(self.random_seed)
 
-        if len(idx_test) != 0:
-            idx_full_no_test = np.setdiff1d(idx_full, idx_test)
+        if self._using_user_defined_idx_test==True:
+
             if int(len(idx_full)*perc/100) <= len(idx_full_no_test):
                 idx_train = np.array(random.sample(idx_full_no_test.tolist(), int(len(idx_full)*perc/100)))
             else:
                 raise ValueError("The training percentage specified is too high, there aren't enough samples.")
+
         else:
-            idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
-            idx_test = np.setdiff1d(idx_full, idx_train)
 
+            if test_selection_option==1:
 
+                idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
+                idx_test = np.setdiff1d(idx_full, idx_train)
 
+            elif test_selection_option==2:
 
+                idx_train = np.array(random.sample(idx_full.tolist(), int(len(idx_full)*perc/100)))
 
-
-
+                # Check if there is enough test samples to select:
+                if perc > 50:
+                    raise ValueError("Percentage is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
+                else:
+                    test_pool = np.setdiff1d(idx_full, idx_train)
+                    idx_test = np.array(random.sample(list(test_pool), int(len(idx_full)*perc/100)))
 
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
@@ -1122,30 +1132,117 @@ def _test():
 
     # ##########################################################################
 
-    sampling = TrainTestSelect(np.array([1, 1, 1, 1, 1, 1, 2, 2, 2, 2]), idx_test=[1,2], random_seed=None, verbose=False)
+    idx_random = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
+    sampling = TrainTestSelect(idx_random, idx_test=[], random_seed=None, verbose=False)
 
     try:
-        (idx_train, idx_test) = sampling.random(40,)
+        (idx_train, idx_test) = sampling.random(40, test_selection_option=1)
     except Exception:
         print('Test (01) of `TrainTestSelect.random` failed.')
         return 0
 
-    sampling = TrainTestSelect(np.array([1, 1, 1, 1, 1, 1, 2, 2, 2, 2]), idx_test=[1,2,3,4,5,6], random_seed=None, verbose=False)
-
     try:
-        (idx_train, idx_test) = sampling.random(40)
+        (idx_train, idx_test) = sampling.random(0, test_selection_option=1)
     except Exception:
         print('Test (02) of `TrainTestSelect.random` failed.')
         return 0
 
-    sampling = TrainTestSelect(np.array([1, 1, 1, 1, 1, 1, 2, 2, 2, 2]), idx_test=[1,2,3,4,5,6,7], random_seed=None, verbose=False)
+    try:
+        (idx_train, idx_test) = sampling.random(51, test_selection_option=1)
+    except Exception:
+        print('Test (03) of `TrainTestSelect.random` failed.')
+        return 0
 
     try:
-        (idx_train, idx_test) = sampling.random(40)
-        print('Test (03) of `TrainTestSelect.random` failed.')
+        (idx_train, idx_test) = sampling.random(100, test_selection_option=1)
+    except Exception:
+        print('Test (04) of `TrainTestSelect.random` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.random(101, test_selection_option=1)
+        print('Test (05) of `TrainTestSelect.random` failed.')
         return 0
     except Exception:
         pass
 
-    print("Test passed.")
+    try:
+        (idx_train, idx_test) = sampling.random(-1, test_selection_option=1)
+        print('Test (06) of `TrainTestSelect.random` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        (idx_train, idx_test) = sampling.random(0, test_selection_option=2)
+    except Exception:
+        print('Test (07) of `TrainTestSelect.random` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.random(10, test_selection_option=2)
+    except Exception:
+        print('Test (08) of `TrainTestSelect.random` failed.')
+        return 0
+
+    try:
+        (idx_train, idx_test) = sampling.random(90, test_selection_option=2)
+        print('Test (09) of `TrainTestSelect.random` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        (idx_train, idx_test) = sampling.random(51, test_selection_option=2)
+        print('Test (10) of `TrainTestSelect.random` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        (idx_train, idx_test) = sampling.random(101, test_selection_option=2)
+        print('Test (11) of `TrainTestSelect.random` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
+        idx_test = [1,2,3,4,5,6]
+        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
+        (idx_train, idx_test) = sampling.random(70, test_selection_option=1)
+    except Exception:
+        print('Test (12) of `TrainTestSelect.random` failed.')
+        return 0
+
+    try:
+        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
+        idx_test = [1,2,3,4,5,6]
+        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
+        (idx_train, idx_test) = sampling.random(80, test_selection_option=1)
+        print('Test (13) of `TrainTestSelect.random` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
+        idx_test = [1,2,3,4,5,6]
+        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
+        (idx_train, idx_test) = sampling.random(70, test_selection_option=2)
+    except Exception:
+        print('Test (14) of `TrainTestSelect.random` failed.')
+        return 0
+
+    try:
+        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
+        idx_test = [1,2,3,4,5,6]
+        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
+        (idx_train, idx_test) = sampling.random(80, test_selection_option=2)
+        print('Test (15) of `TrainTestSelect.random` failed.')
+        return 0
+    except Exception:
+        pass
+
+    print("Tests of `sampling` module passed.")
     return 1
