@@ -139,8 +139,8 @@ The visual result of this sampling can be seen below:
 Select fixed percentage
 -----------------------
 
-Next, we select a percentage of samples from each cluster using function
-``TrainTestSelect.percentage``. Let's request 10% of the total data to be train
+Next, we select a percentage of samples from each cluster using
+``TrainTestSelect.percentage`` function. Let's request 10% of the total data to be train
 data. The function will select 10% of samples from each cluster.
 
 Select test data with ``test_selection_option=1``
@@ -181,7 +181,7 @@ Select test data with ``test_selection_option=2``
 
 We then request ``test_selection_option=2`` which will use the same procedure
 to select test data as was used to select train data. It thus also selects 10%
-of the samples in each cluster as test samples.
+of samples in each cluster as test samples.
 
 .. code:: python
 
@@ -215,8 +215,8 @@ The visual result of this sampling can be seen below:
 Select manually
 ---------------
 
-We select samples manually from each cluster using function
-``TrainTestSelect.manual``.
+We select samples manually from each cluster using ``TrainTestSelect.manual``
+function.
 
 Select test data with ``test_selection_option=1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -299,7 +299,7 @@ The visual result of this sampling can be seen below:
 Select at random
 ----------------
 
-Finally, we select random samples using function ``TrainTestSelect.random``.
+Finally, we select random samples using ``TrainTestSelect.random`` function.
 Let's request 10% of the total data to be train data.
 
 .. note::
@@ -450,7 +450,7 @@ Suppose that our target is to have a fixed test data set that will be composed
 of:
 
 - 10 samples from the first cluster
-- 20 samples from the last cluster
+- 20 samples from the second cluster
 - 10 samples from the third cluster
 - 50 samples from the fourth cluster
 
