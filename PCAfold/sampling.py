@@ -193,10 +193,6 @@ class TrainTestSelect:
             user-provided ``idx_test`` vector and there aren't enough samples to
             select as train data.
 
-        :raises ValueError:
-            if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
-            to ``n_observations``. *This is for unit testing only.*
-
         :return:
             - **idx_train** - indices of the train data.
             - **idx_test** - indices of the test data.
@@ -280,10 +276,6 @@ class TrainTestSelect:
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
 
-        # Unit test check:
-        if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
-            raise ValueError("Sizes of train and test data do not sum up to the total number of observations.")
-
         # Print detailed information on sampling:
         if self.verbose == True:
             _print_verbose_information(self.idx, idx_train, idx_test)
@@ -359,10 +351,6 @@ class TrainTestSelect:
             user-provided ``idx_test`` vector and there aren't enough samples to
             select as train data.
 
-        :raises ValueError:
-            if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
-            to ``n_observations``. *This is for unit testing only.*
-
         :return:
             - **idx_train** - indices of the train data.
             - **idx_test** - indices of the test data.
@@ -435,10 +423,6 @@ class TrainTestSelect:
 
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
-
-        # Unit test check:
-        if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
-            raise ValueError("Size of train and test data do not sum up to the total number of observations.")
 
         # Print detailed information on sampling:
         if self.verbose == True:
@@ -543,10 +527,6 @@ class TrainTestSelect:
             if the perecentage specified is too high in combination with the
             user-provided ``idx_test`` vector and there aren't enough samples to
             select as train data.
-
-        :raises ValueError:
-            if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
-            to ``n_observations``. *This is for unit testing only.*
 
         :return:
             - **idx_train** - indices of the train data.
@@ -682,10 +662,6 @@ class TrainTestSelect:
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
 
-        # Unit test check:
-        if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
-            raise ValueError("Size of train and test data do not sum up to the total number of observations.")
-
         # Print detailed information on sampling:
         if self.verbose == True:
             _print_verbose_information(self.idx, idx_train, idx_test)
@@ -768,10 +744,6 @@ class TrainTestSelect:
             user-provided ``idx_test`` vector and there aren't enough samples to
             select as train data.
 
-        :raises ValueError:
-            if the size of ``idx_train`` and the size of ``idx_test`` do not sum up
-            to ``n_observations``. *This is for unit testing only.*
-
         :return:
             - **idx_train** - indices of the train data.
             - **idx_test** - indices of the test data.
@@ -830,429 +802,8 @@ class TrainTestSelect:
         idx_train = np.sort(idx_train.astype(int))
         idx_test = np.sort(idx_test.astype(int))
 
-        # Unit test check:
-        if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
-            raise ValueError("Size of train and test data do not sum up to the total number of observations.")
-
         # Print detailed information on sampling:
         if self.verbose == True:
             _print_verbose_information(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
-
-def _test():
-    """
-    This function performs regression testing of this module.
-    """
-
-    # ##########################################################################
-
-    # Tests of `TrainTestSelect` class init:
-
-    # ##########################################################################
-
-    try:
-        TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]), idx_test=[], random_seed=0.4, verbose=False)
-        print('Test (02) of `TrainTestSelect` class failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]), idx_test=[], random_seed=100, verbose=2)
-        print('Test (03) of `TrainTestSelect` class failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        TrainTestSelect(np.array([0,0,0,1,1]), idx_test=np.array([0,0,0,0,0,0,0,1,1,1,1,1,1]), random_seed=100, verbose=False)
-        print('Test (04) of `TrainTestSelect` class failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        TrainTestSelect(np.array([]), idx_test=[], random_seed=None, verbose=False)
-        print('Test (05) of `TrainTestSelect` class failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
-    except Exception:
-        print('Test (06) of `TrainTestSelect` class failed.')
-        return 0
-
-    try:
-        TrainTestSelect(np.array([1,1,1,1,2,2,2,2]))
-    except Exception:
-        print('Test (07) of `TrainTestSelect` class failed.')
-        return 0
-
-    # ##########################################################################
-
-    # Tests of `TrainTestSelect.number`:
-
-    # ##########################################################################
-
-    idx_number = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
-
-    sampling = TrainTestSelect(idx_number, idx_test=[], random_seed=None, verbose=False)
-
-    try:
-        (idx_train, idx_test) = sampling.number(40, test_selection_option=1)
-    except Exception:
-        print('Test (01) of `TrainTestSelect.number` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.number(70, test_selection_option=1)
-    except Exception:
-        print('Test (02) of `TrainTestSelect.number` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.number(80, test_selection_option=1)
-        print('Test (03) of `TrainTestSelect.number` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.number(40, test_selection_option=2)
-    except Exception:
-        print('Test (04) of `TrainTestSelect.number` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.number(70, test_selection_option=2)
-    except Exception:
-        print('Test (05) of `TrainTestSelect.number` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.number(80, test_selection_option=2)
-        print('Test (06) of `TrainTestSelect.number` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.number(0, test_selection_option=2)
-    except Exception:
-        print('Test (07) of `TrainTestSelect.number` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.number(-2, test_selection_option=2)
-        print('Test (08) of `TrainTestSelect.number` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.number(102, test_selection_option=2)
-        print('Test (09) of `TrainTestSelect.number` failed.')
-        return 0
-    except Exception:
-        pass
-
-    # ##########################################################################
-
-    # Tests of `TrainTestSelect.percentage`:
-
-    # ##########################################################################
-
-    idx_percentage = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
-    sampling = TrainTestSelect(idx_percentage, idx_test=[], random_seed=None, verbose=False)
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(0, test_selection_option=1)
-    except Exception:
-        print('Test (01) of `TrainTestSelect.percentage` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(20, test_selection_option=1)
-    except Exception:
-        print('Test (02) of `TrainTestSelect.percentage` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(60, test_selection_option=1)
-    except Exception:
-        print('Test (03) of `TrainTestSelect.percentage` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(100, test_selection_option=1)
-    except Exception:
-        print('Test (04) of `TrainTestSelect.percentage` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(10, test_selection_option=2)
-    except Exception:
-        print('Test (05) of `TrainTestSelect.percentage` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(50, test_selection_option=2)
-    except Exception:
-        print('Test (06) of `TrainTestSelect.percentage` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(60, test_selection_option=2)
-        print('Test (07) of `TrainTestSelect.percentage` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.percentage(100, test_selection_option=2)
-        print('Test (07) of `TrainTestSelect.percentage` failed.')
-        return 0
-    except Exception:
-        pass
-
-    # ##########################################################################
-
-    # Tests of `TrainTestSelect.manual`:
-
-    # ##########################################################################
-
-    idx_manual = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
-    sampling = TrainTestSelect(idx_manual, idx_test=[], random_seed=None, verbose=False)
-
-    try:
-        (idx_train, idx_test) = sampling.manual({1:1, 2:1})
-        print('Test (01) of `TrainTestSelect.manual` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:1, 1:1})
-    except Exception:
-        print('Test (02) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:1, 1:1}, sampling_type='perc')
-        print('Test (03) of `TrainTestSelect.manual` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:10, 1:10}, sampling_type='percentage', test_selection_option=1)
-    except Exception:
-        print('Test (04) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:50, 1:50}, sampling_type='percentage', test_selection_option=1)
-    except Exception:
-        print('Test (05) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:60, 1:60}, sampling_type='percentage', test_selection_option=1)
-    except Exception:
-        print('Test (06) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:20, 1:20}, sampling_type='number', test_selection_option=1)
-        print('Test (07) of `TrainTestSelect.manual` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:5, 1:6}, sampling_type='number', test_selection_option=1)
-    except Exception:
-        print('Test (08) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:2, 1:2}, sampling_type='number', test_selection_option=1)
-    except Exception:
-        print('Test (09) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:5, 1:5}, sampling_type='number', test_selection_option=1)
-    except Exception:
-        print('Test (10) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:2.2, 1:1}, sampling_type='number', test_selection_option=1)
-        print('Test (11) of `TrainTestSelect.manual` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:20, 1:-20}, sampling_type='percentage', test_selection_option=1)
-        print('Test (12) of `TrainTestSelect.manual` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:10, 1:10}, sampling_type='percentage', test_selection_option=2)
-    except Exception:
-        print('Test (13) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:50, 1:50}, sampling_type='percentage', test_selection_option=2)
-    except Exception:
-        print('Test (14) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:51, 1:10}, sampling_type='percentage', test_selection_option=2)
-        print('Test (15) of `TrainTestSelect.manual` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:15, 1:2}, sampling_type='number', test_selection_option=2)
-        print('Test (16) of `TrainTestSelect.manual` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.manual({0:1, 1:0}, sampling_type='number', test_selection_option=2)
-    except Exception:
-        print('Test (17) of `TrainTestSelect.manual` failed.')
-        return 0
-
-    # ##########################################################################
-
-    # Tests of `TrainTestSelect.random`:
-
-    # ##########################################################################
-
-    idx_random = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
-    sampling = TrainTestSelect(idx_random, idx_test=[], random_seed=None, verbose=False)
-
-    try:
-        (idx_train, idx_test) = sampling.random(40, test_selection_option=1)
-    except Exception:
-        print('Test (01) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.random(0, test_selection_option=1)
-    except Exception:
-        print('Test (02) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.random(51, test_selection_option=1)
-    except Exception:
-        print('Test (03) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.random(100, test_selection_option=1)
-    except Exception:
-        print('Test (04) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.random(101, test_selection_option=1)
-        print('Test (05) of `TrainTestSelect.random` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.random(-1, test_selection_option=1)
-        print('Test (06) of `TrainTestSelect.random` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.random(0, test_selection_option=2)
-    except Exception:
-        print('Test (07) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.random(10, test_selection_option=2)
-    except Exception:
-        print('Test (08) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        (idx_train, idx_test) = sampling.random(90, test_selection_option=2)
-        print('Test (09) of `TrainTestSelect.random` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.random(51, test_selection_option=2)
-        print('Test (10) of `TrainTestSelect.random` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        (idx_train, idx_test) = sampling.random(101, test_selection_option=2)
-        print('Test (11) of `TrainTestSelect.random` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
-        idx_test = [1,2,3,4,5,6]
-        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
-        (idx_train, idx_test) = sampling.random(70, test_selection_option=1)
-    except Exception:
-        print('Test (12) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
-        idx_test = [1,2,3,4,5,6]
-        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
-        (idx_train, idx_test) = sampling.random(80, test_selection_option=1)
-        print('Test (13) of `TrainTestSelect.random` failed.')
-        return 0
-    except Exception:
-        pass
-
-    try:
-        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
-        idx_test = [1,2,3,4,5,6]
-        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
-        (idx_train, idx_test) = sampling.random(70, test_selection_option=2)
-    except Exception:
-        print('Test (14) of `TrainTestSelect.random` failed.')
-        return 0
-
-    try:
-        idx_random = np.array([0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0])
-        idx_test = [1,2,3,4,5,6]
-        sampling = TrainTestSelect(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
-        (idx_train, idx_test) = sampling.random(80, test_selection_option=2)
-        print('Test (15) of `TrainTestSelect.random` failed.')
-        return 0
-    except Exception:
-        pass
-
-    print("Tests of `sampling` module passed.")
-    return 1
