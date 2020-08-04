@@ -443,7 +443,7 @@ Chaining sampling functions
 ---------------------------
 
 Finally, we discuss an interesting use-case for chaining two sampling
-function where train samples obtained during one sampling can become fixed test
+functions where train samples obtained from one sampling can become fixed test
 data for another sampling.
 
 Suppose that our target is to have a fixed test data set that will be composed
