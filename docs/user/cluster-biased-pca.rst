@@ -10,6 +10,8 @@ The general methodology for cluster-biased PCA is presented in the scheme below:
 .. image:: ../images/cluster-biased-PCA-scheme-sampling-highlighted.png
   :width: 700
 
+--------------------------------------------------------------------------------
+
 Biasing options
 ---------------
 
@@ -69,6 +71,8 @@ In this option, the reduced data set is only found in order to compute its cente
 .. image:: ../images/cb-PCA-scheme-option-5.png
     :width: 700
     :align: center
+
+--------------------------------------------------------------------------------
 
 Functions
 ---------

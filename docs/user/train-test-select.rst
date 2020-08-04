@@ -34,6 +34,8 @@ All functions are equipped with ``verbose`` parameter. If it is set to ``True`` 
 
 .. note:: It is assumed that the first cluster has index ``0`` within all input ``idx`` vectors. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 
+--------------------------------------------------------------------------------
+
 *************************
 Class ``TrainTestSelect``
 *************************

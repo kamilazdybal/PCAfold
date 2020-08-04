@@ -7,6 +7,8 @@ Clustering
 local clusters and performing some basic operations on clusters :cite:`Everitt2009`,
 :cite:`Kaufman2009`.
 
+--------------------------------------------------------------------------------
+
 Functions
 ---------
 

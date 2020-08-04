@@ -5,6 +5,8 @@ Manifold dimensionality
 
 ``normalized_local_variance.py`` module contains functions for assessing the intrinsic dimensionality of manifolds and judging the manifold quality.
 
+--------------------------------------------------------------------------------
+
 Functions
 ---------
 
