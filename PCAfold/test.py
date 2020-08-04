@@ -5,22 +5,22 @@ from PCAfold import normalized_local_variance
 from PCAfold import PCA
 import numpy as np
 
-def _test():
+def test():
     """
     This function runs all regression tests available.
     """
 
-    _test_clustering()
-    _test_sampling()
+    test_clustering()
+    test_sampling()
 
-def _test_clustering():
+def test_clustering():
     """
     This function performs regression testing of ``clustering_data`` module.
     """
 
     # ##########################################################################
 
-    # Test if `idx` output vectors are of type numpy.ndarray and of size (_,):
+    # Check if `idx` output vectors are of type numpy.ndarray and of size (_,):
 
     # ##########################################################################
     try:
@@ -104,14 +104,113 @@ def _test_clustering():
 
     print('Test of `clustering_data` module passed.')
 
-def _test_sampling():
+def test_sampling():
     """
     This function performs regression testing of `sampling` module.
     """
 
-    # # Unit test check:
-    # if (self._using_user_defined_idx_test==False) & (test_selection_option == 1) & (np.size(idx_test) + np.size(idx_train) != n_observations):
-    #     raise ValueError("Size of train and test data do not sum up to the total number of observations.")
+    # ##########################################################################
+
+    # Basic sanity tests:
+
+    # ##########################################################################
+
+    # Check that sizes of idx_train and idx_test always sum up to the total numer
+    # of observations when test_selection_option=1:
+    try:
+        idx = np.array([0,0,0,0,0,0,0,1,1,1,1])
+        sam = TrainTestSelect(idx)
+        (idx_train, idx_test) = sam.number(10)
+        n_observations = len(idx)
+        if np.size(idx_test) + np.size(idx_train) != n_observations:
+            print('Sanity test (01) failed.')
+            return 0
+        (idx_train, idx_test) = sam.percentage(10)
+        if np.size(idx_test) + np.size(idx_train) != n_observations:
+            print('Sanity test (02) failed.')
+            return 0
+        (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number')
+        if np.size(idx_test) + np.size(idx_train) != n_observations:
+            print('Sanity test (03) failed.')
+            return 0
+        (idx_train, idx_test) = sam.random(10)
+        if np.size(idx_test) + np.size(idx_train) != n_observations:
+            print('Sanity test (04) failed.')
+            return 0
+    except Exception:
+        pass
+
+    # Check that sizes of idx_train and idx_test sum up to less than the total numer
+    # for these cases with test_selection_option=2:
+    try:
+        idx = np.array([0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
+        sam = TrainTestSelect(idx)
+        (idx_train, idx_test) = sam.number(10, test_selection_option=2)
+        n_observations = len(idx)
+        if np.size(idx_test) + np.size(idx_train) >= n_observations:
+            print('Sanity test (05) failed.')
+            return 0
+        (idx_train, idx_test) = sam.percentage(10, test_selection_option=2)
+        if np.size(idx_test) + np.size(idx_train) >= n_observations:
+            print('Sanity test (06) failed.')
+            return 0
+        (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number', test_selection_option=2)
+        if np.size(idx_test) + np.size(idx_train) >= n_observations:
+            print('Sanity test (07) failed.')
+            return 0
+        (idx_train, idx_test) = sam.random(10, test_selection_option=2)
+        if np.size(idx_test) + np.size(idx_train) >= n_observations:
+            print('Sanity test (08) failed.')
+            return 0
+    except Exception:
+        pass
+
+    # Check that indices in idx_train are never in idx_test and vice versa:
+    try:
+        idx = np.array([0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,5,5,5,5,10,10,10,10,10])
+        sam = TrainTestSelect(idx)
+        (idx_train, idx_test) = sam.number(10, test_selection_option=1)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (09) failed.')
+            return 0
+        (idx_train, idx_test) = sam.percentage(10, test_selection_option=1)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (19) failed.')
+            return 0
+        (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number', test_selection_option=1)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (20) failed.')
+            return 0
+        (idx_train, idx_test) = sam.random(10, test_selection_option=1)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (21) failed.')
+            return 0
+        (idx_train, idx_test) = sam.number(10, test_selection_option=2)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (22) failed.')
+            return 0
+        (idx_train, idx_test) = sam.percentage(10, test_selection_option=2)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (23) failed.')
+            return 0
+        (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number', test_selection_option=2)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (24) failed.')
+            return 0
+        (idx_train, idx_test) = sam.random(10, test_selection_option=2)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (25) failed.')
+            return 0
+        (idx_train, idx_test) = sam.manual({0:10,1:10}, sampling_type='percentage', test_selection_option=1)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (26) failed.')
+            return 0
+        (idx_train, idx_test) = sam.manual({0:10,1:10}, sampling_type='percentage', test_selection_option=2)
+        if len(np.setdiff1d(idx_train, idx_test)) != 0:
+            print('Sanity test (26) failed.')
+            return 0
+    except Exception:
+        pass
 
     # ##########################################################################
 
@@ -159,6 +258,91 @@ def _test_sampling():
         print('Test (07) of `TrainTestSelect` class failed.')
         return 0
 
+    try:
+        TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]), idx_test=np.array([0,0,0,0,0,0,0,1,1,1,2,2,2,2,2,2]))
+    except Exception:
+        print('Test (08) of `TrainTestSelect` class failed.')
+        return 0
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.idx = np.array([1,1,1,1,1,1,2,2,2,2,2,2,2,2])
+        sam.idx_test = np.arange(1,10,1)
+        sam.random_seed = 100
+        sam.random_seed = None
+        sam.random_seed = -1
+        sam.verbose = False
+        sam.verbose = True
+        sam.idx_test = []
+    except Exception:
+        print('Test (09) of `TrainTestSelect` class failed.')
+        return 0
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.idx_test = np.arange(1,100,1)
+        print('Test (10) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.random_seed = 10.1
+        print('Test (11) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.random_seed = False
+        print('Test (12) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.verbose = 10
+        print('Test (13) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.idx = []
+        print('Test (14) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.idx_test = [0,1,2,3,4,5,6]
+        sam.idx = np.array([0,1])
+        print('Test (15) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.idx_test = 'hello'
+        print('Test (16) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sam = TrainTestSelect(np.array([0,0,0,0,0,0,0,1,1,1,1]))
+        sam.idx = 'hello'
+        print('Test (17) of `TrainTestSelect` class failed.')
+        return 0
+    except Exception:
+        pass
+
     # ##########################################################################
 
     # Tests of `TrainTestSelect.number`:
@@ -166,7 +350,6 @@ def _test_sampling():
     # ##########################################################################
 
     idx_number = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
-
     sampling = TrainTestSelect(idx_number, idx_test=[], random_seed=None, verbose=False)
 
     try:

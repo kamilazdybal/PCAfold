@@ -2,7 +2,7 @@ import numpy as np
 import random
 from PCAfold import clustering_data
 
-def _print_verbose_information(idx, idx_train, idx_test):
+def __print_verbose_information(idx, idx_train, idx_test):
     """
     This private function prints detailed information on train and test sampling when
     ``verbose=True``.
@@ -67,11 +67,11 @@ class TrainTestSelect:
         boolean for printing sampling details.
 
     :raises ValueError:
-        if ``idx`` vector has length zero.
+        if ``idx`` vector has length zero, or is not a list or ``numpy.ndarray``.
     :raises ValueError:
-        if ``idx_test`` vector has more observations than ``idx``.
+        if ``idx_test`` vector has more unique observations than ``idx``, or is not a list or ``numpy.ndarray``.
     :raises ValueError:
-        if ``random_seed`` is not an integer.
+        if ``random_seed`` is not an integer or ``None``.
     :raises ValueError:
         if ``verbose`` is not a boolean.
     """
@@ -81,12 +81,21 @@ class TrainTestSelect:
         if len(idx) == 0:
             raise ValueError("Parameter `idx` has length zero.")
         else:
-            self.__idx = idx
+            if len(np.unique(idx_test)) > len(idx):
+                raise ValueError("Parameter `idx` has less observations than current `idx_test`.")
+            else:
+                if isinstance(idx, list) or isinstance(idx, np.ndarray):
+                    self.__idx = idx
+                else:
+                    raise ValueError("Parameter `idx` has to be a list or numpy.ndarray.")
 
         if len(np.unique(idx_test)) > len(idx):
             raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
         else:
-            self.__idx_test = idx_test
+            if isinstance(idx_test, list) or isinstance(idx_test, np.ndarray):
+                self.__idx_test = idx_test
+            else:
+                raise ValueError("Parameter `idx_test` has to be a list or numpy.ndarray.")
 
         if random_seed != None:
             if not isinstance(random_seed, int):
@@ -103,7 +112,7 @@ class TrainTestSelect:
         else:
             self.__verbose = verbose
 
-        if len(self.idx_test) != 0:
+        if len(np.unique(idx_test)) != 0:
             self.__using_user_defined_idx_test = True
             if self.verbose==True:
                 print('User defined test samples will be used. Parameter `test_selection_option` will be ignored.\n')
@@ -131,14 +140,30 @@ class TrainTestSelect:
         if len(new_idx) == 0:
             raise ValueError("Parameter `idx` has length zero.")
         else:
-            self.__idx = new_idx
+            if len(np.unique(self.idx_test)) > len(new_idx):
+                raise ValueError("Parameter `idx` has less observations than current `idx_test`.")
+            else:
+                if isinstance(new_idx, list) or isinstance(new_idx, np.ndarray):
+                    self.__idx = new_idx
+                else:
+                    raise ValueError("Parameter `idx` has to be a list or numpy.ndarray.")
 
     @idx_test.setter
     def idx_test(self, new_idx_test):
         if len(new_idx_test) > len(self.idx):
             raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
         else:
-            self.__idx_test = new_idx_test
+            if isinstance(new_idx_test, list) or isinstance(new_idx_test, np.ndarray):
+                self.__idx_test = new_idx_test
+            else:
+                raise ValueError("Parameter `idx_test` has to be a list or numpy.ndarray.")
+
+            if len(np.unique(new_idx_test)) != 0:
+                self.__using_user_defined_idx_test = True
+                if self.verbose==True:
+                    print('User defined test samples will be used. Parameter `test_selection_option` will be ignored.\n')
+            else:
+                self.__using_user_defined_idx_test = False
 
     @random_seed.setter
     def random_seed(self, new_random_seed):
@@ -315,7 +340,7 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            _print_verbose_information(self.idx, idx_train, idx_test)
+            __print_verbose_information(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
 
@@ -463,7 +488,7 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            _print_verbose_information(self.idx, idx_train, idx_test)
+            __print_verbose_information(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
 
@@ -701,7 +726,7 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            _print_verbose_information(self.idx, idx_train, idx_test)
+            __print_verbose_information(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
 
@@ -841,6 +866,6 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            _print_verbose_information(self.idx, idx_train, idx_test)
+            __print_verbose_information(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
