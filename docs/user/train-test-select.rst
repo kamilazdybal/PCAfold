@@ -30,7 +30,7 @@ In your model learning algorithm you can then get the train and test observation
   X_train = X[idx_train,:]
   X_test = X[idx_test,:]
 
-All functions are equipped with ``verbose=False`` parameter. If it is set to ``True`` some additional information on train and test selection is printed.
+All functions are equipped with ``verbose`` parameter. If it is set to ``True`` some additional information on train and test selection is printed.
 
 .. note:: It is assumed that the first cluster has index ``0`` within all input ``idx`` vectors. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 

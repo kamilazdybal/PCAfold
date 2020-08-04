@@ -1,5 +1,5 @@
-Getting started with ``PCAfold``
-================================
+Getting started
+===============
 
 Installation
 ------------
