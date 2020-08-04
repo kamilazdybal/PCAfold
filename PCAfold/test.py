@@ -134,7 +134,7 @@ def _test_sampling():
         pass
 
     try:
-        TrainTestSelect(np.array([0,0,0,1,1]), idx_test=np.array([0,0,0,0,0,0,0,1,1,1,1,1,1]), random_seed=100, verbose=False)
+        TrainTestSelect(np.array([0,0,0,1,1]), idx_test=np.array([1,2,3,4,5,6,7,8]), random_seed=100, verbose=False)
         print('Test (04) of `TrainTestSelect` class failed.')
         return 0
     except Exception:

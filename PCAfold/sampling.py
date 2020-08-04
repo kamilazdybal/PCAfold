@@ -2,36 +2,6 @@ import numpy as np
 import random
 from PCAfold import clustering_data
 
-def _perform_class_init_checks(idx, idx_test, random_seed, verbose):
-    """
-    This private function performs basic checks on the input parameters for the
-    ``TrainTestSelect`` class.
-
-    It will run at each class initialization.
-
-    :raises ValueError:
-        if ``idx`` vector has length zero.
-    :raises ValueError:
-        if ``idx_test`` vector has more observations than ``idx``.
-    :raises ValueError:
-        if ``random_seed`` is not an integer.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
-    """
-
-    if len(idx) == 0:
-        raise ValueError("Parameter `idx` has length zero.")
-
-    if len(idx_test) > len(idx):
-        raise ValueError("Parameter `idx_test` has more observations than `idx`.")
-
-    if random_seed != None:
-        if not isinstance(random_seed, int):
-            raise ValueError("Parameter `random_seed` has to be an integer.")
-
-    if not isinstance(verbose, bool):
-        raise ValueError("Parameter `verbose` has to be a boolean.")
-
 def _print_verbose_information(idx, idx_train, idx_test):
     """
     This private function prints detailed information on train and test sampling when
@@ -108,19 +78,86 @@ class TrainTestSelect:
 
     def __init__(self, idx, idx_test=[], random_seed=None, verbose=False):
 
-        self.idx = idx
-        self.idx_test = idx_test
-        self.random_seed = random_seed
-        self.verbose = verbose
+        if len(idx) == 0:
+            raise ValueError("Parameter `idx` has length zero.")
+        else:
+            self.__idx = idx
+
+        if len(np.unique(idx_test)) > len(idx):
+            raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
+        else:
+            self.__idx_test = idx_test
+
+        if random_seed != None:
+            if not isinstance(random_seed, int):
+                raise ValueError("Parameter `random_seed` has to be an integer or None.")
+            if isinstance(random_seed, bool):
+                raise ValueError("Parameter `random_seed` has to be an integer or None.")
+            else:
+                self.__random_seed = random_seed
+        else:
+            self.__random_seed = random_seed
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
+        else:
+            self.__verbose = verbose
 
         if len(self.idx_test) != 0:
-            self._using_user_defined_idx_test = True
+            self.__using_user_defined_idx_test = True
             if self.verbose==True:
                 print('User defined test samples will be used. Parameter `test_selection_option` will be ignored.\n')
         else:
-            self._using_user_defined_idx_test = False
+            self.__using_user_defined_idx_test = False
 
-        _perform_class_init_checks(self.idx, self.idx_test, self.random_seed, self.verbose)
+    @property
+    def idx(self):
+        return self.__idx
+
+    @property
+    def idx_test(self):
+        return self.__idx_test
+
+    @property
+    def random_seed(self):
+        return self.__random_seed
+
+    @property
+    def verbose(self):
+        return self.__verbose
+
+    @idx.setter
+    def idx(self, new_idx):
+        if len(new_idx) == 0:
+            raise ValueError("Parameter `idx` has length zero.")
+        else:
+            self.__idx = new_idx
+
+    @idx_test.setter
+    def idx_test(self, new_idx_test):
+        if len(new_idx_test) > len(self.idx):
+            raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
+        else:
+            self.__idx_test = new_idx_test
+
+    @random_seed.setter
+    def random_seed(self, new_random_seed):
+        if new_random_seed != None:
+            if not isinstance(new_random_seed, int):
+                raise ValueError("Parameter `random_seed` has to be an integer or None.")
+            if isinstance(new_random_seed, bool):
+                raise ValueError("Parameter `random_seed` has to be an integer or None.")
+            else:
+                self.__random_seed = new_random_seed
+        else:
+            self.__random_seed = new_random_seed
+
+    @verbose.setter
+    def verbose(self, new_verbose):
+        if not isinstance(new_verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
+        else:
+            self.__verbose = new_verbose
 
     def number(self, perc, test_selection_option=1):
         """
@@ -246,7 +283,7 @@ class TrainTestSelect:
                 cluster_train = np.array(random.sample(cluster, n_of_samples))
                 idx_train = np.concatenate((idx_train, cluster_train))
 
-            if self._using_user_defined_idx_test==False:
+            if self.__using_user_defined_idx_test==False:
 
                 # Selection of test data - all data that remains is test data:
                 if test_selection_option == 1:
@@ -259,7 +296,7 @@ class TrainTestSelect:
 
                     cluster_test.append(np.setdiff1d(cluster, cluster_train))
 
-        if self._using_user_defined_idx_test==False:
+        if self.__using_user_defined_idx_test==False:
 
             if test_selection_option == 2:
 
@@ -403,7 +440,7 @@ class TrainTestSelect:
                 cluster_train = np.array(random.sample(cluster, int(cluster_populations[cl_id]*perc/100)))
                 idx_train = np.concatenate((idx_train, cluster_train))
 
-            if self._using_user_defined_idx_test==False:
+            if self.__using_user_defined_idx_test==False:
 
                 # Selection of test data - all data that remains is test data:
                 if test_selection_option == 1:
@@ -605,7 +642,7 @@ class TrainTestSelect:
                 cluster_train = np.array(random.sample(cluster, int(len(cluster)*value/100)))
                 idx_train = np.concatenate((idx_train, cluster_train))
 
-                if self._using_user_defined_idx_test==False:
+                if self.__using_user_defined_idx_test==False:
 
                     # Selection of test data - all data that remains is test data:
                     if test_selection_option == 1:
@@ -642,7 +679,7 @@ class TrainTestSelect:
                 cluster_train = np.array(random.sample(cluster, value))
                 idx_train = np.concatenate((idx_train, cluster_train))
 
-                if self._using_user_defined_idx_test==False:
+                if self.__using_user_defined_idx_test==False:
 
                     # Selection of test data - all data that remains is test data:
                     if test_selection_option == 1:
@@ -774,7 +811,7 @@ class TrainTestSelect:
         if self.random_seed != None:
             random.seed(self.random_seed)
 
-        if self._using_user_defined_idx_test==True:
+        if self.__using_user_defined_idx_test==True:
 
             if int(len(idx_full)*perc/100) <= len(idx_full_no_test):
                 idx_train = np.array(random.sample(idx_full_no_test.tolist(), int(len(idx_full)*perc/100)))
