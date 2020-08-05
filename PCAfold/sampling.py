@@ -67,9 +67,9 @@ class TrainTestSelect:
         boolean for printing sampling details.
 
     :raises ValueError:
-        if ``idx`` vector has length zero, or is not a list or ``numpy.ndarray``.
+        if ``idx`` vector has length zero, is not a list or ``numpy.ndarray``.
     :raises ValueError:
-        if ``idx_test`` vector has more unique observations than ``idx``, or is not a list or ``numpy.ndarray``.
+        if ``idx_test`` vector has more unique observations than ``idx``, is not a list or ``numpy.ndarray``.
     :raises ValueError:
         if ``random_seed`` is not an integer or ``None``.
     :raises ValueError:

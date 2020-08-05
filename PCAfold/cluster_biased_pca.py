@@ -5,28 +5,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from PCAfold import pca_impl as P
 from PCAfold import clustering_data as cld
 from PCAfold.sampling import TrainTestSelect
-#
-# def plotting_styles(func):
-#
-from matplotlib import rcParams
+from PCAfold.styles import *
 
-# Plotting parameters:
-csfont = {'fontname':'Charter', 'fontweight':'regular'}
-hfont = {'fontname':'Charter', 'fontweight':'bold'}
-ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
-rcParams["font.family"] = "serif"
-rcParams["font.serif"] = "Charter"
-rcParams['font.size'] = 16
-
-font_axes = 18
-font_labels = 24
-font_annotations = 18
-font_title = 18
-font_text = 16
-font_legend = 20
-font_colorbar = 16
-
-# @plotting_styles
 def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
     """
     This function analyzes the movement of centers in the subset of the original
@@ -101,8 +81,8 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 
     plt.scatter(x_range, norm_centers_X, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1)
     plt.scatter(x_range, norm_centers_X_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1)
-
-    plt.xticks(x_range, variable_names, fontsize=font_annotations, **csfont)
+    plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
     plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_variables+1.5)
@@ -119,10 +99,10 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     ax.spines["right"].set_visible(True)
     ax.spines["left"].set_visible(True)
 
-    lgnd = plt.legend(['Original data set', 'Reduced data set'], fontsize=font_legend, markerscale=50, loc="upper right")
+    lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=50, loc="upper right")
 
-    lgnd.legendHandles[0]._sizes = [marker_size]
-    lgnd.legendHandles[1]._sizes = [marker_size]
+    lgnd.legendHandles[0]._sizes = [marker_size*1.5]
+    lgnd.legendHandles[1]._sizes = [marker_size*1.5]
     plt.setp(lgnd.texts, **csfont)
 
     if save_filename != None:
@@ -204,31 +184,75 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         eigenvectors = np.abs(eigenvectors)
 
     x_range = np.arange(0, n_variables)
-    color_range = np.arange(0, n_versions)
 
-    # Plot the eigenvector weights movement:
-    fig, ax = plt.subplots(figsize=(n_variables, 6))
+    # When there are only two versions, plot a comparison of the original data
+    # set X and an equilibrated data set X_r(e):
+    if n_versions == 2:
 
-    for idx, variable in enumerate(variable_names):
-        scat = ax.scatter(np.repeat(idx, n_versions), eigenvectors[idx,:], c=color_range, cmap=plt.cm.Spectral)
+        color_X = '#191b27'
+        color_X_r = '#ff2f18'
+        marker_size = 50
 
-    plt.xticks(x_range, variable_names, fontsize=font_annotations, **csfont)
+        fig, ax = plt.subplots(figsize=(n_variables, 6))
 
-    if normalize == True:
-        plt.ylabel('Normalized weight [-]', fontsize=font_labels, **csfont)
+        plt.scatter(x_range, eigenvectors[:,0], c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1)
+        plt.scatter(x_range, eigenvectors[:,-1], c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1)
+
+        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+        plt.yticks(fontsize=font_axes, **csfont)
+
+        if normalize == True:
+            plt.ylabel('Normalized weight [-]', fontsize=font_labels, **csfont)
+        else:
+            plt.ylabel('Absolute weight [-]', fontsize=font_labels, **csfont)
+
+        plt.ylim(-0.05,1.05)
+        plt.xlim(-1, n_variables)
+        plt.grid(alpha=0.3)
+
+        if title != None:
+            plt.title(title, fontsize=font_title, **csfont)
+
+        ax.spines["top"].set_visible(True)
+        ax.spines["bottom"].set_visible(True)
+        ax.spines["right"].set_visible(True)
+        ax.spines["left"].set_visible(True)
+
+        lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=50, loc="upper right")
+
+        lgnd.legendHandles[0]._sizes = [marker_size*1.5]
+        lgnd.legendHandles[1]._sizes = [marker_size*1.5]
+        plt.setp(lgnd.texts, **csfont)
+
+    # When there are more than two versions plot the trends:
     else:
-        plt.ylabel('Absolute weight [-]', fontsize=font_labels, **csfont)
 
-    plt.ylim(-0.05,1.05)
-    plt.xlim(-1, n_variables)
-    plt.grid(alpha=0.3)
+        color_range = np.arange(0, n_versions)
 
-    if title != None:
-        plt.title(title, fontsize=font_title, **csfont)
+        # Plot the eigenvector weights movement:
+        fig, ax = plt.subplots(figsize=(n_variables, 6))
 
-    cbar = plt.colorbar(scat, ticks=[0, round((n_versions-1)/2), n_versions-1])
+        for idx, variable in enumerate(variable_names):
+            scat = ax.scatter(np.repeat(idx, n_versions), eigenvectors[idx,:], c=color_range, cmap=plt.cm.Spectral)
 
-    if save_plot != None:
+        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+        plt.yticks(fontsize=font_axes, **csfont)
+
+        if normalize == True:
+            plt.ylabel('Normalized weight [-]', fontsize=font_labels, **csfont)
+        else:
+            plt.ylabel('Absolute weight [-]', fontsize=font_labels, **csfont)
+
+        plt.ylim(-0.05,1.05)
+        plt.xlim(-1, n_variables)
+        plt.grid(alpha=0.3)
+
+        if title != None:
+            plt.title(title, fontsize=font_title, **csfont)
+
+        cbar = plt.colorbar(scat, ticks=[0, round((n_versions-1)/2), n_versions-1])
+
+    if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return
@@ -341,8 +365,8 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
     if title != False:
         plt.title(title, fontsize=font_title, **csfont)
 
-    if save_plot == True:
-        plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
+    if save_filename != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return(min_at_q2_k, min_at_q3_k, max_at_q2_k, max_at_q3_k)
 
