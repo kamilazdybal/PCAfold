@@ -1,6 +1,13 @@
+# ------------------------------------------------------------------------------
+#
+# This file sets plotting parameters and styles that will be used throughout
+# PCAfold modules.
+# You can replace this file or its portion with your own settings.
+#
+# ------------------------------------------------------------------------------
+
 from matplotlib import rcParams
 
-# Plotting parameters:
 csfont = {'fontname':'Charter', 'fontweight':'regular'}
 hfont = {'fontname':'Charter', 'fontweight':'bold'}
 ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
@@ -22,4 +29,4 @@ font_annotations = 20
 font_title = 18
 font_text = 16
 font_legend = 20
-font_colorbar = 16
+font_colorbar = 24

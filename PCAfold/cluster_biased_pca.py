@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
@@ -914,3 +915,30 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         return(idx_matrix, converged)
     else:
         return(idx, converged)
+
+def plot_2d_manifold(pc_scores, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
+    """
+    This function plots a 2-dimensional manifold given the first two PC-scores.
+    """
+
+    fig, axs = plt.subplots(1, 1, figsize=(6,6))
+
+    if len(color_variable) == 0:
+        scat = plt.scatter(pc_scores[:,0].ravel(), pc_scores[:,1].ravel(), c='k', marker='o', s=2, edgecolor='none', alpha=1)
+    else:
+        scat = plt.scatter(pc_scores[:,0].ravel(), pc_scores[:,1].ravel(), c=color_variable, marker='o', s=2, edgecolor='none', alpha=1)
+
+    plt.xticks(fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    plt.xlabel(x_label, fontsize=font_labels, **csfont)
+    plt.ylabel(y_label, fontsize=font_labels, **csfont)
+    plt.grid(alpha=0.3)
+
+    cb = fig.colorbar(scat)
+    cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+
+    if title != None:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')

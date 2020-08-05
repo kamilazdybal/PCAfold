@@ -30,6 +30,7 @@ Each module's functionalities can also be used as a standalone tool for performi
    user/cluster-biased-pca
    user/manifold-dimensionality
    user/train-test-select
+   user/plotting
 
 .. toctree::
    :maxdepth: 2
