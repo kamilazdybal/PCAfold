@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 
-def _print_verbose_information(var, idx, bins_borders):
+def __print_verbose_information(var, idx, bins_borders):
 
     k = len(np.unique(idx))
 
@@ -17,6 +17,15 @@ def variable_bins(var, k, verbose=False):
     """
     This function does clustering by dividing a variable vector ``var`` into
     bins of equal lengths.
+
+    **Example:**
+
+
+    An example of how a vector can be partitioned with this function is presented below:
+
+    .. image:: ../images/clustering-variable-bins.png
+      :width: 600
+      :align: center
 
     :param var:
         vector of variable values.
@@ -64,7 +73,7 @@ def variable_bins(var, k, verbose=False):
     idx = np.asarray(idx)
 
     if verbose==True:
-        _print_verbose_information(var, idx, bins_borders)
+        __print_verbose_information(var, idx, bins_borders)
 
     return(idx)
 
@@ -77,6 +86,14 @@ def predefined_variable_bins(var, split_values, verbose=False):
     *Note:*
     When a split is performed at a given ``value_i``, the observation in ``var``
     that takes exactly that value is assigned to the newly created bin.
+
+    **Example:**
+
+    An example of how a vector can be partitioned with this function is presented below:
+
+    .. image:: ../images/clustering-predefined-variable-bins.png
+      :width: 600
+      :align: center
 
     :param var:
         vector of variable values.
@@ -125,7 +142,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
     idx = np.asarray(idx)
 
     if verbose==True:
-        _print_verbose_information(var, idx, bins_borders)
+        __print_verbose_information(var, idx, bins_borders)
 
     return(idx)
 
@@ -133,10 +150,20 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
     This function does clustering by dividing a mixture fraction vector
     ``Z`` into bins of equal lengths. The vector is first split to lean and rich
-    side and then the sides get divided further into clusters. When ``k`` is even,
-    this function will always create equal number of clusters on the lean and
+    side (according to the stoichiometric mixture fraction ``Z_stoich``) and
+    then the sides get divided further into clusters. When ``k`` is even,
+    this function will always create equal nu
+    mber of clusters on the lean and
     rich side. When ``k`` is odd, there will be one more cluster on the rich side
     compared to the lean side.
+
+    **Example:**
+
+    An example of how a vector can be partitioned with this function is presented below:
+
+    .. image:: ../images/clustering-mixture-fraction-bins.png
+      :width: 600
+      :align: center
 
     :param Z:
         vector of mixture fraction values.
@@ -200,7 +227,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     idx = np.asarray(idx)
 
     if verbose==True:
-        _print_verbose_information(Z, idx, borders)
+        __print_verbose_information(Z, idx, borders)
 
     return(idx)
 
@@ -226,6 +253,22 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
     is to assure that there are at least four clusters: with high negative
     values, with negative values close to zero, with positive values close to
     zero and with high positive values.
+
+    **Example:**
+
+    Two examples of how a vector can be partitioned with this function are presented below.
+
+    With ``split_at_zero=False``:
+
+    .. image:: ../images/clustering-pc-source-bins.png
+      :width: 700
+      :align: center
+
+    With ``split_at_zero=True``:
+
+    .. image:: ../images/clustering-pc-source-bins-zero-split.png
+      :width: 700
+      :align: center
 
     :param pc_source:
         vector of variable values.
@@ -317,7 +360,7 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
     if verbose==True:
-        _print_verbose_information(pc_source, idx, borders)
+        __print_verbose_information(pc_source, idx, borders)
 
     return(idx)
 
@@ -335,6 +378,14 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
     VQPCA algorithm will center the global data set ``X`` by mean and scale by
     the scaling specified in the ``scaling_criteria`` parameter. Data in local
     clusters will be centered by the mean but will not be scaled.
+
+    VQPCA algorithm was first proposed in :cite:`Kambhatla1997` and later its
+    modified version, that we present here, was developed in :cite:`Parente2009`.
+    The general scheme for the iterative procedure is presented below:
+
+    .. image:: ../images/clustering-vqpca.png
+      :width: 700
+      :align: center
 
     :param X:
         raw global data set, uncentered and unscaled.
