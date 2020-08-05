@@ -49,6 +49,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 
     color_X = '#191b27'
     color_X_r = '#ff2f18'
+    color_link = '#bbbbbb'
     marker_size = 50
 
     (n_observations_X, n_variables_X) = np.shape(X)
@@ -80,14 +81,19 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 
     fig, ax = plt.subplots(figsize=(n_variables, 6))
 
-    plt.scatter(x_range, norm_centers_X, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1)
-    plt.scatter(x_range, norm_centers_X_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1)
+    plt.scatter(x_range, norm_centers_X, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+    plt.scatter(x_range, norm_centers_X_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
     plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
     plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_variables+1.5)
-    plt.grid(alpha=0.3)
+    plt.grid(alpha=0.3, zorder=0)
+
+    for i in range(0, n_variables_X):
+
+        dy = norm_centers_X_r[i] - norm_centers_X[i]
+        plt.arrow(x_range[i], norm_centers_X[i], 0, dy, color=color_link, ls='-', lw=1, zorder=1)
 
     if title != None:
         plt.title(title, fontsize=font_title, **csfont)
@@ -192,12 +198,18 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
 
         color_X = '#191b27'
         color_X_r = '#ff2f18'
+        color_link = '#bbbbbb'
         marker_size = 50
 
-        fig, ax = plt.subplots(figsize=(n_variables, 6))
+        fig, ax = plt.subplots(figsize=(n_variables*0.8, 6))
 
-        plt.scatter(x_range, eigenvectors[:,0], c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1)
-        plt.scatter(x_range, eigenvectors[:,-1], c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1)
+        plt.scatter(x_range, eigenvectors[:,0], c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+        plt.scatter(x_range, eigenvectors[:,-1], c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+
+        for i in range(0,n_variables):
+
+            dy = eigenvectors[i,-1] - eigenvectors[i,0]
+            plt.arrow(x_range[i], eigenvectors[i,0], 0, dy, color=color_link, ls='-', lw=1, zorder=1)
 
         plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
         plt.yticks(fontsize=font_axes, **csfont)
@@ -209,7 +221,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
 
         plt.ylim(-0.05,1.05)
         plt.xlim(-1, n_variables)
-        plt.grid(alpha=0.3)
+        plt.grid(alpha=0.3, zorder=0)
 
         if title != None:
             plt.title(title, fontsize=font_title, **csfont)
@@ -231,7 +243,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         color_range = np.arange(0, n_versions)
 
         # Plot the eigenvector weights movement:
-        fig, ax = plt.subplots(figsize=(n_variables, 6))
+        fig, ax = plt.subplots(figsize=(n_variables*0.8, 6))
 
         for idx, variable in enumerate(variable_names):
             scat = ax.scatter(np.repeat(idx, n_versions), eigenvectors[idx,:], c=color_range, cmap=plt.cm.Spectral)
