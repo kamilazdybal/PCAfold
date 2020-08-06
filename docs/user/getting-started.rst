@@ -11,7 +11,7 @@ Clone the ``PCA-python`` repository and move into the ``PCA-python`` directory c
   git clone http://gitlab.multiscale.utah.edu/common/PCA-python.git
   cd PCA-python
 
-Run the ``setup.py`` script as below to complete the installation.
+Run the ``setup.py`` script as below to complete the installation:
 
 .. code::
 
@@ -37,7 +37,7 @@ To run regression tests of all modules execute:
 
   from PCAfold import test
 
-  test._test()
+  test.test()
 
 You can also test each module separately:
 
@@ -45,5 +45,12 @@ You can also test each module separately:
 
   from PCAfold import test
 
-  test._test_clustering()
-  test._test_sampling()
+  test.test_clustering()
+  test.test_sampling()
+
+Plotting
+--------
+
+Some functions within **PCAfold** result in plot outputs. Global styles for the
+plots are set using the ``styles.py`` file. This file can be updated with new
+settings that will be seen globally by **PCAfold** modules.
