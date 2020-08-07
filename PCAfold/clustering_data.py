@@ -278,7 +278,8 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         than 4 if ``split_at_zero=True``.
     :param zero_offset_percentage: (optional)
         percentage of ``|pc_source_max - pc_source_min|`` to take as the
-        ``offset`` value.
+        ``offset`` value. For instance, set ``zero_offset_percentage=10``
+        if you want 10% as offset.
     :param split_at_zero: (optional)
         boolean specifying whether partitioning should be done at PC-source=0.
     :param verbose: (optional)
