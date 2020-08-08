@@ -3,7 +3,7 @@ This is the base PCA module directory.
 """
 
 from .pca_impl import PCA
-from .pca_impl import preprocess
+from .pca_impl import preprocessing
 from .pca_impl import remove_constant_vars
 from .pca_impl import center_scale
 from .pca_impl import inv_center_scale

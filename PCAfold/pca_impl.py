@@ -99,7 +99,7 @@ def inv_center_scale(x, xcenter, xscale):
     return X
 
 
-class preprocess:
+class preprocessing:
     """
     Class for preprocessing data which will check for the constant values and
     remove them, saving whatever manipulations were done so a user can
