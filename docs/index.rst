@@ -12,7 +12,7 @@ clustering and sampling), uses PCA as a dimensionality reduction technique and
 introduces analysis module to judge the topology of the obtained low-dimensional
 manifolds.
 
-A general overview for chaining **PCAfold** modules is presented in the diagram
+The general overview for using **PCAfold** modules is presented in the diagram
 below:
 
 .. image:: images/PCAfold-diagram.png
@@ -32,11 +32,9 @@ section for possible workflows that can be achieved with **PCAfold**.
    :caption: User Guide
 
    user/getting-started
-   user/PCA
-   user/clustering
-   user/cluster-biased-pca
-   user/manifold-dimensionality
-   user/train-test-select
+   user/data-pre-processing
+   user/data-reduction
+   user/data-analysis
 
 .. toctree::
    :maxdepth: 2

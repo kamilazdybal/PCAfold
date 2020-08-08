@@ -1,17 +1,24 @@
 .. module:: pca_impl
 
+#############################
+Data reduction
+#############################
+
+``reduction`` module contains functions for performing Principal Component
+Analysis :cite:`Jolliffe2002`.
+
+--------------------------------------------------------------------------------
+
+*****************************
 Principal Component Analysis
-============================
+*****************************
 
-``pca_impl.py`` module contains functions for performing Principal Component Analysis :cite:`Jolliffe2002`.
-
-It is assumed that the raw data set ``X`` on which PCA is performed has dimensions ``(n_observations, n_variables)``:
+It is assumed that the raw data set ``X`` on which PCA is performed has
+dimensions ``(n_observations, n_variables)``:
 
 .. image:: ../images/data-set.png
   :width: 300
   :align: center
-
---------------------------------------------------------------------------------
 
 Functions
 ---------
@@ -30,8 +37,6 @@ Remove constant variables from a data set
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: PCAfold.pca_impl.remove_constant_vars
-
---------------------------------------------------------------------------------
 
 Class ``PCA``
 -------------
@@ -72,4 +77,4 @@ Functions within ``PCA`` class
 Bibliography
 ------------
 
-.. bibliography:: PCA.bib
+.. bibliography:: data-reduction.bib

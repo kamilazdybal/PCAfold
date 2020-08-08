@@ -17,15 +17,15 @@ from .cluster_biased_pca import analyze_eigenvector_weights_movement
 from .cluster_biased_pca import analyze_eigenvalue_distribution
 from .cluster_biased_pca import equilibrate_cluster_populations
 
-from .sampling import TrainTestSelect
+from .preprocess import TrainTestSelect
 
-from .clustering_data import variable_bins
-from .clustering_data import predefined_variable_bins
-from .clustering_data import mixture_fraction_bins
-from .clustering_data import pc_source_bins
-from .clustering_data import vqpca
-from .clustering_data import degrade_clusters
-from .clustering_data import flip_clusters
-from .clustering_data import get_centroids
-from .clustering_data import get_partition
-from .clustering_data import get_populations
+from .preprocess import variable_bins
+from .preprocess import predefined_variable_bins
+from .preprocess import mixture_fraction_bins
+from .preprocess import pc_source_bins
+from .preprocess import vqpca
+from .preprocess import degrade_clusters
+from .preprocess import flip_clusters
+from .preprocess import get_centroids
+from .preprocess import get_partition
+from .preprocess import get_populations

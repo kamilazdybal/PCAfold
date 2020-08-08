@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from PCAfold import pca_impl as P
-from PCAfold import clustering_data as cld
-from PCAfold.sampling import TrainTestSelect
+import PCAfold.preprocess as preprocess
+from PCAfold import TrainTestSelect
 from PCAfold.styles import *
 
 def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
@@ -36,8 +36,8 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 
         |\mathbf{C_r}| = mean(|\mathbf{X_r}|)
 
-    The relative change in normalized centers is measured relative to the full original
-    data set :math:`\mathbf{X}`:
+    Percentage measuring the relative change in normalized centers is
+    computed as:
 
     .. math::
 
@@ -63,9 +63,8 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     :return:
         - **normalized_C** - normalized centers :math:`|\mathbf{C}|`.
         - **normalized_C_r** - normalized centers :math:`|\mathbf{C_r}|`.
-        - **center_movement_percentage** - relative percentage :math:`p`\
-        specifying how the centers have changed between :math:`\mathbf{X}` and\
-        :math:`\mathbf{X_r}`.
+        - **center_movement_percentage** - percentage :math:`p`\
+        measuring the relative change in normalized centers.
     """
 
     color_X = '#191b27'
@@ -503,7 +502,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
             raise ValueError("Random seed has to be an integer.")
 
     (n_observations, n_variables) = np.shape(X)
-    populations = cld.get_populations(idx)
+    populations = preprocess.get_populations(idx)
     N_smallest_cluster = np.min(populations)
     k = len(populations)
 
@@ -847,7 +846,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     idx = kmeans.labels_
     idx_matrix[:,0] = idx
 
-    current_centroids = cld.get_centroids(X, idx)
+    current_centroids = preprocess.get_centroids(X, idx)
     current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
 
     for iter in range(0,n_resamples):
@@ -861,7 +860,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
         idx = kmeans.labels_
         idx_matrix[:,iter+1] = idx
 
-        current_centroids = cld.get_centroids(X, idx)
+        current_centroids = preprocess.get_centroids(X, idx)
         current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
 
         distance_between_centroids = linalg.norm((current_centroids - old_centroids))
@@ -955,7 +954,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     idx = kmeans.labels_
     idx_matrix[:,0] = idx
 
-    current_centroids = cld.get_centroids(X, idx)
+    current_centroids = preprocess.get_centroids(X, idx)
     current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
 
     for iter in range(0,n_resamples):
@@ -969,7 +968,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         idx = kmeans.labels_
         idx_matrix[:,iter+1] = idx
 
-        current_centroids = cld.get_centroids(X, idx)
+        current_centroids = preprocess.get_centroids(X, idx)
         current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
 
         distance_between_centroids = linalg.norm((current_centroids - old_centroids))

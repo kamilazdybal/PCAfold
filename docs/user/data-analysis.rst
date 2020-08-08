@@ -1,11 +1,16 @@
 .. module:: normalized_local_variance
 
-Manifold dimensionality
-=======================
+#############################
+Data analysis
+#############################
 
-``normalized_local_variance.py`` module contains functions for assessing the intrinsic dimensionality of manifolds and judging the manifold quality.
+``analysis`` module contains functions for assessing the intrinsic
+dimensionality of manifolds and judging the manifold quality.
 
 --------------------------------------------------------------------------------
+
+Manifold dimensionality
+=======================
 
 Functions
 ---------

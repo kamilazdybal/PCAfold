@@ -1,5 +1,5 @@
 from PCAfold import TrainTestSelect
-from PCAfold import clustering_data
+import PCAfold.preprocess as preprocess
 from PCAfold import cluster_biased_pca
 from PCAfold import normalized_local_variance
 from PCAfold import PCA
@@ -24,7 +24,7 @@ def test_clustering():
 
     # ##########################################################################
     try:
-        idx_1 = clustering_data.variable_bins(np.array([1,2,3,4,5,6,7,8,9,10]), 4, verbose=False)
+        idx_1 = preprocess.variable_bins(np.array([1,2,3,4,5,6,7,8,9,10]), 4, verbose=False)
     except:
         print('Test of variable_bins failed.')
         return 0
@@ -38,7 +38,7 @@ def test_clustering():
         return 0
 
     try:
-        idx_2 = clustering_data.predefined_variable_bins(np.array([1,2,3,4,5,6,7,8,9,10]), [3.5, 8.5], verbose=False)
+        idx_2 = preprocess.predefined_variable_bins(np.array([1,2,3,4,5,6,7,8,9,10]), [3.5, 8.5], verbose=False)
     except:
         print('Test of predefined_variable_bins failed.')
         return 0
@@ -52,7 +52,7 @@ def test_clustering():
         return 0
 
     try:
-        idx_3 = clustering_data.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2)
+        idx_3 = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2)
     except:
         print('Test of mixture_fraction_bins failed.')
         return 0
@@ -66,7 +66,7 @@ def test_clustering():
         return 0
 
     try:
-        idx_5 = clustering_data.vqpca(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=20, verbose=False)
+        idx_5 = preprocess.vqpca(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=20, verbose=False)
     except:
         print('Test of vqpca failed.')
         return 0
@@ -80,7 +80,7 @@ def test_clustering():
         return 0
 
     try:
-        idx_6 = clustering_data.pc_source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=False)
+        idx_6 = preprocess.pc_source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=False)
     except:
         print('Test of pc_source_bins failed.')
         return 0
@@ -94,7 +94,7 @@ def test_clustering():
         return 0
 
     # Test degrade_clusters function:
-    (idx, k) = clustering_data.degrade_clusters([1,1,2,2,3,3], verbose=False)
+    (idx, k) = preprocess.degrade_clusters([1,1,2,2,3,3], verbose=False)
     if np.min(idx) != 0:
         print('Test of degrade_clusters failed.')
         return 0
