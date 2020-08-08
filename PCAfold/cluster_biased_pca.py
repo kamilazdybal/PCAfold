@@ -11,46 +11,46 @@ from PCAfold.styles import *
 def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
     """
     This function analyzes the movement of centers in the subset of the original
-    data set ``X_r`` with respect to the full original data set ``X``.
-
-    It returns the normalized centers of the original data set
-    ``norm_centers_X`` and normalized centers of the reduced data set
-    ``norm_centers_X_r``. It also returns the percentage of the centers movement
-    ``center_movement_percentage`` (the same as is plotted in the figure).
+    data set :math:`\mathbf{X_r}` with respect to the full original data set
+    :math:`\mathbf{X}`.
 
     *Note:*
-    The original data set ``X`` is first normalized so that each variable ranges
-    from 0 to 1. Samples are then extracted from the normalized data set to form
-    ``X_r``. The normalization is done so that centers can be compared across
-    variables on one plot.
+    The original data set :math:`\mathbf{X}` is first normalized so that each
+    variable ranges from 0 to 1. Samples are then extracted from the normalized
+    data set to form :math:`\mathbf{X_r}`. The normalization is done so that
+    centers can be compared across variables on one plot.
 
     :param X:
         original (full) data set.
     :param idx_X_r:
-        vector of indices that should be extracted from ``X`` to form ``X_r``.
-        It could be obtained as training indices from
-        ``training_data_generation`` module.
+        vector of indices that should be extracted from :math:`\mathbf{X}` to
+        form :math:`\mathbf{X_r}`. It could be obtained as sampled train indices
+        from ``preprocess`` module.
     :param variable_names: (optional)
         list of strings specifying variable names.
     :param plot_variables: (optional)
         list of integers specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``False``,
+        boolean or string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
-        plot save location/filename.
+        plot save location/filename. If set to ``None`` plot will not be saved.
 
     :return:
-        - **norm_centers_X** - normalized centers of the original (full) data set ``X``.
-        - **norm_centers_X_r** - normalized centers of the reduced data set ``X_r``.
-        - **center_movement_percentage** - relative percentage specifying how the center has moved between ``X`` and ``X_r``. The movement is measured relative to the original (full) data set ``X``.
+        - **norm_centers_X** - normalized centers of the original (full) data\
+        set :math:`\mathbf{X}`.
+        - **norm_centers_X_r** - normalized centers of the reduced data set\
+        :math:`\mathbf{X_r}`.
+        - **center_movement_percentage** - relative percentage specifying how\
+        the center has moved between :math:`\mathbf{X}` and\
+        :math:`\mathbf{X_r}`. The movement is measured relative to the original\
+        (full) data set :math:`\mathbf{X}`.
     """
 
     color_X = '#191b27'
     color_X_r = '#ff2f18'
     color_link = '#bbbbbb'
-    marker_size = 50
 
     (n_observations_X, n_variables_X) = np.shape(X)
 
@@ -106,7 +106,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     ax.spines["right"].set_visible(True)
     ax.spines["left"].set_visible(True)
 
-    lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=50, loc="upper right")
+    lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
     lgnd.legendHandles[0]._sizes = [marker_size*1.5]
     lgnd.legendHandles[1]._sizes = [marker_size*1.5]
@@ -120,11 +120,17 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, title=None, save_filename=None):
     """
     This function analyzes the movement of weights on an eigenvector obtained
-    from a reduced data set at each iteration. The color-coding marks the
-    iteration number. If there is a consistent trend, the coloring should form
-    a clear trajectory. The zero-th iteration corresponds to eigenvectors found
-    on the original data set ``X``. The last iteration corresponds to eigenvectors
-    found on the "equilibrated" data set.
+    from a reduced data set as specified by the ``eigenvectors`` matrix.
+    This matrix can contain many versions of eigenvectors, for instance coming
+    from each iteration from the ``equilibrate_cluster_populations`` function.
+
+    If the number of versions is larger than two, the weights are plot on a
+    color scale that marks each version. If there is a consistent trend, the
+    coloring should form a clear trajectory.
+
+    In a special case, when there are only two versions within ``eigenvectors``
+    matrix, it is understood that the first version corresponds to the original
+    data set and the last version to the *equilibrated* data set.
 
     *Note:*
     This function plots absolute, (and optionally normalized) values of weights on each
@@ -158,10 +164,10 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         By default they are not normalized to start at 0.
         Only has effect if ``normalize=True``.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``False``, title will
-        not be plotted.
+        boolean or string specifying plot title. If set to ``None``
+        title will not be plotted.
     :param save_filename: (optional)
-        plot save location/filename.
+        plot save location/filename. If set to ``None`` plot will not be saved.
 
     :raises ValueError:
         if the number of variables in ``variable_names`` list does not
@@ -199,7 +205,6 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         color_X = '#191b27'
         color_X_r = '#ff2f18'
         color_link = '#bbbbbb'
-        marker_size = 50
 
         fig, ax = plt.subplots(figsize=(n_variables*0.8, 6))
 
@@ -231,7 +236,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         ax.spines["right"].set_visible(True)
         ax.spines["left"].set_visible(True)
 
-        lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=50, loc="upper right")
+        lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
         lgnd.legendHandles[0]._sizes = [marker_size*1.5]
         lgnd.legendHandles[1]._sizes = [marker_size*1.5]
@@ -273,8 +278,8 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
 def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, random_seed=None, title=None, save_filename=None):
     """
     This function analyzes the normalized eigenvalue distribution when PCA is
-    performed on different versions of the reduced data sets ``X_r`` vs. on the
-    original data set ``X``.
+    performed on different versions of the reduced data sets
+    :math:`\mathbf{X_r}` vs. on the original data set :math:`\mathbf{X}`.
 
     :param X:
         original (full) data set.
@@ -291,10 +296,10 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``False``,
+        boolean or string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
-        plot save location/filename.
+        plot save location/filename. If set to ``None`` plot will not be saved.
 
     :return:
         - **min_at_q2_k** - label for which the eigenvalue was smallest when q=2.
@@ -426,12 +431,17 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 
     :return:
         - **eigenvalues** - collected eigenvalues from each iteration.
-        - **eigenvectors_matrix** - collected eigenvectors from each iteration. This is a 3D array of size ``(n_variables, n_components, n_iterations+1)``.
-        - **pc_scores_matrix** - collected PC scores from each iteration. This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
-        - **pc_sources_matrix** - collected PC sources from each iteration. This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
+        - **eigenvectors_matrix** - collected eigenvectors from each iteration.\
+        This is a 3D array of size ``(n_variables, n_components, n_iterations+1)``.
+        - **pc_scores_matrix** - collected PC scores from each iteration.\
+        This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
+        - **pc_sources_matrix** - collected PC sources from each iteration.\
+        This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
         - **idx_train** - the final training indices from the equilibrated iteration.
-        - **X_center** - a vector of final centers that were used to center the data set at the last (equlibration) iteration.
-        - **X_scale** - a vector of final scales that were used to scale the data set at the last (equlibration) iteration.
+        - **X_center** - a vector of final centers that were used to center\
+        the data set at the last (equlibration) iteration.
+        - **X_scale** - a vector of final scales that were used to scale the\
+        data set at the last (equlibration) iteration.
     """
 
     # Check that `biasing_option` parameter was passed correctly:

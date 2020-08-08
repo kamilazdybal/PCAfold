@@ -30,3 +30,6 @@ font_title = 18
 font_text = 16
 font_legend = 20
 font_colorbar = 24
+
+marker_size = 50
+marker_scale_legend = 50
