@@ -37,7 +37,6 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
     'sphinxcontrib.bibtex',
-    'sphinx.ext.autosectionlabel',
 ]
 
 autosectionlabel_prefix_document = True
