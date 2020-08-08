@@ -26,6 +26,23 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     Samples are then extracted from :math:`|\mathbf{X}|` to form
     :math:`|\mathbf{X_r}|`, according to ``idx_X_r``.
 
+    Normalized centers are computed as:
+
+    .. math::
+
+        |\mathbf{C}| = mean(|\mathbf{X}|)
+
+    .. math::
+
+        |\mathbf{C_r}| = mean(|\mathbf{X_r}|)
+
+    The relative change in normalized centers is measured relative to the full original
+    data set :math:`\mathbf{X}`:
+
+    .. math::
+
+        p = \\frac{|\mathbf{C_r}| - |\mathbf{C}|}{|\mathbf{C}|} \cdot 100\%
+
     :param X:
         original (full) data set.
     :param idx_X_r:
@@ -44,28 +61,11 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
         plot save location/filename. If set to ``None`` plot will not be saved.
 
     :return:
-        - **normalized_C** - normalized centers of the full original data\
-        set :math:`\mathbf{X}`, computed as:\
-
-        .. math::
-
-            |\mathbf{C}| = mean(|\mathbf{X}|)
-
-        - **normalized_C_r** - normalized centers of the sampled subset of the\
-        original data set :math:`\mathbf{X_r}`, computed as:\
-
-        .. math::
-
-            |\mathbf{C_r}| = mean(|\mathbf{X_r}|)
-
-        - **center_movement_percentage** - relative percentage specifying how\
-        the centers have changed between :math:`\mathbf{X}` and\
-        :math:`\mathbf{X_r}`. The change is measured relative to the full\
-        original data set :math:`\mathbf{X}`:
-
-        .. math::
-
-            p = \\frac{|\mathbf{C_r}| - |\mathbf{C}|}{|\mathbf{C}|} \cdot 100\%
+        - **normalized_C** - normalized centers :math:`|\mathbf{C}|`.
+        - **normalized_C_r** - normalized centers :math:`|\mathbf{C_r}|`.
+        - **center_movement_percentage** - relative percentage :math:`p`\
+        specifying how the centers have changed between :math:`\mathbf{X}` and\
+        :math:`\mathbf{X_r}`.
     """
 
     color_X = '#191b27'
