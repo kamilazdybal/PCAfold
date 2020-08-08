@@ -12,6 +12,38 @@ The general methodology for cluster-biased PCA is presented in the scheme below:
 
 --------------------------------------------------------------------------------
 
+Functions
+---------
+
+Analyze centers movement
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: PCAfold.cluster_biased_pca.analyze_centers_movement
+
+Analyze eigenvector weights movement
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: PCAfold.cluster_biased_pca.analyze_eigenvector_weights_movement
+
+Analyze eigenvalue distribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: PCAfold.cluster_biased_pca.analyze_eigenvalue_distribution
+
+Equilibrate cluster populations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: PCAfold.cluster_biased_pca.equilibrate_cluster_populations
+
+Re-sample at equilibration using K-Means clustering
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_sources
+
+.. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_scores
+
+--------------------------------------------------------------------------------
+
 Biasing options
 ---------------
 
@@ -71,65 +103,6 @@ In this option, the reduced data set is only found in order to compute its cente
 .. image:: ../images/cb-PCA-scheme-option-5.png
     :width: 700
     :align: center
-
---------------------------------------------------------------------------------
-
-Functions
----------
-
-Analyze centers movement
-^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: PCAfold.cluster_biased_pca.analyze_centers_movement
-
-Analyze eigenvector weights movement
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: PCAfold.cluster_biased_pca.analyze_eigenvector_weights_movement
-
-Analyze eigenvalue distribution
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: PCAfold.cluster_biased_pca.analyze_eigenvalue_distribution
-
-Equilibrate cluster populations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: PCAfold.cluster_biased_pca.equilibrate_cluster_populations
-
-Equilibration
-"""""""""""""
-
-For the moment, there is only one way implemented for the equilibration. The smallest cluster is found and any larger ``j-th`` cluster's observations are diminished at each iteration by
-
-.. math::
-
-    \frac{\verb|N_j| - \verb|N_smallest_cluster|}{\verb|n_iterations|}
-
-``N_j`` is the number of observations in the ``j-th`` cluster and ``N_smallest_cluster`` is the number of observations in the smallest cluster. ``n_iterations`` is an input parameter in the function.
-This is presented in the scheme below:
-
-.. image:: ../images/cluster-equilibration-scheme.png
-    :width: 700
-    :align: center
-
-Future implementation might include equilibration that slows down close to equilibrium. This might be helpful for sensitivity analysis.
-
-Interpretation for the outputs
-""""""""""""""""""""""""""""""
-
-This function returns 3D arrays ``eigenvectors``, ``pc_scores`` and ``pc_sources`` that have the following structure:
-
-.. image:: ../images/cbpca-equlibrate-outputs.png
-    :width: 700
-    :align: center
-
-Re-sample at equilibration using K-Means clustering
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_sources
-
-.. autofunction:: PCAfold.cluster_biased_pca.resample_at_equilibration_with_kmeans_on_pc_scores
 
 --------------------------------------------------------------------------------
 

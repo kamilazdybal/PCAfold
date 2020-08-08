@@ -10,22 +10,28 @@ from PCAfold.styles import *
 
 def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
     """
-    This function analyzes the movement of centers in the subset of the original
-    data set :math:`\mathbf{X_r}` with respect to the full original data set
-    :math:`\mathbf{X}`.
+    This function analyzes the change in normalized centers computed on the
+    sampled subset of the original data set :math:`\mathbf{X_r}` with respect
+    to the full original data set :math:`\mathbf{X}`.
 
-    *Note:*
     The original data set :math:`\mathbf{X}` is first normalized so that each
-    variable ranges from 0 to 1. Samples are then extracted from the normalized
-    data set to form :math:`\mathbf{X_r}`. The normalization is done so that
-    centers can be compared across variables on one plot.
+    variable ranges from 0 to 1:
+
+    .. math::
+
+        |\mathbf{X}| = \\frac{\mathbf{X} - min(\mathbf{X})}{max(\mathbf{X} - min(\mathbf{X}))}
+
+    This normalization is done so that centers can be compared across variables
+    on one plot.
+    Samples are then extracted from :math:`|\mathbf{X}|` to form
+    :math:`|\mathbf{X_r}|`, according to ``idx_X_r``.
 
     :param X:
         original (full) data set.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
-        form :math:`\mathbf{X_r}`. It could be obtained as sampled train indices
-        from ``preprocess`` module.
+        form :math:`\mathbf{X_r}`. For instance, it can be obtained as
+        sampled train indices using the ``preprocess`` module.
     :param variable_names: (optional)
         list of strings specifying variable names.
     :param plot_variables: (optional)
@@ -38,14 +44,28 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
         plot save location/filename. If set to ``None`` plot will not be saved.
 
     :return:
-        - **norm_centers_X** - normalized centers of the original (full) data\
-        set :math:`\mathbf{X}`.
-        - **norm_centers_X_r** - normalized centers of the reduced data set\
-        :math:`\mathbf{X_r}`.
+        - **normalized_C** - normalized centers of the full original data\
+        set :math:`\mathbf{X}`, computed as:\
+
+        .. math::
+
+            |\mathbf{C}| = mean(|\mathbf{X}|)
+
+        - **normalized_C_r** - normalized centers of the sampled subset of the\
+        original data set :math:`\mathbf{X_r}`, computed as:\
+
+        .. math::
+
+            |\mathbf{C_r}| = mean(|\mathbf{X_r}|)
+
         - **center_movement_percentage** - relative percentage specifying how\
-        the center has moved between :math:`\mathbf{X}` and\
-        :math:`\mathbf{X_r}`. The movement is measured relative to the original\
-        (full) data set :math:`\mathbf{X}`.
+        the centers have changed between :math:`\mathbf{X}` and\
+        :math:`\mathbf{X_r}`. The change is measured relative to the full\
+        original data set :math:`\mathbf{X}`:
+
+        .. math::
+
+            p = \\frac{|\mathbf{C_r}| - |\mathbf{C}|}{|\mathbf{C}|} \cdot 100\%
     """
 
     color_X = '#191b27'
@@ -71,18 +91,18 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     X_r_normalized = X_normalized[idx_X_r,:]
 
     # Find centers:
-    norm_centers_X = np.mean(X_normalized, axis=0)
-    norm_centers_X_r = np.mean(X_r_normalized, axis=0)
+    normalized_C = np.mean(X_normalized, axis=0)
+    normalized_C_r = np.mean(X_r_normalized, axis=0)
 
     # Compute the relative percentage by how much the center has moved:
-    center_movement_percentage = (norm_centers_X_r - norm_centers_X) / norm_centers_X * 100
+    center_movement_percentage = (normalized_C_r - normalized_C) / normalized_C * 100
 
     x_range = np.arange(1, n_variables+1)
 
     fig, ax = plt.subplots(figsize=(n_variables, 6))
 
-    plt.scatter(x_range, norm_centers_X, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
-    plt.scatter(x_range, norm_centers_X_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+    plt.scatter(x_range, normalized_C, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+    plt.scatter(x_range, normalized_C_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
     plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
     plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
@@ -92,14 +112,14 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 
     for i in range(0, n_variables_X):
 
-        dy = norm_centers_X_r[i] - norm_centers_X[i]
-        plt.arrow(x_range[i], norm_centers_X[i], 0, dy, color=color_link, ls='-', lw=1, zorder=1)
+        dy = normalized_C_r[i] - normalized_C[i]
+        plt.arrow(x_range[i], normalized_C[i], 0, dy, color=color_link, ls='-', lw=1, zorder=1)
 
     if title != None:
         plt.title(title, fontsize=font_title, **csfont)
 
     for i, value in enumerate(center_movement_percentage):
-        plt.text(i+1.05, norm_centers_X_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r, **csfont)
+        plt.text(i+1.05, normalized_C_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r, **csfont)
 
     ax.spines["top"].set_visible(True)
     ax.spines["bottom"].set_visible(True)
@@ -115,7 +135,7 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
-    return (norm_centers_X, norm_centers_X_r, center_movement_percentage)
+    return (normalized_C, normalized_C_r, center_movement_percentage)
 
 def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, title=None, save_filename=None):
     """
@@ -390,14 +410,43 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
 
 def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_option, X_source=[], n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
     """
-    This function gradually equilibrates cluster populations heading towards
-    population of the smallest cluster in ``n_iterations``.
+    This function gradually (in ``n_iterations``) equilibrates cluster populations heading towards
+    population of the smallest cluster, in each cluster.
 
-    At each iteration it generates the reduced data set ``X_r(i)`` made up from
-    new populations, performs PCA on that data set to find the ``i-th`` version of
-    the eigenvectors. Depending on the option selected, it then does the
-    projection of a data set (and optionally also its sources) onto the found
-    eigenvectors.
+    At each iteration it generates a reduced data set :math:`\mathbf{X_r}^{(i)}`
+    made up from new populations, performs PCA on that data set to find the
+    :math:`i^{th}` version of the eigenvectors. Depending on the option
+    selected, it then does the projection of a data set (and optionally also
+    its sources) onto the found eigenvectors.
+
+    **Equilibration:**
+
+    For the moment, there is only one way implemented for the equilibration.
+    The smallest cluster is found and any larger :math:`j^{th}` cluster's
+    observations are diminished at each iteration by:
+
+    .. math::
+
+        \\frac{N_j - N_s}{\\verb|n_iterations|}
+
+    :math:`N_j` is the number of observations in that :math:`j^{th}` cluster and
+    :math:`N_s` is the number of observations in the smallest
+    cluster. This is further illustrated on synthetic data set below:
+
+    .. image:: ../images/cluster-equilibration-scheme.png
+        :width: 700
+        :align: center
+
+    Future implementation might include equilibration that slows down close to equilibrium. This might be helpful for sensitivity analysis.
+
+    **Interpretation for the outputs:**
+
+    This function returns 3D arrays ``eigenvectors``, ``pc_scores`` and
+    ``pc_sources`` that have the following structure:
+
+    .. image:: ../images/cbpca-equlibrate-outputs.png
+        :width: 700
+        :align: center
 
     :param X:
         original (full) data set.
