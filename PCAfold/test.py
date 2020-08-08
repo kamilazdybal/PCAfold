@@ -1,5 +1,5 @@
 from PCAfold import TrainTestSelect
-import PCAfold.preprocess as preprocess
+from PCAfold import preprocess
 from PCAfold import cluster_biased_pca
 from PCAfold import normalized_local_variance
 from PCAfold import PCA

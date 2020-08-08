@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from PCAfold import pca_impl as P
-import PCAfold.preprocess as preprocess
+from PCAfold import preprocess
 from PCAfold import TrainTestSelect
 from PCAfold.styles import *
 
