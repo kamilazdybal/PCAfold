@@ -108,23 +108,11 @@ Class ``DataSampler``
 Functions within ``DataSampler`` class
 --------------------------------------
 
-Select fixed number
-^^^^^^^^^^^^^^^^^^^
-
 .. autofunction:: PCAfold.preprocess.DataSampler.number
-
-Select fixed percentage
-^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: PCAfold.preprocess.DataSampler.percentage
 
-Select manually
-^^^^^^^^^^^^^^^
-
 .. autofunction:: PCAfold.preprocess.DataSampler.manual
-
-Select at random
-^^^^^^^^^^^^^^^^
 
 .. autofunction:: PCAfold.preprocess.DataSampler.random
 
@@ -134,4 +122,4 @@ Select at random
 Bibliography
 ************
 
-.. bibliography:: data-pre-processing.bib
+.. bibliography:: data-preprocessing.bib
