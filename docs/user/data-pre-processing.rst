@@ -1,8 +1,8 @@
 .. module:: preprocess
 
-#############################
+###################
 Data pre-processing
-#############################
+###################
 
 ``preprocess`` module can be used for performing data pre-processing
 including centering and scaling, outlier detection and removal, data clustering
@@ -10,18 +10,18 @@ and data sampling.
 
 --------------------------------------------------------------------------------
 
-*****************************
+*****************
 Data manipulation
-*****************************
+*****************
 
 This section includes functions for performing some basic data manipulation such
 as centering and scaling and outlier detection and removal.
 
 --------------------------------------------------------------------------------
 
-*****************************
+***************
 Data clustering
-*****************************
+***************
 
 This section includes functions for classifying data sets into
 local clusters and performing some basic operations on clusters :cite:`Everitt2009`,
@@ -66,9 +66,9 @@ Auxiliary functions
 
 --------------------------------------------------------------------------------
 
-*****************************
+*************
 Data sampling
-*****************************
+*************
 
 Functions for splitting data sets into train and test data for use in machine learning algorithms.
 Apart from random splitting that can be achieved with the commonly used `sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_, new methods are implemented here that allow for purposive sampling, such as drawing samples at certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
@@ -130,8 +130,8 @@ Select at random
 
 --------------------------------------------------------------------------------
 
-*************************
+************
 Bibliography
-*************************
+************
 
 .. bibliography:: data-pre-processing.bib

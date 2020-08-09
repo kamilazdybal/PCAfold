@@ -1,19 +1,9 @@
 """
-This is the base PCA module directory.
+This is the base PCAfold directory.
 """
 
-from .pca_impl import PCA
-from .pca_impl import PreProcessing
-from .pca_impl import remove_constant_vars
-from .pca_impl import center_scale
-from .pca_impl import inv_center_scale
-
-from .kernel_regression import KReg
-
-from .normalized_local_variance import compute_normalized_local_variance_quantities
-
+# Module: `preprocess`
 from .preprocess import DataSampler
-
 from .preprocess import variable_bins
 from .preprocess import predefined_variable_bins
 from .preprocess import mixture_fraction_bins
@@ -25,7 +15,20 @@ from .preprocess import get_centroids
 from .preprocess import get_partition
 from .preprocess import get_populations
 
-from .cluster_biased_pca import analyze_centers_movement
-from .cluster_biased_pca import analyze_eigenvector_weights_movement
-from .cluster_biased_pca import analyze_eigenvalue_distribution
-from .cluster_biased_pca import equilibrate_cluster_populations
+# Module: `reduction`
+from .reduction import PCA
+from .reduction import PreProcessing
+from .reduction import remove_constant_vars
+from .reduction import center_scale
+from .reduction import inv_center_scale
+from .reduction import analyze_centers_movement
+from .reduction import analyze_eigenvector_weights_movement
+from .reduction import analyze_eigenvalue_distribution
+from .reduction import equilibrate_cluster_populations
+from .reduction import resample_at_equilibration_with_kmeans_on_pc_sources
+from .reduction import resample_at_equilibration_with_kmeans_on_pc_scores
+from .reduction import plot_2d_manifold
+
+# Module: `analysis`
+from .kernel_regression import KReg
+from .normalized_local_variance import compute_normalized_local_variance_quantities

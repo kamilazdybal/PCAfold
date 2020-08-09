@@ -4,13 +4,23 @@
 Cluster-biased PCA
 ==================
 
-In this tutorial we present the main functionalities of the ``cluster_biased_pca`` module. To import the module:
+*Cluster-biased PCA* is a link between local PCA and global PCA - it is using
+local features to inform (bias) the global PCs through changing sample densities.
+
+The general methodology for cluster-biased PCA is presented in the scheme below:
+
+.. image:: ../images/cluster-biased-PCA-scheme-sampling-highlighted.png
+  :width: 700
+
+In this tutorial we present how the cluster-biased PCA workflow can be run
+using functions from ``reduction`` module. To import the module:
 
 .. code:: python
 
-  import PCAfold.cluster_biased_pca as cbpca
+  from PCAfold import reduction
 
-As an example, we use a data set representing combustion of syngas (CO/H2 mixture) in air generated from steady laminar flamelet model.
+As an example, we will use a data set representing combustion of syngas
+(CO/H2 mixture) in air generated from steady laminar flamelet model.
 This data set has 11 variables and 50,000 observations. To load the data set:
 
 .. code:: python
@@ -52,7 +62,7 @@ A schematic representation of this procedure is presented in the figure below:
 
 .. code:: python
 
-  (eigenvalues, eigenvectors, pc_scores, pc_sources, idx_train, X_center, X_scale) = cbpca.equilibrate_cluster_populations(state_space, idx, scaling=scal_crit, X_source=source_state_space, n_components=n_components, biasing_option=biasing_option, n_iterations=10, stop_iter=0, verbose=True)
+  (eigenvalues, eigenvectors, pc_scores, pc_sources, idx_train, X_center, X_scale) = reduction.equilibrate_cluster_populations(state_space, idx, scaling=scal_crit, X_source=source_state_space, n_components=n_components, biasing_option=biasing_option, n_iterations=10, stop_iter=0, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on number of samples in each cluster at each iteration:
 
@@ -99,7 +109,7 @@ and will thus represent the equilibrated data set sampled from the original data
 
 .. code:: python
 
-  (centers_X, centers_X_r, perc) = cbpca.analyze_centers_movement(state_space, idx_train, variable_names=state_space_names, title=title, save_plot=save_plots, save_filename='')
+  (centers_X, centers_X_r, perc) = reduction.analyze_centers_movement(state_space, idx_train, variable_names=state_space_names, title=title, save_plot=save_plots, save_filename='')
 
 Plotting example
 ^^^^^^^^^^^^^^^^
@@ -140,7 +150,7 @@ and so on.
 
 .. code:: python
 
-  cbpca.analyze_eigenvector_weights_movement(eigenvectors[:,0,:], state_space_names, plot_variables=[], normalize=False, zero_norm=False, title=title, save_plot=save_plots, save_filename='')
+  reduction.analyze_eigenvector_weights_movement(eigenvectors[:,0,:], state_space_names, plot_variables=[], normalize=False, zero_norm=False, title=title, save_plot=save_plots, save_filename='')
 
 Plotting example
 ^^^^^^^^^^^^^^^^
