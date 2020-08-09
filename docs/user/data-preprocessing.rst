@@ -1,8 +1,8 @@
 .. module:: preprocess
 
-###################
-Data pre-processing
-###################
+##################
+Data preprocessing
+##################
 
 ``preprocess`` module can be used for performing data pre-processing
 including centering and scaling, outlier detection and removal, data clustering
@@ -17,6 +17,9 @@ Data manipulation
 This section includes functions for performing some basic data manipulation such
 as centering and scaling and outlier detection and removal.
 
+Functions
+=========
+
 --------------------------------------------------------------------------------
 
 ***************
@@ -27,11 +30,8 @@ This section includes functions for classifying data sets into
 local clusters and performing some basic operations on clusters :cite:`Everitt2009`,
 :cite:`Kaufman2009`.
 
-Functions
-=========
-
 Clustering functions
---------------------
+====================
 
 Each function that clusters the data set returns a vector of integers ``idx`` of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies classification of each observation from the original data set ``X`` to a local cluster.
 
@@ -52,7 +52,7 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 .. autofunction:: PCAfold.preprocess.vqpca
 
 Auxiliary functions
--------------------
+===================
 
 .. autofunction:: PCAfold.preprocess.degrade_clusters
 

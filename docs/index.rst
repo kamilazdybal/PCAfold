@@ -1,5 +1,6 @@
+#######
 PCAfold
-============
+#######
 
 *Low-dimensional PCA-derived manifolds and everything in between!*
 
@@ -28,16 +29,16 @@ section for possible workflows that can be achieved with **PCAfold**.
 --------------------------------------------------------------------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: User Guide
 
    user/getting-started
-   user/data-pre-processing
+   user/data-preprocessing
    user/data-reduction
    user/data-analysis
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Tutorials & Demos
 
    tutorials/demo-clustering
