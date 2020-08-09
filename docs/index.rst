@@ -10,8 +10,7 @@ PCAfold
 empirical low-dimensional manifolds obtained via Principal Component Analysis
 (PCA). It incorporates advanced data pre-processing tools (including data
 clustering and sampling), uses PCA as a dimensionality reduction technique and
-introduces analysis module to judge the topology of the obtained low-dimensional
-manifolds.
+introduces metrics to judge the topology of the low-dimensional manifolds.
 
 The general overview for using **PCAfold** modules is presented in the diagram
 below:

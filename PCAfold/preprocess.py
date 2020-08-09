@@ -216,7 +216,7 @@ class DataSampler:
           import numpy as np
 
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = DataSampler(idx)
+          selection = DataSampler(idx, verbose=True)
           (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
         **Train data:**
@@ -374,7 +374,7 @@ class DataSampler:
           import numpy as np
 
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = DataSampler(idx)
+          selection = DataSampler(idx, verbose=True)
           (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
         *Note:*
@@ -527,8 +527,8 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
-          idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = DataSampler(idx)
+          idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
+          selection = DataSampler(idx, verbose=True)
           (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
         *Note:*
@@ -759,7 +759,7 @@ class DataSampler:
           import numpy as np
 
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = DataSampler(idx)
+          selection = DataSampler(idx, verbose=True)
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         Due to the nature of this sampling technique, it is not necessary to
