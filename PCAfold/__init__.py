@@ -12,11 +12,6 @@ from .kernel_regression import KReg
 
 from .normalized_local_variance import compute_normalized_local_variance_quantities
 
-from .cluster_biased_pca import analyze_centers_movement
-from .cluster_biased_pca import analyze_eigenvector_weights_movement
-from .cluster_biased_pca import analyze_eigenvalue_distribution
-from .cluster_biased_pca import equilibrate_cluster_populations
-
 from .preprocess import TrainTestSelect
 
 from .preprocess import variable_bins
@@ -29,3 +24,8 @@ from .preprocess import flip_clusters
 from .preprocess import get_centroids
 from .preprocess import get_partition
 from .preprocess import get_populations
+
+from .cluster_biased_pca import analyze_centers_movement
+from .cluster_biased_pca import analyze_eigenvector_weights_movement
+from .cluster_biased_pca import analyze_eigenvalue_distribution
+from .cluster_biased_pca import equilibrate_cluster_populations
