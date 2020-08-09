@@ -1,8 +1,12 @@
+# Import available classes:
 from PCAfold import TrainTestSelect
+from PCAfold import PCA
+
+# Import moduless:
 from PCAfold import preprocess
 from PCAfold import cluster_biased_pca
 from PCAfold import normalized_local_variance
-from PCAfold import PCA
+
 import numpy as np
 
 def test():
@@ -15,7 +19,8 @@ def test():
 
 def test_clustering():
     """
-    This function performs regression testing of ``clustering_data`` module.
+    This function performs regression testing of clustering functions within
+    ``preprocess`` module.
     """
 
     # ##########################################################################
@@ -106,7 +111,8 @@ def test_clustering():
 
 def test_sampling():
     """
-    This function performs regression testing of `sampling` module.
+    This function performs regression testing of sampling functions within
+    ``preprocess`` module.
     """
 
     # ##########################################################################
