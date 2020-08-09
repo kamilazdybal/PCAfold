@@ -57,49 +57,17 @@ Functions within ``PCA`` class
 Functions for comparing two ``PCA`` objects
 ===========================================
 
-Analyze centers movement
-------------------------
-
 .. autofunction:: PCAfold.reduction.analyze_centers_movement
-
-Analyze eigenvector weights movement
-------------------------------------
 
 .. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_movement
 
-Analyze eigenvalue distribution
--------------------------------
-
 .. autofunction:: PCAfold.reduction.analyze_eigenvalue_distribution
 
-Equilibrate cluster populations
--------------------------------
-
 .. autofunction:: PCAfold.reduction.equilibrate_cluster_populations
-
-Re-sample at equilibration using K-Means clustering
----------------------------------------------------
 
 .. autofunction:: PCAfold.reduction.resample_at_equilibration_with_kmeans_on_pc_sources
 
 .. autofunction:: PCAfold.reduction.resample_at_equilibration_with_kmeans_on_pc_scores
-
-Those will be moved to ``preprocess`` module:
-
-Center and scale
-----------------
-
-.. autofunction:: PCAfold.reduction.center_scale
-
-Uncenter and unscale
---------------------
-
-.. autofunction:: PCAfold.reduction.inv_center_scale
-
-Remove constant variables from a data set
------------------------------------------
-
-.. autofunction:: PCAfold.reduction.remove_constant_vars
 
 --------------------------------------------------------------------------------
 
