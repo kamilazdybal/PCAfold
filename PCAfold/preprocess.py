@@ -19,42 +19,7 @@ import copy
 #
 ################################################################################
 
-def __print_verbose_information_sampling(idx, idx_train, idx_test):
-    """
-    This private function prints detailed information on train and test sampling when
-    ``verbose=True``.
-
-    :param idx:
-        vector of cluster classifications.
-    :param idx_train:
-        indices of the train data.
-    :param idx_test:
-        indices of the test data.
-    """
-
-    cluster_populations = get_populations(idx)
-    k = np.size(np.unique(idx))
-    n_observations = len(idx)
-
-    for cl_id in range(0,k):
-        train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl_id]
-        if cluster_populations[cl_id] != 0:
-            print("Cluster " + str(cl_id+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl_id])*100) + "%).")
-        else:
-            print("Cluster " + str(cl_id+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (0) + "%).")
-    print("")
-
-    for cl_id in range(0,k):
-        train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl_id]
-        test_indices = [t_id for t_id in idx_test if idx[t_id,]==cl_id]
-        if (cluster_populations[cl_id] - len(train_indices)) != 0:
-            print("Cluster " + str(cl_id+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl_id] - len(train_indices))*100) + "%).")
-        else:
-            print("Cluster " + str(cl_id+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (0) + "%).")
-
-    print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
-
-class TrainTestSelect:
+class DataSampler:
     """
     This class enables selecting train and test data samples.
 
@@ -62,11 +27,11 @@ class TrainTestSelect:
 
     .. code::
 
-      from PCAfold import TrainTestSelect
+      from PCAfold import DataSampler
       import numpy as np
 
       idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-      selection = TrainTestSelect(idx, idx_test=[5,9], random_seed=100, verbose=True)
+      selection = DataSampler(idx, idx_test=[5,9], random_seed=100, verbose=True)
 
     :param idx:
         vector of cluster classifications.
@@ -201,6 +166,41 @@ class TrainTestSelect:
         else:
             self.__verbose = new_verbose
 
+    def __print_verbose_information_sampling(self, idx, idx_train, idx_test):
+        """
+        This private function prints detailed information on train and test sampling when
+        ``verbose=True``.
+
+        :param idx:
+            vector of cluster classifications.
+        :param idx_train:
+            indices of the train data.
+        :param idx_test:
+            indices of the test data.
+        """
+
+        cluster_populations = get_populations(idx)
+        k = np.size(np.unique(idx))
+        n_observations = len(idx)
+
+        for cl_id in range(0,k):
+            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl_id]
+            if cluster_populations[cl_id] != 0:
+                print("Cluster " + str(cl_id+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl_id])*100) + "%).")
+            else:
+                print("Cluster " + str(cl_id+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (0) + "%).")
+        print("")
+
+        for cl_id in range(0,k):
+            train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl_id]
+            test_indices = [t_id for t_id in idx_test if idx[t_id,]==cl_id]
+            if (cluster_populations[cl_id] - len(train_indices)) != 0:
+                print("Cluster " + str(cl_id+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl_id] - len(train_indices))*100) + "%).")
+            else:
+                print("Cluster " + str(cl_id+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (0) + "%).")
+
+        print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
+
     def number(self, perc, test_selection_option=1):
         """
         This function uses classifications into :math:`k` clusters and samples
@@ -212,11 +212,11 @@ class TrainTestSelect:
 
         .. code::
 
-          from PCAfold import TrainTestSelect
+          from PCAfold import DataSampler
           import numpy as np
 
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = TrainTestSelect(idx)
+          selection = DataSampler(idx)
           (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
         **Train data:**
@@ -357,7 +357,7 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            __print_verbose_information_sampling(self.idx, idx_train, idx_test)
+            self.__print_verbose_information_sampling(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
 
@@ -370,16 +370,16 @@ class TrainTestSelect:
 
         .. code:: python
 
-          from PCAfold import TrainTestSelect
+          from PCAfold import DataSampler
           import numpy as np
 
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = TrainTestSelect(idx)
+          selection = DataSampler(idx)
           (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
         *Note:*
         If the cluster sizes are comparable, this function will give a similar
-        train sample distribution as random sampling (``TrainTestSelect.random``).
+        train sample distribution as random sampling (``DataSampler.random``).
         This sampling can be useful in cases where one cluster is significantly
         smaller than others and there is a chance that this cluster will not get
         covereed in the train data if random sampling was used.
@@ -505,7 +505,7 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            __print_verbose_information_sampling(self.idx, idx_train, idx_test)
+            self.__print_verbose_information_sampling(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
 
@@ -524,11 +524,11 @@ class TrainTestSelect:
 
         .. code:: python
 
-          from PCAfold import TrainTestSelect
+          from PCAfold import DataSampler
           import numpy as np
 
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = TrainTestSelect(idx)
+          selection = DataSampler(idx)
           (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
         *Note:*
@@ -743,7 +743,7 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            __print_verbose_information_sampling(self.idx, idx_train, idx_test)
+            self.__print_verbose_information_sampling(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
 
@@ -755,11 +755,11 @@ class TrainTestSelect:
 
         .. code:: python
 
-          from PCAfold import TrainTestSelect
+          from PCAfold import DataSampler
           import numpy as np
 
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
-          selection = TrainTestSelect(idx)
+          selection = DataSampler(idx)
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         Due to the nature of this sampling technique, it is not necessary to
@@ -770,11 +770,11 @@ class TrainTestSelect:
 
         .. code:: python
 
-          from PCAfold import TrainTestSelect
+          from PCAfold import DataSampler
           import numpy as np
 
           idx = np.zeros(n_observations)
-          selection = TrainTestSelect(idx)
+          selection = DataSampler(idx)
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         **Train data:**
@@ -883,7 +883,7 @@ class TrainTestSelect:
 
         # Print detailed information on sampling:
         if self.verbose == True:
-            __print_verbose_information_sampling(self.idx, idx_train, idx_test)
+            self.__print_verbose_information_sampling(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
 

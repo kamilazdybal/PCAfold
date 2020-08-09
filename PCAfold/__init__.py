@@ -12,7 +12,7 @@ from .kernel_regression import KReg
 
 from .normalized_local_variance import compute_normalized_local_variance_quantities
 
-from .preprocess import TrainTestSelect
+from .preprocess import DataSampler
 
 from .preprocess import variable_bins
 from .preprocess import predefined_variable_bins

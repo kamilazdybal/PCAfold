@@ -1,26 +1,16 @@
-Principal Component Analysis
-============================
-
-In this tutorial we present the main functionalities of the ``pca_impl`` module. To import the module:
-
-.. code:: python
-
-  import PCAfold.pca_impl as PCA
-
---------------------------------------------------------------------------------
-
-Global versus local PCA
------------------------
-
 .. note:: This tutorial was generated from a Jupyter notebook that can be
           accessed `here <https://gitlab.multiscale.utah.edu/common/PCA-python/-/blob/regression/docs/tutorials/demo-pca-global-local-PCA.ipynb>`_.
 
-In this example we present how global and local PCA can be performed on a synthetic data set.
-Here we will only need to import the ``PCA`` class:
+Global and local PCA
+============================
+
+In this example we present how global and local PCA can be performed on a
+synthetic data set using the ``reduction`` module.
+We need to import the ``PCA`` class:
 
 .. code:: python
 
-  from PCAfold.pca_impl import PCA
+  from PCAfold import PCA
 
 We generate a synthetic data set on which the global PCA will be performed:
 

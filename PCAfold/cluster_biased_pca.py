@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 from PCAfold import pca_impl as P
 from PCAfold import preprocess
-from PCAfold import TrainTestSelect
+from PCAfold import DataSampler
 from PCAfold.styles import *
 
 def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
@@ -587,7 +587,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
             print(sampling_dictionary)
 
         # Sample manually according to current `sampling_dictionary`:
-        sampling_object = TrainTestSelect(idx, random_seed=random_seed)
+        sampling_object = DataSampler(idx, random_seed=random_seed)
         (idx_train, _) = sampling_object.manual(sampling_dictionary, sampling_type='number')
 
         # Biasing option 1 -----------------------------------------------------

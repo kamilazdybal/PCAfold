@@ -4,9 +4,18 @@
 Data pre-processing
 #############################
 
-``preprocess`` module can be used for performing advanced data pre-processing
-such as centering, scaling, outlier detection and removal, data clustering and
-data sampling.
+``preprocess`` module can be used for performing data pre-processing
+including centering and scaling, outlier detection and removal, data clustering
+and data sampling.
+
+--------------------------------------------------------------------------------
+
+*****************************
+Data manipulation
+*****************************
+
+This section includes functions for performing some basic data manipulation such
+as centering and scaling and outlier detection and removal.
 
 --------------------------------------------------------------------------------
 
@@ -14,15 +23,15 @@ data sampling.
 Data clustering
 *****************************
 
-Functions for classifying data sets into
+This section includes functions for classifying data sets into
 local clusters and performing some basic operations on clusters :cite:`Everitt2009`,
 :cite:`Kaufman2009`.
 
 Functions
----------
+=========
 
 Clustering functions
-""""""""""""""""""""
+--------------------
 
 Each function that clusters the data set returns a vector of integers ``idx`` of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies classification of each observation from the original data set ``X`` to a local cluster.
 
@@ -43,7 +52,7 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 .. autofunction:: PCAfold.preprocess.vqpca
 
 Auxiliary functions
-"""""""""""""""""""
+-------------------
 
 .. autofunction:: PCAfold.preprocess.degrade_clusters
 
@@ -91,29 +100,33 @@ All functions are equipped with ``verbose`` parameter. If it is set to ``True`` 
 
 .. note:: It is assumed that the first cluster has index ``0`` within all input ``idx`` vectors. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 
-Class ``TrainTestSelect``
--------------------------
+Class ``DataSampler``
+=====================
 
-.. autoclass:: PCAfold.preprocess.TrainTestSelect
+.. autoclass:: PCAfold.preprocess.DataSampler
 
-Functions within ``TrainTestSelect`` class
-""""""""""""""""""""""""""""""""""""""""""
+Functions within ``DataSampler`` class
+--------------------------------------
 
 Select fixed number
+^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.preprocess.TrainTestSelect.number
+.. autofunction:: PCAfold.preprocess.DataSampler.number
 
 Select fixed percentage
+^^^^^^^^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.preprocess.TrainTestSelect.percentage
+.. autofunction:: PCAfold.preprocess.DataSampler.percentage
 
 Select manually
+^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.preprocess.TrainTestSelect.manual
+.. autofunction:: PCAfold.preprocess.DataSampler.manual
 
 Select at random
+^^^^^^^^^^^^^^^^
 
-.. autofunction:: PCAfold.preprocess.TrainTestSelect.random
+.. autofunction:: PCAfold.preprocess.DataSampler.random
 
 --------------------------------------------------------------------------------
 

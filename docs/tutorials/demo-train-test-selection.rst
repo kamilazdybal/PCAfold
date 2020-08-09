@@ -5,12 +5,12 @@ Train and test data selection
 =============================
 
 In this tutorial we present how train and test samples can be selected using the
-``sampling`` module.
-We only need to import the ``TrainTestSelect`` class:
+sampling functionalities of the ``preprocess`` module.
+We need to import the ``DataSampler`` class:
 
 .. code:: python
 
-  from PCAfold import TrainTestSelect
+  from PCAfold import DataSampler
 
 First, we generate a synthetic data set that is composed of four distinct
 clusters that have imbalanced number of observations (100, 250, 400 and 500
@@ -60,7 +60,7 @@ The only information about the original data set that will be needed is
 Select fixed number
 -------------------
 
-We first select fixed number of samples using ``TrainTestSelect.number``
+We first select fixed number of samples using ``DataSampler.number``
 function . Let's request 15% of the total data to be train data. The function
 calculates that it needs to select 46 samples from each cluster, which will
 amount to 14.7% of total samples in the data set - when the exact percentage
@@ -75,7 +75,7 @@ data.
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.number(15, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -109,7 +109,7 @@ amounts to 54 test samples from each cluster.
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.number(15, test_selection_option=2)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -140,7 +140,7 @@ Select fixed percentage
 -----------------------
 
 Next, we select a percentage of samples from each cluster using
-``TrainTestSelect.percentage`` function. Let's request 10% of the total data to be train
+``DataSampler.percentage`` function. Let's request 10% of the total data to be train
 data. The function will select 10% of samples from each cluster.
 
 Select test data with ``test_selection_option=1``
@@ -151,7 +151,7 @@ observations as test data.
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.percentage(10, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -185,7 +185,7 @@ of samples in each cluster as test samples.
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.percentage(10, test_selection_option=2)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -215,7 +215,7 @@ The visual result of this sampling can be seen below:
 Select manually
 ---------------
 
-We select samples manually from each cluster using ``TrainTestSelect.manual``
+We select samples manually from each cluster using ``DataSampler.manual``
 function.
 
 Select test data with ``test_selection_option=1``
@@ -232,7 +232,7 @@ selected on number and not percentage basis:
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.manual({0:4, 1:5, 2:10, 3:2}, sampling_type='number', test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -269,7 +269,7 @@ The sampling dictionary will thus have to be:
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.manual({0:50, 1:10, 2:10, 3:20}, sampling_type='percentage', test_selection_option=2)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -299,7 +299,7 @@ The visual result of this sampling can be seen below:
 Select at random
 ----------------
 
-Finally, we select random samples using ``TrainTestSelect.random`` function.
+Finally, we select random samples using ``DataSampler.random`` function.
 Let's request 10% of the total data to be train data.
 
 .. note::
@@ -318,7 +318,7 @@ observations as test data.
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.random(10, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -352,7 +352,7 @@ to select test data as was used to select train data. It will thus also sample
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=[], random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
   (idx_train, idx_test) = sample.random(10, test_selection_option=2)
 
 With ``verbose=True`` we will see some detailed information on sampling:
@@ -386,7 +386,7 @@ In this example we further illustrate how maintaining fixed test data
 functionality can be utilized.
 Suppose that in every cluster you have a very distinct set of observations on
 which you would always like to test your model.
-You can point out those observations when initializing ``TrainTestSelect``
+You can point out those observations when initializing ``DataSampler``
 object through the use of ``idx_test`` vector.
 
 We simulate this situation by appending additional samples to the previously
@@ -402,13 +402,13 @@ If we know the indices of points that represent the appended clouds, stored in
 
 .. code:: python
 
-  sample = TrainTestSelect(idx, idx_test=idx_test, random_seed=None, verbose=True)
+  sample = DataSampler(idx, idx_test=idx_test, random_seed=None, verbose=True)
 
 Any sampling function now called will maintain those samples as test data and
 train data will be sampled ignoring the indices in ``idx_test``.
 Note also that if ``idx_test`` is passed the ``test_selection_option`` parameter is ignored.
 
-We will demonstrate this sampling using ``TrainTestSelect.random`` function, but
+We will demonstrate this sampling using ``DataSampler.random`` function, but
 any other sampling function can be used as well.
 
 .. code:: python
@@ -457,18 +457,18 @@ of:
 and at the same time generate fixed number of train samples in each cluster.
 
 We can start with generating desired test samples using
-``TrainTestSelect.manual`` function. We can output train data as test data:
+``DataSampler.manual`` function. We can output train data as test data:
 
 .. code:: python
 
-  sample_1 = TrainTestSelect(idx, random_seed=None, verbose=True)
+  sample_1 = DataSampler(idx, random_seed=None, verbose=True)
   (idx_test, _) = sample_1.manual({0:10, 1:20, 2:10, 3:50}, sampling_type='number', test_selection_option=1)
 
 Now we feed the obtained test set as a fixed test set for the target sampling:
 
 .. code:: python
 
-  sample_2 = TrainTestSelect(idx, idx_test=idx_test, random_seed=None, verbose=True)
+  sample_2 = DataSampler(idx, idx_test=idx_test, random_seed=None, verbose=True)
   (idx_train, idx_test) = sample_2.number(19.5, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:

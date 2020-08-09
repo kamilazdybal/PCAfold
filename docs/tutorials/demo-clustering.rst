@@ -4,11 +4,12 @@
 Clustering
 ==========
 
-In this tutorial we present the main functionalities of the ``clustering_data`` module. To import the module:
+In this tutorial we present the clustering functionalities of the ``preprocess``
+module. To import the module:
 
 .. code:: python
 
-  import PCAfold.clustering_data as cl
+  from PCAfold import preprocess
 
 First, we generate a synthetic two-dimensional data set:
 
@@ -37,7 +38,7 @@ This clustering will divide the data set based on equal bins of a variable vecto
 
 .. code:: python
 
-  (idx_variable_bins) = cl.variable_bins(var, 4, verbose=True)
+  (idx_variable_bins) = preprocess.variable_bins(var, 4, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -69,7 +70,7 @@ This clustering will divide the data set into bins of a one-dimensional variable
 .. code:: python
 
   split_values = [-0.6, 0.4, 0.8]
-  (idx_predefined_variable_bins) = cl.predefined_variable_bins(var, split_values, verbose=True)
+  (idx_predefined_variable_bins) = preprocess.predefined_variable_bins(var, split_values, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -104,7 +105,7 @@ Without splitting at zero ``split_at_zero=False``
 
 .. code:: python
 
-  (idx_pc_source_bins) = cl.pc_source_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
+  (idx_pc_source_bins) = preprocess.pc_source_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -131,7 +132,7 @@ With splitting at zero ``split_at_zero=True``
 
 .. code:: python
 
-  (idx_pc_source_bins_split_at_zero) = cl.pc_source_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+  (idx_pc_source_bins_split_at_zero) = preprocess.pc_source_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -172,7 +173,7 @@ Note that the first split will be performed at ``Z_stoich`` and further splits w
 
 .. code:: python
 
-  (idx_mixture_fraction_bins) = cl.mixture_fraction_bins(Z, 4, 0.4, verbose=True)
+  (idx_mixture_fraction_bins) = preprocess.mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
