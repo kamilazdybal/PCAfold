@@ -1257,12 +1257,12 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
 
     return(idx)
 
-def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=1000, verbose=False):
+def vqpca(X, k, n_components, scaling_criteria, idx_0=[], maximum_number_of_iterations=1000, verbose=False):
     """
     This function performs Vector Quantization clustering using
     Principal Component Analysis. VQPCA assigns observations to a particular
     cluster based on the minimum reconstruction error from PCA approximation
-    with ``n_pcs`` number of Principal Components. This is an iterative
+    with ``n_components`` number of Principal Components. This is an iterative
     procedure in which the reconstruction errors are evaluated for every
     observation as if that observation belonged to cluster *j* and next,
     the observation is assigned to that cluster for which the error was smallest.
@@ -1284,7 +1284,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         raw global data set, uncentered and unscaled.
     :param k:
         number of clusters to partition the data.
-    :param n_pcs:
+    :param n_components:
         number of Principal Components (PCs) that will be used to reconstruct the data
         at each iteration.
     :param scaling_criteria:
@@ -1305,7 +1305,7 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
         - **idx** - vector of cluster classifications.
     """
 
-    import PCAfold.pca_impl as PCA
+    from PCAfold import reduction
     import numpy.linalg
     from sklearn.decomposition import PCA as sklPCA
 
@@ -1340,11 +1340,11 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
     # Populate the initial eigenvectors and scalings matrices (scalings will not
     # be updated later in the algorithm since we do not scale the data locally):
     for i in range(0,k):
-        eigenvectors.append(np.eye(n_variables, n_pcs))
+        eigenvectors.append(np.eye(n_variables, n_components))
         scalings.append(np.ones((n_variables,)))
 
     # Center and scale the data:
-    (X_pre_processed, _, _) = PCA.center_scale(X, scaling_criteria)
+    (X_pre_processed, _, _) = reduction.center_scale(X, scaling_criteria)
 
     # Initialization of cluster centroids:
     if len(idx_0) > 0:
@@ -1456,10 +1456,10 @@ def vqpca(X, k, n_pcs, scaling_criteria, idx_0=[], maximum_number_of_iterations=
             L, PCs = numpy.linalg.eig(covariance_matrix)
             PCs = np.real(PCs)
 
-            eigenvectors.append(PCs[:,0:n_pcs])
+            eigenvectors.append(PCs[:,0:n_components])
 
             if verbose==True:
-                print('Cluster ' + str(j) + ' dimensions:')
+                print('Cluster ' + str(j+1) + ' dimensions:')
                 print(np.shape(nz_X_k[j]))
 
         # Increment the iteration counter:
