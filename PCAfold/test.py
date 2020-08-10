@@ -4,8 +4,8 @@ from PCAfold import PCA
 
 # Import moduless:
 from PCAfold import preprocess
-from PCAfold import cluster_biased_pca
-from PCAfold import normalized_local_variance
+from PCAfold import reduction
+from PCAfold import analysis
 
 import numpy as np
 
@@ -14,8 +14,67 @@ def test():
     This function runs all regression tests available.
     """
 
+    # Functionalities within `preprocess` module:
+    test_preprocess()
+
+    # Functionalities within `reduction` module:
+    test_reduction()
+
+    # Functionalities within `analysis` module:
+    test_analysis()
+
+    print('Tests of all modules passed.')
+
+################################################################################
+# ------------------------------------------------------------------------------
+################################################################################
+#
+# Module: `preprocess`
+#
+################################################################################
+# ------------------------------------------------------------------------------
+################################################################################
+
+def test_preprocess():
+    """
+    This function performs regression testing of ``preprocess`` module.
+    """
+
+    test_manipulation()
     test_clustering()
     test_sampling()
+
+    print('Tests of `preprocess` module passed.')
+
+################################################################################
+#
+# Data Manipulation
+#
+################################################################################
+
+def test_manipulation():
+    """
+    This function performs regression testing of data manipulation functions
+    within ``preprocess`` module.
+    """
+
+    pass
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+#
+# Data Clustering
+#
+################################################################################
 
 def test_clustering():
     """
@@ -23,11 +82,11 @@ def test_clustering():
     ``preprocess`` module.
     """
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Check if `idx` output vectors are of type numpy.ndarray and of size (_,):
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
     try:
         idx_1 = preprocess.variable_bins(np.array([1,2,3,4,5,6,7,8,9,10]), 4, verbose=False)
     except:
@@ -71,7 +130,7 @@ def test_clustering():
         return 0
 
     try:
-        idx_5 = preprocess.vqpca(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, k=2, n_pcs=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=20, verbose=False)
+        idx_5 = preprocess.vqpca(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, k=2, n_components=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=20, verbose=False)
     except:
         print('Test of vqpca failed.')
         return 0
@@ -107,7 +166,13 @@ def test_clustering():
         print('Test of degrade_clusters failed.')
         return 0
 
-    print('Test of `clustering_data` module passed.')
+    print('Tests of clustering functionalities within `preprocess` module passed.')
+
+################################################################################
+#
+# Data Sampling
+#
+################################################################################
 
 def test_sampling():
     """
@@ -115,11 +180,11 @@ def test_sampling():
     ``preprocess`` module.
     """
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Basic sanity tests:
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Check that sizes of idx_train and idx_test always sum up to the total numer
     # of observations when test_selection_option=1:
@@ -218,11 +283,11 @@ def test_sampling():
     except Exception:
         pass
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Tests of `DataSampler` class init:
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     try:
         DataSampler(np.array([0,0,0,0,0,0,0,1,1,1,1]), idx_test=[], random_seed=0.4, verbose=False)
@@ -349,11 +414,11 @@ def test_sampling():
     except Exception:
         pass
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Tests of `DataSampler.number`:
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     idx_number = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
     sampling = DataSampler(idx_number, idx_test=[], random_seed=None, verbose=False)
@@ -416,11 +481,11 @@ def test_sampling():
     except Exception:
         pass
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Tests of `DataSampler.percentage`:
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     idx_percentage = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
     sampling = DataSampler(idx_percentage, idx_test=[], random_seed=None, verbose=False)
@@ -475,11 +540,11 @@ def test_sampling():
     except Exception:
         pass
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Tests of `DataSampler.manual`:
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     idx_manual = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
     sampling = DataSampler(idx_manual, idx_test=[], random_seed=None, verbose=False)
@@ -593,11 +658,11 @@ def test_sampling():
         print('Test (17) of `DataSampler.manual` failed.')
         return 0
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     # Tests of `DataSampler.random`:
 
-    # ##########################################################################
+    # --------------------------------------------------------------------------
 
     idx_random = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
     sampling = DataSampler(idx_random, idx_test=[], random_seed=None, verbose=False)
@@ -711,4 +776,47 @@ def test_sampling():
     except Exception:
         pass
 
-    print("Tests of `sampling` module passed.")
+    print("Tests of sampling functionalities within `preprocess` module passed.")
+
+################################################################################
+# ------------------------------------------------------------------------------
+################################################################################
+#
+# Module: `reduction`
+#
+################################################################################
+# ------------------------------------------------------------------------------
+################################################################################
+
+def test_reduction():
+    """
+    This function performs regression testing of `reduction` module.
+    """
+
+    print('Tests of `reduction` module passed.')
+
+
+
+
+
+
+
+
+
+
+################################################################################
+# ------------------------------------------------------------------------------
+################################################################################
+#
+# Module: `analysis`
+#
+################################################################################
+# ------------------------------------------------------------------------------
+################################################################################
+
+def test_analysis():
+    """
+    This function performs regression testing of ``analysis`` module.
+    """
+
+    print('Tests of `analysis` module passed.')
