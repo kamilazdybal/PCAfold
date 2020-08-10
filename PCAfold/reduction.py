@@ -1066,6 +1066,9 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         boolean specifying whether weights should be normalized between 0 and 1.
         By default they are not normalized to start at 0.
         Only has effect if ``normalize=True``.
+    :param legend_label: (optional)
+        list of strings specifying labels for the legend. If set to ``[]``
+        legend will not be plotted.
     :param title: (optional)
         boolean or string specifying plot title. If set to ``None``
         title will not be plotted.
@@ -1140,7 +1143,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         ax.spines["left"].set_visible(True)
 
         if len(legend_label) != 0:
-            
+
             lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
             lgnd.legendHandles[0]._sizes = [marker_size*1.5]

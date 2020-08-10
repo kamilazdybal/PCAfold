@@ -50,12 +50,15 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`. For instance, it can be obtained as
-        sampled train indices using the ``preprocess`` module.
+        sampled train indices using sampling functionalities of this module.
     :param variable_names: (optional)
         list of strings specifying variable names.
     :param plot_variables: (optional)
         list of integers specifying indices of variables to be plotted.
         By default, all variables are plotted.
+    :param legend_label: (optional)
+        list of strings specifying labels for the legend. If set to ``[]``
+        legend will not be plotted.
     :param title: (optional)
         string specifying plot title. If set to ``None``
         title will not be plotted.
