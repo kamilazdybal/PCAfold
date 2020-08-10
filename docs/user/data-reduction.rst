@@ -66,7 +66,7 @@ Functions for comparing two ``PCA`` objects
 .. autofunction:: PCAfold.reduction.resample_at_equilibration_with_kmeans_on_pc_scores
 
 Plotting functions
-------------------
+==================
 
 .. autofunction:: PCAfold.reduction.plot_2d_manifold
 

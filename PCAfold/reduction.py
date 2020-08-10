@@ -1880,7 +1880,7 @@ def plot_2d_manifold(pc_scores, color_variable=[], x_label=None, y_label=None, c
         a 1D vector specifying values that will color the manifold. It has to
         have length consistent with the number of observations in ``pc_scores``.
         It can also be set to a string specifying the color, for instance `'r'`
-        or using `'#006778'`.
+        or using ``'#006778'``.
         If not specified, manifold will be plotted in black.
     :param x_label: (optional)
         string specifying :math:`x`-axis label annotation.

@@ -461,15 +461,15 @@ We can start with generating desired test samples using
 
 .. code:: python
 
-  sample_1 = DataSampler(idx, random_seed=None, verbose=True)
-  (idx_test, _) = sample_1.manual({0:10, 1:20, 2:10, 3:50}, sampling_type='number', test_selection_option=1)
+  sample = DataSampler(idx, random_seed=None, verbose=True)
+  (idx_test, _) = sample.manual({0:10, 1:20, 2:10, 3:50}, sampling_type='number', test_selection_option=1)
 
 Now we feed the obtained test set as a fixed test set for the target sampling:
 
 .. code:: python
 
-  sample_2 = DataSampler(idx, idx_test=idx_test, random_seed=None, verbose=True)
-  (idx_train, idx_test) = sample_2.number(19.5, test_selection_option=1)
+  sample.idx_test = idx_test
+  (idx_train, idx_test) = sample.number(19.5, test_selection_option=1)
 
 With ``verbose=True`` we will see some detailed information on sampling:
 
