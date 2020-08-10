@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import copy
+import matplotlib.pyplot as plt
 from PCAfold.styles import *
 
 ################################################################################
@@ -9,7 +10,7 @@ from PCAfold.styles import *
 #
 ################################################################################
 
-def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
+def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], title=None, save_filename=None):
     """
     This function analyzes the change in normalized centers computed on the
     sampled subset of the original data set :math:`\mathbf{X_r}` with respect
@@ -127,11 +128,13 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], tit
     ax.spines["right"].set_visible(True)
     ax.spines["left"].set_visible(True)
 
-    lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
+    if len(legend_label) != 0:
 
-    lgnd.legendHandles[0]._sizes = [marker_size*1.5]
-    lgnd.legendHandles[1]._sizes = [marker_size*1.5]
-    plt.setp(lgnd.texts, **csfont)
+        lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
+
+        lgnd.legendHandles[0]._sizes = [marker_size*1.5]
+        lgnd.legendHandles[1]._sizes = [marker_size*1.5]
+        plt.setp(lgnd.texts, **csfont)
 
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')

@@ -1020,7 +1020,7 @@ def test():
 #
 ################################################################################
 
-def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, title=None, save_filename=None):
+def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
     """
     This function analyzes the movement of weights on an eigenvector obtained
     from a reduced data set as specified by the ``eigenvectors`` matrix.
@@ -1139,11 +1139,13 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         ax.spines["right"].set_visible(True)
         ax.spines["left"].set_visible(True)
 
-        lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
+        if len(legend_label) != 0:
+            
+            lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
-        lgnd.legendHandles[0]._sizes = [marker_size*1.5]
-        lgnd.legendHandles[1]._sizes = [marker_size*1.5]
-        plt.setp(lgnd.texts, **csfont)
+            lgnd.legendHandles[0]._sizes = [marker_size*1.5]
+            lgnd.legendHandles[1]._sizes = [marker_size*1.5]
+            plt.setp(lgnd.texts, **csfont)
 
     # When there are more than two versions plot the trends:
     else:
@@ -1880,10 +1882,10 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
         first column will be :math:`x`-axis values and second column will be
         the :math:`y`-axis values.
     :param color_variable: (optional)
-        a 1D vector specifying values that will color the manifold. It has to
-        have length consistent with the number of observations in
-        ``manifold_2d`` matrix.
-        It can also be set to a string specifying directly the color, for
+        a 1D vector or string specifying color for the manifold. If it is a
+        vector, it has to have length consistent with the number of observations
+        in ``manifold_2d`` matrix.
+        It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.
     :param x_label: (optional)
