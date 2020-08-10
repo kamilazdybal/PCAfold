@@ -14,11 +14,13 @@ and data sampling.
 Data manipulation
 *****************
 
-This section includes functions for performing some basic data manipulation such
+This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.
 
 Functions
 =========
+
+.. autofunction:: PCAfold.preprocess.analyze_centers_change
 
 --------------------------------------------------------------------------------
 

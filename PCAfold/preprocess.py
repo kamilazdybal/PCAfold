@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import copy
+from PCAfold.styles import *
 
 ################################################################################
 #
@@ -8,10 +9,133 @@ import copy
 #
 ################################################################################
 
+def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], title=None, save_filename=None):
+    """
+    This function analyzes the change in normalized centers computed on the
+    sampled subset of the original data set :math:`\mathbf{X_r}` with respect
+    to the full original data set :math:`\mathbf{X}`.
 
+    The original data set :math:`\mathbf{X}` is first normalized so that each
+    variable ranges from 0 to 1:
 
+    .. math::
 
+        ||\mathbf{X}|| = \\frac{\mathbf{X} - min(\mathbf{X})}{max(\mathbf{X} - min(\mathbf{X}))}
 
+    This normalization is done so that centers can be compared across variables
+    on one plot.
+    Samples are then extracted from :math:`||\mathbf{X}||`, according to
+    ``idx_X_r``, to form :math:`||\mathbf{X_r}||`.
+
+    Normalized centers are computed as:
+
+    .. math::
+
+        ||\mathbf{C}|| = mean(||\mathbf{X}||)
+
+    .. math::
+
+        ||\mathbf{C_r}|| = mean(||\mathbf{X_r}||)
+
+    Percentage measuring the relative change in normalized centers is
+    computed as:
+
+    .. math::
+
+        p = \\frac{||\mathbf{C_r}|| - ||\mathbf{C}||}{||\mathbf{C}||} \cdot 100\%
+
+    :param X:
+        original (full) data set.
+    :param idx_X_r:
+        vector of indices that should be extracted from :math:`\mathbf{X}` to
+        form :math:`\mathbf{X_r}`. For instance, it can be obtained as
+        sampled train indices using the ``preprocess`` module.
+    :param variable_names: (optional)
+        list of strings specifying variable names.
+    :param plot_variables: (optional)
+        list of integers specifying indices of variables to be plotted.
+        By default, all variables are plotted.
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+
+    :return:
+        - **normalized_C** - normalized centers :math:`||\mathbf{C}||`.
+        - **normalized_C_r** - normalized centers :math:`||\mathbf{C_r}||`.
+        - **center_movement_percentage** - percentage :math:`p`\
+        measuring the relative change in normalized centers.
+    """
+
+    color_X = '#191b27'
+    color_X_r = '#ff2f18'
+    color_link = '#bbbbbb'
+
+    (n_observations_X, n_variables_X) = np.shape(X)
+
+    if len(variable_names) != 0:
+        n_variables = len(variable_names)
+    else:
+        variable_names = ['X_' + str(i) for i in range(0, n_variables_X)]
+
+    if len(plot_variables) != 0:
+        X = X[:,plot_variables]
+        variable_names = [variable_names[i] for i in plot_variables]
+        (_, n_variables) = np.shape(X)
+
+    X_normalized = (X - np.min(X, axis=0))
+    X_normalized = X_normalized / np.max(X_normalized, axis=0)
+
+    # Extract X_r using the provided idx_X_r:
+    X_r_normalized = X_normalized[idx_X_r,:]
+
+    # Find centers:
+    normalized_C = np.mean(X_normalized, axis=0)
+    normalized_C_r = np.mean(X_r_normalized, axis=0)
+
+    # Compute the relative percentage by how much the center has moved:
+    center_movement_percentage = (normalized_C_r - normalized_C) / normalized_C * 100
+
+    x_range = np.arange(1, n_variables+1)
+
+    fig, ax = plt.subplots(figsize=(n_variables, 6))
+
+    plt.scatter(x_range, normalized_C, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+    plt.scatter(x_range, normalized_C_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+    plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
+    plt.ylim(-0.05,1.05)
+    plt.xlim(0, n_variables+1.5)
+    plt.grid(alpha=0.3, zorder=0)
+
+    for i in range(0, n_variables_X):
+
+        dy = normalized_C_r[i] - normalized_C[i]
+        plt.arrow(x_range[i], normalized_C[i], 0, dy, color=color_link, ls='-', lw=1, zorder=1)
+
+    if title != None:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    for i, value in enumerate(center_movement_percentage):
+        plt.text(i+1.05, normalized_C_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r, **csfont)
+
+    ax.spines["top"].set_visible(True)
+    ax.spines["bottom"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    ax.spines["left"].set_visible(True)
+
+    lgnd = plt.legend(['$\mathbf{X}$', '$\mathbf{X_r}^{(e)}$'], fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
+
+    lgnd.legendHandles[0]._sizes = [marker_size*1.5]
+    lgnd.legendHandles[1]._sizes = [marker_size*1.5]
+    plt.setp(lgnd.texts, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return (normalized_C, normalized_C_r, center_movement_percentage)
 
 ################################################################################
 #
@@ -1257,7 +1381,7 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
 
     return(idx)
 
-def vqpca(X, k, n_components, scaling_criteria, idx_0=[], maximum_number_of_iterations=1000, verbose=False):
+def vqpca(X, k, n_components, scal_crit, idx_0=[], maximum_number_of_iterations=1000, verbose=False):
     """
     This function performs Vector Quantization clustering using
     Principal Component Analysis. VQPCA assigns observations to a particular
@@ -1269,7 +1393,7 @@ def vqpca(X, k, n_components, scaling_criteria, idx_0=[], maximum_number_of_iter
 
     *Note:*
     VQPCA algorithm will center the global data set ``X`` by mean and scale by
-    the scaling specified in the ``scaling_criteria`` parameter. Data in local
+    the scaling specified in the ``scal_crit`` parameter. Data in local
     clusters will be centered by the mean but will not be scaled.
 
     VQPCA algorithm was first proposed in :cite:`Kambhatla1997` and later its
@@ -1287,7 +1411,7 @@ def vqpca(X, k, n_components, scaling_criteria, idx_0=[], maximum_number_of_iter
     :param n_components:
         number of Principal Components (PCs) that will be used to reconstruct the data
         at each iteration.
-    :param scaling_criteria:
+    :param scal_crit:
         scaling critertion for the global data set.
     :param idx_0: (optional)
         user-supplied initial ``idx`` for initializing the centroids. By default
@@ -1344,7 +1468,7 @@ def vqpca(X, k, n_components, scaling_criteria, idx_0=[], maximum_number_of_iter
         scalings.append(np.ones((n_variables,)))
 
     # Center and scale the data:
-    (X_pre_processed, _, _) = reduction.center_scale(X, scaling_criteria)
+    (X_pre_processed, _, _) = reduction.center_scale(X, scal_crit)
 
     # Initialization of cluster centroids:
     if len(idx_0) > 0:

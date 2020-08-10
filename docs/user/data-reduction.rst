@@ -7,18 +7,16 @@ Data reduction
 ``reduction`` module contains functions for performing Principal Component
 Analysis :cite:`Jolliffe2002`.
 
-It is assumed that the raw data set ``X`` on which PCA is performed has
-dimensions ``(n_observations, n_variables)``:
-
-.. image:: ../images/data-set.png
-  :width: 300
-  :align: center
-
 --------------------------------------------------------------------------------
 
 ****************************
 Principal Component Analysis
 ****************************
+
+.. note:: It is assumed that the rows of the data set ``X`` on which PCA is
+  performed correspond to observations and columns correspond to variables.
+
+  The data set thus has dimensions ``(n_observations, n_variables)``.
 
 Class ``PCA``
 =============
@@ -56,8 +54,6 @@ Functions within ``PCA`` class
 
 Functions for comparing two ``PCA`` objects
 ===========================================
-
-.. autofunction:: PCAfold.reduction.analyze_centers_movement
 
 .. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_movement
 

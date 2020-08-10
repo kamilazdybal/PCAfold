@@ -130,7 +130,7 @@ def test_clustering():
         return 0
 
     try:
-        idx_5 = preprocess.vqpca(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, k=2, n_components=1, scaling_criteria='NONE', idx_0=[], maximum_number_of_iterations=20, verbose=False)
+        idx_5 = preprocess.vqpca(np.array([[1,2,3,4,5,6,7,8,9,10],[2,3,4,5,6,7,8,9,10,11]]).T, k=2, n_components=1, scal_crit='NONE', idx_0=[], maximum_number_of_iterations=20, verbose=False)
     except:
         print('Test of vqpca failed.')
         return 0
