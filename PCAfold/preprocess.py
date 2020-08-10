@@ -56,10 +56,11 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], tit
         list of integers specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
+        string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
 
     :return:
         - **normalized_C** - normalized centers :math:`||\mathbf{C}||`.

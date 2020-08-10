@@ -1873,6 +1873,28 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
 def plot_2d_manifold(pc_scores, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold given the first two PC-scores.
+
+    :param pc_scores:
+        Principal Component scores.
+    :param color_variable: (optional)
+        a 1D vector specifying values that will color the manifold. It has to
+        have length consistent with the number of observations in ``pc_scores``.
+        It can also be set to a string specifying the color, for instance `'r'`
+        or using `'#006778'`.
+        If not specified, manifold will be plotted in black.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation.
+    :param colorbar_label: (optional)
+        string specifying colorbar label annotation.
+        If set to ``None``, colorbar label will not be plotted.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
     """
 
     fig, axs = plt.subplots(1, 1, figsize=(6,6))
