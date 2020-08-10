@@ -1031,29 +1031,29 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
 
     .. math::
 
-        |\mathbf{X}| = \\frac{\mathbf{X} - min(\mathbf{X})}{max(\mathbf{X} - min(\mathbf{X}))}
+        ||\mathbf{X}|| = \\frac{\mathbf{X} - min(\mathbf{X})}{max(\mathbf{X} - min(\mathbf{X}))}
 
     This normalization is done so that centers can be compared across variables
     on one plot.
-    Samples are then extracted from :math:`|\mathbf{X}|` to form
-    :math:`|\mathbf{X_r}|`, according to ``idx_X_r``.
+    Samples are then extracted from :math:`||\mathbf{X}||`, according to
+    ``idx_X_r``, to form :math:`||\mathbf{X_r}||`.
 
     Normalized centers are computed as:
 
     .. math::
 
-        |\mathbf{C}| = mean(|\mathbf{X}|)
+        ||\mathbf{C}|| = mean(||\mathbf{X}||)
 
     .. math::
 
-        |\mathbf{C_r}| = mean(|\mathbf{X_r}|)
+        ||\mathbf{C_r}|| = mean(||\mathbf{X_r}||)
 
     Percentage measuring the relative change in normalized centers is
     computed as:
 
     .. math::
 
-        p = \\frac{|\mathbf{C_r}| - |\mathbf{C}|}{|\mathbf{C}|} \cdot 100\%
+        p = \\frac{||\mathbf{C_r}|| - ||\mathbf{C}||}{||\mathbf{C}||} \cdot 100\%
 
     :param X:
         original (full) data set.
@@ -1073,8 +1073,8 @@ def analyze_centers_movement(X, idx_X_r, variable_names=[], plot_variables=[], t
         plot save location/filename. If set to ``None`` plot will not be saved.
 
     :return:
-        - **normalized_C** - normalized centers :math:`|\mathbf{C}|`.
-        - **normalized_C_r** - normalized centers :math:`|\mathbf{C_r}|`.
+        - **normalized_C** - normalized centers :math:`||\mathbf{C}||`.
+        - **normalized_C_r** - normalized centers :math:`||\mathbf{C_r}||`.
         - **center_movement_percentage** - percentage :math:`p`\
         measuring the relative change in normalized centers.
     """
