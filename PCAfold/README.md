@@ -1,7 +1,13 @@
 # PCAfold library
 
-## Data pre-processing `preprocess`
+## Data pre-processing
 
-## Data reduction `reduction`
+`preprocess` module can be used for performing data pre-processing including centering and scaling, outlier detection and removal, data clustering and data sampling.
 
-## Data analysis `analysis`
+## Data reduction
+
+`reduction` module contains functions for performing Principal Component Analysis.
+
+## Data analysis
+
+`analysis` module contains functions for assessing the intrinsic dimensionality of manifolds and judging the manifold quality.

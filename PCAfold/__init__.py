@@ -31,4 +31,4 @@ from .reduction import plot_2d_manifold
 
 # Module: `analysis`
 from .kernel_regression import KReg
-from .normalized_local_variance import compute_normalized_local_variance_quantities
+from .analysis import compute_normalized_local_variance_quantities

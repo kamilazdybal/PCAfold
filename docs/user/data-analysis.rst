@@ -1,4 +1,4 @@
-.. module:: normalized_local_variance
+.. module:: analysis
 
 #############
 Data analysis
@@ -16,12 +16,12 @@ Manifold dimensionality
 Functions
 =========
 
-.. autofunction:: PCAfold.normalized_local_variance.compute_normalized_local_variance_quantities
+.. autofunction:: PCAfold.analysis.compute_normalized_local_variance_quantities
 
 Class ``VarianceData``
 ======================
 
-.. autoclass:: PCAfold.normalized_local_variance.VarianceData
+.. autoclass:: PCAfold.analysis.VarianceData
 
 --------------------------------------------------------------------------------
 
