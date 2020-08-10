@@ -1870,22 +1870,28 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     else:
         return(idx, converged)
 
-def plot_2d_manifold(pc_scores, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
+def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
     """
-    This function plots a 2-dimensional manifold given the first two PC-scores.
+    This function plots a 2-dimensional manifold given the matrix
+    defining the manifold.
 
-    :param pc_scores:
-        Principal Component scores.
+    :param manifold_2d:
+        matrix specifying the 2-dimensional manifold. It is assumed that the
+        first column will be :math:`x`-axis values and second column will be
+        the :math:`y`-axis values.
     :param color_variable: (optional)
         a 1D vector specifying values that will color the manifold. It has to
-        have length consistent with the number of observations in ``pc_scores``.
-        It can also be set to a string specifying the color, for instance `'r'`
-        or using ``'#006778'``.
+        have length consistent with the number of observations in
+        ``manifold_2d`` matrix.
+        It can also be set to a string specifying directly the color, for
+        instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation.
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation.
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
     :param colorbar_label: (optional)
         string specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
@@ -1900,21 +1906,19 @@ def plot_2d_manifold(pc_scores, color_variable=[], x_label=None, y_label=None, c
     fig, axs = plt.subplots(1, 1, figsize=(6,6))
 
     if len(color_variable) == 0:
-        scat = plt.scatter(pc_scores[:,0].ravel(), pc_scores[:,1].ravel(), c='k', marker='o', s=2, edgecolor='none', alpha=1)
+        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c='k', marker='o', s=2, edgecolor='none', alpha=1)
     else:
-        scat = plt.scatter(pc_scores[:,0].ravel(), pc_scores[:,1].ravel(), c=color_variable, marker='o', s=2, edgecolor='none', alpha=1)
+        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c=color_variable, marker='o', s=2, edgecolor='none', alpha=1)
 
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
-    plt.xlabel(x_label, fontsize=font_labels, **csfont)
-    plt.ylabel(y_label, fontsize=font_labels, **csfont)
+    if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
+    if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
     plt.grid(alpha=0.3)
 
     cb = fig.colorbar(scat)
-    cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+    cb.ax.tick_params(labelsize=font_colorbar_axes)
+    if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
 
-    if title != None:
-        plt.title(title, fontsize=font_title, **csfont)
-
-    if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
