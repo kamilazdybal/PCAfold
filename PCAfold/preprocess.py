@@ -57,8 +57,9 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         list of integers specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param legend_label: (optional)
-        list of strings specifying labels for the legend. If the list is empty,
-        legend will not be plotted.
+        list of strings specifying labels for the legend. First entry will refer
+        to :math:`||\mathbf{C}||` and second entry to :math:`||\mathbf{C_r}||`.
+        If the list is empty, legend will not be plotted.
     :param title: (optional)
         string specifying plot title. If set to ``None``
         title will not be plotted.

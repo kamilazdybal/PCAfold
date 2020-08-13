@@ -1112,7 +1112,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         color_X_r = '#ff2f18'
         color_link = '#bbbbbb'
 
-        fig, ax = plt.subplots(figsize=(n_variables*0.8, 6))
+        fig, ax = plt.subplots(figsize=(n_variables, 6))
 
         plt.scatter(x_range, eigenvectors[:,0], c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
         plt.scatter(x_range, eigenvectors[:,-1], c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -1156,7 +1156,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         color_range = np.arange(0, n_versions)
 
         # Plot the eigenvector weights movement:
-        fig, ax = plt.subplots(figsize=(n_variables*0.8, 6))
+        fig, ax = plt.subplots(figsize=(n_variables, 6))
 
         for idx, variable in enumerate(variable_names):
             scat = ax.scatter(np.repeat(idx, n_versions), eigenvectors[idx,:], c=color_range, cmap=plt.cm.Spectral)
