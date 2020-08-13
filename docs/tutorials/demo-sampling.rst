@@ -1,8 +1,8 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://gitlab.multiscale.utah.edu/common/PCA-python/-/blob/regression/docs/tutorials/demo-train-test-selection.ipynb>`_.
+          accessed `here <https://gitlab.multiscale.utah.edu/common/PCA-python/-/blob/regression/docs/tutorials/demo-sampling.ipynb>`_.
 
-Train and test data selection
-=============================
+Sampling
+========
 
 In this tutorial we present how train and test samples can be selected using the
 sampling functionalities of the ``preprocess`` module.
