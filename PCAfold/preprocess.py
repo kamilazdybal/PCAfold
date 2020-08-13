@@ -1260,9 +1260,9 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
     ``source`` into bins. It can be useful for partitioning any variable
     that has many observations clustered around zero value and relatively few
     observations far away from zero on either side.
-    It aims to separate close to zero observations into one (or two)
-    clusters depending on ``split_at_zero`` parameter.
-    The offset from zero at which split is performed is computed
+    It aims to separate close-to-zero observations into one
+    cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
+    The offset from zero at which splits are performed is computed
     based on the input parameter ``zero_offset_percentage``:
 
     .. math::
@@ -1308,7 +1308,7 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         to take as the offset from zero value. For instance, set
         ``zero_offset_percentage=10`` if you want 10% as offset.
     :param split_at_zero: (optional)
-        boolean specifying whether partitioning should be done at PC-source=0.
+        boolean specifying whether partitioning should be done at ``source=0``.
     :param verbose: (optional)
         boolean for printing clustering details.
 
@@ -1338,20 +1338,20 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
     if split_at_zero and (not (isinstance(k, int) and k > 3)):
         raise ValueError("The number of clusters must be an integer not smaller than 4 when splitting at zero.")
 
-    pc_source_min = np.min(pc_source)
-    pc_source_max = np.max(pc_source)
-    pc_source_range = abs(pc_source_max - pc_source_min)
-    offset = zero_offset_percentage * pc_source_range / 100
+    source_min = np.min(source)
+    source_max = np.max(source)
+    source_range = abs(source_max - source_min)
+    offset = zero_offset_percentage * source_range / 100
 
-    # Basic checks on the PC-source vector:
-    if not (pc_source_min <= 0):
-        raise ValueError("PC-source vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
+    # Basic checks on the source vector:
+    if not (source_min <= 0):
+        raise ValueError("Source vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
 
-    if not (pc_source_max >= 0):
-        raise ValueError("PC-source vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
+    if not (source_max >= 0):
+        raise ValueError("Source vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
 
-    if (pc_source_min > -offset) or (pc_source_max < offset):
-        raise ValueError("Offset from zero crosses the minimum or maximum value of the PC-source vector. Consider lowering `zero_offset_percentage`.")
+    if (source_min > -offset) or (source_max < offset):
+        raise ValueError("Offset from zero crosses the minimum or maximum value of the source vector. Consider lowering `zero_offset_percentage`.")
 
     # Number of interval borders:
     if split_at_zero:
@@ -1360,10 +1360,10 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         n_bins_borders = k
 
     # Generate cluster borders on the negative side:
-    borders_negative = np.linspace(pc_source_min, -offset, int(np.ceil(n_bins_borders/2)))
+    borders_negative = np.linspace(source_min, -offset, int(np.ceil(n_bins_borders/2)))
 
     # Generate cluster borders on the positive side:
-    borders_positive = np.linspace(offset, pc_source_max, int(np.ceil((n_bins_borders+1)/2)))
+    borders_positive = np.linspace(offset, source_max, int(np.ceil((n_bins_borders+1)/2)))
 
     # Combine the two partitions:
     if split_at_zero:
@@ -1373,12 +1373,12 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
 
     # Bin data matrices initialization:
     idx_clust = []
-    idx = np.zeros((len(pc_source),))
+    idx = np.zeros((len(source),))
 
     # Create the cluster division vector:
     for bin in range(0,k):
 
-        idx_clust.append(np.where((pc_source >= borders[bin]) & (pc_source <= borders[bin+1])))
+        idx_clust.append(np.where((source >= borders[bin]) & (source <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
     idx = np.asarray([int(i) for i in idx])
@@ -1388,7 +1388,7 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
     if verbose==True:
-        __print_verbose_information_clustering(pc_source, idx, borders)
+        __print_verbose_information_clustering(source, idx, borders)
 
     return(idx)
 

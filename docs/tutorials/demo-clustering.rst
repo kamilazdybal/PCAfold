@@ -94,18 +94,21 @@ The visual result of this clustering can be seen below:
   :width: 350
   :align: center
 
-Cluster into bins of PC-source vector
--------------------------------------
+Cluster into bins of source vector
+----------------------------------
 
-This partitioning relies on unbalanced PC-source vector which, in principle, is assumed to have a lot of observations whose values are close to zero and relatively few observations with values away from zero.
-This function can be used to separate close-to-zero observations into one cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
+This partitioning relies on unbalanced source vector which, in principle,
+is assumed to have a lot of observations whose values are close to zero and
+relatively few observations with values away from zero.
+This function can be used to separate close-to-zero observations into one
+cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
 
 Without splitting at zero ``split_at_zero=False``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code:: python
 
-  (idx_pc_source_bins) = preprocess.pc_source_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
+  (idx_source_bins) = preprocess.source_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -132,7 +135,7 @@ With splitting at zero ``split_at_zero=True``
 
 .. code:: python
 
-  (idx_pc_source_bins_split_at_zero) = preprocess.pc_source_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+  (idx_source_bins_split_at_zero) = preprocess.source_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
