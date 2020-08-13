@@ -57,7 +57,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         list of integers specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param legend_label: (optional)
-        list of strings specifying labels for the legend. If set to ``[]``
+        list of strings specifying labels for the legend. If the list is empty,
         legend will not be plotted.
     :param title: (optional)
         string specifying plot title. If set to ``None``
@@ -81,7 +81,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     # Create default labels for variables:
     if len(variable_names) == 0:
-        variable_names = ['X_' + str(i) for i in range(0, n_variables)]
+        variable_names = ['$X_{' + str(i) + '}$' for i in range(0, n_variables)]
 
     if len(plot_variables) != 0:
         X = X[:,plot_variables]

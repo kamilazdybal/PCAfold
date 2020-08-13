@@ -1067,7 +1067,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
         By default they are not normalized to start at 0.
         Only has effect if ``normalize=True``.
     :param legend_label: (optional)
-        list of strings specifying labels for the legend. If set to ``[]``
+        list of strings specifying labels for the legend. If the list is empty,
         legend will not be plotted.
     :param title: (optional)
         boolean or string specifying plot title. If set to ``None``
