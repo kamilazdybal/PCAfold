@@ -77,12 +77,11 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     color_X_r = '#ff2f18'
     color_link = '#bbbbbb'
 
-    (n_observations_X, n_variables_X) = np.shape(X)
+    (n_observations_X, n_variables) = np.shape(X)
 
-    if len(variable_names) != 0:
-        n_variables = len(variable_names)
-    else:
-        variable_names = ['X_' + str(i) for i in range(0, n_variables_X)]
+    # Create default labels for variables:
+    if len(variable_names) == 0:
+        variable_names = ['X_' + str(i) for i in range(0, n_variables)]
 
     if len(plot_variables) != 0:
         X = X[:,plot_variables]
@@ -115,7 +114,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     plt.xlim(0, n_variables+1.5)
     plt.grid(alpha=0.3, zorder=0)
 
-    for i in range(0, n_variables_X):
+    for i in range(0, n_variables):
 
         dy = normalized_C_r[i] - normalized_C[i]
         plt.arrow(x_range[i], normalized_C[i], 0, dy, color=color_link, ls='-', lw=1, zorder=1)
