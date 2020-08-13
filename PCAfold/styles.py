@@ -33,4 +33,7 @@ font_colorbar = 24
 font_colorbar_axes = 18
 
 marker_size = 50
-marker_scale_legend = 50
+marker_scale_legend = 1
+marker_scale_legend_clustering = 10
+
+scatter_point_size = 2

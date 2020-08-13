@@ -135,10 +135,6 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
         lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
-        lgnd.legendHandles[0]._sizes = [marker_size*1.5]
-        lgnd.legendHandles[1]._sizes = [marker_size*1.5]
-        plt.setp(lgnd.texts, **csfont)
-
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
@@ -1835,3 +1831,63 @@ def get_populations(idx, verbose=False):
         populations.append((idx==i).sum())
 
     return(populations)
+
+################################################################################
+#
+# Plotting functions
+#
+################################################################################
+
+def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', title=None, save_filename=None):
+    """
+    This function plots a 2-dimensional manifold divided into clusters.
+    Number of observations in each cluster will be plotted in the legend.
+
+    :param x:
+        variable on the :math:`x`-axis.
+    :param y:
+        variable on the :math:`y`-axis.
+    :param idx:
+        vector of cluster classifications.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
+    """
+
+    from matplotlib import cm
+
+    n_clusters = len(np.unique(idx))
+    populations = get_populations(idx, verbose=False)
+
+    x = x.ravel()
+    y = y.ravel()
+
+    color_map_colors = cm.get_cmap(color_map, n_clusters)
+    cluster_colors = color_map_colors(np.linspace(0, 1, n_clusters))
+
+    figure = plt.figure(figsize=(14, 7))
+
+    for k in range(0,n_clusters):
+        plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
+
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=4, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
+
+    plt.xticks(fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
+    if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
+    plt.grid(alpha=0.3)
+
+    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')

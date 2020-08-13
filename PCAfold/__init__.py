@@ -15,6 +15,7 @@ from .preprocess import flip_clusters
 from .preprocess import get_centroids
 from .preprocess import get_partition
 from .preprocess import get_populations
+from .preprocess import plot_2d_clustering
 
 # Module: `reduction`
 from .reduction import PCA

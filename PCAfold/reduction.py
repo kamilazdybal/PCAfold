@@ -1911,9 +1911,9 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
     fig, axs = plt.subplots(1, 1, figsize=(6,6))
 
     if len(color_variable) == 0:
-        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c='k', marker='o', s=2, edgecolor='none', alpha=1)
+        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
     else:
-        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c=color_variable, marker='o', s=2, edgecolor='none', alpha=1)
+        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c=color_variable, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)

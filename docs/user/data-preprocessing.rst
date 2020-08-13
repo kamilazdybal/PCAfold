@@ -120,6 +120,20 @@ Functions within ``DataSampler`` class
 
 --------------------------------------------------------------------------------
 
+******************
+Plotting functions
+******************
+
+.. autofunction:: PCAfold.preprocess.plot_2d_clustering
+
+Example plot can be seen below:
+
+.. image:: ../images/preprocess-plot-2d-clustering-example.png
+  :width: 700
+  :align: center
+
+--------------------------------------------------------------------------------
+
 ************
 Bibliography
 ************
