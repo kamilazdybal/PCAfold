@@ -1254,28 +1254,23 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     return(idx)
 
-def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
+def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
-    This function does clustering by dividing a PC-source vector
-    ``pc_source`` into bins. By default, it finds one cluster between a negative and
-    a positive offset from PC-source=0. The offset is computed from the input
-    parameter ``zero_offset_percentage`` which specifies a percentage of the range
-    ``pc_source_max - pc_source_min``. Further clusters are found by clustering
-    positive and negative PC-sources alternatingly into bins of equal lengths.
+    This function does clustering by dividing a source (or PC-source) vector
+    ``source`` into bins. It can be useful for partitioning any variable
+    that has many observations clustered around zero value and relatively few
+    observations far away from zero on either side.
+    It aims to separate close to zero observations into one (or two)
+    clusters depending on ``split_at_zero`` parameter.
+    The offset from zero at which split is performed is computed
+    based on the input parameter ``zero_offset_percentage``:
 
-    If ``split_at_zero`` is set to ``True``, the partitioning will always find one
-    cluster that is between ``-offset`` and 0 and another cluster that is between
-    0 and ``+offset``.
+    .. math::
 
-    Due to the nature of this clustering technique, the smallest allowed number
-    of clusters is 3 if ``split_at_zero=False``. This is to assure that there are
-    at least there three clusters: with high negative values, with close to zero
-    values, with high positive values.
+        \\verb|offset| = \\frac{(max(\\verb|source|) - min(\\verb|source|)) \cdot \\verb|zero_offset_percentage|}{100}
 
-    If ``split_at_zero=True``, the smallest allowed number of clusters is 4. This
-    is to assure that there are at least four clusters: with high negative
-    values, with negative values close to zero, with positive values close to
-    zero and with high positive values.
+    Further clusters are found by splitting positive and negative sources
+    alternatingly into bins of equal lengths.
 
     **Example:**
 
@@ -1283,26 +1278,35 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
 
     With ``split_at_zero=False``:
 
-    .. image:: ../images/clustering-pc-source-bins.png
+    .. image:: ../images/clustering-source-bins.png
       :width: 700
       :align: center
+
+    If ``split_at_zero=False`` the smallest allowed number of clusters is 3.
+    This is to assure that there are at least three clusters:
+    with negative values, with close to zero values, with positive values.
 
     With ``split_at_zero=True``:
 
-    .. image:: ../images/clustering-pc-source-bins-zero-split.png
+    .. image:: ../images/clustering-source-bins-zero-split.png
       :width: 700
       :align: center
 
-    :param pc_source:
+    If ``split_at_zero=True`` the smallest allowed number of clusters is 4.
+    This is to assure that there are at least four clusters: with negative
+    values, with negative values close to zero, with positive values close to
+    zero and with positive values.
+
+    :param source:
         vector of variable values.
     :param k:
         number of clusters to partition the data.
         Cannot be smaller than 3 if ``split_at_zero=False`` or smaller
         than 4 if ``split_at_zero=True``.
     :param zero_offset_percentage: (optional)
-        percentage of ``|pc_source_max - pc_source_min|`` to take as the
-        ``offset`` value. For instance, set ``zero_offset_percentage=10``
-        if you want 10% as offset.
+        percentage of :math:`(max(\\verb|source|) - min(\\verb|source|))`
+        to take as the offset from zero value. For instance, set
+        ``zero_offset_percentage=10`` if you want 10% as offset.
     :param split_at_zero: (optional)
         boolean specifying whether partitioning should be done at PC-source=0.
     :param verbose: (optional)
@@ -1313,13 +1317,13 @@ def pc_source_bins(pc_source, k, zero_offset_percentage=0.1, split_at_zero=False
         ``split_at_zero=False`` or smaller than 4 when ``split_at_zero=True``.
 
     :raises ValueError:
-        if PC-source vector ``pc_source`` has only non-negative or only
+        if the source vector ``source`` has only non-negative or only
         non-positive values. For such vectors it is recommended to use
         ``predefined_variable_bins`` function instead.
 
     :raises ValueError:
         if the requested offset from zero crosses the minimum or maximum value
-        of the PC-source vector ``pc_source``. If that is the case, it is
+        of the source vector ``source``. If that is the case, it is
         recommended to lower the ``zero_offset_percentage`` value.
 
     :return:

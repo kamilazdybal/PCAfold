@@ -49,7 +49,7 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 
 .. autofunction:: PCAfold.preprocess.mixture_fraction_bins
 
-.. autofunction:: PCAfold.preprocess.pc_source_bins
+.. autofunction:: PCAfold.preprocess.source_bins
 
 .. autofunction:: PCAfold.preprocess.vqpca
 
