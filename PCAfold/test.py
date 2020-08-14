@@ -15,15 +15,19 @@ def test():
     """
 
     # Functionalities within `preprocess` module:
-    test_preprocess()
+    result_preprocess = test_preprocess()
 
     # Functionalities within `reduction` module:
-    test_reduction()
+    result_reduction = test_reduction()
 
     # Functionalities within `analysis` module:
-    test_analysis()
+    result_analysis = test_analysis()
 
-    print('Tests of all modules passed.')
+    if ((result_preprocess == 0) or (result_reduction == 0) or (result_analysis == 0)):
+        print('Tests of all modules failed.')
+        return 0
+    else:
+        print('Tests of all modules passed.')
 
 ################################################################################
 # ------------------------------------------------------------------------------
@@ -40,11 +44,16 @@ def test_preprocess():
     This function performs regression testing of ``preprocess`` module.
     """
 
-    test_manipulation()
-    test_clustering()
-    test_sampling()
+    result_manipulation = test_manipulation()
+    result_clustering = test_clustering()
+    result_sampling = test_sampling()
 
-    print('Tests of `preprocess` module passed.')
+    if ((result_manipulation == 0) or (result_clustering == 0) or (result_sampling == 0)):
+        print('Tests of `preprocess` module failed.')
+        return 0
+    else:
+        print('Tests of `preprocess` module passed.')
+        return 1
 
 ################################################################################
 #
@@ -58,7 +67,7 @@ def test_manipulation():
     within ``preprocess`` module.
     """
 
-    pass
+    return 1
 
 
 
@@ -144,17 +153,17 @@ def test_clustering():
         return 0
 
     try:
-        idx_6 = preprocess.pc_source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=False)
+        idx_6 = preprocess.source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=False)
     except:
-        print('Test of pc_source_bins failed.')
+        print('Test of source_bins failed.')
         return 0
     if not isinstance(idx_6, np.ndarray):
-        print('Test of pc_source_bins failed.')
+        print('Test of source_bins failed.')
         return 0
     try:
         (n_observations,) = np.shape(idx_6)
     except:
-        print('Test of pc_source_bins failed.')
+        print('Test of source_bins failed.')
         return 0
 
     # Test degrade_clusters function:
@@ -167,6 +176,7 @@ def test_clustering():
         return 0
 
     print('Tests of clustering functionalities within `preprocess` module passed.')
+    return 1
 
 ################################################################################
 #
@@ -777,6 +787,7 @@ def test_sampling():
         pass
 
     print("Tests of sampling functionalities within `preprocess` module passed.")
+    return 1
 
 ################################################################################
 # ------------------------------------------------------------------------------
@@ -794,7 +805,7 @@ def test_reduction():
     """
 
     print('Tests of `reduction` module passed.')
-
+    return 1
 
 
 
@@ -820,3 +831,4 @@ def test_analysis():
     """
 
     print('Tests of `analysis` module passed.')
+    return 1
