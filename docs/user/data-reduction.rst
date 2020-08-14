@@ -23,49 +23,103 @@ Class ``PCA``
 
 .. autoclass:: PCAfold.reduction.PCA
 
-Functions within ``PCA`` class
-------------------------------
+``PCA.x2eta``
+=============
 
 .. autofunction:: PCAfold.reduction.PCA.x2eta
 
+``PCA.eta2x``
+=============
+
 .. autofunction:: PCAfold.reduction.PCA.eta2x
+
+``PCA.calculate_r2``
+====================
 
 .. autofunction:: PCAfold.reduction.PCA.calculate_r2
 
+``PCA.data_consistency_check``
+==============================
+
 .. autofunction:: PCAfold.reduction.PCA.data_consistency_check
+
+``PCA.convergence``
+===================
 
 .. autofunction:: PCAfold.reduction.PCA.convergence
 
+``PCA.eig_bar_plot_maker``
+==========================
+
 .. autofunction:: PCAfold.reduction.PCA.eig_bar_plot_maker
+
+``PCA.plot_convergence``
+========================
 
 .. autofunction:: PCAfold.reduction.PCA.plot_convergence
 
+``PCA.principal_variables``
+===========================
+
 .. autofunction:: PCAfold.reduction.PCA.principal_variables
+
+``PCA.r2converge``
+==================
 
 .. autofunction:: PCAfold.reduction.PCA.r2converge
 
+``PCA.write_file_for_cpp``
+==========================
+
 .. autofunction:: PCAfold.reduction.PCA.write_file_for_cpp
+
+``PCA.set_retained_eigenvalues``
+================================
 
 .. autofunction:: PCAfold.reduction.PCA.set_retained_eigenvalues
 
+``PCA.u_scores``
+================
+
 .. autofunction:: PCAfold.reduction.PCA.u_scores
+
+``PCA.w_scores``
+================
 
 .. autofunction:: PCAfold.reduction.PCA.w_scores
 
 Functions for comparing two ``PCA`` objects
 ===========================================
 
+``analyze_eigenvector_weights_movement``
+----------------------------------------
+
 .. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_movement
+
+``analyze_eigenvalue_distribution``
+-----------------------------------
 
 .. autofunction:: PCAfold.reduction.analyze_eigenvalue_distribution
 
+``equilibrate_cluster_populations``
+-----------------------------------
+
 .. autofunction:: PCAfold.reduction.equilibrate_cluster_populations
 
-.. autofunction:: PCAfold.reduction.resample_at_equilibration_with_kmeans_on_pc_sources
+``resample_kmeans_on_pc_sources``
+---------------------------------
 
-.. autofunction:: PCAfold.reduction.resample_at_equilibration_with_kmeans_on_pc_scores
+.. autofunction:: PCAfold.reduction.resample_kmeans_on_pc_sources
 
-.. autofunction:: PCAfold.reduction.resample_at_equilibration_with_bins_of_pc_sources
+``resample_kmeans_on_pc_scores``
+--------------------------------
+
+.. autofunction:: PCAfold.reduction.resample_kmeans_on_pc_scores
+
+``resample_bins_of_pc_sources``
+-------------------------------
+
+.. autofunction:: PCAfold.reduction.resample_bins_of_pc_sources
 
 --------------------------------------------------------------------------------
 
@@ -139,6 +193,9 @@ In this option, the reduced data set is only found in order to compute its cente
 ******************
 Plotting functions
 ******************
+
+``plot_2d_manifold``
+====================
 
 .. autofunction:: PCAfold.reduction.plot_2d_manifold
 

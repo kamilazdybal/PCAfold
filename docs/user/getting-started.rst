@@ -22,6 +22,7 @@ Dependencies
 
 ``PCAfold`` requires ``python3`` (developed with ``python3.5``) and the following packages:
 
+- ``copy``
 - ``matplotlib``
 - ``numpy``
 - ``random``
@@ -45,8 +46,9 @@ You can also test each module separately:
 
   from PCAfold import test
 
-  test.test_clustering()
-  test.test_sampling()
+  test.test_preprocess()
+  test.test_reduction()
+  test.test_analysis()
 
 Plotting
 --------

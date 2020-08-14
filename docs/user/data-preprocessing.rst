@@ -17,8 +17,8 @@ Data manipulation
 This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.
 
-Functions
-=========
+``analyze_centers_change``
+==========================
 
 .. autofunction:: PCAfold.preprocess.analyze_centers_change
 
@@ -43,26 +43,56 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 
 .. note:: The first cluster has index ``0`` within all ``idx`` vectors returned. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
 
+``variable_bins``
+-----------------
+
 .. autofunction:: PCAfold.preprocess.variable_bins
+
+``predefined_variable_bins``
+----------------------------
 
 .. autofunction:: PCAfold.preprocess.predefined_variable_bins
 
+``mixture_fraction_bins``
+-------------------------
+
 .. autofunction:: PCAfold.preprocess.mixture_fraction_bins
 
+``source_bins``
+---------------
+
 .. autofunction:: PCAfold.preprocess.source_bins
+
+``vqpca``
+---------
 
 .. autofunction:: PCAfold.preprocess.vqpca
 
 Auxiliary functions
 ===================
 
+``degrade_clusters``
+--------------------
+
 .. autofunction:: PCAfold.preprocess.degrade_clusters
+
+``flip_clusters``
+-----------------
 
 .. autofunction:: PCAfold.preprocess.flip_clusters
 
+``get_centroids``
+-----------------
+
 .. autofunction:: PCAfold.preprocess.get_centroids
 
+``get_partition``
+-----------------
+
 .. autofunction:: PCAfold.preprocess.get_partition
+
+``get_populations``
+-------------------
 
 .. autofunction:: PCAfold.preprocess.get_populations
 
@@ -107,14 +137,23 @@ Class ``DataSampler``
 
 .. autoclass:: PCAfold.preprocess.DataSampler
 
-Functions within ``DataSampler`` class
---------------------------------------
+``DataSampler.number``
+======================
 
 .. autofunction:: PCAfold.preprocess.DataSampler.number
 
+``DataSampler.percentage``
+==========================
+
 .. autofunction:: PCAfold.preprocess.DataSampler.percentage
 
+``DataSampler.manual``
+======================
+
 .. autofunction:: PCAfold.preprocess.DataSampler.manual
+
+``DataSampler.random``
+======================
 
 .. autofunction:: PCAfold.preprocess.DataSampler.random
 
@@ -123,6 +162,9 @@ Functions within ``DataSampler`` class
 ******************
 Plotting functions
 ******************
+
+``plot_2d_clustering``
+======================
 
 .. autofunction:: PCAfold.preprocess.plot_2d_clustering
 

@@ -13,8 +13,8 @@ dimensionality of manifolds and judging the manifold quality.
 Manifold dimensionality
 ***********************
 
-Functions
-=========
+``compute_normalized_local_variance_quantities``
+================================================
 
 .. autofunction:: PCAfold.analysis.compute_normalized_local_variance_quantities
 

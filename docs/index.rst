@@ -28,7 +28,7 @@ section for possible workflows that can be achieved with **PCAfold**.
 --------------------------------------------------------------------------------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 5
    :caption: User Guide
 
    user/getting-started
