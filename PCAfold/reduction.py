@@ -1657,7 +1657,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 
     return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, X_center, X_scale)
 
-def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
+def resample_kmeans_on_pc_sources(X, X_source, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-sources at equilibration step. Re-sampling is done
@@ -1769,7 +1769,7 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     else:
         return(idx, converged)
 
-def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
+def resample_kmeans_on_pc_scores(X, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
     """
     This function performs re-sampling using K-Means clustering on
     ``n_components`` first PC-scores at equilibration step. Re-sampling is done
@@ -1879,7 +1879,7 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     else:
         return(idx, converged)
 
-def resample_at_equilibration_with_bins_of_pc_sources(X, X_source, scaling, biasing_option, n_clusters, nth_source=1, n_resamples=20, zero_offset_percentage=0.1, split_at_zero=False, idx_all=True, random_seed=None, verbose=False):
+def resample_bins_of_pc_sources(X, X_source, scaling, biasing_option, n_clusters, nth_source=1, n_resamples=20, zero_offset_percentage=0.1, split_at_zero=False, idx_all=True, random_seed=None, verbose=False):
     """
     This function performs re-sampling using source bins clustering on
     :math:`n^{th}` PC-source at equilibration step. Re-sampling is done
