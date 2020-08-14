@@ -1665,6 +1665,8 @@ def resample_at_equilibration_with_kmeans_on_pc_sources(X, X_source, scaling, bi
     ``n_resamples`` times. At each step the current ``idx`` containing
     cluster classifications is saved in the global ``idx_matrix``.
 
+    This function uses ``sklearn.cluster.KMeans`` as a clustering algorithm.
+
     :param X:
         original (full) data set.
     :param X_source:
@@ -1775,6 +1777,8 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
     ``n_resamples`` times. At each step the current ``idx`` containing
     cluster classifications is saved in the global ``idx_matrix``.
 
+    This function uses ``sklearn.cluster.KMeans`` as a clustering algorithm.
+
     :param X:
         original (full) data set.
     :param scaling:
@@ -1874,6 +1878,122 @@ def resample_at_equilibration_with_kmeans_on_pc_scores(X, scaling, biasing_optio
         return(idx_matrix, converged)
     else:
         return(idx, converged)
+
+def resample_at_equilibration_with_bins_of_pc_sources(X, X_source, scaling, biasing_option, n_clusters, nth_source=1, n_resamples=20, zero_offset_percentage=0.1, split_at_zero=False, idx_all=True, random_seed=None, verbose=False):
+    """
+    This function performs re-sampling using source bins clustering on
+    :math:`n^{th}` PC-source at equilibration step. Re-sampling is done
+    until convergence of cluster centroids is reached but for a maximum of
+    ``n_resamples`` times. At each step the current ``idx`` containing
+    cluster classifications is saved in the global ``idx_matrix``.
+
+    This function uses ``preprocess.source_bins`` as a clustering technique.
+
+    :param X:
+        original (full) data set.
+    :param X_source:
+        source terms corresponding to the state-space variables in ``X``.
+    :param scaling:
+        data scaling criterion.
+    :param biasing_option:
+        integer specifying biasing option.
+        See documentation of cluster-biased PCA for more information.
+        Can only attain values [1,2,3,4,5].
+    :param n_clusters:
+        number of clusters to use for K-Means partitioning.
+    :param nth_source: (optional)
+        integer specifying which source to bin on. For instance, set
+        ``nth_source=1`` to use the first source.
+    :param n_resamples: (optional)
+        number of times that the re-sampling will be performed.
+    :param zero_offset_percentage: (optional)
+        setting as per ``preprocess.source_bins``.
+    :param split_at_zero: (optional)
+        setting as per ``preprocess.source_bins``.
+    :param idx_all: (optional)
+        boolean specifying whether all ``idx`` vectors should be returned (``idx_all=True``) or only the last one (``idx_all=False``).
+    :param random_seed: (optional)
+        integer specifying random seed for random sample selection.
+    :param verbose: (optional)
+        boolean for printing verbose details.
+
+    :raises ValueError:
+        if ``biasing_option`` is not 1, 2, 3, 4 or 5.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
+
+    :return:
+        - **idx_matrix** (returned if ``idx_all=True``) - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
+        - **idx** (returned if ``idx_all=False``) - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``.
+        - **converged** - boolean specifying whether the re-sampling algorithm have converged based on cluster centroids movement.
+    """
+
+    from numpy import linalg
+
+    # Check that `biasing_option` parameter was passed correctly:
+    _biasing_options = [1,2,3,5]
+    if biasing_option not in _biasing_options:
+        raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
+
+    if random_seed != None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Random seed has to be an integer.")
+
+    (n_observations, n_variables) = np.shape(X)
+
+    n_components = cp.deepcopy(nth_source)
+
+    centroids_threshold = 0.01
+    converged = False
+
+    # Initialize idx_matrix:
+    idx_matrix = np.zeros((n_observations, n_resamples+1))
+
+    # Perform global PCA to obtain initial PC-sources:
+    pca_global = PCA(X, scaling, n_components, useXTXeig=True)
+
+    # Compute initial PC-sources:
+    global_pc_sources = pca_global.x2eta(X_source, nocenter=True)
+
+    # Make the initial clustering with source bins of the n-th PC-source:
+    idx = preprocess.source_bins(global_pc_sources[:,nth_source-1], n_clusters, zero_offset_percentage=zero_offset_percentage, split_at_zero=split_at_zero, verbose=False)
+    idx_matrix[:,0] = idx
+
+    current_centroids = preprocess.get_centroids(X, idx)
+    current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
+
+    for iter in range(0,n_resamples):
+
+        old_centroids = current_centroids
+
+        (_, _, _, pc_sources_matrix, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=X_source, n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=False)
+        idx = preprocess.source_bins(pc_sources_matrix[:,nth_source-1,-1], n_clusters, zero_offset_percentage=zero_offset_percentage, split_at_zero=split_at_zero, verbose=False)
+        idx_matrix[:,iter+1] = idx
+
+        current_centroids = preprocess.get_centroids(X, idx)
+        current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
+
+        distance_between_centroids = linalg.norm((current_centroids - old_centroids))
+
+        if verbose==True:
+            print('Current norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
+
+        if distance_between_centroids <= centroids_threshold:
+            converged = True
+            print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
+            break
+
+    if idx_all:
+        return(idx_matrix, converged)
+    else:
+        return(idx, converged)
+
+################################################################################
+#
+# Plotting functions
+#
+################################################################################
 
 def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
     """

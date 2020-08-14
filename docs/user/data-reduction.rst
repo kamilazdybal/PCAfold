@@ -65,10 +65,7 @@ Functions for comparing two ``PCA`` objects
 
 .. autofunction:: PCAfold.reduction.resample_at_equilibration_with_kmeans_on_pc_scores
 
-Plotting functions
-==================
-
-.. autofunction:: PCAfold.reduction.plot_2d_manifold
+.. autofunction:: PCAfold.reduction.resample_at_equilibration_with_bins_of_pc_sources
 
 --------------------------------------------------------------------------------
 
@@ -136,6 +133,14 @@ In this option, the reduced data set is only found in order to compute its cente
 .. image:: ../images/cb-PCA-scheme-option-5.png
     :width: 700
     :align: center
+
+--------------------------------------------------------------------------------
+
+******************
+Plotting functions
+******************
+
+.. autofunction:: PCAfold.reduction.plot_2d_manifold
 
 --------------------------------------------------------------------------------
 

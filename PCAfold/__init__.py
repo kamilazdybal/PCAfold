@@ -28,6 +28,7 @@ from .reduction import analyze_eigenvalue_distribution
 from .reduction import equilibrate_cluster_populations
 from .reduction import resample_at_equilibration_with_kmeans_on_pc_sources
 from .reduction import resample_at_equilibration_with_kmeans_on_pc_scores
+from .reduction import resample_at_equilibration_with_bins_of_pc_sources
 from .reduction import plot_2d_manifold
 
 # Module: `analysis`
