@@ -8,6 +8,8 @@ metrics to judge the topology of the low-dimensional manifolds.
 
 #### [PCAfold Documentation](https://pca-python.readthedocs.io/en/latest/)
 
+## Software architecture
+
 A general overview for using **PCAfold** modules is presented in the diagram
 below:
 
@@ -44,6 +46,8 @@ Run the `setup.py` script as below to complete the installation:
 ```
 python3.7 setup.py install
 ```
+
+You are ready to `import PCAfold`!
 
 ### Testing
 
