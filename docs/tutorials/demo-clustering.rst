@@ -47,13 +47,13 @@ With ``verbose=True`` we will see some detailed information on clustering:
   Border values for bins:
   [-1.0, -0.5, 0.0, 0.5, 1.0]
 
-  Bounds for cluster 1:
+  Bounds for cluster 0:
   	-1.0, -0.5152
-  Bounds for cluster 2:
+  Bounds for cluster 1:
   	-0.4949, -0.0101
-  Bounds for cluster 3:
+  Bounds for cluster 2:
   	0.0101, 0.4949
-  Bounds for cluster 4:
+  Bounds for cluster 3:
   	0.5152, 1.0
 
 The visual result of this clustering can be seen below:
@@ -79,13 +79,13 @@ With ``verbose=True`` we will see some detailed information on clustering:
   Border values for bins:
   [-1.0, -0.6, 0.4, 0.8, 1.0]
 
-  Bounds for cluster 1:
+  Bounds for cluster 0:
   	-1.0, -0.6162
-  Bounds for cluster 2:
+  Bounds for cluster 1:
   	-0.596, 0.3939
-  Bounds for cluster 3:
+  Bounds for cluster 2:
   	0.4141, 0.798
-  Bounds for cluster 4:
+  Bounds for cluster 3:
   	0.8182, 1.0
 
 The visual result of this clustering can be seen below:
@@ -117,11 +117,11 @@ With ``verbose=True`` we will see some detailed information on clustering:
   Border values for bins:
   [-1.  -0.2  0.2  1. ]
 
-  Bounds for cluster 1:
+  Bounds for cluster 0:
   	-1.0, -0.2121
-  Bounds for cluster 2:
+  Bounds for cluster 1:
   	-0.1919, 0.1919
-  Bounds for cluster 3:
+  Bounds for cluster 2:
   	0.2121, 1.0
 
 The visual result of this clustering can be seen below:
@@ -144,13 +144,13 @@ With ``verbose=True`` we will see some detailed information on clustering:
   Border values for bins:
   [-1.  -0.2  0.   0.2  1. ]
 
-  Bounds for cluster 1:
+  Bounds for cluster 0:
   -1.0, -0.2121
-  Bounds for cluster 2:
+  Bounds for cluster 1:
   -0.1919, -0.0101
-  Bounds for cluster 3:
+  Bounds for cluster 2:
   0.0101, 0.1919
-  Bounds for cluster 4:
+  Bounds for cluster 3:
   0.2121, 1.0
 
 The visual result of this clustering can be seen below:
@@ -185,13 +185,13 @@ With ``verbose=True`` we will see some detailed information on clustering:
   Border values for bins:
   [0.  0.2 0.4 0.7 1. ]
 
-  Bounds for cluster 1:
+  Bounds for cluster 0:
   	0.0, 0.1919
-  Bounds for cluster 2:
+  Bounds for cluster 1:
   	0.202, 0.3939
-  Bounds for cluster 3:
+  Bounds for cluster 2:
   	0.404, 0.697
-  Bounds for cluster 4:
+  Bounds for cluster 3:
   	0.7071, 1.0
 
 The visual result of this clustering can be seen below:

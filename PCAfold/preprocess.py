@@ -313,18 +313,18 @@ class DataSampler:
         for cl_id in range(0,k):
             train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl_id]
             if cluster_populations[cl_id] != 0:
-                print("Cluster " + str(cl_id+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl_id])*100) + "%).")
+                print("Cluster " + str(cl_id) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (len(train_indices)/(cluster_populations[cl_id])*100) + "%).")
             else:
-                print("Cluster " + str(cl_id+1) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (0) + "%).")
+                print("Cluster " + str(cl_id) + ": taking " + str(len(train_indices)) + " train samples out of " + str(cluster_populations[cl_id]) + " observations (%.1f" % (0) + "%).")
         print("")
 
         for cl_id in range(0,k):
             train_indices = [t_id for t_id in idx_train if idx[t_id,]==cl_id]
             test_indices = [t_id for t_id in idx_test if idx[t_id,]==cl_id]
             if (cluster_populations[cl_id] - len(train_indices)) != 0:
-                print("Cluster " + str(cl_id+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl_id] - len(train_indices))*100) + "%).")
+                print("Cluster " + str(cl_id) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (len(test_indices)/(cluster_populations[cl_id] - len(train_indices))*100) + "%).")
             else:
-                print("Cluster " + str(cl_id+1) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (0) + "%).")
+                print("Cluster " + str(cl_id) + ": taking " + str(len(test_indices)) + " test samples out of " + str(cluster_populations[cl_id] - len(train_indices)) + " remaining observations (%.1f" % (0) + "%).")
 
         print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
 
@@ -447,7 +447,7 @@ class DataSampler:
 
             # Selection of training data:
             if int(len(cluster)) < n_of_samples:
-                raise ValueError("The requested percentage requires taking more samples from cluster " + str(cl_id+1) + " than there are available observations in that cluster. Consider lowering the percentage or use a different sampling function.")
+                raise ValueError("The requested percentage requires taking more samples from cluster " + str(cl_id) + " than there are available observations in that cluster. Consider lowering the percentage or use a different sampling function.")
             else:
                 cluster_train = np.array(random.sample(cluster, n_of_samples))
                 idx_train = np.concatenate((idx_train, cluster_train))
@@ -604,7 +604,7 @@ class DataSampler:
 
             # Selection of training data:
             if int(len(cluster)) < int(cluster_populations[cl_id]*perc/100):
-                raise ValueError("The requested percentage requires taking more samples from cluster " + str(cl_id+1) + " than there are available observations in that cluster. Consider lowering the percentage or use a different sampling function.")
+                raise ValueError("The requested percentage requires taking more samples from cluster " + str(cl_id) + " than there are available observations in that cluster. Consider lowering the percentage or use a different sampling function.")
             else:
                 cluster_train = np.array(random.sample(cluster, int(cluster_populations[cl_id]*perc/100)))
                 idx_train = np.concatenate((idx_train, cluster_train))
@@ -1020,9 +1020,9 @@ def __print_verbose_information_clustering(var, idx, bins_borders):
     print(bins_borders)
     print('')
 
-    for cl in range(0,k):
-        print("Bounds for cluster " + str(cl+1) + ":")
-        print("\t" + str(round(np.min(var[np.argwhere(idx==cl)]), 4)) + ", " + str(round(np.max(var[np.argwhere(idx==cl)]), 4)))
+    for cl_id in range(0,k):
+        print("Bounds for cluster " + str(cl_id) + ":")
+        print("\t" + str(round(np.min(var[np.argwhere(idx==cl_id)]), 4)) + ", " + str(round(np.max(var[np.argwhere(idx==cl_id)]), 4)))
 
 def variable_bins(var, k, verbose=False):
     """
@@ -1830,7 +1830,7 @@ def get_populations(idx, verbose=False):
 #
 ################################################################################
 
-def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', title=None, save_filename=None):
+def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -1849,6 +1849,9 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         label will not be plotted.
     :param color_map: (optional)
         colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+    :param first_cluster_index_zero: (optional)
+        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        If set to ``False`` the first cluster will be indexed ``1``.
     :param title: (optional)
         string specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -1871,7 +1874,10 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     figure = plt.figure(figsize=(14, 7))
 
     for k in range(0,n_clusters):
-        plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
+        if first_cluster_index_zero:
+            plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k) + '}$ - ' + str(populations[k]))
+        else:
+            plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=4, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
 

@@ -41,7 +41,7 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
   :width: 400
   :align: center
 
-.. note:: The first cluster has index ``0`` within all ``idx`` vectors returned. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
+.. note:: The first cluster has index ``0`` within all ``idx`` vectors returned.
 
 ``variable_bins``
 -----------------
@@ -130,7 +130,7 @@ In your model learning algorithm you can then get the train and test observation
 
 All functions are equipped with ``verbose`` parameter. If it is set to ``True`` some additional information on train and test selection is printed.
 
-.. note:: It is assumed that the first cluster has index ``0`` within all input ``idx`` vectors. When verbose information is printed with ``verbose=True`` during function execution or on the plots the cluster numeration starts with ``1``.
+.. note:: It is assumed that the first cluster has index ``0`` within all input ``idx`` vectors.
 
 Class ``DataSampler``
 =====================
