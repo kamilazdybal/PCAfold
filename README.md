@@ -6,7 +6,9 @@ It incorporates a variety of data pre-processing tools (including data clusterin
 and sampling), uses PCA as a dimensionality reduction technique and introduces
 metrics to judge the topology of the low-dimensional manifolds.
 
-#### [PCAfold Documentation](https://pca-python.readthedocs.io/en/latest/)
+### [PCAfold Documentation](https://pca-python.readthedocs.io/en/latest/)
+
+[![Documentation Status](https://readthedocs.org/projects/pca-python/badge/?version=latest)](https://pca-python.readthedocs.io/en/latest/?badge=latest)
 
 ## Software architecture
 
