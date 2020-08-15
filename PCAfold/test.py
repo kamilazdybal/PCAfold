@@ -204,22 +204,23 @@ def test_sampling():
         (idx_train, idx_test) = sam.number(10)
         n_observations = len(idx)
         if np.size(idx_test) + np.size(idx_train) != n_observations:
-            print('Sanity test (01) failed.')
+            print('Sanity test of sampling functions (01) failed.')
             return 0
         (idx_train, idx_test) = sam.percentage(10)
         if np.size(idx_test) + np.size(idx_train) != n_observations:
-            print('Sanity test (02) failed.')
+            print('Sanity test of sampling functions (02) failed.')
             return 0
         (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number')
         if np.size(idx_test) + np.size(idx_train) != n_observations:
-            print('Sanity test (03) failed.')
+            print('Sanity test of sampling functions (03) failed.')
             return 0
         (idx_train, idx_test) = sam.random(10)
         if np.size(idx_test) + np.size(idx_train) != n_observations:
-            print('Sanity test (04) failed.')
+            print('Sanity test of sampling functions (04) failed.')
             return 0
     except Exception:
-        pass
+        print('Sanity test of sampling functions (05) failed.')
+        return 0
 
     # Check that sizes of idx_train and idx_test sum up to less than the total numer
     # for these cases with test_selection_option=2:
@@ -229,69 +230,174 @@ def test_sampling():
         (idx_train, idx_test) = sam.number(10, test_selection_option=2)
         n_observations = len(idx)
         if np.size(idx_test) + np.size(idx_train) >= n_observations:
-            print('Sanity test (05) failed.')
+            print('Sanity test of sampling functions (06) failed.')
             return 0
         (idx_train, idx_test) = sam.percentage(10, test_selection_option=2)
         if np.size(idx_test) + np.size(idx_train) >= n_observations:
-            print('Sanity test (06) failed.')
+            print('Sanity test of sampling functions (07) failed.')
             return 0
         (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number', test_selection_option=2)
         if np.size(idx_test) + np.size(idx_train) >= n_observations:
-            print('Sanity test (07) failed.')
+            print('Sanity test of sampling functions (08) failed.')
             return 0
         (idx_train, idx_test) = sam.random(10, test_selection_option=2)
         if np.size(idx_test) + np.size(idx_train) >= n_observations:
-            print('Sanity test (08) failed.')
+            print('Sanity test of sampling functions (09) failed.')
             return 0
     except Exception:
-        pass
+        print('Sanity test of sampling functions (10) failed.')
+        return 0
 
     # Check that indices in idx_train are never in idx_test and vice versa:
     try:
-        idx = np.array([0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,5,5,5,5,10,10,10,10,10])
+        idx = np.array([0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,5,5,5,5,10,10,10,10,10])
         sam = DataSampler(idx)
-        (idx_train, idx_test) = sam.number(10, test_selection_option=1)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (09) failed.')
+
+        (idx_train, idx_test) = sam.number(40, test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (11) failed.')
             return 0
-        (idx_train, idx_test) = sam.percentage(10, test_selection_option=1)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (19) failed.')
+
+        (idx_train, idx_test) = sam.percentage(40, test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (12) failed.')
             return 0
-        (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number', test_selection_option=1)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (20) failed.')
+
+        (idx_train, idx_test) = sam.manual({0:1,1:4,2:1,3:1,4:1}, sampling_type='number', test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (13) failed.')
             return 0
-        (idx_train, idx_test) = sam.random(10, test_selection_option=1)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (21) failed.')
+
+        (idx_train, idx_test) = sam.random(40, test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (14) failed.')
             return 0
-        (idx_train, idx_test) = sam.number(10, test_selection_option=2)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (22) failed.')
+
+        (idx_train, idx_test) = sam.number(40, test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (15) failed.')
             return 0
-        (idx_train, idx_test) = sam.percentage(10, test_selection_option=2)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (23) failed.')
+
+        (idx_train, idx_test) = sam.percentage(40, test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (16) failed.')
             return 0
-        (idx_train, idx_test) = sam.manual({0:1,1:4}, sampling_type='number', test_selection_option=2)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (24) failed.')
+
+        (idx_train, idx_test) = sam.manual({0:1,1:1,2:1,3:1,4:1}, sampling_type='number', test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (17) failed.')
             return 0
+
         (idx_train, idx_test) = sam.random(10, test_selection_option=2)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (25) failed.')
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (18) failed.')
             return 0
-        (idx_train, idx_test) = sam.manual({0:10,1:10}, sampling_type='percentage', test_selection_option=1)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (26) failed.')
+
+        (idx_train, idx_test) = sam.manual({0:10,1:10,2:60,3:10,4:80}, sampling_type='percentage', test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (19) failed.')
             return 0
-        (idx_train, idx_test) = sam.manual({0:10,1:10}, sampling_type='percentage', test_selection_option=2)
-        if len(np.setdiff1d(idx_train, idx_test)) != 0:
-            print('Sanity test (26) failed.')
+
+        (idx_train, idx_test) = sam.manual({0:40,1:40,2:40,3:40,4:40}, sampling_type='percentage', test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (20) failed.')
             return 0
+
     except Exception:
-        pass
+        print('Sanity test of sampling functions (21) failed.')
+        return 0
+
+    # Check that idx_test can be predefined by user and check that idx_test
+    # returned is always the same as the user predefined vector:
+    try:
+
+        idx = np.array([0,0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,2,2,2,2,5,5,5,5,10,10,10,10,10])
+        idx_test_predefined = [0, 10, 20, 21]
+        sam = DataSampler(idx, idx_test=idx_test_predefined)
+
+        (idx_train, idx_test) = sam.number(40, test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (22) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (23) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.percentage(40, test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (24) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (25) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.manual({0:1,1:1,2:1,3:1,4:1}, sampling_type='number', test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (26) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (27) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.random(40, test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (28) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (29) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.number(40, test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (30) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (31) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.percentage(40, test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (32) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (33) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.manual({0:1,1:1,2:1,3:1,4:1}, sampling_type='number', test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (34) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (35) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.random(10, test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (36) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (37) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.manual({0:20,1:80,2:60,3:80,4:80}, sampling_type='percentage', test_selection_option=1)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (38) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (39) failed.')
+            return 0
+
+        (idx_train, idx_test) = sam.manual({0:40,1:40,2:40,3:40,4:40}, sampling_type='percentage', test_selection_option=2)
+        if len(np.setdiff1d(idx_test, idx_train)) == 0:
+            print('Sanity test of sampling functions (40) failed.')
+            return 0
+        if not np.array_equal(idx_test_predefined, idx_test):
+            print('Sanity test of sampling functions (41) failed.')
+            return 0
+
+    except Exception:
+        print('Sanity test of sampling functions (42) failed.')
+        return 0
 
     # --------------------------------------------------------------------------
 
@@ -491,6 +597,21 @@ def test_sampling():
     except Exception:
         pass
 
+    try:
+        sampling.idx_test = np.array([0,0,1,10,20,30,31])
+        (idx_train, idx_test) = sampling.number(40, test_selection_option=1)
+    except Exception:
+        print('Test (10) of `DataSampler.number` failed.')
+        return 0
+
+    try:
+        sampling.idx_test = np.array([0,1,2,3,10,20,21,22,23,24,30,31])
+        (idx_train, idx_test) = sampling.number(46, test_selection_option=1)
+        print('Test (11) of `DataSampler.number` failed.')
+        return 0
+    except Exception:
+        pass
+
     # --------------------------------------------------------------------------
 
     # Tests of `DataSampler.percentage`:
@@ -545,7 +666,22 @@ def test_sampling():
 
     try:
         (idx_train, idx_test) = sampling.percentage(100, test_selection_option=2)
-        print('Test (07) of `DataSampler.percentage` failed.')
+        print('Test (08) of `DataSampler.percentage` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sampling.idx_test = np.array([0,0,1,10,20,30,31])
+        (idx_train, idx_test) = sampling.percentage(40, test_selection_option=1)
+    except Exception:
+        print('Test (09) of `DataSampler.percentage` failed.')
+        return 0
+
+    try:
+        sampling.idx_test = np.array([0,1,2,3,10,20,21,22,23,24,30,31])
+        (idx_train, idx_test) = sampling.percentage(80, test_selection_option=1)
+        print('Test (10) of `DataSampler.percentage` failed.')
         return 0
     except Exception:
         pass
@@ -667,6 +803,36 @@ def test_sampling():
     except Exception:
         print('Test (17) of `DataSampler.manual` failed.')
         return 0
+
+    try:
+        sampling.idx_test = np.array([0,0,1,10,20,30,31])
+        (idx_train, idx_test) = sampling.manual({0:2, 1:2}, sampling_type='number', test_selection_option=1)
+    except Exception:
+        print('Test (18) of `DataSampler.manual` failed.')
+        return 0
+
+    try:
+        sampling.idx_test = np.array([0,1,2,3,10,20,21,22,23,24,30,31])
+        (idx_train, idx_test) = sampling.manual({0:2, 1:8}, sampling_type='number', test_selection_option=1)
+        print('Test (19) of `DataSampler.manual` failed.')
+        return 0
+    except Exception:
+        pass
+
+    try:
+        sampling.idx_test = np.array([0,1,2,3,10,20,21,22,23,24,30,31])
+        (idx_train, idx_test) = sampling.manual({0:70, 1:10}, sampling_type='percentage', test_selection_option=1)
+    except Exception:
+        print('Test (20) of `DataSampler.manual` failed.')
+        return 0
+
+    try:
+        sampling.idx_test = np.array([0,1,2,3,10,20,21,22,23,24,30,31])
+        (idx_train, idx_test) = sampling.manual({0:75, 1:10}, sampling_type='number', test_selection_option=1)
+        print('Test (21) of `DataSampler.manual` failed.')
+        return 0
+    except Exception:
+        pass
 
     # --------------------------------------------------------------------------
 
