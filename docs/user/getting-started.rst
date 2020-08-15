@@ -2,7 +2,7 @@ Getting started
 ===============
 
 Dependencies
-^^^^^^^^^^^^
+------------
 
 **PCAfold** requires ``python3.7`` and the following packages:
 
