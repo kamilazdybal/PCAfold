@@ -10,9 +10,9 @@ metrics to judge the topology of the low-dimensional manifolds.
 
 ## Dependencies
 
-`PCA-python` requires `python3` (developed with `python3.5`) and the following packages:
+**PCAfold** requires `python3.7` and the following packages:
 
-- ``copy``
+- `copy`
 - `matplotlib`
 - `numpy`
 - `random`
@@ -21,17 +21,17 @@ metrics to judge the topology of the low-dimensional manifolds.
 
 ## Installation
 
-Clone the `PCA-python` repository and move into the `PCA-python` directory created:
+Clone the `PCAfold` repository and move into the `PCAfold` directory created:
 
 ```
-git clone http://gitlab.multiscale.utah.edu/common/PCA-python.git
-cd PCA-python
+git clone http://gitlab.multiscale.utah.edu/common/PCAfold.git
+cd PCAfold
 ```
 
 Run the `setup.py` script as below to complete the installation.
 
 ```
-python3.5 setup.py install
+python3.7 setup.py install
 ```
 
 ## Testing

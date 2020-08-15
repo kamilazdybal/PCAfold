@@ -1,26 +1,10 @@
 Getting started
 ===============
 
-Installation
-------------
-
-Clone the ``PCA-python`` repository and move into the ``PCA-python`` directory created:
-
-.. code::
-
-  git clone http://gitlab.multiscale.utah.edu/common/PCA-python.git
-  cd PCA-python
-
-Run the ``setup.py`` script as below to complete the installation:
-
-.. code::
-
-  python3.5 setup.py install
-
 Dependencies
 ^^^^^^^^^^^^
 
-``PCAfold`` requires ``python3`` (developed with ``python3.5``) and the following packages:
+**PCAfold** requires ``python3.7`` and the following packages:
 
 - ``copy``
 - ``matplotlib``
@@ -28,6 +12,22 @@ Dependencies
 - ``random``
 - ``scipy``
 - ``sklearn``
+
+Installation
+------------
+
+Clone the ``PCAfold`` repository and move into the ``PCAfold`` directory created:
+
+.. code::
+
+  git clone http://gitlab.multiscale.utah.edu/common/PCAfold.git
+  cd PCAfold
+
+Run the ``setup.py`` script as below to complete the installation:
+
+.. code::
+
+  python3.7 setup.py install
 
 Testing
 ^^^^^^^
@@ -60,7 +60,7 @@ after changing ``styles.py`` file:
 
 .. code::
 
-  python3.5 setup.py install
+  python3.7 setup.py install
 
 Workflows
 ---------
