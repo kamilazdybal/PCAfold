@@ -1,8 +1,11 @@
 Getting started
 ===============
 
-Dependencies
+Installation
 ------------
+
+Dependencies
+^^^^^^^^^^^^
 
 **PCAfold** requires ``python3.7`` and the following packages:
 
@@ -13,21 +16,23 @@ Dependencies
 - ``scipy``
 - ``sklearn``
 
-Installation
-------------
+Build from source
+^^^^^^^^^^^^^^^^^
 
 Clone the ``PCAfold`` repository and move into the ``PCAfold`` directory created:
 
-.. code::
+.. code-block:: text
 
   git clone http://gitlab.multiscale.utah.edu/common/PCAfold.git
   cd PCAfold
 
 Run the ``setup.py`` script as below to complete the installation:
 
-.. code::
+.. code-block:: text
 
   python3.7 setup.py install
+
+You are ready to ``import PCAfold``!
 
 Testing
 ^^^^^^^
@@ -58,7 +63,7 @@ plots are set using the ``styles.py`` file. This file can be updated with new
 settings that will be seen globally by **PCAfold** modules. Re-build the project
 after changing ``styles.py`` file:
 
-.. code::
+.. code-block:: text
 
   python3.7 setup.py install
 
@@ -83,7 +88,7 @@ useful for data analysis or feature detection.
 Data sampling
 ^^^^^^^^^^^^^
 
-Data sampling can be achieved using ``preprocess`` module only. Possible
+Data sampling can be achieved using ``preprocess`` module. Possible
 use-case for sampling data sets could be to split data sets into train and test
 samples for other Machine Learning algorithms, as well as sample unbalanced
 data sets.
