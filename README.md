@@ -1,5 +1,7 @@
 # PCAfold
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Documentation Status](https://readthedocs.org/projects/pca-python/badge/?version=latest)](https://pca-python.readthedocs.io/en/latest/?badge=latest)
+
 **PCAfold** is a Python software for generating, improving and analyzing empirical
 low-dimensional manifolds obtained via *Principal Component Analysis* (PCA).
 It incorporates a variety of data pre-processing tools (including data clustering
@@ -7,8 +9,6 @@ and sampling), uses PCA as a dimensionality reduction technique and introduces
 metrics to judge the topology of the low-dimensional manifolds.
 
 ### [PCAfold Documentation](https://pca-python.readthedocs.io/en/latest/)
-
-[![Documentation Status](https://readthedocs.org/projects/pca-python/badge/?version=latest)](https://pca-python.readthedocs.io/en/latest/?badge=latest)
 
 ## Software architecture
 
