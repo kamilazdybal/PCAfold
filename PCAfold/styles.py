@@ -23,6 +23,8 @@ rcParams['mathtext.bf'] = 'Charter:bold'
 rcParams['font.size'] = 20
 rcParams["text.usetex"] = False
 
+grid_opacity = 0.3
+
 font_axes = 20
 font_labels = 24
 font_annotations = 20

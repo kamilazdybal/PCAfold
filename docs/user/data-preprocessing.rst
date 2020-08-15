@@ -168,11 +168,10 @@ Plotting functions
 
 .. autofunction:: PCAfold.preprocess.plot_2d_clustering
 
-Example plot can be seen below:
+``plot_2d_train_test_samples``
+======================
 
-.. image:: ../images/preprocess-plot-2d-clustering-example.png
-  :width: 700
-  :align: center
+.. autofunction:: PCAfold.preprocess.plot_2d_train_test_samples
 
 --------------------------------------------------------------------------------
 

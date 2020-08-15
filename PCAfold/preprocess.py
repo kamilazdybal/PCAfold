@@ -726,6 +726,11 @@ class DataSampler:
             user-provided ``idx_test`` vector and there aren't enough samples to
             select as train data.
 
+        :raises ValueError:
+            if the number specified is too high in combination with the
+            user-provided ``idx_test`` vector and there aren't enough samples to
+            select as train data.
+
         :return:
             - **idx_train** - indices of the train data.
             - **idx_test** - indices of the test data.
@@ -753,17 +758,17 @@ class DataSampler:
 
             # Check that keys are non-negative integers:
             if not (isinstance(key, int) and key >= 0):
-                raise ValueError("Error in cluster number " + str(key) + ". Key must be a non-negative integer.")
+                raise ValueError("Error in cluster " + str(key) + ". Key must be a non-negative integer.")
 
             # Check that percentage is between 0 and 100:
             if sampling_type == 'percentage':
                 if not (value >= 0 and value <= 100):
-                    raise ValueError("Error in cluster number " + str(key) + ". The percentage has to be between 0-100.")
+                    raise ValueError("Error in cluster " + str(key) + ". The percentage has to be between 0-100.")
 
             # Check that number is a non-negative integer:
             if sampling_type == 'number':
                 if not (isinstance(value, int) and value >= 0):
-                    raise ValueError("Error in cluster number " + str(key) + ". The number must be a non-negative integer.")
+                    raise ValueError("Error in cluster " + str(key) + ". The number must be a non-negative integer.")
 
         # Check that `test_selection_option` parameter was passed correctly:
         _test_selection_option = [1,2]
@@ -800,7 +805,11 @@ class DataSampler:
                         cluster.append(idx_full_no_test[i])
 
                 # Selection of training data:
-                cluster_train = np.array(random.sample(cluster, int(cluster_populations[key]*value/100)))
+                if int(cluster_populations[key]*value/100) <= len(cluster):
+                    cluster_train = np.array(random.sample(cluster, int(cluster_populations[key]*value/100)))
+                else:
+                    raise ValueError("The training percentage specified is too high, there aren't enough samples.")
+
                 idx_train = np.concatenate((idx_train, cluster_train))
 
                 if self.__using_user_defined_idx_test==False:
@@ -814,7 +823,7 @@ class DataSampler:
                     if test_selection_option == 2:
 
                         if value > 50:
-                            raise ValueError("Percentage in cluster " + str(key+1) + " is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
+                            raise ValueError("Percentage in cluster " + str(key) + " is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
 
                         cluster_test = np.setdiff1d(cluster, cluster_train)
                         cluster_test_sampled = np.array(random.sample(list(cluster_test), int(len(cluster)*value/100)))
@@ -835,8 +844,9 @@ class DataSampler:
                         cluster.append(idx_full_no_test[i])
 
                 if value > len(cluster):
-                    raise ValueError("Error in cluster number " + str(key+1) + ". The number of samples in `sampling_dictionary` cannot exceed the number of observations in a cluster.")
+                    raise ValueError("Error in cluster " + str(key) + ". The number of samples in `sampling_dictionary` cannot exceed the number of observations in a cluster.")
 
+                # Selection of training data:
                 cluster_train = np.array(random.sample(cluster, value))
                 idx_train = np.concatenate((idx_train, cluster_train))
 
@@ -851,7 +861,7 @@ class DataSampler:
                     if test_selection_option == 2:
 
                         if value > int(cluster_populations[key]*0.5):
-                            raise ValueError("Number of samples in cluster " + str(key+1) + " is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
+                            raise ValueError("Number of samples in cluster " + str(key) + " is larger than 50% and test samples cannot be selected with `test_selection_option=2`.")
 
                         cluster_test = np.setdiff1d(cluster, cluster_train)
                         cluster_test_sampled = np.array(random.sample(list(cluster_test), value))
@@ -1830,7 +1840,7 @@ def get_populations(idx, verbose=False):
 #
 ################################################################################
 
-def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, title=None, save_filename=None):
+def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -1852,6 +1862,10 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     :param first_cluster_index_zero: (optional)
         boolean specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
+    :param grid_on:
+        boolean specifying whether grid should be plotted.
+    :param figure_size:
+        tuple specifying figure size.
     :param title: (optional)
         string specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -1871,7 +1885,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     color_map_colors = cm.get_cmap(color_map, n_clusters)
     cluster_colors = color_map_colors(np.linspace(0, 1, n_clusters))
 
-    figure = plt.figure(figsize=(14, 7))
+    figure = plt.figure(figsize=figure_size)
 
     for k in range(0,n_clusters):
         if first_cluster_index_zero:
@@ -1881,11 +1895,93 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=4, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
 
-    plt.xticks(fontsize=font_axes, **csfont)
-    plt.yticks(fontsize=font_axes, **csfont)
+    plt.xticks(fontsize=font_axes, **csfont), plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
-    plt.grid(alpha=0.3)
+    if grid_on: plt.grid(alpha=grid_opacity)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
+    """
+    This function plots a 2-dimensional manifold divided into train and test
+    samples. Number of observations in train and test data respectively will be
+    plotted in the legend.
+
+    :param x:
+        variable on the :math:`x`-axis.
+    :param y:
+        variable on the :math:`y`-axis.
+    :param idx:
+        vector of cluster classifications.
+    :param idx_train:
+        indices of the train data.
+    :param idx_test:
+        indices of the test data.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+    :param first_cluster_index_zero: (optional)
+        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        If set to ``False`` the first cluster will be indexed ``1``.
+    :param grid_on:
+        boolean specifying whether grid should be plotted.
+    :param figure_size:
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
+    """
+
+    from matplotlib import cm
+
+    n_clusters = len(np.unique(idx))
+    populations = get_populations(idx, verbose=False)
+
+    x = x.ravel()
+    y = y.ravel()
+
+    color_map_colors = cm.get_cmap(color_map, n_clusters)
+    cluster_colors = color_map_colors(np.linspace(0, 1, n_clusters))
+
+    figure = plt.figure(figsize=figure_size)
+
+    ax1 = plt.subplot(121)
+    for k in range(0,n_clusters):
+        train_indices = [idxt for idxt in idx_train if idx[idxt,]==k]
+        if first_cluster_index_zero:
+            ax1.scatter(x[train_indices], y[train_indices], color=cluster_colors[k], marker='o', s=scatter_point_size*2, label='$k_' + str(k) + '$ - ' + str(len(train_indices)))
+        else:
+            ax1.scatter(x[train_indices], y[train_indices], color=cluster_colors[k], marker='o', s=scatter_point_size*2, label='$k_' + str(k+1) + '$ - ' + str(len(train_indices)))
+    ax1.set_xticks([]), ax1.set_yticks([])
+    ax1.set_title('Train data', fontsize=font_title)
+    if x_label != None: ax1.set_xlabel(x_label, fontsize=font_labels, **csfont)
+    if y_label != None: ax1.set_ylabel(y_label, fontsize=font_labels, **csfont)
+    if grid_on: ax1.grid(alpha=grid_opacity)
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=4, fontsize=font_legend/2, markerscale=marker_scale_legend_clustering/2)
+
+    ax2 = plt.subplot(1,2,2)
+    for k in range(0,n_clusters):
+        test_indices = [idxt for idxt in idx_test if idx[idxt,]==k]
+        if first_cluster_index_zero:
+            ax2.scatter(x[test_indices], y[test_indices], color=cluster_colors[k], marker='o', s=scatter_point_size*2, label='$k_' + str(k) + '$ - ' + str(len(test_indices)))
+        else:
+            ax2.scatter(x[test_indices], y[test_indices], color=cluster_colors[k], marker='o', s=scatter_point_size*2, label='$k_' + str(k+1) + '$ - ' + str(len(test_indices)))
+    ax2.set_xticks([]), ax2.set_yticks([])
+    ax2.set_title('Test data', fontsize=font_title)
+    if x_label != None: ax2.set_xlabel(x_label, fontsize=font_labels, **csfont)
+    if y_label != None: ax2.set_ylabel(y_label, fontsize=font_labels, **csfont)
+    if grid_on: ax2.grid(alpha=grid_opacity)
+    ax2.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=4, fontsize=font_legend/2, markerscale=marker_scale_legend_clustering/2)
+
+    if title != None: figure.suptitle(title, fontsize=font_title, **csfont)
+    if save_filename != None: figure.savefig(save_filename, dpi = 500, bbox_inches='tight')

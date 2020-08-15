@@ -16,6 +16,7 @@ from .preprocess import get_centroids
 from .preprocess import get_partition
 from .preprocess import get_populations
 from .preprocess import plot_2d_clustering
+from .preprocess import plot_2d_train_test_samples
 
 # Module: `reduction`
 from .reduction import PCA
