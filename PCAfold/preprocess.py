@@ -658,14 +658,6 @@ class DataSampler:
           selection = DataSampler(idx, verbose=True)
           (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
-        *Note:*
-        This function does not run ``degrade_clusters`` to avoid disambiguity
-        between cluster classifications inside ``idx`` and inside the keys of the
-        ``sampling_dictionary``! It will however check whether keys are consistent
-        with ``idx`` entries and if yes it will continue running. If the ``idx``
-        classifies for running ``degrade_clusters`` this information will be printed
-        as a suggestion.
-
         **Train data:**
 
         The number of train samples selected from each cluster is estimated based
@@ -744,6 +736,10 @@ class DataSampler:
         if sampling_type not in _sampling_type:
             raise ValueError("Variable `sampling_type` has to be one of the following: 'percentage' or 'number'.")
 
+        # Degrade clusters if needed:
+        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+            (self.idx, _) = degrade_clusters(self.idx, verbose=False)
+
         # Check that dictionary has consistend number of entries with respect to `idx`:
         if len(np.unique(self.idx)) != len(sampling_dictionary.keys()):
             raise ValueError("The number of entries inside `sampling_dictionary` does not match the number of clusters specified in `idx`.")
@@ -773,10 +769,6 @@ class DataSampler:
         _test_selection_option = [1,2]
         if test_selection_option not in _test_selection_option:
             raise ValueError("Test selection option can only be 1 or 2.")
-
-        # Check if degrading clusters is needed and if yes print a message:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
-            print("----------\nConsider running `degrade_clusters` on `idx`!\n----------")
 
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
@@ -808,7 +800,7 @@ class DataSampler:
                         cluster.append(idx_full_no_test[i])
 
                 # Selection of training data:
-                cluster_train = np.array(random.sample(cluster, int(len(cluster)*value/100)))
+                cluster_train = np.array(random.sample(cluster, int(cluster_populations[key]*value/100)))
                 idx_train = np.concatenate((idx_train, cluster_train))
 
                 if self.__using_user_defined_idx_test==False:
