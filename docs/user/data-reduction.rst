@@ -1,0 +1,180 @@
+.. module:: reduction
+
+##############
+Data reduction
+##############
+
+``reduction`` module contains functions for performing Principal Component
+Analysis :cite:`Jolliffe2002`.
+
+--------------------------------------------------------------------------------
+
+****************************
+Principal Component Analysis
+****************************
+
+.. note:: It is assumed that the rows of the data set ``X`` on which PCA is
+  performed correspond to observations and columns correspond to variables.
+
+  The data set thus has dimensions ``(n_observations, n_variables)``.
+
+Class ``PCA``
+=============
+
+.. autoclass:: PCAfold.reduction.PCA
+
+``PCA.x2eta``
+=============
+
+.. autofunction:: PCAfold.reduction.PCA.x2eta
+
+``PCA.eta2x``
+=============
+
+.. autofunction:: PCAfold.reduction.PCA.eta2x
+
+``PCA.calculate_r2``
+====================
+
+.. autofunction:: PCAfold.reduction.PCA.calculate_r2
+
+``PCA.data_consistency_check``
+==============================
+
+.. autofunction:: PCAfold.reduction.PCA.data_consistency_check
+
+``PCA.convergence``
+===================
+
+.. autofunction:: PCAfold.reduction.PCA.convergence
+
+``PCA.eig_bar_plot_maker``
+==========================
+
+.. autofunction:: PCAfold.reduction.PCA.eig_bar_plot_maker
+
+``PCA.plot_convergence``
+========================
+
+.. autofunction:: PCAfold.reduction.PCA.plot_convergence
+
+``PCA.principal_variables``
+===========================
+
+.. autofunction:: PCAfold.reduction.PCA.principal_variables
+
+``PCA.r2converge``
+==================
+
+.. autofunction:: PCAfold.reduction.PCA.r2converge
+
+``PCA.write_file_for_cpp``
+==========================
+
+.. autofunction:: PCAfold.reduction.PCA.write_file_for_cpp
+
+``PCA.set_retained_eigenvalues``
+================================
+
+.. autofunction:: PCAfold.reduction.PCA.set_retained_eigenvalues
+
+``PCA.u_scores``
+================
+
+.. autofunction:: PCAfold.reduction.PCA.u_scores
+
+``PCA.w_scores``
+================
+
+.. autofunction:: PCAfold.reduction.PCA.w_scores
+
+Functions for comparing two ``PCA`` objects
+===========================================
+
+``analyze_eigenvector_weights_movement``
+----------------------------------------
+
+.. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_movement
+
+``analyze_eigenvalue_distribution``
+-----------------------------------
+
+.. autofunction:: PCAfold.reduction.analyze_eigenvalue_distribution
+
+``equilibrate_cluster_populations``
+-----------------------------------
+
+.. autofunction:: PCAfold.reduction.equilibrate_cluster_populations
+
+--------------------------------------------------------------------------------
+
+Biasing options
+===============
+
+This section explains the choice for ``biasing_option`` input parameter in some
+of the functions in this module.
+
+Schemes below present how centering and scaling of data sets can be handled and
+how PCA transformations are done using the original eigenvectors
+:math:`\mathbf{A}` vs. the biased eigenvectors :math:`\mathbf{A_r}`.
+The superscript :math:`(i)` represents the :math:`i^{th}` version of the
+``idx`` vector.
+
+.. note:: Given the same ``idx``, the eigenvectors matrix :math:`\mathbf{A_r}` will be the same in option 1, 3 and 4 (the reduced data set is pre-processed in the same way in these three options). It will only be different in option 2 where the reduced data set is not pre-processed after being sampled from :math:`\mathbf{X_{cs}}`.
+
+.. note:: The biased PC-scores :math:`\mathbf{Z_{biased}}` resulting from option 4 are included within the biased PC-scores :math:`\mathbf{Z_{biased}}` resulting from option 3. Note that the only difference going with option 3 instead of option 4 is that there will be more observations in the PC-scores matrix, but the data set that is transformed by PCA in both cases was pre-processed using the same centers and scales.
+
+Biasing option 1
+----------------
+
+In this option, the projection is always done using the centered and scaled original data set :math:`\mathbf{X_{cs}}` (centered with :math:`\mathbf{C}` and scaled with :math:`\mathbf{D}`). When sources of the PCs are computed, they are scaled by the scaling coming from the original data matrix :math:`\mathbf{X}`. The centers and scales of the reduced data set (:math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`) are not used anywhere beyond the pre-processing step.
+
+.. image:: ../images/cb-PCA-scheme-option-1.png
+    :width: 700
+    :align: center
+
+Biasing option 2
+----------------
+
+This option is the same as option 1, except we sample directly from :math:`\mathbf{X_{cs}}` and then without additionally pre-processing :math:`\mathbf{X_r}`, we perform PCA on a reduced data set.
+
+.. image:: ../images/cb-PCA-scheme-option-2.png
+    :width: 700
+    :align: center
+
+Biasing option 3
+----------------
+
+In this option, the projection is always done using the original data set :math:`\mathbf{X}` centered and scaled with the centers and scales found on the reduced data set :math:`\mathbf{X_r}` (centered by :math:`\mathbf{C_r}` and scaled by :math:`\mathbf{D_r}`). The sources :math:`\mathbf{S}` are scaled with :math:`\mathbf{D_r}` as well to match the data set scaling.
+
+.. image:: ../images/cb-PCA-scheme-option-3.png
+    :width: 700
+    :align: center
+
+Biasing option 4
+----------------
+
+In this option, the reduced data set is only found in order to compute its centers and scales. Once we have that, we go back to the original data set and pre-process it using :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`. PCA transformation is done on the entire data set :math:`\mathbf{X_{cs}^{(i)}}` and the same data set is projected onto the found eigenvectors.
+
+.. image:: ../images/cb-PCA-scheme-option-5.png
+    :width: 700
+    :align: center
+
+--------------------------------------------------------------------------------
+
+******************
+Plotting functions
+******************
+
+``plot_2d_manifold``
+====================
+
+.. autofunction:: PCAfold.reduction.plot_2d_manifold
+
+--------------------------------------------------------------------------------
+
+************
+Bibliography
+************
+
+.. bibliography:: data-reduction.bib

@@ -1,27 +1,62 @@
-`PCA-python` is the python version of the PCA Matlab suite found at: https://gitlab.multiscale.utah.edu/common/PCA
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+[![Documentation Status](https://readthedocs.org/projects/pcafold/badge/?version=latest)](https://pcafold.readthedocs.io/en/latest/?badge=latest)
 
-# Dependencies
-`PCA-python` requires `python3` (developed with `python3.5`) and the following packages:
-- `numpy`
-- `scipy`
+# PCAfold
+
+**PCAfold** is a Python software for generating, improving and analyzing empirical
+low-dimensional manifolds obtained via *Principal Component Analysis* (PCA).
+It incorporates a variety of data pre-processing tools (including data clustering
+and sampling), uses PCA as a dimensionality reduction technique and introduces
+metrics to judge the topology of the low-dimensional manifolds.
+
+### [PCAfold Documentation](https://pcafold.readthedocs.io/en/latest/)
+
+## Software architecture
+
+A general overview for using **PCAfold** modules is presented in the diagram
+below:
+
+![Screenshot](docs/images/PCAfold-diagram.png)
+
+Each module's functionalities can also be used as a standalone tool for
+performing a specific task and can easily combine with techniques outside of
+this software, such as K-Means algorithm or Artificial Neural Networks.
+
+## Installation
+
+### Dependencies
+
+**PCAfold** requires `python3.7` and the following packages:
+
+- `copy`
 - `matplotlib`
+- `numpy`
+- `random`
+- `scipy`
+- `sklearn`
 
-# Installation
-Clone the `PCA-python` repository and move into the `PCA-python` directory created:
+### Build from source
+
+Clone the `PCAfold` repository and move into the `PCAfold` directory created:
+
 ```
-git clone http://gitlab.multiscale.utah.edu/common/PCA-python.git
-cd PCA-python
+git clone http://gitlab.multiscale.utah.edu/common/PCAfold.git
+cd PCAfold
 ```
 
-Run the `setup.py` script as below to complete the installation.
+Run the `setup.py` script as below to complete the installation:
+
 ```
-python3.5 setup.py install
+python3.7 setup.py install
 ```
 
-# Examples
-The example file [Example.py](Example.py) demonstrates the use of preprocessing data before using PCA then transforming the variables into the principal components using a given scaling. Next, the absolute values of the eigenvectors are plotted. Finally, the regression tests are run and a statement of whether or not the tests passed is printed.
+You are ready to `import PCAfold`!
 
-This example can be run from the terminal using:
+### Testing
+
+To run regression tests from the base repo directory run:
+
 ```
-python3.5 Example.py
+python3.7 -m unittest discover
 ```
+To switch verbose on, use the `-v` flag.
