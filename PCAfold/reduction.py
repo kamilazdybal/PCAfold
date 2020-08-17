@@ -15,154 +15,6 @@ from PCAfold.styles import *
 #
 ################################################################################
 
-def center_scale(X, scaling, nocenter=False):
-    """
-    Centers and scales data - used in constructing PCA objects
-
-    **Example:**
-
-    .. code:: python
-
-        xs = center_scale( X )
-
-    :param X:
-        uncentered, unscaled data
-    :param scaling:
-        the scaling methodology
-
-    :return:
-        - **Xout** - the centered and scaled data
-        - **xbar** - the value for centering
-        - **d** - the value for scaling
-    """
-    Xout = np.zeros_like(X, dtype=float)
-    xbar = X.mean(axis=0)
-    npts, nvar = X.shape
-
-    dev = 0 * xbar
-    kurt = 0 * xbar
-
-    for i in range(0, nvar):
-        # calculate the standard deviation (required for some scalings)
-        dev[i] = np.std(X[:, i], ddof=0)
-
-        # calculate the kurtosis (required for some scalings)
-        kurt[i] = np.sum((X[:, i] - xbar[i]) ** 4) / npts / (np.sum((X[:, i] - xbar[i]) ** 2) / npts) ** 2
-
-    scaling = scaling.upper()
-    eps = np.finfo(float).eps
-    if scaling == 'NONE' or scaling == '':
-        d = np.ones(nvar)
-    elif scaling == 'AUTO' or scaling == 'STD':
-        d = dev
-    elif scaling == 'VAST':
-        d = dev * dev / (xbar + eps)
-    elif scaling == 'VAST_2':
-        d = dev * dev * kurt * kurt / (xbar + eps)
-    elif scaling == 'VAST_3':
-        d = dev * dev * kurt * kurt / np.max(X, axis=0)
-    elif scaling == 'VAST_4':
-        d = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
-    elif scaling == 'RANGE':
-        d = np.max(X, axis=0) - np.min(X, axis=0)
-    elif scaling == 'LEVEL':
-        d = xbar
-    elif scaling == 'MAX':
-        d = np.max(X, axis=0)
-    elif scaling == 'PARETO':
-        d = np.zeros(nvar)
-        for i in range(0, nvar):
-            d[i] = np.sqrt(np.std(X[:, i], ddof=0))
-    elif scaling == 'POISSON':
-        d = np.sqrt(xbar)
-    else:
-        raise ValueError('Unsupported scaling option')
-
-    for i in range(0, nvar):
-        if nocenter:
-            Xout[:, i] = (X[:, i]) / d[i]
-        else:
-            Xout[:, i] = (X[:, i] - xbar[i]) / d[i]
-
-    if nocenter:
-        xbar = np.zeros(nvar)
-
-    return Xout, xbar, d
-
-
-def inv_center_scale(x, xcenter, xscale):
-    """
-    Invert whatever scaling and centering was done by ``center_scale`` function.
-
-    :param x:
-        the dataset you want to un-center and un-scale.
-    :param xcenter:
-        the centering done on the original dataset ``X``.
-    :param xscale:
-        the scaling done on the original dataset ``X``.
-
-    :return:
-        - **X** - the unmanipulated/original dataset.
-    """
-    X = np.zeros_like(x, dtype=float)
-    for i in range(0, len(xcenter)):
-        X[:, i] = x[:, i] * xscale[i] + xcenter[i]
-    return X
-
-
-class PreProcessing:
-    """
-    Class for preprocessing data which will check for the constant values and
-    remove them, saving whatever manipulations were done so a user can
-    manipulate new data in the same way.
-
-    Could make more complicated ones as needed.
-    """
-
-    def __init__(self, X):
-        self.manipulated, self.idx_removed, self.original, self.idx_retained = remove_constant_vars(X)
-
-
-def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
-    """
-    Remove any constant variables (columns) in the data ``X``.
-    Specifically pre-processing for PCA so the eigenvalue calculation
-    doesn't break.
-
-    :param X:
-        original data.
-    :param maxtol:
-        tolerance for the maximum absolute value of a column (variable) in
-        ``X`` to be saved.
-    :param rangetol:
-        tolerance for the range (max-min) over the maximum absolute value of
-        a column (variable) in X to be saved.
-
-    :return:
-        - **manipulated** - the manipulated data.
-        - **idx_removed** - the indices of columns removed from ``X``.
-        - **original** - the original data ``X``.
-        - **idx_retained** - the indices of columns retained in ``X``.
-    """
-    npts, nvar = X.shape
-    original = np.copy(X)
-    idx_removed = []
-    idx_retained = []
-    for i in reversed(range(0, nvar)):
-        min = np.min(X[:, i], axis=0)
-        max = np.max(X[:, i], axis=0)
-        maxabs = np.max(np.abs(X[:, i]), axis=0)
-        if (maxabs < maxtol) or ((max - min) / maxabs < rangetol):
-            X = np.delete(X, i, 1)
-            idx_removed.append(i)
-        else:
-            idx_retained.append(i)
-    manipulated = X
-    idx_removed = idx_removed[::-1]
-    idx_retained = idx_retained[::-1]
-    return manipulated, idx_removed, original, idx_retained
-
-
 class PCA:
     """
     A class to support Principal Component Analysis.
@@ -181,19 +33,8 @@ class PCA:
         arise telling the user to preprocess the data to remove that variable. The
         preprocess class can do this for the user.
     :param scaling: (optional)
-        default is ``'AUTO'``
-
-            * ``'NONE'``          no scaling
-            * ``'AUTO'`` ``'STD'`` scale by :math:`\sigma`
-            * ``'PARETO'``        scale by :math:`\sigma^2`
-            * ``'VAST'``          scale by :math:`\sigma^2 / {mean}`
-            * ``'VAST_2'``        scale by :math:`\sigma^2 \cdot kurtosis^2 / mean`
-            * ``'VAST_3'``        scale by :math:`\sigma^2 \cdot kurtosis^2 / max`
-            * ``'VAST_4'``        scale by :math:`\sigma^2 \cdot kurtosis^2 / (max - min)`
-            * ``'RANGE'``         scale by :math:`(max-min)`
-            * ``'LEVEL'``         scale by :math:`mean`
-            * ``'MAX'``           scale by :math:`max`
-            * ``'POISSON'``       scale by :math:`\sqrt{mean}`
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
     :param neta: (optional)
         number of retained eigenvalues - default is all
     :param useXTXeig: (optional)
@@ -210,7 +51,7 @@ class PCA:
             raise ValueError('Variables should be in columns; observations in rows.\n'
                              'Also ensure that you have more than one observation\n')
 
-        manipulated, idx_removed, original, idx_retained = remove_constant_vars(X)
+        manipulated, idx_removed, original, idx_retained = preprocess.remove_constant_vars(X)
 
         if len(idx_removed) != 0:
             raise ValueError('Constant variable detected. Must preprocess data for PCA.')
@@ -222,7 +63,7 @@ class PCA:
         else:
             self.neta = nvar
 
-        self.X, self.XCenter, self.XScale = center_scale(X, self.scaling, nocenter)
+        self.X, self.XCenter, self.XScale = preprocess.center_scale(X, self.scaling, nocenter)
         self.R = np.dot(self.X.transpose(), self.X) / npts
         if useXTXeig:
             L, Q = np.linalg.eigh(self.R)
@@ -301,7 +142,7 @@ class PCA:
         assert neta == self.neta, "Number of variables provided inconsistent with number of PCs."
         A = self.Q[:, 0:neta]
         x = eta.dot(A.transpose())
-        return inv_center_scale(x, self.XCenter, self.XScale)
+        return preprocess.invert_center_scale(x, self.XCenter, self.XScale)
 
     def calculate_r2(self, X):
         """
@@ -956,7 +797,7 @@ def test():
     PHI = np.vstack(
         (np.sin(np.linspace(0, np.pi, npts)).T, np.cos(np.linspace(0, 2 * np.pi, npts)),
          np.linspace(0, np.pi, npts)))
-    PHI, cntr, scl = center_scale(PHI.T, 'NONE')
+    PHI, cntr, scl = preprocess.center_scale(PHI.T, 'NONE')
 
     # create random means for the dataset for comparison with PCA XCenter
     xbar = np.random.rand(1, PHI.shape[1])
@@ -1576,7 +1417,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
             X_r = X[idx_train,:]
 
             # Compute the current centers and scales of X_r:
-            (_, C_r, D_r) = center_scale(X_r, scaling)
+            (_, C_r, D_r) = preprocess.center_scale(X_r, scaling)
             X_center = C_r
             X_scale = D_r
 

@@ -3,6 +3,10 @@ This is the base PCAfold directory.
 """
 
 # Module: `preprocess`
+from .preprocess import center_scale
+from .preprocess import invert_center_scale
+from .preprocess import remove_constant_vars
+from .preprocess import PreProcessing
 from .preprocess import analyze_centers_change
 from .preprocess import DataSampler
 from .preprocess import variable_bins
@@ -20,10 +24,6 @@ from .preprocess import plot_2d_train_test_samples
 
 # Module: `reduction`
 from .reduction import PCA
-from .reduction import PreProcessing
-from .reduction import remove_constant_vars
-from .reduction import center_scale
-from .reduction import inv_center_scale
 from .reduction import analyze_eigenvector_weights_movement
 from .reduction import analyze_eigenvalue_distribution
 from .reduction import equilibrate_cluster_populations

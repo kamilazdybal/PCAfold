@@ -10,6 +10,231 @@ from PCAfold.styles import *
 #
 ################################################################################
 
+def center_scale(X, scaling, nocenter=False):
+    """
+    This function centers and scales the data set. Centering is always performed
+    by subtracting the mean of each column:
+
+    .. math::
+
+        \mathbf{X_c} = \mathbf{X} - mean(\mathbf{X})
+
+    Scaling is performed by dividing :math:`i^{th}` column by a certain scaling
+    factor :math:`d_i`, where scaling factors for all columns are stored in a vector
+    :math:`\mathbf{d}`:
+
+    .. math::
+
+        \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{d}^{-1}
+
+    Several scaling options are implemented here:
+
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Scaling method  | ``scaling`` | Scaling factor                                                   |
+    +=================+=============+==================================================================+
+    | None            | ``'none'``  | 1                                                                |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Auto            | ``'auto'``  | :math:`\sigma`                                                   |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Pareto          | ``'pareto'``| :math:`\sigma^2`                                                 |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Vast            | ``'vast'``  | :math:`\sigma^2 / mean(\mathbf{X})`                              |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Range           | ``'range'`` | :math:`max(\mathbf{X}) - min(\mathbf{X})`                        |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Level           | ``'level'`` | :math:`mean(\mathbf{X})`                                         |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Max             | ``'max'``   | :math:`max(\mathbf{X})`                                          |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Poisson         |``'poisson'``| :math:`\sqrt{mean(\mathbf{X})}`                                  |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Vast-2          | ``'vast_2'``| :math:`\sigma^2 \cdot k^2 / mean(\mathbf{X})`                    |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Vast-3          | ``'vast_3'``| :math:`\sigma^2 \cdot k^2 / max(\mathbf{X})`                     |
+    +-----------------+-------------+------------------------------------------------------------------+
+    | Vast-4          | ``'vast_4'``| :math:`\sigma^2 \cdot k^2 / (max(\mathbf{X}) - min(\mathbf{X}))` |
+    +-----------------+-------------+------------------------------------------------------------------+
+
+    where :math:`\sigma` is standard deviation and :math:`k` is kurtosis.
+
+    When both centering and scaling is applied:
+
+    .. math::
+
+        \mathbf{X_{cs}} = (\mathbf{X} - mean(\mathbf{X})) \\cdot \mathbf{d}^{-1}
+
+    **Example:**
+
+    .. code:: python
+
+        (X_cs, C, d) = center_scale(X, 'range', nocenter=False)
+
+    :param X:
+        data matrix to pre-process. Columns correspond to variables and rows
+        correspond to observations.
+    :param scaling:
+        string specifying the scaling methodology.
+    :param nocenter: (optional)
+        boolean specifying whether data should be centered by mean.
+
+    :raises ValueError:
+        if ``scaling`` method is not within the available scalings.
+
+    :return:
+        - **Xout** - the centered and scaled data
+        - **xbar** - vector containig centers of each variable.
+        - **d** - the value for scaling
+    """
+
+    _scalings_list = ['none', 'auto', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+
+    if scaling.lower() not in _scalings_list:
+        raise ValueError("Unrecognized scaling method.")
+
+    Xout = np.zeros_like(X, dtype=float)
+    xbar = X.mean(axis=0)
+    npts, nvar = X.shape
+
+    dev = 0 * xbar
+    kurt = 0 * xbar
+
+    for i in range(0, nvar):
+        # calculate the standard deviation (required for some scalings)
+        dev[i] = np.std(X[:, i], ddof=0)
+
+        # calculate the kurtosis (required for some scalings)
+        kurt[i] = np.sum((X[:, i] - xbar[i]) ** 4) / npts / (np.sum((X[:, i] - xbar[i]) ** 2) / npts) ** 2
+
+    scaling = scaling.upper()
+    eps = np.finfo(float).eps
+    if scaling == 'NONE' or scaling == '':
+        d = np.ones(nvar)
+    elif scaling == 'AUTO' or scaling == 'STD':
+        d = dev
+    elif scaling == 'VAST':
+        d = dev * dev / (xbar + eps)
+    elif scaling == 'VAST_2':
+        d = dev * dev * kurt * kurt / (xbar + eps)
+    elif scaling == 'VAST_3':
+        d = dev * dev * kurt * kurt / np.max(X, axis=0)
+    elif scaling == 'VAST_4':
+        d = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
+    elif scaling == 'RANGE':
+        d = np.max(X, axis=0) - np.min(X, axis=0)
+    elif scaling == 'LEVEL':
+        d = xbar
+    elif scaling == 'MAX':
+        d = np.max(X, axis=0)
+    elif scaling == 'PARETO':
+        d = np.zeros(nvar)
+        for i in range(0, nvar):
+            d[i] = np.sqrt(np.std(X[:, i], ddof=0))
+    elif scaling == 'POISSON':
+        d = np.sqrt(xbar)
+    else:
+        raise ValueError('Unsupported scaling option')
+
+    for i in range(0, nvar):
+        if nocenter:
+            Xout[:, i] = (X[:, i]) / d[i]
+        else:
+            Xout[:, i] = (X[:, i] - xbar[i]) / d[i]
+
+    if nocenter:
+        xbar = np.zeros(nvar)
+
+    return Xout, xbar, d
+
+def invert_center_scale(X_cs, x_center, x_scale):
+    """
+    This function inverts whatever centering and scaling was done by
+    ``center_scale`` function:
+
+    .. math::
+
+        \mathbf{X} = \mathbf{X_{cs}} \\cdot \mathbf{d} + \mathbf{C}
+
+    :param X_cs:
+        data matrix to pre-process. Columns correspond to variables and rows
+        correspond to observations.
+    :param x_center:
+        vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+    :param x_scale:
+        vector of scales :math:`\mathbf{d}` applied on the original data set :math:`\mathbf{X}`.
+
+    :return:
+        - **X** - the original data set :math:`\mathbf{X}`.
+    """
+
+    X = np.zeros_like(X_cs, dtype=float)
+
+    for i in range(0, len(x_center)):
+        X[:, i] = X_cs[:, i] * x_scale[i] + x_center[i]
+
+    return X
+
+class PreProcessing:
+    """
+    This class performs basic data manipulation and stores the result of that
+    manipulation. Specifically:
+
+    - checks for the constant values and removes them,
+    - centers and scales the data.
+
+    :param X:
+        data matrix to pre-process. Columns correspond to variables and rows
+        correspond to observations.
+    :param scaling:
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
+    :param nocenter: (optional)
+        boolean specifying whether data should be centered by mean.
+    """
+
+    def __init__(self, X, scaling='none', nocenter=False):
+
+        self.manipulated, self.idx_removed, self.original, self.idx_retained = remove_constant_vars(X)
+        self.Xout, self.xbar, self.d = center_scale(X, scaling, nocenter=nocenter)
+
+def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
+    """
+    Remove any constant variables (columns) in the data set :math:`\mathbf{X}`.
+    Specifically pre-processing for PCA so the eigenvalue calculation
+    doesn't break.
+
+    :param X:
+        original data.
+    :param maxtol:
+        tolerance for the maximum absolute value of a column (variable) in
+        ``X`` to be saved.
+    :param rangetol:
+        tolerance for the range (max-min) over the maximum absolute value of
+        a column (variable) in X to be saved.
+
+    :return:
+        - **manipulated** - the manipulated data.
+        - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
+        - **original** - the original data :math:`\mathbf{X}`.
+        - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
+    """
+    npts, nvar = X.shape
+    original = np.copy(X)
+    idx_removed = []
+    idx_retained = []
+    for i in reversed(range(0, nvar)):
+        min = np.min(X[:, i], axis=0)
+        max = np.max(X[:, i], axis=0)
+        maxabs = np.max(np.abs(X[:, i]), axis=0)
+        if (maxabs < maxtol) or ((max - min) / maxabs < rangetol):
+            X = np.delete(X, i, 1)
+            idx_removed.append(i)
+        else:
+            idx_retained.append(i)
+    manipulated = X
+    idx_removed = idx_removed[::-1]
+    idx_retained = idx_retained[::-1]
+    return manipulated, idx_removed, original, idx_retained
+
 def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], title=None, save_filename=None):
     """
     This function analyzes the change in normalized centers computed on the
@@ -1477,7 +1702,7 @@ def vqpca(X, k, n_components, scal_crit, idx_0=[], maximum_number_of_iterations=
         scalings.append(np.ones((n_variables,)))
 
     # Center and scale the data:
-    (X_pre_processed, _, _) = reduction.center_scale(X, scal_crit)
+    (X_pre_processed, _, _) = center_scale(X, scal_crit)
 
     # Initialization of cluster centroids:
     if len(idx_0) > 0:

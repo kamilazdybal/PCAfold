@@ -17,6 +17,26 @@ Data manipulation
 This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.
 
+Class ``PreProcessing``
+=======================
+
+.. autoclass:: PCAfold.preprocess.PreProcessing
+
+``center_scale``
+==========================
+
+.. autofunction:: PCAfold.preprocess.center_scale
+
+``invert_center_scale``
+==========================
+
+.. autofunction:: PCAfold.preprocess.invert_center_scale
+
+``remove_constant_vars``
+==========================
+
+.. autofunction:: PCAfold.preprocess.remove_constant_vars
+
 ``analyze_centers_change``
 ==========================
 
