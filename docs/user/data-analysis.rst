@@ -1,8 +1,8 @@
 .. module:: analysis
 
-#############
-Data analysis
-#############
+#################
+Manifold analysis
+#################
 
 ``analysis`` module contains functions for assessing the intrinsic
 dimensionality and quality of manifolds.
@@ -52,7 +52,7 @@ This section includes details on the Nadaraya-Watson kernel regression
 :cite:`Hardle1990` used in assessing manifolds. The ``KReg`` class may be used
 for non-parametric regression in general.
 
-``KReg``
+Class ``KReg``
 ================================================
 
 .. autoclass:: PCAfold.kernel_regression.KReg

@@ -1,8 +1,8 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/regression/docs/tutorials/demo-cluster-biased-pca.ipynb>`_.
+          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/regression/docs/tutorials/demo-pca-on-sampled-data-sets.ipynb>`_.
 
-Cluster-biased PCA
-==================
+PCA on sampled data sets
+========================
 
 *Cluster-biased PCA* is a link between local PCA and global PCA - it is using
 local features to inform (bias) the global PCs through changing sample densities.

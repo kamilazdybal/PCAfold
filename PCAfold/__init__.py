@@ -27,9 +27,6 @@ from .reduction import inv_center_scale
 from .reduction import analyze_eigenvector_weights_movement
 from .reduction import analyze_eigenvalue_distribution
 from .reduction import equilibrate_cluster_populations
-from .reduction import resample_kmeans_on_pc_sources
-from .reduction import resample_kmeans_on_pc_scores
-from .reduction import resample_bins_of_pc_sources
 from .reduction import plot_2d_manifold
 
 # Module: `analysis`

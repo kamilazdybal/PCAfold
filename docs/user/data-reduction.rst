@@ -106,21 +106,6 @@ Functions for comparing two ``PCA`` objects
 
 .. autofunction:: PCAfold.reduction.equilibrate_cluster_populations
 
-``resample_kmeans_on_pc_sources``
----------------------------------
-
-.. autofunction:: PCAfold.reduction.resample_kmeans_on_pc_sources
-
-``resample_kmeans_on_pc_scores``
---------------------------------
-
-.. autofunction:: PCAfold.reduction.resample_kmeans_on_pc_scores
-
-``resample_bins_of_pc_sources``
--------------------------------
-
-.. autofunction:: PCAfold.reduction.resample_bins_of_pc_sources
-
 --------------------------------------------------------------------------------
 
 Biasing options
@@ -167,19 +152,6 @@ In this option, the projection is always done using the original data set :math:
     :align: center
 
 Biasing option 4
-----------------
-
-In this option, the projection is done on the reduced data set :math:`\mathbf{X_r}` centered with :math:`\mathbf{C_r}` and scaled with :math:`\mathbf{D_r}`.
-Source terms :math:`\mathbf{S}` have to be sampled as well, using the same ``idx`` vector. The sampled sources :math:`\mathbf{S}` are scaled with :math:`\mathbf{D_r}` as well to match the data set scaling.
-
-.. note:: The major difference from the other three options is that this time, the number of transported observations is different from the original number of observations in the original data set.
-
-
-.. image:: ../images/cb-PCA-scheme-option-4.png
-    :width: 700
-    :align: center
-
-Biasing option 5
 ----------------
 
 In this option, the reduced data set is only found in order to compute its centers and scales. Once we have that, we go back to the original data set and pre-process it using :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`. PCA transformation is done on the entire data set :math:`\mathbf{X_{cs}^{(i)}}` and the same data set is projected onto the found eigenvectors.

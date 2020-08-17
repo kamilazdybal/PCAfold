@@ -1199,8 +1199,7 @@ def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_opti
         data scaling criterion.
     :param biasing_option:
         integer specifying biasing option.
-        See documentation of cluster-biased PCA for more information.
-        Can only attain values [1,2,3,4,5].
+        Can only attain values 1, 2, 3 or 4.
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
     :param title: (optional)
@@ -1349,8 +1348,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         number of first Principal Components that will be saved.
     :param biasing_option:
         integer specifying biasing option.
-        See documentation of cluster-biased PCA for more information.
-        Can only attain values [1,2,3,4,5].
+        Can only attain values 1, 2, 3 or 4.
     :param n_iterations: (optional)
         number of iterations to loop over.
     :param stop_iter: (optional)
@@ -1361,7 +1359,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         boolean for printing verbose details.
 
     :raises ValueError:
-        if ``biasing_option`` is not 1, 2, 3, 4 or 5.
+        if ``biasing_option`` is not 1, 2, 3 or 4.
 
     :raises ValueError:
         if ``random_seed`` is not an integer.
@@ -1382,9 +1380,9 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     """
 
     # Check that `biasing_option` parameter was passed correctly:
-    _biasing_options = [1,2,3,5]
+    _biasing_options = [1,2,3,4]
     if biasing_option not in _biasing_options:
-        raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
+        raise ValueError("Option can only be 1-4.")
 
     if random_seed != None:
         if not isinstance(random_seed, int):
@@ -1577,43 +1575,6 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
             # Generate the reduced data set X_r:
             X_r = X[idx_train,:]
 
-            if len(X_source) != 0:
-
-                # Sample the sources using the same idx:
-                X_source_r = X_source[idx_train,:]
-
-            # Perform PCA on X_r:
-            pca = PCA(X_r, scaling, n_components, useXTXeig=True)
-            X_center = pca.XCenter
-            X_scale = pca.XScale
-
-            # Compute local eigenvectors:
-            eigenvectors = pca.Q
-
-            # Compute local eigenvalues:
-            local_eigenvalues = pca.L
-            maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Compute local PC-scores:
-            pc_scores = pca.x2eta(X_r, nocenter=False)
-
-            # Append the local PC-scores:
-            pc_scores_matrix[:,:,iter+1] = pc_scores
-
-            if len(X_source) != 0:
-
-                # Compute local PC-sources:
-                pc_sources = pca.x2eta(X_source_r, nocenter=True)
-
-                # Append the global PC-sources:
-                pc_sources_matrix[:,:,iter+1] = pc_sources
-
-        # Biasing option 5 -----------------------------------------------------
-        elif biasing_option == 5:
-
-            # Generate the reduced data set X_r:
-            X_r = X[idx_train,:]
-
             # Compute the current centers and scales of X_r:
             (_, C_r, D_r) = center_scale(X_r, scaling)
             X_center = C_r
@@ -1656,338 +1617,6 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     eigenvalues = eigenvalues[:,1::]
 
     return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, X_center, X_scale)
-
-def resample_kmeans_on_pc_sources(X, X_source, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
-    """
-    This function performs re-sampling using K-Means clustering on
-    ``n_components`` first PC-sources at equilibration step. Re-sampling is done
-    until convergence of cluster centroids is reached but for a maximum of
-    ``n_resamples`` times. At each step the current ``idx`` containing
-    cluster classifications is saved in the global ``idx_matrix``.
-
-    This function uses ``sklearn.cluster.KMeans`` as a clustering algorithm.
-
-    :param X:
-        original (full) data set.
-    :param X_source:
-        source terms corresponding to the state-space variables in ``X``.
-    :param scaling:
-        data scaling criterion.
-    :param biasing_option:
-        integer specifying biasing option.
-        See documentation of cluster-biased PCA for more information.
-        Can only attain values [1,2,3,4,5].
-    :param n_clusters:
-        number of clusters to use for K-Means partitioning.
-    :param n_components:
-        number of Principal Components that will be used (this directly
-        translates to how many first PC-sources the partitioning is based on).
-    :param n_resamples: (optional)
-        number of times that the re-sampling will be performed.
-    :param idx_all: (optional)
-        boolean specifying whether all ``idx`` vectors should be returned (``idx_all=True``) or only the last one (``idx_all=False``).
-    :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
-    :param verbose: (optional)
-        boolean for printing verbose details.
-
-    :raises ValueError:
-        if ``biasing_option`` is not 1, 2, 3, 4 or 5.
-
-    :raises ValueError:
-        if ``random_seed`` is not an integer.
-
-    :return:
-        - **idx_matrix** (returned if ``idx_all=True``) - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
-        - **idx** (returned if ``idx_all=False``) - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``.
-        - **converged** - boolean specifying whether the re-sampling algorithm have converged based on cluster centroids movement.
-    """
-
-    # Check that `biasing_option` parameter was passed correctly:
-    _biasing_options = [1,2,3,5]
-    if biasing_option not in _biasing_options:
-        raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
-
-    if random_seed != None:
-        if not isinstance(random_seed, int):
-            raise ValueError("Random seed has to be an integer.")
-
-    (n_observations, n_variables) = np.shape(X)
-
-    centroids_threshold = 0.01
-    converged = False
-
-    # Initialize idx_matrix:
-    idx_matrix = np.zeros((n_observations, n_resamples+1))
-
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.cluster import KMeans
-    from numpy import linalg
-
-    # Perform global PCA to obtain initial PC-sources:
-    pca_global = PCA(X, scaling, n_components, useXTXeig=True)
-
-    # Compute initial PC-sources:
-    global_pc_sources = pca_global.x2eta(X_source, nocenter=True)
-
-    # Make the initial clustering with K-Means based on n_components first PC-sources:
-    scaler = StandardScaler()
-    global_pc_sources_pp = scaler.fit_transform(global_pc_sources[:,0:n_components])
-    kmeans = KMeans(n_clusters=n_clusters).fit(global_pc_sources_pp)
-    idx = kmeans.labels_
-    idx_matrix[:,0] = idx
-
-    current_centroids = preprocess.get_centroids(X, idx)
-    current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
-
-    for iter in range(0,n_resamples):
-
-        old_centroids = current_centroids
-
-        (_, _, _, pc_sources_matrix, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=X_source, n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=verbose)
-        scaler = StandardScaler()
-        current_equilibrated_pc_sources_pp = scaler.fit_transform(pc_sources_matrix[:,:,-1])
-        kmeans = KMeans(n_clusters=n_clusters).fit(current_equilibrated_pc_sources_pp)
-        idx = kmeans.labels_
-        idx_matrix[:,iter+1] = idx
-
-        current_centroids = preprocess.get_centroids(X, idx)
-        current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
-
-        distance_between_centroids = linalg.norm((current_centroids - old_centroids))
-
-        if verbose==True:
-            print('Current norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
-
-        if distance_between_centroids <= centroids_threshold:
-            converged = True
-            print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
-            break
-
-    if idx_all:
-        return(idx_matrix, converged)
-    else:
-        return(idx, converged)
-
-def resample_kmeans_on_pc_scores(X, scaling, biasing_option, n_clusters, n_components, n_resamples=20, idx_all=True, random_seed=None, verbose=False):
-    """
-    This function performs re-sampling using K-Means clustering on
-    ``n_components`` first PC-scores at equilibration step. Re-sampling is done
-    until convergence of cluster centroids is reached but for a maximum of
-    ``n_resamples`` times. At each step the current ``idx`` containing
-    cluster classifications is saved in the global ``idx_matrix``.
-
-    This function uses ``sklearn.cluster.KMeans`` as a clustering algorithm.
-
-    :param X:
-        original (full) data set.
-    :param scaling:
-        data scaling criterion.
-    :param biasing_option:
-        integer specifying biasing option.
-        See documentation of cluster-biased PCA for more information.
-        Can only attain values [1,2,3,4,5].
-    :param n_clusters:
-        number of clusters to use for K-Means partitioning.
-    :param n_components:
-        number of Principal Components that will be used (this directly
-        translates to how many first PC-scores the partitioning is based on).
-    :param n_resamples: (optional)
-        number of times that the re-sampling will be performed.
-    :param idx_all: (optional)
-        boolean specifying whether all ``idx`` vectors should be returned (``idx_all=True``) or only the last one (``idx_all=False``).
-    :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
-    :param verbose: (optional)
-        boolean for printing verbose details.
-
-    :raises ValueError:
-        if ``biasing_option`` is not 1, 2, 3, 4 or 5.
-
-    :raises ValueError:
-        if ``random_seed`` is not an integer.
-
-    :return:
-        - **idx_matrix** (returned if ``idx_all=True``) - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
-        - **idx** (returned if ``idx_all=False``) - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``.
-        - **converged** - boolean specifying whether the re-sampling algorithm have converged based on cluster centroids movement.
-    """
-
-    # Check that `biasing_option` parameter was passed correctly:
-    _biasing_options = [1,2,3,5]
-    if biasing_option not in _biasing_options:
-        raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
-
-    if random_seed != None:
-        if not isinstance(random_seed, int):
-            raise ValueError("Random seed has to be an integer.")
-
-    (n_observations, n_variables) = np.shape(X)
-
-    centroids_threshold = 0.01
-    converged = False
-
-    # Initialize idx_matrix:
-    idx_matrix = np.zeros((n_observations, n_resamples+1))
-
-    from sklearn.preprocessing import StandardScaler
-    from sklearn.cluster import KMeans
-    from numpy import linalg
-
-    # Perform global PCA to obtain initial PC-scores:
-    pca_global = PCA(X, scaling, n_components, useXTXeig=True)
-
-    # Compute initial PC-scores:
-    global_pc_scores = pca_global.x2eta(X, nocenter=False)
-
-    # Make the initial clustering with K-Means based on n_components first PC-scores:
-    scaler = StandardScaler()
-    global_pc_scores_pp = scaler.fit_transform(global_pc_scores[:,0:n_components])
-    kmeans = KMeans(n_clusters=n_clusters).fit(global_pc_scores_pp)
-    idx = kmeans.labels_
-    idx_matrix[:,0] = idx
-
-    current_centroids = preprocess.get_centroids(X, idx)
-    current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
-
-    for iter in range(0,n_resamples):
-
-        old_centroids = current_centroids
-
-        (_, _, pc_scores_matrix, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=[], n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=verbose)
-        scaler = StandardScaler()
-        current_equilibrated_pc_scores_pp = scaler.fit_transform(pc_scores_matrix[:,:,-1])
-        kmeans = KMeans(n_clusters=n_clusters).fit(current_equilibrated_pc_scores_pp)
-        idx = kmeans.labels_
-        idx_matrix[:,iter+1] = idx
-
-        current_centroids = preprocess.get_centroids(X, idx)
-        current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
-
-        distance_between_centroids = linalg.norm((current_centroids - old_centroids))
-
-        if verbose==True:
-            print('Current norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
-
-        if distance_between_centroids <= centroids_threshold:
-            converged = True
-            print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
-            break
-
-    if idx_all:
-        return(idx_matrix, converged)
-    else:
-        return(idx, converged)
-
-def resample_bins_of_pc_sources(X, X_source, scaling, biasing_option, n_clusters, nth_source=1, n_resamples=20, zero_offset_percentage=0.1, split_at_zero=False, idx_all=True, random_seed=None, verbose=False):
-    """
-    This function performs re-sampling using source bins clustering on
-    :math:`n^{th}` PC-source at equilibration step. Re-sampling is done
-    until convergence of cluster centroids is reached but for a maximum of
-    ``n_resamples`` times. At each step the current ``idx`` containing
-    cluster classifications is saved in the global ``idx_matrix``.
-
-    This function uses ``preprocess.source_bins`` as a clustering technique.
-
-    :param X:
-        original (full) data set.
-    :param X_source:
-        source terms corresponding to the state-space variables in ``X``.
-    :param scaling:
-        data scaling criterion.
-    :param biasing_option:
-        integer specifying biasing option.
-        See documentation of cluster-biased PCA for more information.
-        Can only attain values [1,2,3,4,5].
-    :param n_clusters:
-        number of clusters to use for K-Means partitioning.
-    :param nth_source: (optional)
-        integer specifying which source to bin on. For instance, set
-        ``nth_source=1`` to use the first source.
-    :param n_resamples: (optional)
-        number of times that the re-sampling will be performed.
-    :param zero_offset_percentage: (optional)
-        setting as per ``preprocess.source_bins``.
-    :param split_at_zero: (optional)
-        setting as per ``preprocess.source_bins``.
-    :param idx_all: (optional)
-        boolean specifying whether all ``idx`` vectors should be returned (``idx_all=True``) or only the last one (``idx_all=False``).
-    :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
-    :param verbose: (optional)
-        boolean for printing verbose details.
-
-    :raises ValueError:
-        if ``biasing_option`` is not 1, 2, 3, 4 or 5.
-
-    :raises ValueError:
-        if ``random_seed`` is not an integer.
-
-    :return:
-        - **idx_matrix** (returned if ``idx_all=True``) - matrix of collected cluster classifications. This is a 2D array of size ``(n_observations, n_resamples+1)``.
-        - **idx** (returned if ``idx_all=False``) - vector of cluster classifications from the last re-sampling step. It is the same as ``idx_matrix[:,-1]``.
-        - **converged** - boolean specifying whether the re-sampling algorithm have converged based on cluster centroids movement.
-    """
-
-    from numpy import linalg
-
-    # Check that `biasing_option` parameter was passed correctly:
-    _biasing_options = [1,2,3,5]
-    if biasing_option not in _biasing_options:
-        raise ValueError("Option can only be 1-5. Option 4 is temporarily removed.")
-
-    if random_seed != None:
-        if not isinstance(random_seed, int):
-            raise ValueError("Random seed has to be an integer.")
-
-    (n_observations, n_variables) = np.shape(X)
-
-    n_components = cp.deepcopy(nth_source)
-
-    centroids_threshold = 0.01
-    converged = False
-
-    # Initialize idx_matrix:
-    idx_matrix = np.zeros((n_observations, n_resamples+1))
-
-    # Perform global PCA to obtain initial PC-sources:
-    pca_global = PCA(X, scaling, n_components, useXTXeig=True)
-
-    # Compute initial PC-sources:
-    global_pc_sources = pca_global.x2eta(X_source, nocenter=True)
-
-    # Make the initial clustering with source bins of the n-th PC-source:
-    idx = preprocess.source_bins(global_pc_sources[:,nth_source-1], n_clusters, zero_offset_percentage=zero_offset_percentage, split_at_zero=split_at_zero, verbose=False)
-    idx_matrix[:,0] = idx
-
-    current_centroids = preprocess.get_centroids(X, idx)
-    current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
-
-    for iter in range(0,n_resamples):
-
-        old_centroids = current_centroids
-
-        (_, _, _, pc_sources_matrix, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, X_source=X_source, n_components=n_components, biasing_option=biasing_option, n_iterations=1, stop_iter=0, random_seed=random_seed, verbose=False)
-        idx = preprocess.source_bins(pc_sources_matrix[:,nth_source-1,-1], n_clusters, zero_offset_percentage=zero_offset_percentage, split_at_zero=split_at_zero, verbose=False)
-        idx_matrix[:,iter+1] = idx
-
-        current_centroids = preprocess.get_centroids(X, idx)
-        current_centroids = np.divide(current_centroids, linalg.norm(current_centroids))
-
-        distance_between_centroids = linalg.norm((current_centroids - old_centroids))
-
-        if verbose==True:
-            print('Current norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
-
-        if distance_between_centroids <= centroids_threshold:
-            converged = True
-            print('Centroids have converged. Norm of the centroids difference: ' + str(round(distance_between_centroids, 5)))
-            break
-
-    if idx_all:
-        return(idx_matrix, converged)
-    else:
-        return(idx, converged)
 
 ################################################################################
 #
