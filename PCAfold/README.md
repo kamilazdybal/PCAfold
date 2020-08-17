@@ -10,4 +10,4 @@
 
 ## Data analysis
 
-`analysis` module contains functions for assessing the intrinsic dimensionality of manifolds and judging the manifold quality.
+`analysis` module contains functions for assessing the intrinsic dimensionality and quality of manifolds.

@@ -15,7 +15,7 @@ Manifold assessment
 
 This section includes functions for quantitative assessments of
 manifold dimensionality and for comparing manifold parameterizations
-according to scales of variation and uniqueness of dependent variables values.
+according to scales of variation and uniqueness of dependent variable values.
 
 ``compute_normalized_variance``
 ================================================

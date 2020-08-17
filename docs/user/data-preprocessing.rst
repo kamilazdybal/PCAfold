@@ -169,7 +169,7 @@ Plotting functions
 .. autofunction:: PCAfold.preprocess.plot_2d_clustering
 
 ``plot_2d_train_test_samples``
-======================
+==============================
 
 .. autofunction:: PCAfold.preprocess.plot_2d_train_test_samples
 
