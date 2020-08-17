@@ -83,11 +83,6 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 
 .. autofunction:: PCAfold.preprocess.source_bins
 
-``vqpca``
----------
-
-.. autofunction:: PCAfold.preprocess.vqpca
-
 Auxiliary functions
 ===================
 

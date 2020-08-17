@@ -35,17 +35,17 @@ class TestClustering(unittest.TestCase):
         self.assertTrue(isinstance(idx, np.ndarray))
         self.assertTrue(idx.ndim == 1)
 
-    def test_vqpca(self):
-        try:
-            idx = preprocess.vqpca(np.array([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]]).T, k=2,
-                                   n_components=1, scal_crit='NONE', idx_0=[], maximum_number_of_iterations=20,
-                                   verbose=False)
-            self.assertTrue(True)
-        except:
-            self.assertTrue(False)
-
-        self.assertTrue(isinstance(idx, np.ndarray))
-        self.assertTrue(idx.ndim == 1)
+    # def test_vqpca(self):
+    #     try:
+    #         idx = preprocess.vqpca(np.array([[1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]]).T, k=2,
+    #                                n_components=1, scal_crit='NONE', idx_0=[], maximum_number_of_iterations=20,
+    #                                verbose=False)
+    #         self.assertTrue(True)
+    #     except:
+    #         self.assertTrue(False)
+    #
+    #     self.assertTrue(isinstance(idx, np.ndarray))
+    #     self.assertTrue(idx.ndim == 1)
 
     def test_source_bins(self):
         try:

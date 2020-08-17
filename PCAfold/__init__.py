@@ -13,7 +13,6 @@ from .preprocess import variable_bins
 from .preprocess import predefined_variable_bins
 from .preprocess import mixture_fraction_bins
 from .preprocess import source_bins
-from .preprocess import vqpca
 from .preprocess import degrade_clusters
 from .preprocess import flip_clusters
 from .preprocess import get_centroids
