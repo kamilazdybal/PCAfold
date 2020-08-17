@@ -37,23 +37,13 @@ You are ready to ``import PCAfold``!
 Testing
 ^^^^^^^
 
-To run regression tests of all modules execute:
+To run regression tests from the base repo directory run:
 
-.. code:: python
+.. code-block:: text
 
-  from PCAfold import test
+  python3.7 -m unittest discover
 
-  test.test()
-
-You can also test each module separately:
-
-.. code:: python
-
-  from PCAfold import test
-
-  test.test_preprocess()
-  test.test_reduction()
-  test.test_analysis()
+To switch verbose on, use the ``-v`` flag.
 
 Plotting
 --------
