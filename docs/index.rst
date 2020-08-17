@@ -22,7 +22,7 @@ below:
 Each module's functionalities can also be used as a standalone tool for
 performing a specific task and can easily combine with techniques outside of
 this software, such as K-Means algorithm or Artificial Neural Networks.
-Reach out to the `Getting started <https://pca-python.readthedocs.io/en/latest/user/getting-started.html#workflows>`_
+Reach out to the `Getting started <https://pcafold.readthedocs.io/en/latest/user/getting-started.html#workflows>`_
 section for possible workflows that can be achieved with **PCAfold**.
 
 --------------------------------------------------------------------------------

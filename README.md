@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Documentation Status](https://readthedocs.org/projects/pca-python/badge/?version=latest)](https://pca-python.readthedocs.io/en/latest/?badge=latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Documentation Status](https://readthedocs.org/projects/pcafold/badge/?version=latest)](https://pcafold.readthedocs.io/en/latest/?badge=latest)
 
 # PCAfold
 
@@ -8,7 +8,7 @@ It incorporates a variety of data pre-processing tools (including data clusterin
 and sampling), uses PCA as a dimensionality reduction technique and introduces
 metrics to judge the topology of the low-dimensional manifolds.
 
-### [PCAfold Documentation](https://pca-python.readthedocs.io/en/latest/)
+### [PCAfold Documentation](https://pcafold.readthedocs.io/en/latest/)
 
 ## Software architecture
 
@@ -55,7 +55,7 @@ You are ready to `import PCAfold`!
 
 To run regression tests from the base repo directory run:
 
-```python
+```
 python3.7 -m unittest discover
 ```
 To switch verbose on, use the `-v` flag.
