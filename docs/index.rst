@@ -44,4 +44,4 @@ section for possible workflows that can be achieved with **PCAfold**.
    tutorials/demo-sampling
    tutorials/demo-global-vs-local-pca
    tutorials/demo-cluster-biased-pca
-   tutorials/demo-manifold-dimensionality
+   tutorials/demo-manifold-assessment
