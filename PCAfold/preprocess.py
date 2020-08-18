@@ -374,7 +374,6 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     ax.spines["left"].set_visible(True)
 
     if len(legend_label) != 0:
-
         lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
     if save_filename != None:

@@ -863,7 +863,7 @@ def test():
 
 def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X_source=[]):
     """
-    This function performs PCA on sampled data set :math:`\mathbf{X_r}` in one
+    This function performs PCA on sampled data set :math:`\mathbf{X_r}` with one
     of four implemented options.
 
     Reach out to the
@@ -1194,117 +1194,85 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
 
     return
 
-def analyze_eigenvalue_distribution(X, idx_matrix, k_list, scaling, biasing_option, random_seed=None, title=None, save_filename=None):
+def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_label=[], title=None, save_filename=None):
     """
     This function analyzes the normalized eigenvalue distribution when PCA is
-    performed on different versions of the reduced data sets
-    :math:`\mathbf{X_r}` vs. on the original data set :math:`\mathbf{X}`.
+    performed on the original data set :math:`\mathbf{X}` and on the sampled
+    data set :math:`\mathbf{X_r}`.
 
     :param X:
         original (full) data set.
-    :param idx_matrix:
-        matrix of collected idx vectors.
-    :param k_list:
-        list of numerical labels for the idx_matrix columns.
+    :param idx_X_r:
+        vector of indices that should be extracted from :math:`\mathbf{X}` to
+        form :math:`\mathbf{X_r}`.
     :param scaling:
         data scaling criterion.
     :param biasing_option:
         integer specifying biasing option.
         Can only attain values 1, 2, 3 or 4.
-    :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
+    :param legend_label: (optional)
+        list of strings specifying labels for the legend. First entry will refer
+        to :math:`\mathbf{X}` and second entry to :math:`\mathbf{X_r}`.
+        If the list is empty, legend will not be plotted.
     :param title: (optional)
         boolean or string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
-
-    :return:
-        - **min_at_q2_k** - label for which the eigenvalue was smallest when q=2.
-        - **min_at_q3_k** - label for which the eigenvalue was smallest when q=3.
-        - **max_at_q2_k** - label for which the eigenvalue was largest when q=2.
-        - **max_at_q3_k** - label for which the eigenvalue was largest when q=3.
     """
 
-    n_k = len(k_list)
+    color_X = '#191b27'
+    color_X_r = '#ff2f18'
+    color_link = '#bbbbbb'
+
     (n_observations, n_variables) = np.shape(X)
-    x_range = np.arange(1, n_variables+1)
-    colors = plt.cm.Blues(np.linspace(0.3,1,n_k))
+    n_components_range = np.arange(1, n_variables+1)
+    n_components = 1
+
+    # PCA on the original full data set X:
+    pca_original = PCA(X, scaling, n_components, useXTXeig=True)
+
+    # Compute eigenvalues:
+    eigenvalues_original = pca_original.L
+
+    # PCA on the sampled data set X_r:
+    (eigenvalues_sampled, _, _, _, _, _, _, _) = pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X_source=[])
+
+    # Normalize eigenvalues:
+    eigenvalues_original = eigenvalues_original / np.max(eigenvalues_original)
+    eigenvalues_sampled = eigenvalues_sampled / np.max(eigenvalues_sampled)
 
     fig, ax = plt.subplots(figsize=(n_variables, 6))
 
-    for i_idx, k in enumerate(k_list):
+    # Plot the eigenvalue distribution from the full original data set X:
+    original_distribution = plt.scatter(n_components_range, eigenvalues_original, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
 
-        idx = idx_matrix[:,i_idx]
-        (eigenvalues, _, _, _, _, _, _, _) = equilibrate_cluster_populations(X, idx, scaling, biasing_option=biasing_option, n_iterations=1, random_seed=random_seed)
+    # Plot the eigenvalue distribution from the sampled data set:
+    sampled_distribution = plt.scatter(n_components_range, eigenvalues_sampled, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
 
-        # Plot the eigenvalue distribution when PCA is performed on the original data set:
-        if i_idx==0:
-            original_distribution = plt.plot(np.arange(1, n_variables+1), eigenvalues[:,0], 'r-', linewidth=3, label='Original')
+    if len(legend_label) != 0:
+        lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
-            # Initialize the minimum eigenvalue at q=2 and q=3:
-            min_at_q2 = eigenvalues[1,0]
-            min_at_q3 = eigenvalues[2,0]
-            max_at_q2 = eigenvalues[1,0]
-            max_at_q3 = eigenvalues[2,0]
-            min_at_q2_k = 0
-            min_at_q3_k = 0
-            max_at_q2_k = 0
-            max_at_q3_k = 0
+    plt.plot(n_components_range, eigenvalues_original, '-', c=color_X, linewidth=line_width, alpha=1, zorder=1)
+    plt.plot(n_components_range, eigenvalues_sampled, '-', c=color_X_r, linewidth=line_width, alpha=1, zorder=1)
 
-        if eigenvalues[1,1] < min_at_q2:
-            min_at_q2 = eigenvalues[1,1]
-            min_at_q2_k = k
-        if eigenvalues[2,1] < min_at_q3:
-            min_at_q3 = eigenvalues[2,1]
-            min_at_q3_k = k
-        if eigenvalues[1,1] > max_at_q2:
-            max_at_q2 = eigenvalues[1,1]
-            max_at_q2_k = k
-        if eigenvalues[2,1] > max_at_q3:
-            max_at_q3 = eigenvalues[2,1]
-            max_at_q3_k = k
-
-        # Plot the eigenvalue distribution from the current equilibrated X_r for the current idx:
-        plt.plot(np.arange(1, n_variables+1), eigenvalues[:,-1], 'o--', c=colors[i_idx], label='$k=' + str(k) + '$')
-
-    plt.xticks(x_range, fontsize=font_annotations, **csfont)
-    plt.xlabel('q [-]', fontsize=font_labels, **csfont)
+    plt.xticks(n_components_range, fontsize=font_axes, **csfont)
+    plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
     plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_variables+1.5)
-    plt.grid(alpha=0.3)
+    plt.grid(alpha=0.3, zorder=0)
 
-    if min_at_q2_k==0:
-        plt.text(n_variables/3, 0.93, 'Min at $q=2$: Original, $\lambda=' + str(round(min_at_q2,3)) + '$')
-    else:
-        plt.text(n_variables/3, 0.93, 'Min at $q=2$: $k=' + str(min_at_q2_k) + '$, $\lambda=' + str(round(min_at_q2,3)) + '$')
-
-    if min_at_q3_k==0:
-        plt.text(n_variables/3, 0.79, 'Min at $q=3$: Original, $\lambda=' + str(round(min_at_q3,3)) + '$')
-    else:
-        plt.text(n_variables/3, 0.79, 'Min at $q=3$: $k=' + str(min_at_q3_k) + '$, $\lambda=' + str(round(min_at_q3,3)) + '$')
-
-    if max_at_q2_k==0:
-        plt.text(n_variables/3, 0.86, 'Max at $q=2$: Original, $\lambda=' + str(round(max_at_q2,3)) + '$')
-    else:
-        plt.text(n_variables/3, 0.86, 'Max at $q=2$: $k=' + str(max_at_q2_k) + '$, $\lambda=' + str(round(max_at_q2,3)) + '$')
-
-    if max_at_q3_k==0:
-        plt.text(n_variables/3, 0.72, 'Max at $q=3$: Original, $\lambda=' + str(round(max_at_q3,3)) + '$')
-    else:
-        plt.text(n_variables/3, 0.72, 'Max at $q=3$: $k=' + str(max_at_q3_k) + '$, $\lambda=' + str(round(max_at_q3,3)) + '$')
-
-    lgnd = plt.legend(fontsize=font_legend-2, loc="upper right")
-    plt.setp(lgnd.texts, **csfont)
+    ax.spines["top"].set_visible(True)
+    ax.spines["bottom"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    ax.spines["left"].set_visible(True)
 
     if title != False:
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
-
-    return(min_at_q2_k, min_at_q3_k, max_at_q2_k, max_at_q3_k)
 
 def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_option, X_source=[], n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
     """

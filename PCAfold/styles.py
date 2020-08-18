@@ -39,3 +39,5 @@ marker_scale_legend = 1
 marker_scale_legend_clustering = 10
 
 scatter_point_size = 2
+
+line_width = 1
