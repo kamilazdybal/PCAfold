@@ -867,7 +867,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     of four implemented options.
 
     Reach out to the
-    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-options>`_
+    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id4>`_
     section of the documentation for more information on the available options.
 
     :param X:
