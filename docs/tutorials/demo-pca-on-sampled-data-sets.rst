@@ -31,13 +31,14 @@ A general overview for performing PCA on sampled data set is presented below:
 
 The main goal is to inform PCA of some of the characteristics of the sampled
 data set :math:`\mathbf{X_r}`. There are several ways in which that information
-can be used and they can be controlled using a selected
-`Biasing option <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id4>`_
+can be incorporated within PCA transformation and they can be controlled using a selected
+`biasing option <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id4>`_
 and setting the ``biasing_option`` input parameter whenever needed. In this
-example we choose ``biasing_option=2``. It is understood that PCA performed on a
-sampled data set is *biased* in some way, since it is performed on a data set that
-contains different proportions of features in terms of sample density. Those features
-can be identified using any clustering technique of choice and later sampled.
+example, we choose ``biasing_option=2``. It is understood that PCA performed on a
+sampled data set is *biased* in some way, since that data set contains different
+proportions of features in terms of sample density than their original
+contribution within the full :math:`\mathbf{X}`.
+Those features can be identified using any clustering technique of choice.
 
 As an example, we will use a data set representing combustion of syngas
 (CO/H2 mixture) in air generated from steady laminar flamelet model.
@@ -154,8 +155,8 @@ in each cluster at each iteration:
   At iteration 10 taking samples:
   {0: 5316, 1: 5316, 2: 5316, 3: 5316}
 
-Analyze centers movement
-------------------------
+Analyze centers change
+----------------------
 
 This function compares centers computed on the original data set
 :math:`\mathbf{X}` versus on the sampled data set :math:`\mathbf{X_r}`.
@@ -276,9 +277,9 @@ Analyze eigenvalue distribution
 Plotting example
 ^^^^^^^^^^^^^^^^
 
-This function will produce a plot that shows the eigenvalues distribution for
-the original data set :math:`\mathbf{X}` and for the sampled data set
-:math:`\mathbf{X_r}`.
+This function will produce a plot that shows the normalized eigenvalues
+distribution for the original data set :math:`\mathbf{X}` and for the sampled
+data set :math:`\mathbf{X_r}`.
 Example of a plot:
 
 .. image:: ../images/eigenvalue-distribution.png
