@@ -14,7 +14,6 @@ Dependencies
 - ``numpy``
 - ``random``
 - ``scipy``
-- ``sklearn``
 
 Build from source
 ^^^^^^^^^^^^^^^^^

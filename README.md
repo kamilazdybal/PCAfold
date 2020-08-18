@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/pcafold/badge/?version=latest)](https://pcafold.readthedocs.io/en/latest/?badge=latest)
 
 # PCAfold
@@ -33,7 +33,6 @@ this software, such as K-Means algorithm or Artificial Neural Networks.
 - `numpy`
 - `random`
 - `scipy`
-- `sklearn`
 
 ### Build from source
 
