@@ -17,15 +17,21 @@ def center_scale(X, scaling, nocenter=False):
 
     .. math::
 
-        \mathbf{X_c} = \mathbf{X} - mean(\mathbf{X})
+        \mathbf{X_c} = \mathbf{X} - \mathbf{C}
 
-    Scaling is performed by dividing :math:`i^{th}` column by a certain scaling
-    factor :math:`d_i`, where scaling factors for all columns are stored in a vector
-    :math:`\mathbf{d}`:
+    where:
 
     .. math::
 
-        \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{d}^{-1}
+        \mathbf{C} = mean(\mathbf{X})
+
+    Scaling is performed by dividing :math:`i^{th}` column by a certain scaling
+    factor :math:`d_i`, where scaling factors for all columns are stored in a vector
+    :math:`\mathbf{D}`:
+
+    .. math::
+
+        \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
 
     Several scaling options are implemented here:
 
@@ -63,13 +69,13 @@ def center_scale(X, scaling, nocenter=False):
 
     .. math::
 
-        \mathbf{X_{cs}} = (\mathbf{X} - mean(\mathbf{X})) \\cdot \mathbf{d}^{-1}
+        \mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \\cdot \mathbf{D}^{-1}
 
     **Example:**
 
     .. code:: python
 
-        (X_cs, C, d) = center_scale(X, 'range', nocenter=False)
+        (Xcs, C, D) = center_scale(X, 'range', nocenter=False)
 
     :param X:
         data matrix to pre-process. Columns correspond to variables and rows
@@ -154,7 +160,7 @@ def invert_center_scale(X_cs, x_center, x_scale):
 
     .. math::
 
-        \mathbf{X} = \mathbf{X_{cs}} \\cdot \mathbf{d} + \mathbf{C}
+        \mathbf{X} = \mathbf{X_{cs}} \\cdot \mathbf{D} + \mathbf{C}
 
     :param X_cs:
         data matrix to pre-process. Columns correspond to variables and rows
@@ -162,7 +168,7 @@ def invert_center_scale(X_cs, x_center, x_scale):
     :param x_center:
         vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
     :param x_scale:
-        vector of scales :math:`\mathbf{d}` applied on the original data set :math:`\mathbf{X}`.
+        vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
 
     :return:
         - **X** - the original data set :math:`\mathbf{X}`.

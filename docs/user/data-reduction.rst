@@ -113,55 +113,110 @@ Functions for performing PCA on sampled data sets
 
 --------------------------------------------------------------------------------
 
+***************
 Biasing options
-===============
+***************
 
 This section explains the choice for ``biasing_option`` input parameter in some
-of the functions in this module.
+of the functions in this module. This parameter will control how PCA is performed
+on :math:`\mathbf{X_r}` data set sampled from :math:`\mathbf{X}`.
 
-Schemes below present how centering and scaling of data sets can be handled and
-how PCA transformations are done using the original eigenvectors
-:math:`\mathbf{A}` vs. the biased eigenvectors :math:`\mathbf{A_r}`.
-The superscript :math:`(i)` represents the :math:`i^{th}` version of the
-``idx`` vector.
-
-.. note:: Given the same ``idx``, the eigenvectors matrix :math:`\mathbf{A_r}` will be the same in option 1, 3 and 4 (the reduced data set is pre-processed in the same way in these three options). It will only be different in option 2 where the reduced data set is not pre-processed after being sampled from :math:`\mathbf{X_{cs}}`.
-
-.. note:: The biased PC-scores :math:`\mathbf{Z_{biased}}` resulting from option 4 are included within the biased PC-scores :math:`\mathbf{Z_{biased}}` resulting from option 3. Note that the only difference going with option 3 instead of option 4 is that there will be more observations in the PC-scores matrix, but the data set that is transformed by PCA in both cases was pre-processed using the same centers and scales.
+The general goal for PCA on sampled data sets is to bias PCA with some
+information about the sampled data set :math:`\mathbf{X_r}`.
 
 Biasing option 1
-----------------
+================
 
-In this option, the projection is always done using the centered and scaled original data set :math:`\mathbf{X_{cs}}` (centered with :math:`\mathbf{C}` and scaled with :math:`\mathbf{D}`). When sources of the PCs are computed, they are scaled by the scaling coming from the original data matrix :math:`\mathbf{X}`. The centers and scales of the reduced data set (:math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`) are not used anywhere beyond the pre-processing step.
+The steps of PCA in this option:
 
-.. image:: ../images/cb-PCA-scheme-option-1.png
++-----------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| *Step*                      | *Option 1*                                                                                                                 |
++=============================+============================================================================================================================+
+| *S1*: Sampling              | :math:`\mathbf{X} \xrightarrow{\text{sampling}} \mathbf{X_r}`                                                              |
++-----------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| *S2*: Centering and scaling | :math:`\mathbf{\tilde{X}_r} = (\mathbf{X_r} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                       |
++-----------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| *S3*: PCA: Eigenvectors     | :math:`\frac{1}{n-1} {\mathbf{\tilde{X}_r}}^{\mathbf{T}} \mathbf{\tilde{X}_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}` |
++-----------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| | *S4*: PCA: Transformation | | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                                   |
+| |                           | | where :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                                       |
++-----------------------------+----------------------------------------------------------------------------------------------------------------------------+
+
+These steps are presented graphically below:
+
+.. image:: ../images/biasing-option-1.png
     :width: 700
     :align: center
 
 Biasing option 2
-----------------
+================
 
-This option is the same as option 1, except we sample directly from :math:`\mathbf{X_{cs}}` and then without additionally pre-processing :math:`\mathbf{X_r}`, we perform PCA on a reduced data set.
+The steps of PCA in this option:
 
-.. image:: ../images/cb-PCA-scheme-option-2.png
++-----------------------------+--------------------------------------------------------------------------------------------------------------+
+| *Step*                      | *Option 2*                                                                                                   |
++=============================+==============================================================================================================+
+| | *S1*: Sampling            | | :math:`\mathbf{\tilde{X}} \xrightarrow{\text{sampling}} \mathbf{X_r}`                                      |
+| |                           | | where :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                         |
++-----------------------------+--------------------------------------------------------------------------------------------------------------+
+| *S2*: Centering and scaling | :math:`\mathbf{X_r}` is not further pre-processed                                                            |
++-----------------------------+--------------------------------------------------------------------------------------------------------------+
+| *S3*: PCA: Eigenvectors     | :math:`\frac{1}{n-1} {\mathbf{X_r}}^{\mathbf{T}} \mathbf{X_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}`   |
++-----------------------------+--------------------------------------------------------------------------------------------------------------+
+| *S4*: PCA: Transformation   | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                       |
++-----------------------------+--------------------------------------------------------------------------------------------------------------+
+
+These steps are presented graphically below:
+
+.. image:: ../images/biasing-option-2.png
     :width: 700
     :align: center
 
 Biasing option 3
-----------------
+================
 
-In this option, the projection is always done using the original data set :math:`\mathbf{X}` centered and scaled with the centers and scales found on the reduced data set :math:`\mathbf{X_r}` (centered by :math:`\mathbf{C_r}` and scaled by :math:`\mathbf{D_r}`). The sources :math:`\mathbf{S}` are scaled with :math:`\mathbf{D_r}` as well to match the data set scaling.
+The steps of PCA in this option:
 
-.. image:: ../images/cb-PCA-scheme-option-3.png
++-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| *Step*                        | *Option 3*                                                                                                                 |
++===============================+============================================================================================================================+
+| *S1*: Sampling                | :math:`\mathbf{X} \xrightarrow{\text{sampling}} \mathbf{X_r}`                                                              |
++-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| | *S2*: Centering and scaling | | :math:`\mathbf{\tilde{X}_r} = (\mathbf{X_r} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                     |
+| |                             | | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                                             |
++-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{n-1} {\mathbf{\tilde{X}_r}}^{\mathbf{T}} \mathbf{\tilde{X}_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}` |
++-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+| *S4*: PCA: Transformation     | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                                     |
++-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
+
+These steps are presented graphically below:
+
+.. image:: ../images/biasing-option-3.png
     :width: 700
     :align: center
 
 Biasing option 4
-----------------
+================
 
-In this option, the reduced data set is only found in order to compute its centers and scales. Once we have that, we go back to the original data set and pre-process it using :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`. PCA transformation is done on the entire data set :math:`\mathbf{X_{cs}^{(i)}}` and the same data set is projected onto the found eigenvectors.
+The steps of PCA in this option:
 
-.. image:: ../images/cb-PCA-scheme-option-5.png
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
+| *Step*                        | *Option 4*                                                                                                               |
++===============================+==========================================================================================================================+
+| *S1*: Sampling                | :math:`\mathbf{X} \xrightarrow{\text{sampling}} \mathbf{X_r}`                                                            |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
+| | *S2*: Centering and scaling | | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                       |
+| |                             | | where :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}` are centers and scales computed on :math:`\mathbf{X_r}`            |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
+| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{n-1} {\mathbf{\tilde{X}}}^{\mathbf{T}} \mathbf{\tilde{X}} \xrightarrow{\text{eigendec.}} \mathbf{A_r}`   |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
+| *S4*: PCA: Transformation     | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                                   |
++-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
+
+These steps are presented graphically below:
+
+.. image:: ../images/biasing-option-4.png
     :width: 700
     :align: center
 
