@@ -30,7 +30,7 @@ def center_scale(X, scaling, nocenter=False):
     Several scaling options are implemented here:
 
     +-----------------+-------------+------------------------------------------------------------------+
-    | Scaling method  | ``scaling`` | Scaling factor                                                   |
+    | Scaling method  | ``scaling`` | Scaling factor :math:`d_i`                                       |
     +=================+=============+==================================================================+
     | None            | ``'none'``  | 1                                                                |
     +-----------------+-------------+------------------------------------------------------------------+
@@ -38,24 +38,26 @@ def center_scale(X, scaling, nocenter=False):
     +-----------------+-------------+------------------------------------------------------------------+
     | Pareto          | ``'pareto'``| :math:`\sigma^2`                                                 |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Vast            | ``'vast'``  | :math:`\sigma^2 / mean(\mathbf{X})`                              |
+    | Vast            | ``'vast'``  | :math:`\sigma^2 / mean(\mathbf{X}_i)`                            |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Range           | ``'range'`` | :math:`max(\mathbf{X}) - min(\mathbf{X})`                        |
+    | Range           | ``'range'`` | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                    |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Level           | ``'level'`` | :math:`mean(\mathbf{X})`                                         |
+    | Level           | ``'level'`` | :math:`mean(\mathbf{X}_i)`                                       |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Max             | ``'max'``   | :math:`max(\mathbf{X})`                                          |
+    | Max             | ``'max'``   | :math:`max(\mathbf{X}_i)`                                        |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Poisson         |``'poisson'``| :math:`\sqrt{mean(\mathbf{X})}`                                  |
+    | Poisson         |``'poisson'``| :math:`\sqrt{mean(\mathbf{X}_i)}`                                |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Vast-2          | ``'vast_2'``| :math:`\sigma^2 \cdot k^2 / mean(\mathbf{X})`                    |
+    | Vast-2          | ``'vast_2'``| :math:`\sigma^2 k^2 / mean(\mathbf{X}_i)`                        |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Vast-3          | ``'vast_3'``| :math:`\sigma^2 \cdot k^2 / max(\mathbf{X})`                     |
+    | Vast-3          | ``'vast_3'``| :math:`\sigma^2 k^2 / max(\mathbf{X}_i)`                         |
     +-----------------+-------------+------------------------------------------------------------------+
-    | Vast-4          | ``'vast_4'``| :math:`\sigma^2 \cdot k^2 / (max(\mathbf{X}) - min(\mathbf{X}))` |
+    | Vast-4          | ``'vast_4'``| :math:`\sigma^2 k^2 / (max(\mathbf{X}_i) - min(\mathbf{X}_i))`   |
     +-----------------+-------------+------------------------------------------------------------------+
 
-    where :math:`\sigma` is standard deviation and :math:`k` is kurtosis.
+    where :math:`\mathbf{X}_i` is the :math:`i^{th}` column of :math:`\mathbf{X}`,
+    :math:`\sigma` is the standard deviation and :math:`k` is the kurtosis of the
+    :math:`i^{th}` column of :math:`\mathbf{X}`.
 
     When both centering and scaling is applied:
 
@@ -81,9 +83,9 @@ def center_scale(X, scaling, nocenter=False):
         if ``scaling`` method is not within the available scalings.
 
     :return:
-        - **Xout** - the centered and scaled data
+        - **Xout** - centered and scaled data set.
         - **xbar** - vector containig centers of each variable.
-        - **d** - the value for scaling
+        - **d** - vector containing scales of each variable.
     """
 
     _scalings_list = ['none', 'auto', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
@@ -175,26 +177,36 @@ def invert_center_scale(X_cs, x_center, x_scale):
 
 class PreProcessing:
     """
-    This class performs basic data manipulation and stores the result of that
-    manipulation. Specifically:
+    This class performs basic data manipulation on the original data matrix
+    :math:`\mathbf{X}` and stores the result of that manipulation.
+    Specifically, it:
 
-    - checks for the constant values and removes them,
-    - centers and scales the data.
+    - checks for the constant columns in a data set and removes them,
+    - centers and scales the data. Centering and scaling is performed on :math:`\mathbf{X}`.
 
     :param X:
-        data matrix to pre-process. Columns correspond to variables and rows
+        data matrix :math:`\mathbf{X}` to pre-process. Columns correspond to variables and rows
         correspond to observations.
     :param scaling:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
+
+    **Attributes:**
+
+        - **X_removed** - data set with removed constant columns.
+        - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
+        - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
+        - **X_cs** - centered and scaled data set.
+        - **C** - vector containig centers of each variable.
+        - **D** - vector containing scales of each variable.
     """
 
     def __init__(self, X, scaling='none', nocenter=False):
 
-        self.manipulated, self.idx_removed, self.original, self.idx_retained = remove_constant_vars(X)
-        self.Xout, self.xbar, self.d = center_scale(X, scaling, nocenter=nocenter)
+        (self.X_removed, self.idx_removed, _, self.idx_retained) = remove_constant_vars(X)
+        self.X_cs, self.C, self.D = center_scale(X, scaling, nocenter=nocenter)
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
@@ -274,8 +286,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         original (full) data set.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
-        form :math:`\mathbf{X_r}`. For instance, it can be obtained as
-        sampled train indices using sampling functionalities of this module.
+        form :math:`\mathbf{X_r}`.
     :param variable_names: (optional)
         list of strings specifying variable names.
     :param plot_variables: (optional)

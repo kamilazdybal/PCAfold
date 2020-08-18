@@ -88,8 +88,13 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.w_scores
 
-Functions for comparing two ``PCA`` objects
-===========================================
+Functions for performing PCA on sampled data sets
+=================================================
+
+``pca_on_sampled_data_set``
+---------------------------
+
+.. autofunction:: PCAfold.reduction.pca_on_sampled_data_set
 
 ``analyze_eigenvector_weights_movement``
 ----------------------------------------

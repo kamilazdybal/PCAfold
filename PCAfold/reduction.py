@@ -861,6 +861,176 @@ def test():
 #
 ################################################################################
 
+def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X_source=[]):
+    """
+    This function performs PCA on sampled data set :math:`\mathbf{X_r}` in one
+    of four implemented options.
+
+    Reach out to the
+    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-options>`_
+    section of the documentation for more information on the available options.
+
+    :param X:
+        original (full) data set.
+    :param idx_X_r:
+        vector of indices that should be extracted from :math:`\mathbf{X}` to
+        form :math:`\mathbf{X_r}`.
+    :param scaling:
+        data scaling criterion.
+    :param n_components:
+        number of first Principal Components that will be saved.
+    :param biasing_option:
+        integer specifying biasing option.
+        Can only attain values 1, 2, 3 or 4.
+    :param X_source:
+        source terms corresponding to the state-space variables in ``X``.
+
+    :raises ValueError:
+        if ``biasing_option`` is not 1, 2, 3 or 4.
+
+    :raises ValueError:
+        if ``random_seed`` is not an integer.
+
+    :return:
+        - **eigenvalues** - collected eigenvalues from each iteration.
+        - **eigenvectors** - collected eigenvectors from each iteration.\
+        This is a 2D array of size ``(n_variables, n_components)``.
+        - **pc_scores** - collected PC scores from each iteration.\
+        This is a 2D array of size ``(n_observations, n_components)``.
+        - **pc_sources** - collected PC sources from each iteration.\
+        This is a 2D array of size ``(n_observations, n_components)``.
+        - **C** - a vector of centers that were used to pre-process the\
+        original full data set.
+        - **D** - a vector of scales that were used to pre-process the\
+        original full data set.
+        - **C_r** - a vector of centers that were used to pre-process the\
+        sampled data set.
+        - **D_r** - a vector of scales that were used to pre-process the\
+        sampled data set.
+    """
+
+    # Check that `biasing_option` parameter was passed correctly:
+    _biasing_options = [1,2,3,4]
+    if biasing_option not in _biasing_options:
+        raise ValueError("Option can only be 1-4.")
+
+    (n_observations, n_variables) = np.shape(X)
+
+    # Pre-process the original full data set:
+    (X_cs, C, D) = preprocess.center_scale(X, scaling)
+
+    # Pre-process the original full sources:
+    if len(X_source) != 0:
+
+        # Scale sources with the global scalings:
+        X_source_cs = np.divide(X_source, D)
+
+    if biasing_option == 1:
+
+        # Generate the reduced data set X_r:
+        X_r = X[idx_X_r,:]
+
+        # Perform PCA on X_r:
+        pca = PCA(X_r, scaling, n_components, useXTXeig=True)
+        C_r = pca.XCenter
+        D_r = pca.XScale
+
+        # Compute eigenvectors:
+        eigenvectors = pca.Q
+
+        # Compute eigenvalues:
+        eigenvalues = pca.L
+
+        # Compute PC-scores:
+        pc_scores = X_cs.dot(eigenvectors[:,0:n_components])
+
+        if len(X_source) != 0:
+
+            # Compute PC-sources:
+            pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
+
+    elif biasing_option == 2:
+
+        # Generate the reduced data set X_r:
+        X_r = X_cs[idx_X_r,:]
+
+        # Perform PCA on X_r:
+        pca = PCA(X_r, 'none', n_components, useXTXeig=True, nocenter=True)
+        C_r = pca.XCenter
+        D_r = pca.XScale
+
+        # Compute eigenvectors:
+        eigenvectors = pca.Q
+
+        # Compute eigenvalues:
+        eigenvalues = pca.L
+
+        # Compute local PC-scores:
+        pc_scores = X_cs.dot(eigenvectors[:,0:n_components])
+
+        if len(X_source) != 0:
+
+            # Compute PC-sources:
+            pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
+
+    elif biasing_option == 3:
+
+        # Generate the reduced data set X_r:
+        X_r = X[idx_X_r,:]
+
+        # Perform PCA on X_r:
+        pca = PCA(X_r, scaling, n_components, useXTXeig=True)
+        C_r = pca.XCenter
+        D_r = pca.XScale
+
+        # Compute eigenvectors:
+        eigenvectors = pca.Q
+
+        # Compute eigenvalues:
+        eigenvalues = pca.L
+
+        # Compute local PC-scores (the original data set will be centered and scaled with C_r and D_r):
+        pc_scores = pca.x2eta(X, nocenter=False)
+
+        if len(X_source) != 0:
+
+            # Compute PC-sources:
+            pc_sources = pca.x2eta(X_source, nocenter=True)
+
+    elif biasing_option == 4:
+
+        # Generate the reduced data set X_r:
+        X_r = X[idx_X_r,:]
+
+        # Compute the current centers and scales of X_r:
+        (_, C_r, D_r) = preprocess.center_scale(X_r, scaling)
+
+        # Pre-process the global data set with the current C_r and D_r:
+        X_cs = (X - C_r) / D_r
+
+        # Perform PCA on the original data set X:
+        pca = PCA(X_cs, 'none', n_components, useXTXeig=True, nocenter=True)
+
+        # Compute eigenvectors:
+        eigenvectors = pca.Q
+
+        # Compute eigenvalues:
+        eigenvalues = pca.L
+
+        # Compute local PC-scores:
+        pc_scores = X_cs.dot(eigenvectors[:,0:n_components])
+
+        if len(X_source) != 0:
+
+            # Compute PC-sources:
+            pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
+
+    if len(X_source) == 0:
+
+        pc_sources = []
+
+    return(eigenvalues, eigenvectors, pc_scores, pc_sources, C, D, C_r, D_r)
+
 def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
     """
     This function analyzes the movement of weights on an eigenvector obtained
@@ -1214,9 +1384,9 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         - **pc_sources_matrix** - collected PC sources from each iteration.\
         This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
         - **idx_train** - the final training indices from the equilibrated iteration.
-        - **X_center** - a vector of final centers that were used to center\
+        - **C_r** - a vector of final centers that were used to center\
         the data set at the last (equlibration) iteration.
-        - **X_scale** - a vector of final scales that were used to scale the\
+        - **D_r** - a vector of final scales that were used to scale the\
         data set at the last (equlibration) iteration.
     """
 
@@ -1321,29 +1491,13 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         # Biasing option 1 -----------------------------------------------------
         if biasing_option == 1:
 
-            # Generate the reduced data set X_r:
-            X_r = X[idx_train,:]
-
-            # Perform PCA on X_r:
-            pca = PCA(X_r, scaling, n_components, useXTXeig=True)
-
-            # Compute local eigenvectors:
-            eigenvectors = pca.Q
-
-            # Compute local eigenvalues:
-            local_eigenvalues = pca.L
+            (local_eigenvalues, eigenvectors, pc_scores, pc_sources, _, _, C_r, D_r) = pca_on_sampled_data_set(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
             maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Compute local PC-scores:
-            pc_scores = X_cs.dot(eigenvectors[:,0:n_components])
 
             # Append the local PC-scores:
             pc_scores_matrix[:,:,iter+1] = pc_scores
 
             if len(X_source) != 0:
-
-                # Compute local PC-sources:
-                pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
 
                 # Append the global PC-sources:
                 pc_sources_matrix[:,:,iter+1] = pc_sources
@@ -1351,29 +1505,13 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         # Biasing option 2 -----------------------------------------------------
         elif biasing_option == 2:
 
-            # Generate the reduced data set X_r:
-            X_r = X_cs[idx_train,:]
-
-            # Perform PCA on X_r:
-            pca = PCA(X_r, 'none', n_components, useXTXeig=True, nocenter=True)
-
-            # Compute local eigenvectors:
-            eigenvectors = pca.Q
-
-            # Compute local eigenvalues:
-            local_eigenvalues = pca.L
+            (local_eigenvalues, eigenvectors, pc_scores, pc_sources, _, _, C_r, D_r) = pca_on_sampled_data_set(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
             maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Compute local PC-scores:
-            pc_scores = X_cs.dot(eigenvectors[:,0:n_components])
 
             # Append the local PC-scores:
             pc_scores_matrix[:,:,iter+1] = pc_scores
 
             if len(X_source) != 0:
-
-                # Compute local PC-sources:
-                pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
 
                 # Append the global PC-sources:
                 pc_sources_matrix[:,:,iter+1] = pc_sources
@@ -1381,31 +1519,13 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         # Biasing option 3 -----------------------------------------------------
         elif biasing_option == 3:
 
-            # Generate the reduced data set X_r:
-            X_r = X[idx_train,:]
-
-            # Perform PCA on X_r:
-            pca = PCA(X_r, scaling, n_components, useXTXeig=True)
-            X_center = pca.XCenter
-            X_scale = pca.XScale
-
-            # Compute local eigenvectors:
-            eigenvectors = pca.Q
-
-            # Compute local eigenvalues:
-            local_eigenvalues = pca.L
+            (local_eigenvalues, eigenvectors, pc_scores, pc_sources, _, _, C_r, D_r) = pca_on_sampled_data_set(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
             maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Compute local PC-scores (the original data set will be centered and scaled with the local centers and scales):
-            pc_scores = pca.x2eta(X, nocenter=False)
 
             # Append the local PC-scores:
             pc_scores_matrix[:,:,iter+1] = pc_scores
 
             if len(X_source) != 0:
-
-                # Compute local PC-sources:
-                pc_sources = pca.x2eta(X_source, nocenter=True)
 
                 # Append the global PC-sources:
                 pc_sources_matrix[:,:,iter+1] = pc_sources
@@ -1413,37 +1533,13 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         # Biasing option 4 -----------------------------------------------------
         elif biasing_option == 4:
 
-            # Generate the reduced data set X_r:
-            X_r = X[idx_train,:]
-
-            # Compute the current centers and scales of X_r:
-            (_, C_r, D_r) = preprocess.center_scale(X_r, scaling)
-            X_center = C_r
-            X_scale = D_r
-
-            # Pre-process the global data set with the current C_r and D_r:
-            X_cs = (X - C_r) / D_r
-
-            # Perform PCA on the original data set X:
-            pca = PCA(X_cs, 'none', n_components, useXTXeig=True, nocenter=True)
-
-            # Compute local eigenvectors:
-            eigenvectors = pca.Q
-
-            # Compute local eigenvalues:
-            local_eigenvalues = pca.L
+            (local_eigenvalues, eigenvectors, pc_scores, pc_sources, _, _, C_r, D_r) = pca_on_sampled_data_set(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
             maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Compute local PC-scores:
-            pc_scores = X_cs.dot(eigenvectors[:,0:n_components])
 
             # Append the local PC-scores:
             pc_scores_matrix[:,:,iter+1] = pc_scores
 
             if len(X_source) != 0:
-
-                # Compute local PC-sources:
-                pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
 
                 # Append the global PC-sources:
                 pc_sources_matrix[:,:,iter+1] = pc_sources
@@ -1457,7 +1553,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     # Remove the first column of zeros:
     eigenvalues = eigenvalues[:,1::]
 
-    return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, X_center, X_scale)
+    return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r)
 
 ################################################################################
 #
