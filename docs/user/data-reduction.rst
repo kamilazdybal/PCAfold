@@ -124,6 +124,11 @@ on :math:`\mathbf{X_r}` data set sampled from :math:`\mathbf{X}`.
 The general goal for PCA on sampled data sets is to bias PCA with some
 information about the sampled data set :math:`\mathbf{X_r}`.
 
+It is assumed that centers and scales computed on
+:math:`\mathbf{X_r}` are denoted :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`
+and centers and scales computed on :math:`\mathbf{X}` are denoted
+:math:`\mathbf{C}` and :math:`\mathbf{D}`.
+
 Biasing option 1
 ================
 
@@ -206,8 +211,7 @@ The steps of PCA in this option:
 +===============================+==========================================================================================================================+
 | *S1*: Sampling                | :math:`\mathbf{X} \xrightarrow{\text{sampling}} \mathbf{X_r}`                                                            |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
-| | *S2*: Centering and scaling | | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                       |
-| |                             | | where :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}` are centers and scales computed on :math:`\mathbf{X_r}`            |
+| *S2*: Centering and scaling   | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                         |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 | *S3*: PCA: Eigenvectors       | :math:`\frac{1}{n-1} {\mathbf{\tilde{X}}}^{\mathbf{T}} \mathbf{\tilde{X}} \xrightarrow{\text{eigendec.}} \mathbf{A_r}`   |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------+

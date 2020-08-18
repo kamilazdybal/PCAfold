@@ -316,8 +316,8 @@ which always samples equal number of samples from each cluster).
   It is worth noting that function ``equilibrate_cluster_populations`` uses
   ``pca_on_sampled_data_set`` inside.
 
-We will first inspect how many samples each cluster has (in the earlier
-identified clusters by K-Means algorithm):
+We will first inspect how many samples each cluster has (in the clusters we
+identified earlier with the K-Means algorithm):
 
 .. code:: python
 
@@ -329,8 +329,8 @@ which shows us populations of each cluster to be:
 
   [7830, 16903, 19959, 5308]
 
-We begin by generating a sampling using the already identified clusters and
-perform manual sampling. Suppose that we'd like to severely under-represent the
+We begin by generating a manual sampling using the already identified clusters.
+Suppose that we would like to severely under-represent the
 two largest clusters and over-represent the features of the two smallest
 clusters. Let's select 7000 samples from :math:`k_0`, 1000 samples from :math:`k_1`,
 1000 samples from :math:`k_2` and 5000 samples from :math:`k_3`:
@@ -344,7 +344,7 @@ clusters. Let's select 7000 samples from :math:`k_0`, 1000 samples from :math:`k
   (idx_manual, _) = sample.manual({0:7000, 1:1000, 2:1000, 3:5000}, sampling_type='number', test_selection_option=1)
 
 In this example we are not interested in generating test samples, so we can
-suppress returning those. The verbose information will tell us how the sample
+suppress returning those. The verbose information will tell us how sample
 densities compare in terms of percentage of samples in each cluster:
 
 .. code-block:: text
@@ -369,7 +369,8 @@ We now perform PCA on a data set that has been sampled according to
   (eigenvalues, eigenvectors, pc_scores, _, _, _, _, _) = reduction.pca_on_sampled_data_set(state_space, idx_manual, scal_crit, n_components, biasing_option)
 
 Finally, we can generate all the same plots that were shown before.
-Here, we are only going to present the new biased manifold using current sampling:
+Here, we are only going to present the new biased manifold resulting from
+current manual sampling:
 
 .. image:: ../images/generalize-sampling-biased-manifold.png
     :width: 500
