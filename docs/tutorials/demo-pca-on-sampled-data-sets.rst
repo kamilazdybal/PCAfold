@@ -32,12 +32,12 @@ A general overview for performing PCA on sampled data set is presented below:
 The main goal is to inform PCA of some of the characteristics of the sampled
 data set :math:`\mathbf{X_r}`. There are several ways in which that information
 can be used and they can be controlled using a selected
-`Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id4>`_
+`Biasing option <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id4>`_
 and setting the ``biasing_option`` input parameter whenever needed. In this
 example we choose ``biasing_option=2``. It is understood that PCA performed on a
-sampled data set is *biased* in some way, since it usually contains different
-ratios of various features identified with a clustering technique in terms of
-sample density.
+sampled data set is *biased* in some way, since it is performed on a data set that
+contains different proportions of features in terms of sample density. Those features
+can be identified using any clustering technique of choice and later sampled.
 
 As an example, we will use a data set representing combustion of syngas
 (CO/H2 mixture) in air generated from steady laminar flamelet model.
