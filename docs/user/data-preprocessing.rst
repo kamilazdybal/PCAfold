@@ -14,10 +14,9 @@ and data sampling.
 Data manipulation
 *****************
 
-.. note:: It is assumed that the rows of the data set ``X`` correspond to
+.. note:: It is assumed that the rows of the data set :math:`\mathbf{X}` correspond to
   observations and columns correspond to variables.
-
-  The data set has dimensions ``(n_observations, n_variables)``.
+  It has dimensions ``(n_observations, n_variables)``.
 
 This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.

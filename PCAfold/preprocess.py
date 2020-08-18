@@ -287,7 +287,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         p = \\frac{||\mathbf{C_r}|| - ||\mathbf{C}||}{||\mathbf{C}||} \cdot 100\%
 
     :param X:
-        original (full) data set.
+        original (full) data set :math:`\mathbf{X}`.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
