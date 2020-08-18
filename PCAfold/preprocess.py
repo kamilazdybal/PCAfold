@@ -33,6 +33,12 @@ def center_scale(X, scaling, nocenter=False):
 
         \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
 
+    When both centering and scaling is applied:
+
+    .. math::
+
+        \mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \\cdot \mathbf{D}^{-1}
+
     Several scaling options are implemented here:
 
     +-----------------+-------------+------------------------------------------------------------------+
@@ -65,17 +71,11 @@ def center_scale(X, scaling, nocenter=False):
     :math:`\sigma` is the standard deviation and :math:`k` is the kurtosis of the
     :math:`i^{th}` column of :math:`\mathbf{X}`.
 
-    When both centering and scaling is applied:
-
-    .. math::
-
-        \mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \\cdot \mathbf{D}^{-1}
-
     **Example:**
 
     .. code:: python
 
-        (Xcs, C, D) = center_scale(X, 'range', nocenter=False)
+        (X_cs, C, D) = center_scale(X, 'range', nocenter=False)
 
     :param X:
         data matrix to pre-process. Columns correspond to variables and rows
@@ -89,9 +89,9 @@ def center_scale(X, scaling, nocenter=False):
         if ``scaling`` method is not within the available scalings.
 
     :return:
-        - **Xout** - centered and scaled data set.
-        - **xbar** - vector containig centers of each variable.
-        - **d** - vector containing scales of each variable.
+        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        - **X_center** - vector containig centers :math:`\mathbf{C}` of each variable.
+        - **X_scale** - vector containing scales :math:`\mathbf{D}` of each variable.
     """
 
     _scalings_list = ['none', 'auto', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
@@ -99,61 +99,61 @@ def center_scale(X, scaling, nocenter=False):
     if scaling.lower() not in _scalings_list:
         raise ValueError("Unrecognized scaling method.")
 
-    Xout = np.zeros_like(X, dtype=float)
-    xbar = X.mean(axis=0)
+    X_cs = np.zeros_like(X, dtype=float)
+    X_center = X.mean(axis=0)
     npts, nvar = X.shape
 
-    dev = 0 * xbar
-    kurt = 0 * xbar
+    dev = 0 * X_center
+    kurt = 0 * X_center
 
     for i in range(0, nvar):
         # calculate the standard deviation (required for some scalings)
         dev[i] = np.std(X[:, i], ddof=0)
 
         # calculate the kurtosis (required for some scalings)
-        kurt[i] = np.sum((X[:, i] - xbar[i]) ** 4) / npts / (np.sum((X[:, i] - xbar[i]) ** 2) / npts) ** 2
+        kurt[i] = np.sum((X[:, i] - X_center[i]) ** 4) / npts / (np.sum((X[:, i] - X_center[i]) ** 2) / npts) ** 2
 
     scaling = scaling.upper()
     eps = np.finfo(float).eps
     if scaling == 'NONE' or scaling == '':
-        d = np.ones(nvar)
+       X_scale = np.ones(nvar)
     elif scaling == 'AUTO' or scaling == 'STD':
-        d = dev
+       X_scale = dev
     elif scaling == 'VAST':
-        d = dev * dev / (xbar + eps)
+       X_scale = dev * dev / (X_center + eps)
     elif scaling == 'VAST_2':
-        d = dev * dev * kurt * kurt / (xbar + eps)
+       X_scale = dev * dev * kurt * kurt / (X_center + eps)
     elif scaling == 'VAST_3':
-        d = dev * dev * kurt * kurt / np.max(X, axis=0)
+       X_scale = dev * dev * kurt * kurt / np.max(X, axis=0)
     elif scaling == 'VAST_4':
-        d = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
+       X_scale = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
     elif scaling == 'RANGE':
-        d = np.max(X, axis=0) - np.min(X, axis=0)
+       X_scale = np.max(X, axis=0) - np.min(X, axis=0)
     elif scaling == 'LEVEL':
-        d = xbar
+       X_scale = X_center
     elif scaling == 'MAX':
-        d = np.max(X, axis=0)
+       X_scale = np.max(X, axis=0)
     elif scaling == 'PARETO':
-        d = np.zeros(nvar)
-        for i in range(0, nvar):
-            d[i] = np.sqrt(np.std(X[:, i], ddof=0))
+       X_scale = np.zeros(nvar)
+       for i in range(0, nvar):
+           X_scale[i] = np.sqrt(np.std(X[:, i], ddof=0))
     elif scaling == 'POISSON':
-        d = np.sqrt(xbar)
+       X_scale = np.sqrt(X_center)
     else:
         raise ValueError('Unsupported scaling option')
 
     for i in range(0, nvar):
         if nocenter:
-            Xout[:, i] = (X[:, i]) / d[i]
+            X_cs[:, i] = (X[:, i]) / X_scale[i]
         else:
-            Xout[:, i] = (X[:, i] - xbar[i]) / d[i]
+            X_cs[:, i] = (X[:, i] - X_center[i]) / X_scale[i]
 
     if nocenter:
-        xbar = np.zeros(nvar)
+        X_center = np.zeros(nvar)
 
-    return Xout, xbar, d
+    return X_cs, X_center, X_scale
 
-def invert_center_scale(X_cs, x_center, x_scale):
+def invert_center_scale(X_cs, X_center, X_scale):
     """
     This function inverts whatever centering and scaling was done by
     ``center_scale`` function:
@@ -163,11 +163,10 @@ def invert_center_scale(X_cs, x_center, x_scale):
         \mathbf{X} = \mathbf{X_{cs}} \\cdot \mathbf{D} + \mathbf{C}
 
     :param X_cs:
-        data matrix to pre-process. Columns correspond to variables and rows
-        correspond to observations.
-    :param x_center:
+        centered and scaled data set :math:`\mathbf{X_{cs}}`.
+    :param X_center:
         vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-    :param x_scale:
+    :param X_scale:
         vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
 
     :return:
@@ -176,8 +175,8 @@ def invert_center_scale(X_cs, x_center, x_scale):
 
     X = np.zeros_like(X_cs, dtype=float)
 
-    for i in range(0, len(x_center)):
-        X[:, i] = X_cs[:, i] * x_scale[i] + x_center[i]
+    for i in range(0, len(X_center)):
+        X[:, i] = X_cs[:, i] * X_scale[i] + X_center[i]
 
     return X
 
