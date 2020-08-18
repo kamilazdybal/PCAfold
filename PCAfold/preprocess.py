@@ -75,11 +75,10 @@ def center_scale(X, scaling, nocenter=False):
 
     .. code:: python
 
-        (X_cs, C, D) = center_scale(X, 'range', nocenter=False)
+        (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
 
     :param X:
-        data matrix to pre-process. Columns correspond to variables and rows
-        correspond to observations.
+        original data set :math:`\mathbf{X}`.
     :param scaling:
         string specifying the scaling methodology.
     :param nocenter: (optional)
@@ -90,8 +89,8 @@ def center_scale(X, scaling, nocenter=False):
 
     :return:
         - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - vector containig centers :math:`\mathbf{C}` of each variable.
-        - **X_scale** - vector containing scales :math:`\mathbf{D}` of each variable.
+        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
     """
 
     _scalings_list = ['none', 'auto', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
@@ -170,7 +169,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
         vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
 
     :return:
-        - **X** - the original data set :math:`\mathbf{X}`.
+        - **X** - original data set :math:`\mathbf{X}`.
     """
 
     X = np.zeros_like(X_cs, dtype=float)
@@ -187,11 +186,10 @@ class PreProcessing:
     Specifically, it:
 
     - checks for the constant columns in a data set and removes them,
-    - centers and scales the data. Centering and scaling is performed on :math:`\mathbf{X}`.
+    - centers and scales the data.
 
     :param X:
-        data matrix :math:`\mathbf{X}` to pre-process. Columns correspond to variables and rows
-        correspond to observations.
+        data matrix :math:`\mathbf{X}` to pre-process.
     :param scaling:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
@@ -203,39 +201,38 @@ class PreProcessing:
         - **X_removed** - data set with removed constant columns.
         - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
         - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
-        - **X_cs** - centered and scaled data set.
-        - **C** - vector containig centers of each variable.
-        - **D** - vector containing scales of each variable.
+        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
     """
 
     def __init__(self, X, scaling='none', nocenter=False):
 
-        (self.X_removed, self.idx_removed, _, self.idx_retained) = remove_constant_vars(X)
-        self.X_cs, self.C, self.D = center_scale(X, scaling, nocenter=nocenter)
+        (self.X_removed, self.idx_removed, self.idx_retained) = remove_constant_vars(X)
+        (self.X_cs, self.X_center, self.X_scale) = center_scale(X, scaling, nocenter=nocenter)
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
-    Remove any constant variables (columns) in the data set :math:`\mathbf{X}`.
-    Specifically pre-processing for PCA so the eigenvalue calculation
+    This function removes any constant columns in the data set :math:`\mathbf{X}`.
+    Specifically, it can be used as pre-processing for PCA so the eigenvalue calculation
     doesn't break.
 
     :param X:
-        original data.
+        original data set :math:`\mathbf{X}`.
     :param maxtol:
-        tolerance for the maximum absolute value of a column (variable) in
-        ``X`` to be saved.
+        tolerance for the maximum absolute value of a column in
+        :math:`\mathbf{X}` to be saved.
     :param rangetol:
-        tolerance for the range (max-min) over the maximum absolute value of
-        a column (variable) in X to be saved.
+        tolerance for the range :math:`max(\mathbf{X}) - min(\mathbf{X})` over
+        the maximum absolute value of a column in :math:`\mathbf{X}` to be saved.
 
     :return:
-        - **manipulated** - the manipulated data.
+        - **X_removed** - original data set :math:`\mathbf{X}` with any constant columns removed.
         - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
-        - **original** - the original data :math:`\mathbf{X}`.
         - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
     """
+
     npts, nvar = X.shape
-    original = np.copy(X)
     idx_removed = []
     idx_retained = []
     for i in reversed(range(0, nvar)):
@@ -247,10 +244,12 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
             idx_removed.append(i)
         else:
             idx_retained.append(i)
-    manipulated = X
+
+    X_removed = X
     idx_removed = idx_removed[::-1]
     idx_retained = idx_retained[::-1]
-    return manipulated, idx_removed, original, idx_retained
+
+    return X_removed, idx_removed, idx_retained
 
 def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], title=None, save_filename=None):
     """

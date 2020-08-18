@@ -14,13 +14,13 @@ and data sampling.
 Data manipulation
 *****************
 
+.. note:: It is assumed that the rows of the data set ``X`` correspond to
+  observations and columns correspond to variables.
+
+  The data set has dimensions ``(n_observations, n_variables)``.
+
 This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.
-
-Class ``PreProcessing``
-=======================
-
-.. autoclass:: PCAfold.preprocess.PreProcessing
 
 ``center_scale``
 ==========================
@@ -36,6 +36,11 @@ Class ``PreProcessing``
 ==========================
 
 .. autofunction:: PCAfold.preprocess.remove_constant_vars
+
+Class ``PreProcessing``
+=======================
+
+.. autoclass:: PCAfold.preprocess.PreProcessing
 
 ``analyze_centers_change``
 ==========================

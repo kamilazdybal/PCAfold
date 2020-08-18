@@ -51,7 +51,7 @@ class PCA:
             raise ValueError('Variables should be in columns; observations in rows.\n'
                              'Also ensure that you have more than one observation\n')
 
-        manipulated, idx_removed, original, idx_retained = preprocess.remove_constant_vars(X)
+        manipulated, idx_removed, idx_retained = preprocess.remove_constant_vars(X)
 
         if len(idx_removed) != 0:
             raise ValueError('Constant variable detected. Must preprocess data for PCA.')

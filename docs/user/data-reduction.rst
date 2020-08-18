@@ -16,7 +16,7 @@ Principal Component Analysis
 .. note:: It is assumed that the rows of the data set ``X`` on which PCA is
   performed correspond to observations and columns correspond to variables.
 
-  The data set thus has dimensions ``(n_observations, n_variables)``.
+  The data set has dimensions ``(n_observations, n_variables)``.
 
 Class ``PCA``
 =============
