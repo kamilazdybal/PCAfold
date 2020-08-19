@@ -64,7 +64,7 @@ class PCA:
             self.neta = nvar
 
         self.X, self.XCenter, self.XScale = preprocess.center_scale(X, self.scaling, nocenter)
-        self.R = np.dot(self.X.transpose(), self.X) / npts
+        self.R = np.dot(self.X.transpose(), self.X) / (npts-1)
         if useXTXeig:
             L, Q = np.linalg.eigh(self.R)
             L = L / np.sum(L)
