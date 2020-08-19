@@ -126,7 +126,8 @@ information about the sampled data set :math:`\mathbf{X_r}`.
 It is assumed that centers and scales computed on
 :math:`\mathbf{X_r}` are denoted :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`
 and centers and scales computed on :math:`\mathbf{X}` are denoted
-:math:`\mathbf{C}` and :math:`\mathbf{D}`.
+:math:`\mathbf{C}` and :math:`\mathbf{D}`. Here $N$ is the number of
+observations in :math:`\mathbf{X}`.
 
 Biasing option 1
 ================
@@ -141,7 +142,7 @@ The steps of PCA in this option:
 | | *S2*: Centering and scaling | | :math:`\mathbf{\tilde{X}_r} = (\mathbf{X_r} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                     |
 | |                             | | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                                             |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
-| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{n-1} {\mathbf{\tilde{X}_r}}^{\mathbf{T}} \mathbf{\tilde{X}_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}` |
+| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{N-1} {\mathbf{\tilde{X}_r}}^{\mathbf{T}} \mathbf{\tilde{X}_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}` |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
 | *S4*: PCA: Transformation     | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                                     |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
@@ -165,7 +166,7 @@ The steps of PCA in this option:
 | | *S2*: Centering and scaling | | :math:`\mathbf{X_r}` is not further pre-processed                                                          |
 | |                             | | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                               |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------+
-| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{n-1} {\mathbf{X_r}}^{\mathbf{T}} \mathbf{X_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}`   |
+| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{N-1} {\mathbf{X_r}}^{\mathbf{T}} \mathbf{X_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}`   |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------+
 | *S4*: PCA: Transformation     | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                       |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------+
@@ -189,7 +190,7 @@ The steps of PCA in this option:
 | | *S2*: Centering and scaling | | :math:`\mathbf{\tilde{X}_r} = (\mathbf{X_r} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                     |
 | |                             | | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                         |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
-| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{n-1} {\mathbf{\tilde{X}_r}}^{\mathbf{T}} \mathbf{\tilde{X}_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}` |
+| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{N-1} {\mathbf{\tilde{X}_r}}^{\mathbf{T}} \mathbf{\tilde{X}_r} \xrightarrow{\text{eigendec.}} \mathbf{A_r}` |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
 | *S4*: PCA: Transformation     | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                                     |
 +-------------------------------+----------------------------------------------------------------------------------------------------------------------------+
@@ -212,7 +213,7 @@ The steps of PCA in this option:
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 | *S2*: Centering and scaling   | :math:`\mathbf{\tilde{X}} = (\mathbf{X} - \mathbf{C_r}) \cdot \mathbf{D_r}^{-1}`                                         |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
-| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{n-1} {\mathbf{\tilde{X}}}^{\mathbf{T}} \mathbf{\tilde{X}} \xrightarrow{\text{eigendec.}} \mathbf{A_r}`   |
+| *S3*: PCA: Eigenvectors       | :math:`\frac{1}{N-1} {\mathbf{\tilde{X}}}^{\mathbf{T}} \mathbf{\tilde{X}} \xrightarrow{\text{eigendec.}} \mathbf{A_r}`   |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------+
 | *S4*: PCA: Transformation     | :math:`\mathbf{Z_r} = \mathbf{\tilde{X}} \mathbf{A_r}`                                                                   |
 +-------------------------------+--------------------------------------------------------------------------------------------------------------------------+

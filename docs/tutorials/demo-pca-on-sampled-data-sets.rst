@@ -221,25 +221,25 @@ Plotting example
 
 Three weight normalization variants are available:
 
-- No normalization, the absolute values of the eigenvector weights are plotted.\
+- No normalization, the absolute values of the eigenvector weights are plotted. \
   To use this variant set ``normalize=False``. Example can be seen below:
 
 .. image:: ../images/eigenvector-weights-movement-non-normalized.png
     :width: 500
     :align: center
 
-- Normalizing so that the highest weight is equal to 1 and the smallest weight\
-  is between 0 and 1. This is useful for judging the severity of the weight movement.\
-  To use this variant set ``normalize=True`` and ``zero_norm=False``.\
+- Normalizing so that the highest weight is equal to 1 and the smallest weight \
+  is between 0 and 1. This is useful for judging the severity of the weight movement. \
+  To use this variant set ``normalize=True`` and ``zero_norm=False``. \
   Example can be seen below:
 
 .. image:: ../images/eigenvector-weights-movement-normalized.png
     :width: 500
     :align: center
 
-- Normalizing so that weights are between 0 and 1. This is useful for judging\
-  the movement trends since it will blow up even the smallest changes to the entire\
-  range 0-1. To use this variant set ``normalize=True`` and ``zero_norm=True``.\
+- Normalizing so that weights are between 0 and 1. This is useful for judging \
+  the movement trends since it will blow up even the smallest changes to the entire \
+  range 0-1. To use this variant set ``normalize=True`` and ``zero_norm=True``. \
   Example can be seen below:
 
 .. image:: ../images/eigenvector-weights-movement-normalized-to-zero.png
