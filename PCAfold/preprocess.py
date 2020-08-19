@@ -25,9 +25,9 @@ def center_scale(X, scaling, nocenter=False):
 
         \mathbf{C} = mean(\mathbf{X})
 
-    Scaling is performed by dividing the :math:`i^{th}` column by a scaling
-    factor :math:`d_i`, where scaling factors for all columns are stored in a vector
-    :math:`\mathbf{D}`:
+    Scaling is performed by dividing the :math:`i^{th}` column of
+    :math:`\mathbf{X}` by a scaling factor :math:`d_i`, where scaling factors
+    for all columns are stored in a vector :math:`\mathbf{D}`:
 
     .. math::
 
@@ -181,11 +181,12 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
 class PreProcessing:
     """
-    This class performs basic data manipulation on the original data matrix
-    :math:`\mathbf{X}` and stores the result of that manipulation.
+    This class performs a composition of data manipulation done by ``remove_constant_vars``
+    and ``center_scale`` functions on the original data set
+    :math:`\mathbf{X}`. It can be used to store the result of that manipulation.
     Specifically, it:
 
-    - checks for the constant columns in a data set and removes them,
+    - checks for constant columns in a data set and removes them,
     - centers and scales the data.
 
     :param X:
