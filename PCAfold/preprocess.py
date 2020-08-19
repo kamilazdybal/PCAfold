@@ -25,7 +25,7 @@ def center_scale(X, scaling, nocenter=False):
 
         \mathbf{C} = mean(\mathbf{X})
 
-    Scaling is performed by dividing :math:`i^{th}` column by a certain scaling
+    Scaling is performed by dividing the :math:`i^{th}` column by a scaling
     factor :math:`d_i`, where scaling factors for all columns are stored in a vector
     :math:`\mathbf{D}`:
 
@@ -189,7 +189,7 @@ class PreProcessing:
     - centers and scales the data.
 
     :param X:
-        data matrix :math:`\mathbf{X}` to pre-process.
+        original data set :math:`\mathbf{X}`.
     :param scaling:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
@@ -287,7 +287,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         p = \\frac{||\mathbf{C_r}|| - ||\mathbf{C}||}{||\mathbf{C}||} \cdot 100\%
 
     :param X:
-        original (full) data set :math:`\mathbf{X}`.
+        original data set :math:`\mathbf{X}`.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
