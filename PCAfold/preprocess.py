@@ -1674,14 +1674,26 @@ def degrade_clusters(idx, verbose=False):
     is equal to ``0``.
 
     :param idx:
-        raw vector of cluster classifications.
+        vector of cluster classifications.
     :param verbose: (optional)
         boolean for printing clustering details.
+
+    :raises ValueError:
+        if ``idx`` vector contains entries other than integers.
 
     :return:
         - **idx_degraded** degraded vector of cluster classifications. The first cluster has index 0.
         - **k_update** - the updated number of clusters.
     """
+
+    if isinstance(idx, list):
+        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    elif isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    else:
+        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
 
     index = 0
     dictionary = {}
@@ -1715,13 +1727,45 @@ def flip_clusters(idx, dictionary):
 
     :param idx:
         vector of cluster classifications.
-        The first cluster has index 0.
     :param dictionary:
         a dictionary specifying the cluster numeration flipping instructions.
 
+    :raises ValueError:
+        if ``idx`` vector contains entries other than integers.
+
+    :raises ValueError:
+        if any ``key`` or ``value`` is not an integer.
+
+    :raises ValueError:
+        if any ``key`` is not found within ``idx``.
+
     :return:
-        - **flipped_idx** - vector of cluster classifications. The first cluster has index 0.
+        - **flipped_idx** - vector of cluster classifications.
     """
+
+    if isinstance(idx, list):
+        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    elif isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    else:
+        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
+
+    # Check that keys and values are properly defined:
+    for key, value in dictionary.items():
+
+        # Check that all keys are present in the `idx`:
+        if key not in np.unique(idx):
+            raise ValueError("Key " + str(key) + " does not match an entry in `idx`.")
+
+        # Check that keys are non-negative integers:
+        if not isinstance(key, int):
+            raise ValueError("Error in key " + str(key) + ". Key must be an integer.")
+
+        # Check that values are non-negative integers:
+        if not isinstance(value, int):
+            raise ValueError("Error in value " + str(value) + ". Value must be an integer.")
 
     flipped_idx = []
 
@@ -1742,7 +1786,6 @@ def get_centroids(X, idx):
         data set for computing the cluster centroids.
     :param idx:
         vector of cluster classifications.
-        The first cluster has index 0.
 
     :raises ValueError:
         if the number of observations in the data set ``X`` does not match the
