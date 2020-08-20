@@ -7,14 +7,13 @@ from PCAfold import PCA
 
 class TestReduction(unittest.TestCase):
 
-    def test_PCA_class_initialization(self):
+    def test_PCA_allowed_initializations(self):
 
         test_data_set = np.random.rand(100,20)
         test_data_set_constant = np.random.rand(100,20)
         test_data_set_constant[:,10] = np.ones((100,))
         test_data_set_constant[:,5] = np.ones((100,))
 
-        # Instantiations that should work:
         try:
             pca = PCA(test_data_set, scaling='auto')
         except Exception:
@@ -60,7 +59,23 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
-        # Instantiations that should not work:
+        try:
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(test_data_set_constant)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca = PCA(X_removed, scaling='range', neta=2)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_PCA_not_allowed_initializations(self):
+
+        test_data_set = np.random.rand(100,20)
+        test_data_set_constant = np.random.rand(100,20)
+        test_data_set_constant[:,10] = np.ones((100,))
+        test_data_set_constant[:,5] = np.ones((100,))
+
         with self.assertRaises(ValueError):
             pca = PCA(test_data_set, scaling='none', neta=-1)
 
@@ -93,16 +108,6 @@ class TestReduction(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             pca = PCA(test_data_set_constant, scaling='range', neta=5)
-
-        try:
-            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(test_data_set_constant)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            pca = PCA(X_removed, scaling='range', neta=2)
-        except Exception:
-            self.assertTrue(False)
 
     def test_x2eta(self):
 

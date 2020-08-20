@@ -126,7 +126,7 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            # Inject a constant columns that has values close to zero:
+            # Inject a constant column that has values close to zero:
             close_to_zero_column = -10**(-14)*np.ones((100,1))
             close_to_zero_column[20:30,:] = -10**(-13)
             close_to_zero_column[80:85,:] = -10**(-15)
@@ -141,7 +141,7 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            # Inject a constant columns that has values close to zero:
+            # Inject a constant column that has values close to zero:
             close_to_zero_column = -10**(-14)*np.ones((100,1))
             close_to_zero_column[20:30,:] = 10**(-13)
             close_to_zero_column[80:85,:] = 10**(-15)
