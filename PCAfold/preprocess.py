@@ -87,7 +87,10 @@ def center_scale(X, scaling, nocenter=False):
         boolean specifying whether data should be centered by mean.
 
     :raises ValueError:
-        if ``scaling`` method is not within the available scalings.
+        if ``scaling`` method is not a string or is not within the available scalings.
+
+    :raises ValueError:
+        if ``nocenter`` is not a boolean.
 
     :return:
         - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
@@ -95,8 +98,14 @@ def center_scale(X, scaling, nocenter=False):
         - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
     """
 
-    if scaling.lower() not in _scalings_list:
-        raise ValueError("Unrecognized scaling method.")
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be a string.")
+    else:
+        if scaling.lower() not in _scalings_list:
+            raise ValueError("Unrecognized scaling method.")
+
+    if not isinstance(nocenter, bool):
+        raise ValueError("Parameter `nocenter` has to be a boolean.")
 
     (n_observations, n_variables) = np.shape(X)
     X_cs = np.zeros_like(X, dtype=float)

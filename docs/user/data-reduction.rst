@@ -126,7 +126,7 @@ information about the sampled data set :math:`\mathbf{X_r}`.
 It is assumed that centers and scales computed on
 :math:`\mathbf{X_r}` are denoted :math:`\mathbf{C_r}` and :math:`\mathbf{D_r}`
 and centers and scales computed on :math:`\mathbf{X}` are denoted
-:math:`\mathbf{C}` and :math:`\mathbf{D}`. Here $N$ is the number of
+:math:`\mathbf{C}` and :math:`\mathbf{D}`. Here :math:`N` is the number of
 observations in :math:`\mathbf{X}`.
 
 Biasing option 1

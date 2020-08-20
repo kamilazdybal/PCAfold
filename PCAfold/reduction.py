@@ -32,12 +32,7 @@ class PCA:
         pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
 
     :param X:
-        matrix of data to apply PCA to. Variables are in columns and
-        observations are in rows.  Must have more observations than
-        variables.
-        *Note*: If a variable (column) is constant in the matrix ``X``, an error will
-        arise telling the user to preprocess the data to remove that variable. The
-        preprocess class can do this for the user.
+        original data set :math:`\mathbf{X}`.
     :param scaling: (optional)
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
@@ -48,6 +43,25 @@ class PCA:
 
             * ``useXTXeig=False`` uses singular-value decomposition (from ``scipy.linalg.svd``)
             * ``useXTXeig=True`` (default) uses ``numpy.linalg.eigh`` on the covariance matrix ``R``
+
+    :raises ValueError:
+        if the original data set :math:`\mathbf{X}` has more variables (columns)
+        then observations (rows).
+
+    :raises ValueError:
+        if a constant column is detected in the original data set :math:`\mathbf{X}`.
+
+    :raises ValueError:
+        if ``scaling`` method is not a string or is not within the available scalings.
+
+    :raises ValueError:
+        if ``neta`` is not an integer or is negative.
+
+    :raises ValueError:
+        if ``useXTXeig`` is not a boolean.
+
+    :raises ValueError:
+        if ``nocenter`` is not a boolean.
 
     **Attributes:**
 
@@ -136,7 +150,7 @@ class PCA:
 
     def x2eta(self, X, nocenter=False):
         """
-        Calculate the principal components given the original data.
+        Calculate the Principal Components given the original data .
 
         **Example:**
 
@@ -152,10 +166,11 @@ class PCA:
             eta = pca_X.x2eta(X)
 
         :param X:
-            a set of observations of variables x (observations in rows),
-            unscaled, uncentered. These do not need to be the same
-            observations as were used to construct the PCA object. They
-            could be, e.g. functions of those variables.
+            data set to transform. Note that it does not need to
+            be the same data set that was used to construct the PCA object. It
+            could for instance be a function of that data set. By default,
+            this data set will be pre-processed with the centers and scales
+            computed on the data set used when constructing the PCA object.
         :param nocenter: (optional)
             Defaults to centering. A nonzero argument here will result in no
             centering being applied, even though it may be present in the
@@ -166,6 +181,7 @@ class PCA:
         :return:
             - **eta** - the Principal Components.
         """
+
         neta = self.neta
         n_observations, nvar = X.shape
         assert nvar == len(self.L), "Number of variables inconsistent with number of eigenvectors."
@@ -184,7 +200,7 @@ class PCA:
 
     def eta2x(self, eta):
         """
-        Calculate the principal components (or reconstructed variables).
+        Calculate the reconstructed variables from the Principal Components.
 
         **Example:**
 
@@ -206,7 +222,7 @@ class PCA:
             matrix of Principal Components (PCs).
 
         :return:
-            - **X** - the unscaled, uncentered approximation to the data.
+            - **X** - the unscaled and uncentered approximation to the data.
         """
 
         n_observations, n_components = eta.shape
