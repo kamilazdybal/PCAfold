@@ -1123,7 +1123,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
     return(eigenvalues, eigenvectors, pc_scores, pc_sources, C, D, C_r, D_r)
 
-def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
+def analyze_eigenvector_weights_movement(eigenvectors, variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
     """
     This function analyzes the movement of weights on an eigenvector obtained
     from a reduced data set as specified by the ``eigenvectors`` matrix.
@@ -1157,7 +1157,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
 
             eigenvectors_1 = eigenvectors_matrix[:,0,:]
             eigenvectors_2 = eigenvectors_matrix[:,1,:]
-    :param variable_names:
+    :param variable_names: (optional)
         list of strings specifying variable names.
     :param plot_variables: (optional)
         list of integers specifying indices of variables to be plotted.
@@ -1181,9 +1181,16 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
     :raises ValueError:
         if the number of variables in ``variable_names`` list does not
         correspond to variables in the ``eigenvectors_matrix``.
+
+    :return:
+        - **plt** - plot handle.
     """
 
     (n_variables, n_versions) = np.shape(eigenvectors)
+
+    # Create default labels for variables:
+    if len(variable_names) == 0:
+        variable_names = ['$X_{' + str(i) + '}$' for i in range(0, n_variables)]
 
     # Check that the number of columns in the eigenvector matrix is equal to the
     # number of elements in the `variable_names` vector:
@@ -1284,7 +1291,7 @@ def analyze_eigenvector_weights_movement(eigenvectors, variable_names, plot_vari
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
-    return
+    return plt
 
 def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_label=[], title=None, save_filename=None):
     """
@@ -1311,6 +1318,9 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
     """
 
     color_X = '#191b27'
@@ -1365,6 +1375,8 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
 
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
 
 def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_option, X_source=[], n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
     """
@@ -1652,6 +1664,9 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
     """
 
     fig, axs = plt.subplots(1, 1, figsize=(6,6))
@@ -1673,3 +1688,5 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt

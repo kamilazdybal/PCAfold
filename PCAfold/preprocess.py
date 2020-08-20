@@ -338,6 +338,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         - **normalized_C_r** - normalized centers :math:`||\mathbf{C_r}||`.
         - **center_movement_percentage** - percentage :math:`p`\
         measuring the relative change in normalized centers.
+        - **plt** - plot handle.
     """
 
     color_X = '#191b27'
@@ -403,7 +404,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
-    return (normalized_C, normalized_C_r, center_movement_percentage)
+    return (normalized_C, normalized_C_r, center_movement_percentage, plt)
 
 ################################################################################
 #
@@ -1665,13 +1666,35 @@ def degrade_clusters(idx, verbose=False):
 
     **Example:**
 
-    Starting with an ``idx`` that is the following:
-    ``[0, 0, 2, 0, 5, 10]`` this function turns this ``idx`` to:
-    ``[0, 0, 1, 0, 2, 3]``, where clusters are numbered with consecutive integers.
+    .. code:: python
 
-    Alternatively, if ``idx`` is: ``[1, 1, 2, 2, 3, 3]`` this function turns
-    this ``idx`` to: ``[0, 0, 1, 1, 2, 2]`` so that the smallest cluster number
-    is equal to ``0``.
+        from PCAfold.preprocess import degrade_clusters
+
+        idx = [0, 0, 2, 0, 5, 10]
+        (idx_degraded, k_update) = degrade_clusters(idx)
+
+    The code above will produce:
+
+    .. code-block:: text
+
+        >>> idx_degraded
+        array([0, 0, 1, 0, 2, 3])
+
+    Alternatively:
+
+    .. code:: python
+
+        from PCAfold.preprocess import degrade_clusters
+
+        idx = [1, 1, 2, 2, 3, 3]
+        (idx_degraded, k_update) = degrade_clusters(idx)
+
+    will produce:
+
+    .. code-block:: text
+
+        >>> idx_degraded
+        array([0, 0, 1, 1, 2, 2])
 
     :param idx:
         vector of cluster classifications.
@@ -1679,7 +1702,7 @@ def degrade_clusters(idx, verbose=False):
         boolean for printing clustering details.
 
     :raises ValueError:
-        if ``idx`` vector contains entries other than integers.
+        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
 
     :return:
         - **idx_degraded** degraded vector of cluster classifications. The first cluster has index 0.
@@ -1721,17 +1744,33 @@ def degrade_clusters(idx, verbose=False):
 
 def flip_clusters(idx, dictionary):
     """
-    This function flips the cluster labelling according to instructions provided
+    This function flips cluster labelling according to instructions provided
     in the dictionary. For a ``dictionary = {key : value}``, a cluster with a
     number ``key`` will get a number ``value``.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold.preprocess import flip_clusters
+
+        idx = [0,0,0,1,1,1,1,2,2]
+        flipped_idx = flip_clusters(idx, {1:2, 2:1})
+
+    The code above will produce:
+
+    .. code-block:: text
+
+        >>> flipped_idx
+        array([0, 0, 0, 2, 2, 2, 2, 1, 1])
 
     :param idx:
         vector of cluster classifications.
     :param dictionary:
-        a dictionary specifying the cluster numeration flipping instructions.
+        dictionary specifying instructions for cluster label flipping.
 
     :raises ValueError:
-        if ``idx`` vector contains entries other than integers.
+        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
 
     :raises ValueError:
         if any ``key`` or ``value`` is not an integer.
@@ -1740,7 +1779,7 @@ def flip_clusters(idx, dictionary):
         if any ``key`` is not found within ``idx``.
 
     :return:
-        - **flipped_idx** - vector of cluster classifications.
+        - **flipped_idx** - re-labelled vector of cluster classifications.
     """
 
     if isinstance(idx, list):
@@ -1959,6 +1998,9 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
     """
 
     from matplotlib import cm
@@ -1989,6 +2031,8 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
 
 def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
     """
@@ -2027,6 +2071,9 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
     """
 
     from matplotlib import cm
@@ -2072,3 +2119,5 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
 
     if title != None: figure.suptitle(title, fontsize=font_title, **csfont)
     if save_filename != None: figure.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
