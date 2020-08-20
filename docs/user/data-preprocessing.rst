@@ -85,10 +85,10 @@ classification of each observation from the original data set
 
 .. autofunction:: PCAfold.preprocess.mixture_fraction_bins
 
-``source_bins``
----------------
+``zero_neighborhood_bins``
+--------------------------
 
-.. autofunction:: PCAfold.preprocess.source_bins
+.. autofunction:: PCAfold.preprocess.zero_neighborhood_bins
 
 Auxiliary functions
 ===================

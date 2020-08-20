@@ -1518,22 +1518,22 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     return(idx)
 
-def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
+def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
-    This function does clustering by dividing a source (or PC-source) vector
-    ``source`` into bins. It can be useful for partitioning any variable
+    This function aims to separate close-to-zero observations in a vector into one
+    cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
+    It can be useful for partitioning any variable
     that has many observations clustered around zero value and relatively few
     observations far away from zero on either side.
-    It aims to separate close-to-zero observations into one
-    cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
+
     The offset from zero at which splits are performed is computed
     based on the input parameter ``zero_offset_percentage``:
 
     .. math::
 
-        \\verb|offset| = \\frac{(max(\\verb|source|) - min(\\verb|source|)) \cdot \\verb|zero_offset_percentage|}{100}
+        \\verb|offset| = \\frac{(max(\\verb|var|) - min(\\verb|var|)) \cdot \\verb|zero_offset_percentage|}{100}
 
-    Further clusters are found by splitting positive and negative sources
+    Further clusters are found by splitting positive and negative values in a vector
     alternatingly into bins of equal lengths.
 
     **Example:**
@@ -1542,7 +1542,7 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
 
     With ``split_at_zero=False``:
 
-    .. image:: ../images/clustering-source-bins.png
+    .. image:: ../images/clustering-zero-neighborhood-bins.png
       :width: 700
       :align: center
 
@@ -1552,7 +1552,7 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
 
     With ``split_at_zero=True``:
 
-    .. image:: ../images/clustering-source-bins-zero-split.png
+    .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.png
       :width: 700
       :align: center
 
@@ -1561,18 +1561,18 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
     values, with negative values close to zero, with positive values close to
     zero and with positive values.
 
-    :param source:
+    :param var:
         vector of variable values.
     :param k:
         number of clusters to partition the data.
         Cannot be smaller than 3 if ``split_at_zero=False`` or smaller
         than 4 if ``split_at_zero=True``.
     :param zero_offset_percentage: (optional)
-        percentage of :math:`(max(\\verb|source|) - min(\\verb|source|))`
+        percentage of :math:`max(\\verb|var|) - min(\\verb|var|)` range
         to take as the offset from zero value. For instance, set
         ``zero_offset_percentage=10`` if you want 10% as offset.
     :param split_at_zero: (optional)
-        boolean specifying whether partitioning should be done at ``source=0``.
+        boolean specifying whether partitioning should be done at ``var=0``.
     :param verbose: (optional)
         boolean for printing clustering details.
 
@@ -1581,13 +1581,13 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         ``split_at_zero=False`` or smaller than 4 when ``split_at_zero=True``.
 
     :raises ValueError:
-        if the source vector ``source`` has only non-negative or only
+        if the vector ``var`` has only non-negative or only
         non-positive values. For such vectors it is recommended to use
         ``predefined_variable_bins`` function instead.
 
     :raises ValueError:
         if the requested offset from zero crosses the minimum or maximum value
-        of the source vector ``source``. If that is the case, it is
+        of the variable vector ``var``. If that is the case, it is
         recommended to lower the ``zero_offset_percentage`` value.
 
     :return:
@@ -1602,20 +1602,20 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
     if split_at_zero and (not (isinstance(k, int) and k > 3)):
         raise ValueError("The number of clusters must be an integer not smaller than 4 when splitting at zero.")
 
-    source_min = np.min(source)
-    source_max = np.max(source)
-    source_range = abs(source_max - source_min)
-    offset = zero_offset_percentage * source_range / 100
+    var_min = np.min(var)
+    var_max = np.max(var)
+    var_range = abs(var_max - var_min)
+    offset = zero_offset_percentage * var_range / 100
 
-    # Basic checks on the source vector:
-    if not (source_min <= 0):
+    # Basic checks on the variable vector:
+    if not (var_min <= 0):
         raise ValueError("Source vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
 
-    if not (source_max >= 0):
+    if not (var_max >= 0):
         raise ValueError("Source vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
 
-    if (source_min > -offset) or (source_max < offset):
-        raise ValueError("Offset from zero crosses the minimum or maximum value of the source vector. Consider lowering `zero_offset_percentage`.")
+    if (var_min > -offset) or (var_max < offset):
+        raise ValueError("Offset from zero crosses the minimum or maximum value of the variable vector. Consider lowering `zero_offset_percentage`.")
 
     # Number of interval borders:
     if split_at_zero:
@@ -1624,10 +1624,10 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         n_bins_borders = k
 
     # Generate cluster borders on the negative side:
-    borders_negative = np.linspace(source_min, -offset, int(np.ceil(n_bins_borders/2)))
+    borders_negative = np.linspace(var_min, -offset, int(np.ceil(n_bins_borders/2)))
 
     # Generate cluster borders on the positive side:
-    borders_positive = np.linspace(offset, source_max, int(np.ceil((n_bins_borders+1)/2)))
+    borders_positive = np.linspace(offset, var_max, int(np.ceil((n_bins_borders+1)/2)))
 
     # Combine the two partitions:
     if split_at_zero:
@@ -1637,12 +1637,12 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
 
     # Bin data matrices initialization:
     idx_clust = []
-    idx = np.zeros((len(source),))
+    idx = np.zeros((len(var),))
 
     # Create the cluster division vector:
     for bin in range(0,k):
 
-        idx_clust.append(np.where((source >= borders[bin]) & (source <= borders[bin+1])))
+        idx_clust.append(np.where((var >= borders[bin]) & (var <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
     idx = np.asarray([int(i) for i in idx])
@@ -1652,7 +1652,7 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         (idx, k_new) = degrade_clusters(idx, verbose=False)
 
     if verbose==True:
-        __print_verbose_information_clustering(source, idx, borders)
+        __print_verbose_information_clustering(var, idx, borders)
 
     return(idx)
 

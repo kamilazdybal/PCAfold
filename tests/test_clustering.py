@@ -35,9 +35,9 @@ class TestClustering(unittest.TestCase):
         self.assertTrue(isinstance(idx, np.ndarray))
         self.assertTrue(idx.ndim == 1)
 
-    def test_source_bins(self):
+    def test_zero_neighborhood_bins(self):
         try:
-            idx = preprocess.source_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4,
+            idx = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4,
                                          split_at_zero=True, verbose=False)
 
             self.assertTrue(True)

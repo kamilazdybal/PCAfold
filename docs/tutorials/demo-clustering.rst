@@ -94,10 +94,10 @@ The visual result of this clustering can be seen below:
   :width: 350
   :align: center
 
-Cluster into bins of source vector
-----------------------------------
+Cluster into zero-neighborhood variable bins
+--------------------------------------------
 
-This partitioning relies on unbalanced source vector which, in principle,
+This partitioning relies on unbalanced variable vector which, in principle,
 is assumed to have a lot of observations whose values are close to zero and
 relatively few observations with values away from zero.
 This function can be used to separate close-to-zero observations into one
@@ -108,7 +108,7 @@ Without splitting at zero ``split_at_zero=False``
 
 .. code:: python
 
-  (idx_source_bins) = preprocess.source_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
+  (idx_zero_neighborhood_bins) = preprocess.zero_neighborhood_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -126,7 +126,7 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 The visual result of this clustering can be seen below:
 
-.. image:: ../images/tutorial-clustering-pc-source-bins-k3.png
+.. image:: ../images/tutorial-clustering-zero-neighborhood-bins-k3.png
   :width: 350
   :align: center
 
@@ -135,7 +135,7 @@ With splitting at zero ``split_at_zero=True``
 
 .. code:: python
 
-  (idx_source_bins_split_at_zero) = preprocess.source_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+  (idx_zero_neighborhood_bins_split_at_zero) = preprocess.zero_neighborhood_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -155,7 +155,7 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 The visual result of this clustering can be seen below:
 
-.. image:: ../images/tutorial-clustering-pc-source-bins-split-at-zero-k4.png
+.. image:: ../images/tutorial-clustering-zero-neighborhood-bins-split-at-zero-k4.png
   :width: 350
   :align: center
 
