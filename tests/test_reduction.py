@@ -4,9 +4,70 @@ from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import PCA
 from PCAfold import DataSampler
-
+from scipy import linalg as lg
 
 class TestReduction(unittest.TestCase):
+
+    def test_PCA(self):
+
+        tol = 10 * np.finfo(float).eps
+
+        # create random dataset with zero mean
+        n_observations = 100
+        PHI = np.vstack(
+            (np.sin(np.linspace(0, np.pi, n_observations)).T, np.cos(np.linspace(0, 2 * np.pi, n_observations)),
+             np.linspace(0, np.pi, n_observations)))
+        PHI, cntr, scl = preprocess.center_scale(PHI.T, 'NONE')
+
+        # create random means for the dataset for comparison with PCA XCenter
+        xbar = np.random.rand(1, PHI.shape[1])
+
+        # svd on PHI to get Q and L for comparison with PCA Q and L
+        U, s, V = lg.svd(PHI)
+        L = s * s / np.sum(s * s)
+        isort = np.argsort(-np.diagonal(np.diag(L)))  # descending order
+        L = L[isort]
+        Q = V.T[:, isort]
+
+        # checking both methods for PCA:
+        pca = PCA(PHI + xbar, 'NONE', useXTXeig=False)
+        pca2 = PCA(PHI + xbar, 'NONE', useXTXeig=True)
+
+        # comparing mean(centering), centered data, Q, and L
+
+        if np.any(xbar - pca.XCenter > tol) or np.any(xbar - pca2.XCenter > tol):
+            self.assertTrue(False)
+
+        if np.any(PHI - pca.X > tol) or np.any(PHI - pca2.X > tol):
+            self.assertTrue(False)
+
+        if np.any(Q - pca.Q > tol) or np.any(Q - pca2.Q > tol):
+            self.assertTrue(False)
+
+        if np.any(L - pca.L > tol) or np.any(L - pca2.L > tol):
+            self.assertTrue(False)
+
+        # Check if feed eta's to PCA, return same eta's when do x2eta
+        eta = pca.x2eta(PHI + xbar)  # dataset as example of eta's
+
+        # both methods of PCA:
+        pca = PCA(eta, 'NONE', useXTXeig=False)
+        pca2 = PCA(eta, 'NONE', useXTXeig=True)
+
+        # x2eta transformation:
+        eta_new = pca.x2eta(eta)
+        eta_new2 = pca2.x2eta(eta)
+
+        # transformation can have different direction -> check sign is the same before compare eta's
+        for i in range(pca.nvar):
+            if np.sign(eta[0, i]) != np.sign(eta_new[0, i]):
+                eta_new[:, i] *= -1
+            if np.sign(eta[0, i]) != np.sign(eta_new2[0, i]):
+                eta_new2[:, i] *= -1
+
+        # checking eta's are the same from transformation of eta
+        if np.any(eta - eta_new > tol) or np.any(eta - eta_new2 > tol):
+            self.assertTrue(False)
 
     def test_PCA_allowed_initializations(self):
 
