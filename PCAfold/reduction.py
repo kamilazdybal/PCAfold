@@ -8,6 +8,7 @@ import matplotlib.cm as cm
 from PCAfold import preprocess
 from PCAfold import DataSampler
 from PCAfold.styles import *
+from PCAfold.preprocess import _scalings_list
 
 ################################################################################
 #
@@ -17,13 +18,18 @@ from PCAfold.styles import *
 
 class PCA:
     """
-    A class to support Principal Component Analysis.
+    This class enables performing Principal Component Analysis (PCA)
+    of a data set :math:`\mathbf{X}`.
 
     **Example:**
 
     .. code:: python
 
-        pca = PCA(X)
+        from PCAfold import PCA
+        import numpy as np
+
+        X = np.random.rand(100,20)
+        pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
 
     :param X:
         matrix of data to apply PCA to. Variables are in columns and
@@ -36,44 +42,83 @@ class PCA:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param neta: (optional)
-        number of retained eigenvalues - default is all
+        number of retained eigenvalues. If set to ``0`` all eigenvalues are retained.
     :param useXTXeig: (optional)
         method for obtaining the eigenvalues ``L`` and eigenvectors ``Q``:
 
             * ``useXTXeig=False`` uses singular-value decomposition (from ``scipy.linalg.svd``)
             * ``useXTXeig=True`` (default) uses ``numpy.linalg.eigh`` on the covariance matrix ``R``
 
+    **Attributes:**
+
+        - **X** - pre-processed data set :math:`\mathbf{X}`.
+        - **XCenter** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **XScale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        - **R** - covariance matrix.
+        - **L** - eigenvalues.
+        - **Q** - eigenvectors (vectors are stored in columns, rows correspond to weights).
+        - **loadings** - loadings (vectors are stored in columns, rows correspond to weights).
     """
 
     def __init__(self, X, scaling='std', neta=0, useXTXeig=True, nocenter=False):
-        npts, nvar = X.shape
-        if (npts < nvar):
+
+        (n_observations, nvar) = np.shape(X)
+
+        if not isinstance(scaling, str):
+            raise ValueError("Parameter `scaling` has to be a string.")
+        else:
+            if scaling.lower() not in _scalings_list:
+                raise ValueError("Unrecognized scaling method.")
+
+        if not isinstance(neta, int):
+            raise ValueError("Parameter `neta` has to be an integer.")
+        else:
+            if (neta < 0) or (neta > nvar):
+                raise ValueError("Parameter `neta` cannot be negative or larger than number of variables in a data set.")
+            else:
+                if isinstance(neta, bool):
+                    raise ValueError("Parameter `neta` has to be an integer.")
+
+        if not isinstance(useXTXeig, bool):
+            raise ValueError("Parameter `useXTXeig` has to be a boolean.")
+
+        if not isinstance(nocenter, bool):
+            raise ValueError("Parameter `nocenter` has to be a boolean.")
+
+        if (n_observations < nvar):
             raise ValueError('Variables should be in columns; observations in rows.\n'
                              'Also ensure that you have more than one observation\n')
 
         manipulated, idx_removed, idx_retained = preprocess.remove_constant_vars(X)
-
         if len(idx_removed) != 0:
             raise ValueError('Constant variable detected. Must preprocess data for PCA.')
 
-        self.scaling = scaling.upper()
+        self._scaling = scaling.upper()
 
         if neta > 0:
             self.neta = neta
         else:
             self.neta = nvar
 
-        self.X, self.XCenter, self.XScale = preprocess.center_scale(X, self.scaling, nocenter)
-        self.R = np.dot(self.X.transpose(), self.X) / (npts-1)
+        # Center and scale the data set:
+        self.X, self.XCenter, self.XScale = preprocess.center_scale(X, self._scaling, nocenter)
+
+        # Compute covariance matrix:
+        self.R = np.dot(self.X.transpose(), self.X) / (n_observations-1)
+
+        # Perform PCA with eigendecomposition of the covariance matrix:
         if useXTXeig:
             L, Q = np.linalg.eigh(self.R)
             L = L / np.sum(L)
+
+        # Perform PCA with Singular Value Decomposition:
         else:
             U, s, vh = lg.svd(self.X)
             Q = vh.transpose()
             L = s * s / np.sum(s * s)
 
-        isort = np.argsort(-np.diagonal(np.diag(L)))  # descending order
+        # Sort eigenvalues and eigenvectors in the descending order:
+        isort = np.argsort(-np.diagonal(np.diag(L)))
         Lsort = L[isort]
         Qsort = Q[:, isort]
         self.Q = Qsort
@@ -81,14 +126,30 @@ class PCA:
 
         self.nvar = len(self.L)
         val = np.zeros((self.nvar, self.neta))
+
+        # Compute loadings:
         for i in range(self.neta):
             for j in range(self.nvar):
                 val[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
+
         self.loadings = val
 
     def x2eta(self, X, nocenter=False):
         """
         Calculate the principal components given the original data.
+
+        **Example:**
+
+        .. code:: python
+
+            from PCAfold import PCA
+            import numpy as np
+
+            X = np.random.rand(100,20)
+            pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
+
+            # Calculate the Principal Components:
+            eta = pca_X.eta2x(X)
 
         :param X:
             a set of observations of variables x (observations in rows),
@@ -103,10 +164,10 @@ class PCA:
             to be flagged.
 
         :return:
-            - **eta** - the principal components.
+            - **eta** - the Principal Components.
         """
         neta = self.neta
-        npts, nvar = X.shape
+        n_observations, nvar = X.shape
         assert nvar == len(self.L), "Number of variables inconsistent with number of eigenvectors."
         A = self.Q[:, 0:neta]
         x = np.zeros_like(X, dtype=float)
@@ -129,18 +190,33 @@ class PCA:
 
         .. code:: python
 
-            eta = pca.eta2x(x) # calculate the principal components
-            xrec = pca.eta2x(eta) # calculate reconstructed variables
+            from PCAfold import PCA
+            import numpy as np
+
+            X = np.random.rand(100,20)
+            pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
+
+            # Calculate the Principal Components:
+            eta = pca_X.eta2x(X)
+
+            # Calculate reconstructed variables:
+            X_rec = pca_X.eta2x(eta)
 
         :param eta:
-            the PCs.
+            matrix of Principal Components (PCs).
 
         :return:
             - **X** - the unscaled, uncentered approximation to the data.
         """
-        npts, neta = eta.shape
-        assert neta == self.neta, "Number of variables provided inconsistent with number of PCs."
-        A = self.Q[:, 0:neta]
+
+        n_observations, n_components = eta.shape
+
+        assert n_components == self.neta, "Number of variables provided inconsistent with number of PCs."
+
+        # Select n_components first Principal Components:
+        A = self.Q[:, 0:n_components]
+
+        # Calculate unscaled, uncentered approximation to the data:
         x = eta.dot(A.transpose())
         return preprocess.invert_center_scale(x, self.XCenter, self.XScale)
 
@@ -163,8 +239,8 @@ class PCA:
         :return:
             - **r2** coefficient of determination values for the reduced representation of the data.
         """
-        npts, nvar = X.shape
-        assert (npts > nvar), "Need more observations than variables."
+        n_observations, nvar = X.shape
+        assert (n_observations > nvar), "Need more observations than variables."
         xapprox = self.eta2x(self.x2eta(X))
         r2 = np.zeros(nvar)
         for i in range(0, nvar):
@@ -192,7 +268,7 @@ class PCA:
             - **okay** - boolean for whether or not supplied data matrix ``X``\
             is consistent with the PCA object.
         """
-        npts, nvar = X.shape
+        n_observations, nvar = X.shape
         self.neta = nvar
         err = X - self.eta2x(self.x2eta(X))
         isBad = (np.max(np.abs(err), axis=0) / np.max(np.abs(X), axis=0) > 1e-10).any() or (
@@ -232,7 +308,7 @@ class PCA:
             - **r2** matrix ``(nmax,nvar)`` containing the :math:`R^2` values\
             for each variable as a function of the number of retained eigenvalues.
         """
-        npts, nvar = X.shape
+        n_observations, nvar = X.shape
         r2 = np.zeros((nmax, nvar))
         r2vec = np.zeros((nmax, nvar + 1))
         self.data_consistency_check(X)
@@ -428,14 +504,14 @@ class PCA:
             q = nvarTot
             while q > neta:
 
-                npts, nvar = x.shape
+                n_observations, nvar = x.shape
                 m2cut = 1e12
 
                 for i in range(nvar):
 
                     # look at a PCA obtained from a subset of x.
                     xs = np.hstack((x[:, np.arange(i)], x[:, np.arange(i + 1, nvar)]))
-                    pca2 = PCA(xs, self.scaling, neta)
+                    pca2 = PCA(xs, self._scaling, neta)
                     etaSub = pca2.x2eta(xs)
 
                     cov = (etaSub.transpose()).dot(eta)  # covariance of the two sets of PCs
@@ -490,7 +566,7 @@ class PCA:
         neta = np.arange(nvar) + 1
         netapts = len(neta)
 
-        npts, nvar = data.shape
+        n_observations, nvar = data.shape
         r2 = np.zeros((netapts, nvar))
         r2vec = r2.copy()
 
@@ -793,10 +869,10 @@ def test():
     tol = 10 * np.finfo(float).eps
 
     # create random dataset with zero mean
-    npts = 100
+    n_observations = 100
     PHI = np.vstack(
-        (np.sin(np.linspace(0, np.pi, npts)).T, np.cos(np.linspace(0, 2 * np.pi, npts)),
-         np.linspace(0, np.pi, npts)))
+        (np.sin(np.linspace(0, np.pi, n_observations)).T, np.cos(np.linspace(0, 2 * np.pi, n_observations)),
+         np.linspace(0, np.pi, n_observations)))
     PHI, cntr, scl = preprocess.center_scale(PHI.T, 'NONE')
 
     # create random means for the dataset for comparison with PCA XCenter

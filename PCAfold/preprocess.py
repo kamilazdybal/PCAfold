@@ -98,24 +98,24 @@ def center_scale(X, scaling, nocenter=False):
     if scaling.lower() not in _scalings_list:
         raise ValueError("Unrecognized scaling method.")
 
+    (n_observations, n_variables) = np.shape(X)
     X_cs = np.zeros_like(X, dtype=float)
     X_center = X.mean(axis=0)
-    npts, nvar = X.shape
 
     dev = 0 * X_center
     kurt = 0 * X_center
 
-    for i in range(0, nvar):
+    for i in range(0, n_variables):
         # calculate the standard deviation (required for some scalings)
         dev[i] = np.std(X[:, i], ddof=0)
 
         # calculate the kurtosis (required for some scalings)
-        kurt[i] = np.sum((X[:, i] - X_center[i]) ** 4) / npts / (np.sum((X[:, i] - X_center[i]) ** 2) / npts) ** 2
+        kurt[i] = np.sum((X[:, i] - X_center[i]) ** 4) / n_observations / (np.sum((X[:, i] - X_center[i]) ** 2) / n_observations) ** 2
 
     scaling = scaling.upper()
     eps = np.finfo(float).eps
     if scaling == 'NONE' or scaling == '':
-       X_scale = np.ones(nvar)
+       X_scale = np.ones(n_variables)
     elif scaling == 'AUTO' or scaling == 'STD':
        X_scale = dev
     elif scaling == 'VAST':
@@ -133,22 +133,22 @@ def center_scale(X, scaling, nocenter=False):
     elif scaling == 'MAX':
        X_scale = np.max(X, axis=0)
     elif scaling == 'PARETO':
-       X_scale = np.zeros(nvar)
-       for i in range(0, nvar):
+       X_scale = np.zeros(n_variables)
+       for i in range(0, n_variables):
            X_scale[i] = np.sqrt(np.std(X[:, i], ddof=0))
     elif scaling == 'POISSON':
        X_scale = np.sqrt(X_center)
     else:
         raise ValueError('Unsupported scaling option')
 
-    for i in range(0, nvar):
+    for i in range(0, n_variables):
         if nocenter:
             X_cs[:, i] = (X[:, i]) / X_scale[i]
         else:
             X_cs[:, i] = (X[:, i] - X_center[i]) / X_scale[i]
 
     if nocenter:
-        X_center = np.zeros(nvar)
+        X_center = np.zeros(n_variables)
 
     return X_cs, X_center, X_scale
 
@@ -210,22 +210,34 @@ class PreProcessing:
     def __init__(self, X, scaling='none', nocenter=False):
 
         (self.X_removed, self.idx_removed, self.idx_retained) = remove_constant_vars(X)
-        (self.X_cs, self.X_center, self.X_scale) = center_scale(X, scaling, nocenter=nocenter)
+        (self.X_cs, self.X_center, self.X_scale) = center_scale(self.X_removed, scaling, nocenter=nocenter)
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
     This function removes any constant columns in the data set :math:`\mathbf{X}`.
-    Specifically, it can be used as pre-processing for PCA so the eigenvalue calculation
-    doesn't break.
+    The :math:`i^{th}` column :math:`\mathbf{X}_i` is considered constant if either of the following is true:
+
+    - the maximum of an absolute value of a column :math:`\mathbf{X}_i` is less than ``maxtol``:
+
+    .. math::
+
+        max(|\mathbf{X}_i|) < \\verb|maxtol|
+
+    - the ratio of the range of values in a column :math:`\mathbf{X}_i` to :math:`max(|\mathbf{X}_i|)` is less than ``rangetol``:
+
+    .. math::
+
+        \\frac{max(\mathbf{X}_i) - min(\mathbf{X}_i)}{max(|\mathbf{X}_i|)} < \\verb|rangetol|
+
+    Specifically, it can be used as pre-processing for PCA so the eigenvalue
+    calculation doesn't break.
 
     :param X:
         original data set :math:`\mathbf{X}`.
     :param maxtol:
-        tolerance for the maximum absolute value of a column in
-        :math:`\mathbf{X}` to be saved.
+        tolerance for :math:`max(|\mathbf{X}_i|)`.
     :param rangetol:
-        tolerance for the range :math:`max(\mathbf{X}) - min(\mathbf{X})` over
-        the maximum absolute value of a column in :math:`\mathbf{X}` to be saved.
+        tolerance for :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)` over :math:`max(|\mathbf{X}_i|)`.
 
     :return:
         - **X_removed** - original data set :math:`\mathbf{X}` with any constant columns removed.
@@ -233,13 +245,17 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
         - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
     """
 
-    npts, nvar = X.shape
+    (n_observations, n_variables) = np.shape(X)
+
     idx_removed = []
     idx_retained = []
-    for i in reversed(range(0, nvar)):
+
+    for i in reversed(range(0, n_variables)):
+
         min = np.min(X[:, i], axis=0)
         max = np.max(X[:, i], axis=0)
         maxabs = np.max(np.abs(X[:, i]), axis=0)
+
         if (maxabs < maxtol) or ((max - min) / maxabs < rangetol):
             X = np.delete(X, i, 1)
             idx_removed.append(i)
@@ -319,7 +335,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     color_X_r = '#ff2f18'
     color_link = '#bbbbbb'
 
-    (n_observations_X, n_variables) = np.shape(X)
+    (n_observations, n_variables) = np.shape(X)
 
     # Create default labels for variables:
     if len(variable_names) == 0:
