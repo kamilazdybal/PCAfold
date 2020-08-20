@@ -10,6 +10,8 @@ from PCAfold.styles import *
 #
 ################################################################################
 
+_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+
 def center_scale(X, scaling, nocenter=False):
     """
     This function centers and scales the data set. Centering is always performed
@@ -92,8 +94,6 @@ def center_scale(X, scaling, nocenter=False):
         - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
         - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
     """
-
-    _scalings_list = ['none', 'auto', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
 
     if scaling.lower() not in _scalings_list:
         raise ValueError("Unrecognized scaling method.")
