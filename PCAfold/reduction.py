@@ -149,7 +149,7 @@ class PCA:
             pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
 
             # Calculate the Principal Components:
-            eta = pca_X.eta2x(X)
+            eta = pca_X.x2eta(X)
 
         :param X:
             a set of observations of variables x (observations in rows),
@@ -197,7 +197,7 @@ class PCA:
             pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
 
             # Calculate the Principal Components:
-            eta = pca_X.eta2x(X)
+            eta = pca_X.x2eta(X)
 
             # Calculate reconstructed variables:
             X_rec = pca_X.eta2x(eta)
