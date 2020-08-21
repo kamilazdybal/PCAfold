@@ -10,22 +10,33 @@ from PCAfold.styles import *
 #
 ################################################################################
 
-_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '-1to1', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
 
 def center_scale(X, scaling, nocenter=False):
     """
-    This function centers and scales the data set. Centering is always performed
-    by subtracting the mean of each column:
+    This function centers and scales the data set.
+
+    Centering is performed:
 
     .. math::
 
         \mathbf{X_c} = \mathbf{X} - \mathbf{C}
 
-    where:
+    Centers for each column are computed as:
 
     .. math::
 
-        \mathbf{C} = mean(\mathbf{X})
+        \mathbf{C}_i = mean(\mathbf{X}_i)
+
+    where :math:`\mathbf{X}_i` is the :math:`i^{th}` column of :math:`\mathbf{X}`.
+    Centers for all columns are stored in a vector :math:`\mathbf{C}`.
+
+    The only exception is the MinusOneToOne scaling which introduces a different
+    quantity to center each column:
+
+    .. math::
+
+        \mathbf{C}_i = 0.5 (max(\mathbf{X}_i) + min(\mathbf{X}_i))
 
     Scaling is performed by dividing the :math:`i^{th}` column of
     :math:`\mathbf{X}` by a scaling factor :math:`d_i`, where scaling factors
@@ -56,6 +67,8 @@ def center_scale(X, scaling, nocenter=False):
     +-----------------+--------------------------+------------------------------------------------------------------+
     | Range           | ``'range'``              | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                    |
     +-----------------+--------------------------+------------------------------------------------------------------+
+    | MinusOneToOne   | ``'-1to1'``              | :math:`0.5 (max(\mathbf{X}_i) - min(\mathbf{X}_i))`              |
+    +-----------------+--------------------------+------------------------------------------------------------------+
     | Level           | ``'level'``              | :math:`mean(\mathbf{X}_i)`                                       |
     +-----------------+--------------------------+------------------------------------------------------------------+
     | Max             | ``'max'``                | :math:`max(\mathbf{X}_i)`                                        |
@@ -69,8 +82,7 @@ def center_scale(X, scaling, nocenter=False):
     | Vast-4          | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(\mathbf{X}_i) - min(\mathbf{X}_i))`   |
     +-----------------+--------------------------+------------------------------------------------------------------+
 
-    where :math:`\mathbf{X}_i` is the :math:`i^{th}` column of :math:`\mathbf{X}`,
-    :math:`\sigma` is the standard deviation and :math:`k` is the kurtosis of the
+    where :math:`\sigma` is the standard deviation and :math:`k` is the kurtosis of the
     :math:`i^{th}` column of :math:`\mathbf{X}`.
 
     **Example:**
@@ -137,6 +149,9 @@ def center_scale(X, scaling, nocenter=False):
        X_scale = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
     elif scaling == 'RANGE':
        X_scale = np.max(X, axis=0) - np.min(X, axis=0)
+    elif scaling == '-1TO1':
+       X_center = 0.5*(np.max(X, axis=0) + np.min(X, axis=0))
+       X_scale = 0.5*(np.max(X, axis=0) - np.min(X, axis=0))
     elif scaling == 'LEVEL':
        X_scale = X_center
     elif scaling == 'MAX':
