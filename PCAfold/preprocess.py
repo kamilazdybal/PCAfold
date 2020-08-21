@@ -16,37 +16,39 @@ def center_scale(X, scaling, nocenter=False):
     """
     This function centers and scales the data set.
 
-    Centering is performed:
+    Below we understand that :math:`\mathbf{X}_i` is the :math:`i^{th}` column
+    of :math:`\mathbf{X}`.
 
-    .. math::
+    - Centering is performed by subtracting a center :math:`C_i` from
+      :math:`\mathbf{X}_i`, where centers for all columns are stored
+      in a vector :math:`\mathbf{C}`:
 
-        \mathbf{X_c} = \mathbf{X} - \mathbf{C}
+        .. math::
 
-    Centers for each column are computed as:
+            \mathbf{X_c} = \mathbf{X} - \mathbf{C}
 
-    .. math::
+      Centers for each column are computed as:
 
-        \mathbf{C}_i = mean(\mathbf{X}_i)
+        .. math::
 
-    where :math:`\mathbf{X}_i` is the :math:`i^{th}` column of :math:`\mathbf{X}`.
-    Centers for all columns are stored in a vector :math:`\mathbf{C}`.
+            C_i = mean(\mathbf{X}_i)
 
-    The only exception is the MinusOneToOne scaling which introduces a different
-    quantity to center each column:
+      The only exception is the *MinusOneToOne* scaling which introduces a different
+      quantity to center each column:
 
-    .. math::
+        .. math::
 
-        \mathbf{C}_i = 0.5 (max(\mathbf{X}_i) + min(\mathbf{X}_i))
+            C_i = 0.5 \\cdot (max(\mathbf{X}_i) + min(\mathbf{X}_i))
 
-    Scaling is performed by dividing the :math:`i^{th}` column of
-    :math:`\mathbf{X}` by a scaling factor :math:`d_i`, where scaling factors
-    for all columns are stored in a vector :math:`\mathbf{D}`:
+    - Scaling is performed by dividing :math:`\mathbf{X}_i` by a scaling
+      factor :math:`d_i`, where scaling factors
+      for all columns are stored in a vector :math:`\mathbf{D}`:
 
-    .. math::
+      .. math::
 
-        \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
+          \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
 
-    When both centering and scaling is applied:
+    If both centering and scaling is applied:
 
     .. math::
 
@@ -67,7 +69,7 @@ def center_scale(X, scaling, nocenter=False):
     +-----------------+--------------------------+------------------------------------------------------------------+
     | Range           | ``'range'``              | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                    |
     +-----------------+--------------------------+------------------------------------------------------------------+
-    | MinusOneToOne   | ``'-1to1'``              | :math:`0.5 (max(\mathbf{X}_i) - min(\mathbf{X}_i))`              |
+    | MinusOneToOne   | ``'-1to1'``              | :math:`0.5 \cdot (max(\mathbf{X}_i) - min(\mathbf{X}_i))`        |
     +-----------------+--------------------------+------------------------------------------------------------------+
     | Level           | ``'level'``              | :math:`mean(\mathbf{X}_i)`                                       |
     +-----------------+--------------------------+------------------------------------------------------------------+
@@ -82,8 +84,8 @@ def center_scale(X, scaling, nocenter=False):
     | Vast-4          | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(\mathbf{X}_i) - min(\mathbf{X}_i))`   |
     +-----------------+--------------------------+------------------------------------------------------------------+
 
-    where :math:`\sigma` is the standard deviation and :math:`k` is the kurtosis of the
-    :math:`i^{th}` column of :math:`\mathbf{X}`.
+    where :math:`\sigma` is the standard deviation of :math:`\mathbf{X}_i`
+    and :math:`k` is the kurtosis of :math:`\mathbf{X}_i`.
 
     **Example:**
 
