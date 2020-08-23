@@ -697,7 +697,7 @@ class DataSampler:
             raise ValueError("Test selection option can only be 1 or 2.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Initialize vector of indices 0..n_observations:
@@ -855,12 +855,12 @@ class DataSampler:
             raise ValueError("Test selection option can only be 1 or 2.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
-        idx_full = np.arange(0,n_observations)
+        idx_full = np.arange(0, n_observations)
         idx_test = np.unique(np.array(self.idx_test))
         idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
@@ -1025,7 +1025,7 @@ class DataSampler:
             raise ValueError("Variable `sampling_type` has to be one of the following: 'percentage' or 'number'.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Check that dictionary has consistend number of entries with respect to `idx`:
@@ -1250,7 +1250,7 @@ class DataSampler:
             raise ValueError("Test selection option can only be 1 or 2.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Initialize vector of indices 0..n_observations:
@@ -1371,8 +1371,8 @@ def variable_bins(var, k, verbose=False):
                     idx.append(cl)
 
     # Degrade clusters if needed:
-    if np.size(np.unique(idx)) != k:
-        (idx, k) = degrade_clusters(idx, verbose)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose)
 
     idx = np.asarray(idx)
 
@@ -1440,8 +1440,8 @@ def predefined_variable_bins(var, split_values, verbose=False):
                     idx.append(cl)
 
     # Degrade clusters if needed:
-    if np.size(np.unique(idx)) != k:
-        (idx, k) = degrade_clusters(idx, verbose)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose)
 
     idx = np.asarray(idx)
 
@@ -1525,8 +1525,8 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     idx = [int(i) for i in idx]
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose=False)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     idx = np.asarray(idx)
 
@@ -1665,8 +1665,8 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     idx = np.asarray([int(i) for i in idx])
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose=False)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     if verbose==True:
         __print_verbose_information_clustering(var, idx, borders)
@@ -1852,8 +1852,8 @@ def get_centroids(X, idx):
     """
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose=False)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     (n_observations, n_variables) = np.shape(X)
 
@@ -1909,7 +1909,7 @@ def get_partition(X, idx, verbose=False):
         n_variables = 1
 
     # Remove empty clusters from indexing:
-    if len(np.unique(idx)) != (np.max(idx)+1):
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
         (idx, _) = degrade_clusters(idx, verbose)
         if verbose==True:
             print('Empty clusters will be removed.')
@@ -1965,8 +1965,8 @@ def get_populations(idx, verbose=False):
     populations = []
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose)
 
     # Find the number of clusters:
     k = len(np.unique(idx))
