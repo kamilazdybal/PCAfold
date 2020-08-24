@@ -8,34 +8,152 @@ from PCAfold import PreProcessing
 
 class TestManipulation(unittest.TestCase):
 
-    def test_center_scale(self):
+    def test_center_scale_all_possible_C_and_D(self):
 
+        test_data_set = np.random.rand(100,20)
+
+        # Instantiations that should work:
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=False)
+
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=True)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_center_scale_on_0D_variable(self):
+
+        test_0D_variable = np.random.rand(100,)
+
+        # Instantiations that should work:
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'none', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'auto', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'std', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'pareto', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'range', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, '-1to1', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'level', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'max', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'poisson', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_2', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_3', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_4', nocenter=False)
+
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'none', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'auto', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'std', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'pareto', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'range', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, '-1to1', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'level', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'max', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'poisson', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_2', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_3', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_4', nocenter=True)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_center_scale_on_1D_variable(self):
+
+        test_1D_variable = np.random.rand(100,1)
+
+        # Instantiations that should work:
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'none', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'auto', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'std', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'pareto', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'range', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, '-1to1', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'level', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'max', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'poisson', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_2', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_3', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_4', nocenter=False)
+
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'none', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'auto', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'std', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'pareto', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'range', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, '-1to1', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'level', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'max', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'poisson', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_2', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_3', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_4', nocenter=True)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_center_scale_MinusOneToOne(self):
+
+        test_data_set = np.random.rand(100,10)
+        tolerance = 10**-10
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            for i in range(0,10):
+                self.assertTrue((np.min(X_cs[:,i]) > (-1 - tolerance)) and (np.min(X_cs[:,i]) < -1 + tolerance))
+        except Exception:
+            self.assertTrue(False)
+
+        test_data_set = np.random.rand(1000,)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            for i in range(0,1):
+                self.assertTrue((np.min(X_cs[:,i]) > (-1 - tolerance)) and (np.min(X_cs[:,i]) < -1 + tolerance))
+        except Exception:
+            self.assertTrue(False)
+
+        test_data_set = np.random.rand(2000,1)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            for i in range(0,1):
+                self.assertTrue((np.min(X_cs[:,i]) > (-1 - tolerance)) and (np.min(X_cs[:,i]) < -1 + tolerance))
+        except Exception:
+            self.assertTrue(False)
+
+    def test_center_scale_C_and_D_properties(self):
+
+        # This function tests if known properties of centers or scales hold:
         test_data_set = np.random.rand(100,20)
         means = np.mean(test_data_set, axis=0)
         stds = np.std(test_data_set, axis=0)
         zeros = np.zeros((20,))
         ones = np.ones((20,))
-
-        # Instantiations that should work:
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=False)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=True)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=True)
-        except Exception:
-            self.assertTrue(False)
 
         try:
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=False)
@@ -57,18 +175,47 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
     def test_invert_center_scale(self):
-
-        test_data_set = np.random.rand(100,20)
+        # This function tests all possible inversions of center_scale function:
+        test_data_set = np.random.rand(200,20)
 
         try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
             self.assertTrue(X.all() == test_data_set.all())
-        except Exception:
-            self.assertTrue(False)
-
-        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=False)
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
             self.assertTrue(X.all() == test_data_set.all())
         except Exception:
@@ -78,34 +225,256 @@ class TestManipulation(unittest.TestCase):
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=True)
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
             self.assertTrue(X.all() == test_data_set.all())
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=True)
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
             self.assertTrue(X.all() == test_data_set.all())
         except Exception:
             self.assertTrue(False)
 
+    def test_invert_center_scale_on_0D_variable(self):
+        # This function tests all possible inversions of center_scale function:
+        test_data_set = np.random.rand(200,)
+
         try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=False)
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
             self.assertTrue(X.all() == test_data_set.all())
-        except Exception:
-            self.assertTrue(False)
-
-        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=False)
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
             self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
         except Exception:
             self.assertTrue(False)
 
         try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_invert_center_scale_on_1D_variable(self):
+        # This function tests all possible inversions of center_scale function:
+        test_data_set = np.random.rand(200,1)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=False)
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
             self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=False)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=True)
+            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
+            self.assertTrue(X.all() == test_data_set.all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_invert_center_scale_single_variable(self):
+
+        try:
+            test_data_set = np.ones((200,))
+            X_result = 2*np.ones((200,))
+            X = preprocess.invert_center_scale(test_data_set, 0, 2)
+            self.assertTrue(X.all() == X_result.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            test_data_set = np.ones((200,))
+            X_result = 3*np.ones((200,))
+            X = preprocess.invert_center_scale(test_data_set, 1, 2)
+            self.assertTrue(X.all() == X_result.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            test_data_set = np.ones((200,1))
+            X_result = 2*np.ones((200,))
+            X = preprocess.invert_center_scale(test_data_set, 0, 2)
+            self.assertTrue(X.all() == X_result.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            test_data_set = np.ones((200,1))
+            X_result = 3*np.ones((200,))
+            X = preprocess.invert_center_scale(test_data_set, 1, 2)
+            self.assertTrue(X.all() == X_result.all())
         except Exception:
             self.assertTrue(False)
 
