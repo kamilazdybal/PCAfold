@@ -802,7 +802,7 @@ class DataSampler:
         train sample distribution as random sampling (``DataSampler.random``).
         This sampling can be useful in cases where one cluster is significantly
         smaller than others and there is a chance that this cluster will not get
-        covereed in the train data if random sampling was used.
+        covered in the train data if random sampling was used.
 
         **Train data:**
 
@@ -1466,8 +1466,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     ``Z`` into bins of equal lengths. The vector is first split to lean and rich
     side (according to the stoichiometric mixture fraction ``Z_stoich``) and
     then the sides get divided further into clusters. When ``k`` is even,
-    this function will always create equal nu
-    mber of clusters on the lean and
+    this function will always create equal number of clusters on the lean and
     rich side. When ``k`` is odd, there will be one more cluster on the rich side
     compared to the lean side.
 

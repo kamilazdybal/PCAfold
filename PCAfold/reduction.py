@@ -37,7 +37,7 @@ class PCA:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param neta: (optional)
-        number of retained eigenvalues. If set to ``0`` all eigenvalues are retained.
+        number of retained Principal Components :math:`q`. If set to ``0`` all eigenvalues are retained.
     :param useXTXeig: (optional)
         method for obtaining the eigenvalues ``L`` and eigenvectors ``Q``:
 
