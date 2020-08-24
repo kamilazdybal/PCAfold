@@ -898,9 +898,6 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3 or 4.
 
-    :raises ValueError:
-        if ``random_seed`` is not an integer.
-
     :return:
         - **eigenvalues** - collected eigenvalues from each iteration.
         - **eigenvectors** - collected eigenvectors from each iteration.\
