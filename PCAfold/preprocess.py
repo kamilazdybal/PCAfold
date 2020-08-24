@@ -33,7 +33,7 @@ def center_scale(X, scaling, nocenter=False):
 
             C_i = mean(\mathbf{X}_i)
 
-      The only exception is the *MinusOneToOne* scaling which introduces a different
+      The only exception is the *-1 to 1* scaling which introduces a different
       quantity to center each column.
 
     - Scaling is performed by dividing :math:`\mathbf{X}_i` by a scaling
@@ -65,7 +65,7 @@ def center_scale(X, scaling, nocenter=False):
     +-----------------+--------------------------+--------------------------------------------------------------------+
     | Range           | ``'range'``              | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                      |
     +-----------------+--------------------------+--------------------------------------------------------------------+
-    | | MinusOneToOne | | ``'-1to1'``            | | :math:`d_i = 0.5 \cdot (max(\mathbf{X}_i) - min(\mathbf{X}_i))`  |
+    | | -1 to 1       | | ``'-1to1'``            | | :math:`d_i = 0.5 \cdot (max(\mathbf{X}_i) - min(\mathbf{X}_i))`  |
     | |               | |                        | | :math:`C_i = 0.5 \cdot (max(\mathbf{X}_i) + min(\mathbf{X}_i))`  |
     +-----------------+--------------------------+--------------------------------------------------------------------+
     | Level           | ``'level'``              | :math:`mean(\mathbf{X}_i)`                                         |

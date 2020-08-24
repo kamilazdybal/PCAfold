@@ -150,7 +150,7 @@ class PCA:
 
     def x2eta(self, X, nocenter=False):
         """
-        Calculate the :math:`q`-first Principal Components
+        This function calculates the :math:`q`-first Principal Components
         given the original data:
 
         .. math::
@@ -208,8 +208,8 @@ class PCA:
 
     def eta2x(self, eta):
         """
-        Calculate rank-:math:`q` reconstruction of the original data set from
-        the :math:`q`-first  Principal Components:
+        This function calculates rank-:math:`q` reconstruction of the original
+        data set from the :math:`q`-first  Principal Components:
 
         .. math::
 
@@ -253,9 +253,8 @@ class PCA:
 
     def calculate_r2(self, X):
         """
-        This function calculates coefficient of determination :math:`R^2` values.
-        Given the data set :math:`\mathbf{X}` used to construct the PCA, it calculates the
-        :math:`R^2` values for the rank-:math:`q` reconstruction of the original
+        This function calculates coefficient of determination :math:`R^2` values
+        for the rank-:math:`q` reconstruction of the original
         data set :math:`\mathbf{X_{rec}}`:
 
         .. math::
@@ -264,10 +263,10 @@ class PCA:
 
         where :math:`\mathbf{X}_i` is the :math:`i^{th}` column
         of :math:`\mathbf{X}` and :math:`\mathbf{X_{rec}}_i` is the :math:`i^{th}` column
-        of :math:`\mathbf{X_{rec}}`. :math:`N` is the number of
+        of :math:`\mathbf{X_{rec}}` and :math:`N` is the number of
         observations in :math:`\mathbf{X}`.
 
-        If all of the eigenvalues are retained, :math:`R^2` should be equal to unity.
+        If all of the eigenvalues are retained, :math:`R^2` will be equal to unity.
 
         **Example:**
 
@@ -280,7 +279,7 @@ class PCA:
             pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
 
             # Calculate R2 values:
-            pca_X.calculate_r2(X)
+            r2 = pca_X.calculate_r2(X)
 
         :param X:
             original data set :math:`\mathbf{X}`.
