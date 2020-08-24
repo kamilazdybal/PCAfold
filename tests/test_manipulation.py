@@ -118,31 +118,53 @@ class TestManipulation(unittest.TestCase):
 
     def test_center_scale_MinusOneToOne(self):
 
-        test_data_set = np.random.rand(100,10)
         tolerance = 10**-10
 
         try:
+            test_data_set = np.random.rand(100,10)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
             for i in range(0,10):
                 self.assertTrue((np.min(X_cs[:,i]) > (-1 - tolerance)) and (np.min(X_cs[:,i]) < -1 + tolerance))
         except Exception:
             self.assertTrue(False)
 
-        test_data_set = np.random.rand(1000,)
-
         try:
+            test_data_set = np.random.rand(1000,)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
             for i in range(0,1):
                 self.assertTrue((np.min(X_cs[:,i]) > (-1 - tolerance)) and (np.min(X_cs[:,i]) < -1 + tolerance))
         except Exception:
             self.assertTrue(False)
 
-        test_data_set = np.random.rand(2000,1)
-
         try:
+            test_data_set = np.random.rand(2000,1)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
             for i in range(0,1):
                 self.assertTrue((np.min(X_cs[:,i]) > (-1 - tolerance)) and (np.min(X_cs[:,i]) < -1 + tolerance))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            test_data_set = np.random.rand(100,10)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            for i in range(0,10):
+                self.assertTrue((np.max(X_cs[:,i]) > (1 - tolerance)) and (np.max(X_cs[:,i]) < (1 + tolerance)))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            test_data_set = np.random.rand(1000,)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            for i in range(0,1):
+                self.assertTrue((np.max(X_cs[:,i]) > (1 - tolerance)) and (np.max(X_cs[:,i]) < (1 + tolerance)))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            test_data_set = np.random.rand(2000,1)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
+            for i in range(0,1):
+                self.assertTrue((np.max(X_cs[:,i]) > (1 - tolerance)) and (np.max(X_cs[:,i]) < (1 + tolerance)))
         except Exception:
             self.assertTrue(False)
 
