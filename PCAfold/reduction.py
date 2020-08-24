@@ -150,7 +150,14 @@ class PCA:
 
     def x2eta(self, X, nocenter=False):
         """
-        Calculate the Principal Components given the original data .
+        Calculate the :math:`q`-first Principal Components
+        given the original data:
+
+        .. math::
+
+            \mathbf{Z_q} = \mathbf{X_{cs}} \mathbf{A_q}
+
+        where :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors.
 
         **Example:**
 
@@ -179,7 +186,7 @@ class PCA:
             to be flagged.
 
         :return:
-            - **eta** - the Principal Components.
+            - **eta** - the :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
         """
 
         neta = self.neta
@@ -196,11 +203,17 @@ class PCA:
             for i in range(0, nvar):
                 x[:, i] = (X[:, i] - self.XCenter[i]) / self.XScale[i]
             eta = x.dot(A)
+
         return eta
 
     def eta2x(self, eta):
         """
-        Calculate the reconstructed variables from the Principal Components.
+        Calculate rank-:math:`q` reconstruction of the original data set from
+        the :math:`q`-first  Principal Components:
+
+        .. math::
+
+            \mathbf{X_{rec}} = \mathbf{Z_q} \mathbf{A_q}^{\mathbf{T}} \\cdot \mathbf{D} + \mathbf{C}
 
         **Example:**
 
@@ -219,10 +232,10 @@ class PCA:
             X_rec = pca_X.eta2x(eta)
 
         :param eta:
-            matrix of Principal Components (PCs).
+            matrix of :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
 
         :return:
-            - **X** - the unscaled and uncentered approximation to the data.
+            - **X_rec** - rank-:math:`q` reconstruction of the original data set.
         """
 
         n_observations, n_components = eta.shape
@@ -234,34 +247,59 @@ class PCA:
 
         # Calculate unscaled, uncentered approximation to the data:
         x = eta.dot(A.transpose())
-        return preprocess.invert_center_scale(x, self.XCenter, self.XScale)
+        X_rec = preprocess.invert_center_scale(x, self.XCenter, self.XScale)
+
+        return(X_rec)
 
     def calculate_r2(self, X):
         """
-        Calculates coefficient of determination :math:`R^2` values.
-        Given the data used to construct the PCA, this calculates the
-        :math:`R^2` values for the reduced representation of the data.
-        If all of the eigenvalues are retained, then this should be unity.
+        This function calculates coefficient of determination :math:`R^2` values.
+        Given the data set :math:`\mathbf{X}` used to construct the PCA, it calculates the
+        :math:`R^2` values for the rank-:math:`q` reconstruction of the original
+        data set :math:`\mathbf{X_{rec}}`:
+
+        .. math::
+
+            R^2 = 1 - \\frac{\\sum_{i=0}^N (\mathbf{X}_i - \mathbf{X_{rec}}_i)^2}{\\sum_{i=0}^N (\mathbf{X}_i - mean(\mathbf{X}_i))^2}
+
+        where :math:`\mathbf{X}_i` is the :math:`i^{th}` column
+        of :math:`\mathbf{X}` and :math:`\mathbf{X_{rec}}_i` is the :math:`i^{th}` column
+        of :math:`\mathbf{X_{rec}}`. :math:`N` is the number of
+        observations in :math:`\mathbf{X}`.
+
+        If all of the eigenvalues are retained, :math:`R^2` should be equal to unity.
 
         **Example:**
 
         .. code:: python
 
-            r2 = pca.calculate_r2( X )
+            from PCAfold import PCA
+            import numpy as np
+
+            X = np.random.rand(100,20)
+            pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
+
+            # Calculate R2 values:
+            pca_X.calculate_r2(X)
 
         :param X:
-            data used to construct the PCA.
+            original data set :math:`\mathbf{X}`.
 
         :return:
-            - **r2** coefficient of determination values for the reduced representation of the data.
+            - **r2** - coefficient of determination values :math:`R^2` for the rank-:math:`q` reconstruction of the original data set.
         """
-        n_observations, nvar = X.shape
-        assert (n_observations > nvar), "Need more observations than variables."
+
+        (n_observations, n_variables) = np.shape(X)
+
+        assert (n_observations > n_variables), "Need more observations than variables."
+
         xapprox = self.eta2x(self.x2eta(X))
-        r2 = np.zeros(nvar)
-        for i in range(0, nvar):
+        r2 = np.zeros(n_variables)
+
+        for i in range(0, n_variables):
             r2[i] = 1 - np.sum((X[:, i] - xapprox[:, i]) * (X[:, i] - xapprox[:, i])) / np.sum(
                 (X[:, i] - X[:, i].mean(axis=0)) * (X[:, i] - X[:, i].mean(axis=0)))
+
         return r2
 
     def data_consistency_check(self, X, errorsAreFatal=True):
@@ -892,7 +930,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     :param biasing_option:
         integer specifying biasing option.
         Can only attain values 1, 2, 3 or 4.
-    :param X_source:
+    :param X_source: (optional)
         source terms corresponding to the state-space variables in ``X``.
 
     :raises ValueError:

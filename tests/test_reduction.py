@@ -194,6 +194,19 @@ class TestReduction(unittest.TestCase):
 
         self.assertTrue(test_data_set.all() == x.all())
 
+    def test_calculate_r2_allowed_calls(self):
+
+        test_data_set = np.random.rand(100,20)
+        r2_test = np.ones((20,))
+
+        try:
+            pca_X = PCA(test_data_set, scaling='auto', neta=20, useXTXeig=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            comparison = r2_values == r2_test
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
     def test_x2eta_not_allowed_calls(self):
 
         test_data_set = np.random.rand(10,2)
