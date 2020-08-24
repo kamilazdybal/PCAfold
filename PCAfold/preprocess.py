@@ -88,6 +88,12 @@ def center_scale(X, scaling, nocenter=False):
 
     .. code:: python
 
+        from PCAfold.preprocess import center_scale
+        import numpy as np
+
+        X = np.random.rand(100,20)
+
+        # Center and scale:
         (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
 
     :param X:
@@ -179,7 +185,7 @@ def center_scale(X, scaling, nocenter=False):
     if nocenter:
         X_center = np.zeros(n_variables)
 
-    return X_cs, X_center, X_scale
+    return(X_cs, X_center, X_scale)
 
 def invert_center_scale(X_cs, X_center, X_scale):
     """
@@ -189,6 +195,21 @@ def invert_center_scale(X_cs, X_center, X_scale):
     .. math::
 
         \mathbf{X} = \mathbf{X_{cs}} \\cdot \mathbf{D} + \mathbf{C}
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold.preprocess import center_scale, invert_center_scale
+        import numpy as np
+
+        X = np.random.rand(100,20)
+
+        # Center and scale:
+        (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
+
+        # Uncenter and unscale:
+        X = invert_center_scale(X_cs, X_center, X_scale)
 
     :param X_cs:
         centered and scaled data set :math:`\mathbf{X_{cs}}`.
@@ -213,7 +234,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
         for i in range(0, n_variables):
             X[:, i] = X_cs[:, i] * X_scale[i] + X_center[i]
 
-    return X
+    return(X)
 
 class PreProcessing:
     """
@@ -224,6 +245,19 @@ class PreProcessing:
 
     - checks for constant columns in a data set and removes them,
     - centers and scales the data.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PreProcessing
+        import numpy as np
+
+        X = np.random.rand(100,20)
+        X[:,5] = np.ones((100,))
+
+        # Center and scale:
+        preprocessed = PreProcessing(X, 'range', nocenter=False)
 
     :param X:
         original data set :math:`\mathbf{X}`.
@@ -268,6 +302,19 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     Specifically, it can be used as pre-processing for PCA so the eigenvalue
     calculation doesn't break.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold.preprocess import remove_constant_vars
+        import numpy as np
+
+        X = np.random.rand(100,20)
+        X[:,5] = np.ones((100,))
+
+        # Remove the constant column:
+        (X_removed, idx_removed, idx_retained) = remove_constant_vars(X)
+
     :param X:
         original data set :math:`\mathbf{X}`.
     :param maxtol:
@@ -302,7 +349,7 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     idx_removed = idx_removed[::-1]
     idx_retained = idx_retained[::-1]
 
-    return X_removed, idx_removed, idx_retained
+    return(X_removed, idx_removed, idx_retained)
 
 def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], title=None, save_filename=None):
     """
@@ -431,7 +478,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
-    return (normalized_C, normalized_C_r, center_movement_percentage, plt)
+    return(normalized_C, normalized_C_r, center_movement_percentage, plt)
 
 ################################################################################
 #
