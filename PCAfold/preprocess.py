@@ -1983,7 +1983,7 @@ def get_populations(idx, verbose=False):
 
     for i in range(0,k):
 
-        populations.append((idx==i).sum())
+        populations.append(int((idx==i).sum()))
 
     return(populations)
 
