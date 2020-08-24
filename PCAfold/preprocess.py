@@ -118,7 +118,12 @@ def center_scale(X, scaling, nocenter=False):
     if not isinstance(nocenter, bool):
         raise ValueError("Parameter `nocenter` has to be a boolean.")
 
-    (n_observations, n_variables) = np.shape(X)
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        X = X[:,np.newaxis]
+        (n_observations, n_variables) = np.shape(X)
+
     X_cs = np.zeros_like(X, dtype=float)
     X_center = X.mean(axis=0)
 
@@ -126,10 +131,11 @@ def center_scale(X, scaling, nocenter=False):
     kurt = 0 * X_center
 
     for i in range(0, n_variables):
-        # calculate the standard deviation (required for some scalings)
+
+        # Calculate the standard deviation (required for some scalings):
         dev[i] = np.std(X[:, i], ddof=0)
 
-        # calculate the kurtosis (required for some scalings)
+        # Calculate the kurtosis (required for some scalings):
         kurt[i] = np.sum((X[:, i] - X_center[i]) ** 4) / n_observations / (np.sum((X[:, i] - X_center[i]) ** 2) / n_observations) ** 2
 
     scaling = scaling.upper()
@@ -195,10 +201,17 @@ def invert_center_scale(X_cs, X_center, X_scale):
         - **X** - original data set :math:`\mathbf{X}`.
     """
 
-    X = np.zeros_like(X_cs, dtype=float)
+    try:
+        (_, n_variables) = np.shape(X_cs)
+    except:
+        n_variables = 1
 
-    for i in range(0, len(X_center)):
-        X[:, i] = X_cs[:, i] * X_scale[i] + X_center[i]
+    if n_variables == 1:
+        X = X_cs * X_scale + X_center
+    else:
+        X = np.zeros_like(X_cs, dtype=float)
+        for i in range(0, n_variables):
+            X[:, i] = X_cs[:, i] * X_scale[i] + X_center[i]
 
     return X
 
