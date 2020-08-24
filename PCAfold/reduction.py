@@ -228,7 +228,7 @@ class PCA:
             # Calculate the Principal Components:
             eta = pca_X.x2eta(X)
 
-            # Calculate reconstructed variables:
+            # Calculate the reconstructed variables:
             X_rec = pca_X.eta2x(eta)
 
         :param eta:
@@ -259,10 +259,10 @@ class PCA:
 
         .. math::
 
-            R^2 = 1 - \\frac{\\sum_{i=0}^N (\mathbf{X}_i - \mathbf{X_{rec}}_i)^2}{\\sum_{i=0}^N (\mathbf{X}_i - mean(\mathbf{X}_i))^2}
+            R^2 = 1 - \\frac{\\sum_{i=1}^N (\mathbf{X}_i - \mathbf{X_{rec}}_i)^2}{\\sum_{i=1}^N (\mathbf{X}_i - mean(\mathbf{X}_i))^2}
 
         where :math:`\mathbf{X}_i` is the :math:`i^{th}` column
-        of :math:`\mathbf{X}` and :math:`\mathbf{X_{rec}}_i` is the :math:`i^{th}` column
+        of :math:`\mathbf{X}`, :math:`\mathbf{X_{rec}}_i` is the :math:`i^{th}` column
         of :math:`\mathbf{X_{rec}}` and :math:`N` is the number of
         observations in :math:`\mathbf{X}`.
 
@@ -278,7 +278,7 @@ class PCA:
             X = np.random.rand(100,20)
             pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
 
-            # Calculate R2 values:
+            # Calculate the R2 values:
             r2 = pca_X.calculate_r2(X)
 
         :param X:
@@ -807,56 +807,83 @@ class PCA:
 
     def u_scores(self, X):
         """
-        Calculate the U-scores (Principal Components).
+        Calculate the U-scores (Principal Components):
+
+        .. math::
+
+            \mathbf{U_{scores}} = \mathbf{X_{cs}} \mathbf{A_q}
+
+        This function is equivalent to ``PCA.x2eta``.
 
         **Example:**
 
         .. code:: python
 
-            uscores = pca.u_scores(X)
+            from PCAfold import PCA
+            import numpy as np
 
-        U-scores = obtained by using the U-vectors, i.e. the eigenvectors of the
-        covariance matrix S. The resulting U-scores are uncorrelated and have
-        variances equal to the corresponding eigenvalues.
+            X = np.random.rand(100,20)
+            pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
 
-        This is entirely equivalent to x2eta.
+            # Calculate the U-scores:
+            u_scores = pca_X.u_scores(X)
 
         :param X:
-            a set of observations of variables x (observations in rows),
-            unscaled, uncentered. These do not need to be the same
-            observations as were used to construct the PCA object. They
-            could be, e.g. functions of those variables.
+            data set to transform. Note that it does not need to
+            be the same data set that was used to construct the PCA object. It
+            could for instance be a function of that data set. By default,
+            this data set will be pre-processed with the centers and scales
+            computed on the data set used when constructing the PCA object.
 
         :return:
-            - **uscores** - U-scores or principal components (``eta``)
+            - **u_scores** - U-scores (Principal Components).
         """
-        return self.x2eta(X)
+
+        u_scores = self.x2eta(X)
+
+        return(u_scores)
 
     def w_scores(self, X):
         """
-        Calculates the W-scores.
+        This function calculates the W-scores which are the Principal Components
+        scaled by the inverse square root of the corresponding eigenvalue:
+
+        .. math::
+
+            \mathbf{W_{scores}} = \\frac{\mathbf{Z_q}}{\\sqrt{\mathbf{L_q}}}
+
+        where :math:`\mathbf{L_q}` are the :math:`q`-first eigenvalues.
+        The W-scores are still uncorrelated and have variances equal unity.
 
         **Example:**
 
         .. code:: python
 
-            wscores = pca.w_scores( X )
+            from PCAfold import PCA
+            import numpy as np
 
-        W-scores = The U vectors are scaled by the inverse of the eigenvalues
-        square root, i.e. :math:`V = L^{-0.5} \cdot U`. The W-scores are still uncorrelated and
-        have variances equal unity.
+            X = np.random.rand(100,20)
+            pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
+
+            # Calculate the U-scores:
+            w_scores = pca_X.w_scores(X)
 
         :param X:
-            a set of observations of variables x (observations in rows),
-            unscaled, uncentered. These do not need to be the same
-            observations as were used to construct the PCA object. They
-            could be, e.g. functions of those variables.
+            data set to transform. Note that it does not need to
+            be the same data set that was used to construct the PCA object. It
+            could for instance be a function of that data set. By default,
+            this data set will be pre-processed with the centers and scales
+            computed on the data set used when constructing the PCA object.
 
         :return:
-            - **wscores** - W-scores or principal components
+            - **w_scores** - W-scores (scaled Principal Components).
         """
+
         eval = self.L[0:self.neta]
-        return self.x2eta(X).dot(np.diag(1 / np.sqrt(eval)))
+
+        w_scores = self.x2eta(X).dot(np.diag(1 / np.sqrt(eval)))
+
+        return(w_scores)
 
     def __eq__(a, b):
         """

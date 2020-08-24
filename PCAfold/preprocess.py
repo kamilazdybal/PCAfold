@@ -256,7 +256,7 @@ class PreProcessing:
         X = np.random.rand(100,20)
         X[:,5] = np.ones((100,))
 
-        # Center and scale:
+        # Instantiate PreProcessing class object:
         preprocessed = PreProcessing(X, 'range', nocenter=False)
 
     :param X:
