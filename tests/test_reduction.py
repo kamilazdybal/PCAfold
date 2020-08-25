@@ -192,7 +192,14 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
-        self.assertTrue(test_data_set.all() == x.all())
+        try:
+            scores = pca.x2eta(test_data_set)
+            x = pca.eta2x(scores)
+            difference = abs(test_data_set - x)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
 
     def test_calculate_r2_allowed_calls(self):
 

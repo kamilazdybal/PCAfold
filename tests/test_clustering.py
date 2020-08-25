@@ -117,7 +117,8 @@ class TestClustering(unittest.TestCase):
             idx_unflipped = np.array([0,0,0,1,1,1,2,2,2])
             idx_flipped = np.array([0,0,0,2,2,2,1,1,1])
             idx = preprocess.flip_clusters(idx_unflipped, dictionary={1:2, 2:1})
-            self.assertTrue(idx_flipped.all() == idx.all())
+            comparison = idx_flipped == idx
+            self.assertTrue(comparison.all())
         except:
             self.assertTrue(False)
 
@@ -125,7 +126,8 @@ class TestClustering(unittest.TestCase):
             idx_unflipped = np.array([0,0,0,1,1,1,2,2,2])
             idx_flipped = np.array([0,0,0,10,10,10,20,20,20])
             idx = preprocess.flip_clusters(idx_unflipped, dictionary={1:10, 2:20})
-            self.assertTrue(idx_flipped.all() == idx.all())
+            comparison = idx_flipped == idx
+            self.assertTrue(comparison.all())
         except:
             self.assertTrue(False)
 
