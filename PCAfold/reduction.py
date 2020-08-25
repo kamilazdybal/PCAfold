@@ -1102,9 +1102,9 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
     return(eigenvalues, eigenvectors, pc_scores, pc_sources, C, D, C_r, D_r)
 
-def analyze_eigenvector_weights_movement(eigenvectors, variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
+def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
     """
-    This function analyzes the movement of weights on an eigenvector obtained
+    This function analyzes the change of weights on an eigenvector obtained
     from a reduced data set as specified by the ``eigenvectors`` matrix.
     This matrix can contain many versions of eigenvectors, for instance coming
     from each iteration from the ``equilibrate_cluster_populations`` function.

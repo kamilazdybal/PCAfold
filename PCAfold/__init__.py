@@ -24,7 +24,7 @@ from .preprocess import plot_2d_train_test_samples
 # Module: `reduction`
 from .reduction import PCA
 from .reduction import pca_on_sampled_data_set
-from .reduction import analyze_eigenvector_weights_movement
+from .reduction import analyze_eigenvector_weights_change
 from .reduction import analyze_eigenvalue_distribution
 from .reduction import equilibrate_cluster_populations
 from .reduction import plot_2d_manifold
