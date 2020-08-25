@@ -95,10 +95,10 @@ Functions for performing PCA on sampled data sets
 
 .. autofunction:: PCAfold.reduction.pca_on_sampled_data_set
 
-``analyze_eigenvector_weights_movement``
+``analyze_eigenvector_weights_change``
 ----------------------------------------
 
-.. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_movement
+.. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_change
 
 ``analyze_eigenvalue_distribution``
 -----------------------------------
