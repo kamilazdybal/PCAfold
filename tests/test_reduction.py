@@ -59,7 +59,8 @@ class TestReduction(unittest.TestCase):
         eta_new2 = pca2.x2eta(eta)
 
         # transformation can have different direction -> check sign is the same before compare eta's
-        for i in range(pca.nvar):
+        (n_observations, n_variables) = np.shape(PHI)
+        for i in range(n_variables):
             if np.sign(eta[0, i]) != np.sign(eta_new[0, i]):
                 eta_new[:, i] *= -1
             if np.sign(eta[0, i]) != np.sign(eta_new2[0, i]):

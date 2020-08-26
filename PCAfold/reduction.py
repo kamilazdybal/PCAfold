@@ -141,12 +141,12 @@ class PCA:
         self.__Q = Qsort
         self.__L = Lsort
 
-        self.nvar = len(self.L)
-        loadings_matrix = np.zeros((self.nvar, self.neta))
+        self.__nvar = len(self.L)
+        loadings_matrix = np.zeros((self.__nvar, self.neta))
 
         # Compute loadings:
         for i in range(self.neta):
-            for j in range(self.nvar):
+            for j in range(self.__nvar):
                 loadings_matrix[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
 
         self.__loadings = loadings_matrix
@@ -455,7 +455,7 @@ class PCA:
 
         :return: (plot)
         """
-        assert (neig <= self.nvar), "Number of eigenvectors specified is greater than the number of variables"
+        assert (neig <= self.__nvar), "Number of eigenvectors specified is greater than the number of variables"
         xtick = np.arange(len(self.Q))
         for i in range(neig):
             if i == 0:
@@ -488,7 +488,7 @@ class PCA:
         :return: (plot)
         """
         if npc == 0:
-            npc = self.nvar
+            npc = self.__nvar
         npcvec = np.arange(0, npc)
         plt.plot(npcvec + 1, np.cumsum(self.L[npcvec]), 'b', label='Cumulative')
         plt.bar(npcvec + 1, self.L[npcvec])
@@ -537,7 +537,7 @@ class PCA:
         method = method.upper()
 
         if method == 'B2':  # B2 Method of Jolliffe (1972)
-            nvar = self.nvar
+            nvar = self.__nvar
             neta = self.neta
             eigVec = self.Q  # eigenvectors
 
@@ -563,7 +563,7 @@ class PCA:
             ikeep = sd[np.argsort(sd)]
 
         elif method == 'B4':  # B4 Forward method
-            nvar = self.nvar
+            nvar = self.__nvar
             neta = self.neta
             eigVec = self.Q  # eigenvectors
 
@@ -589,7 +589,7 @@ class PCA:
 
             eta = self.x2eta(x)  # the PCs based on the full set of x.
 
-            nvarTot = self.nvar
+            nvarTot = self.__nvar
             neta = self.neta
 
             idiscard = []
@@ -654,7 +654,7 @@ class PCA:
         :return:
             - **r2** - [neta,nvar] The r2 values.  Each column is a different variable and each row is for a different number of retained pcs.
         """
-        nvar = self.nvar
+        nvar = self.__nvar
         neta = np.arange(nvar) + 1
         netapts = len(neta)
 
