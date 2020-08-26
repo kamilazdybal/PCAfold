@@ -76,7 +76,7 @@ class PCA:
 
     def __init__(self, X, scaling='std', neta=0, useXTXeig=True, nocenter=False):
 
-        (n_observations, nvar) = np.shape(X)
+        (n_observations, n_variables) = np.shape(X)
 
         if not isinstance(scaling, str):
             raise ValueError("Parameter `scaling` has to be a string.")
@@ -87,7 +87,7 @@ class PCA:
         if not isinstance(neta, int):
             raise ValueError("Parameter `neta` has to be an integer.")
         else:
-            if (neta < 0) or (neta > nvar):
+            if (neta < 0) or (neta > n_variables):
                 raise ValueError("Parameter `neta` cannot be negative or larger than number of variables in a data set.")
             else:
                 if isinstance(neta, bool):
@@ -99,7 +99,7 @@ class PCA:
         if not isinstance(nocenter, bool):
             raise ValueError("Parameter `nocenter` has to be a boolean.")
 
-        if (n_observations < nvar):
+        if (n_observations < n_variables):
             raise ValueError('Variables should be in columns; observations in rows.\n'
                              'Also ensure that you have more than one observation\n')
 
@@ -110,9 +110,9 @@ class PCA:
         self.__scaling = scaling.upper()
 
         if neta > 0:
-            self.neta = neta
+            self.__neta = neta
         else:
-            self.neta = nvar
+            self.__neta = n_variables
 
         # Center and scale the data set:
         self.__X_cs, self.__XCenter, self.__XScale = preprocess.center_scale(X, self.scaling, nocenter)
@@ -151,6 +151,10 @@ class PCA:
     @property
     def scaling(self):
         return self.__scaling
+
+    @property
+    def neta(self):
+        return self.__neta
 
     @property
     def X_cs(self):
