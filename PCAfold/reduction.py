@@ -115,7 +115,7 @@ class PCA:
             self.neta = nvar
 
         # Center and scale the data set:
-        self.__X_cs, self.XCenter, self.XScale = preprocess.center_scale(X, self.__scaling, nocenter)
+        self.__X_cs, self.__XCenter, self.__XScale = preprocess.center_scale(X, self.__scaling, nocenter)
 
         # Compute covariance matrix:
         self.__R = np.dot(self.__X_cs.transpose(), self.__X_cs) / (n_observations-1)
@@ -155,6 +155,14 @@ class PCA:
     @property
     def R(self):
         return self.__R
+
+    @property
+    def XCenter(self):
+        return self.__XCenter
+
+    @property
+    def XScale(self):
+        return self.__XScale
 
     def x2eta(self, X, nocenter=False):
         """
