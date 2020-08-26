@@ -63,7 +63,7 @@ class PCA:
     :raises ValueError:
         if ``nocenter`` is not a boolean.
 
-    **Attributes:**
+    **Attributes:** (read only)
 
         - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
         - **XCenter** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
@@ -76,14 +76,23 @@ class PCA:
 
     def __init__(self, X, scaling='std', neta=0, useXTXeig=True, nocenter=False):
 
+        # Check X:
         (n_observations, n_variables) = np.shape(X)
+        if (n_observations < n_variables):
+            raise ValueError('Variables should be in columns; observations in rows.\n'
+                             'Also ensure that you have more than one observation\n')
+        (_, idx_removed, _) = preprocess.remove_constant_vars(X)
+        if len(idx_removed) != 0:
+            raise ValueError('Constant variable detected. Must preprocess data for PCA.')
 
+        # Check scaling:
         if not isinstance(scaling, str):
             raise ValueError("Parameter `scaling` has to be a string.")
         else:
             if scaling.lower() not in _scalings_list:
                 raise ValueError("Unrecognized scaling method.")
 
+        # Check neta:
         if not isinstance(neta, int):
             raise ValueError("Parameter `neta` has to be an integer.")
         else:
@@ -93,19 +102,13 @@ class PCA:
                 if isinstance(neta, bool):
                     raise ValueError("Parameter `neta` has to be an integer.")
 
+        # Check useXTXeig:
         if not isinstance(useXTXeig, bool):
             raise ValueError("Parameter `useXTXeig` has to be a boolean.")
 
+        # Check nocenter:
         if not isinstance(nocenter, bool):
             raise ValueError("Parameter `nocenter` has to be a boolean.")
-
-        if (n_observations < n_variables):
-            raise ValueError('Variables should be in columns; observations in rows.\n'
-                             'Also ensure that you have more than one observation\n')
-
-        manipulated, idx_removed, idx_retained = preprocess.remove_constant_vars(X)
-        if len(idx_removed) != 0:
-            raise ValueError('Constant variable detected. Must preprocess data for PCA.')
 
         self.__scaling = scaling.upper()
 
@@ -139,14 +142,14 @@ class PCA:
         self.__L = Lsort
 
         self.nvar = len(self.L)
-        val = np.zeros((self.nvar, self.neta))
+        loadings_matrix = np.zeros((self.nvar, self.neta))
 
         # Compute loadings:
         for i in range(self.neta):
             for j in range(self.nvar):
-                val[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
+                loadings_matrix[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
 
-        self.__loadings = val
+        self.__loadings = loadings_matrix
 
     @property
     def scaling(self):
