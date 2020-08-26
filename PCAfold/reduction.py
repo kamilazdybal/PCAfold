@@ -65,7 +65,7 @@ class PCA:
 
     **Attributes:**
 
-        - **X_cs** - pre-processed data set :math:`\mathbf{X_{cs}}`.
+        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
         - **XCenter** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
         - **XScale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
         - **R** - covariance matrix.
@@ -118,11 +118,11 @@ class PCA:
         self.__X_cs, self.XCenter, self.XScale = preprocess.center_scale(X, self.__scaling, nocenter)
 
         # Compute covariance matrix:
-        self.R = np.dot(self.__X_cs.transpose(), self.__X_cs) / (n_observations-1)
+        self.__R = np.dot(self.__X_cs.transpose(), self.__X_cs) / (n_observations-1)
 
         # Perform PCA with eigendecomposition of the covariance matrix:
         if useXTXeig:
-            L, Q = np.linalg.eigh(self.R)
+            L, Q = np.linalg.eigh(self.__R)
             L = L / np.sum(L)
 
         # Perform PCA with Singular Value Decomposition:
@@ -144,13 +144,17 @@ class PCA:
         # Compute loadings:
         for i in range(self.neta):
             for j in range(self.nvar):
-                val[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
+                val[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.__R[j, j])
 
         self.loadings = val
 
     @property
     def X_cs(self):
         return self.__X_cs
+
+    @property
+    def R(self):
+        return self.__R
 
     def x2eta(self, X, nocenter=False):
         """
