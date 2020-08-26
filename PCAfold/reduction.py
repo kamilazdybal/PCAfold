@@ -135,8 +135,8 @@ class PCA:
         isort = np.argsort(-np.diagonal(np.diag(L)))
         Lsort = L[isort]
         Qsort = Q[:, isort]
-        self.Q = Qsort
-        self.L = Lsort
+        self.__Q = Qsort
+        self.__L = Lsort
 
         self.nvar = len(self.L)
         val = np.zeros((self.nvar, self.neta))
@@ -146,7 +146,7 @@ class PCA:
             for j in range(self.nvar):
                 val[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
 
-        self.loadings = val
+        self.__loadings = val
 
     @property
     def scaling(self):
@@ -172,10 +172,17 @@ class PCA:
     def R(self):
         return self.__R
 
+    @property
+    def Q(self):
+        return self.__Q
 
+    @property
+    def L(self):
+        return self.__L
 
-
-
+    @property
+    def loadings(self):
+        return self.__loadings
 
     def x2eta(self, X, nocenter=False):
         """
