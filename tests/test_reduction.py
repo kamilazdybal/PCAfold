@@ -38,7 +38,7 @@ class TestReduction(unittest.TestCase):
         if np.any(xbar - pca.XCenter > tol) or np.any(xbar - pca2.XCenter > tol):
             self.assertTrue(False)
 
-        if np.any(PHI - pca.X > tol) or np.any(PHI - pca2.X > tol):
+        if np.any(PHI - pca.X_cs > tol) or np.any(PHI - pca2.X_cs > tol):
             self.assertTrue(False)
 
         if np.any(Q - pca.Q > tol) or np.any(Q - pca2.Q > tol):

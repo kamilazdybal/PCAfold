@@ -19,7 +19,7 @@ from PCAfold.preprocess import _scalings_list
 class PCA:
     """
     This class enables performing Principal Component Analysis (PCA)
-    of a data set :math:`\mathbf{X}`.
+    of the original data set :math:`\mathbf{X}`.
 
     **Example:**
 
@@ -65,7 +65,7 @@ class PCA:
 
     **Attributes:**
 
-        - **X** - pre-processed data set :math:`\mathbf{X}`.
+        - **X_cs** - pre-processed data set :math:`\mathbf{X_{cs}}`.
         - **XCenter** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
         - **XScale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
         - **R** - covariance matrix.
@@ -107,7 +107,7 @@ class PCA:
         if len(idx_removed) != 0:
             raise ValueError('Constant variable detected. Must preprocess data for PCA.')
 
-        self._scaling = scaling.upper()
+        self.__scaling = scaling.upper()
 
         if neta > 0:
             self.neta = neta
@@ -115,10 +115,10 @@ class PCA:
             self.neta = nvar
 
         # Center and scale the data set:
-        self.X, self.XCenter, self.XScale = preprocess.center_scale(X, self._scaling, nocenter)
+        self.__X_cs, self.XCenter, self.XScale = preprocess.center_scale(X, self.__scaling, nocenter)
 
         # Compute covariance matrix:
-        self.R = np.dot(self.X.transpose(), self.X) / (n_observations-1)
+        self.R = np.dot(self.__X_cs.transpose(), self.__X_cs) / (n_observations-1)
 
         # Perform PCA with eigendecomposition of the covariance matrix:
         if useXTXeig:
@@ -127,7 +127,7 @@ class PCA:
 
         # Perform PCA with Singular Value Decomposition:
         else:
-            U, s, vh = lg.svd(self.X)
+            U, s, vh = lg.svd(self.__X_cs)
             Q = vh.transpose()
             L = s * s / np.sum(s * s)
 
@@ -147,6 +147,10 @@ class PCA:
                 val[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
 
         self.loadings = val
+
+    @property
+    def X_cs(self):
+        return self.__X_cs
 
     def x2eta(self, X, nocenter=False):
         """
@@ -564,7 +568,7 @@ class PCA:
 
                     # look at a PCA obtained from a subset of x.
                     xs = np.hstack((x[:, np.arange(i)], x[:, np.arange(i + 1, nvar)]))
-                    pca2 = PCA(xs, self._scaling, neta)
+                    pca2 = PCA(xs, self.__scaling, neta)
                     etaSub = pca2.x2eta(xs)
 
                     cov = (etaSub.transpose()).dot(eta)  # covariance of the two sets of PCs
@@ -1466,7 +1470,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     pca_global = PCA(X, scaling, n_components, useXTXeig=True)
 
     # Get a centered and scaled data set:
-    X_cs = pca_global.X
+    X_cs = pca_global.X_cs
     X_center = pca_global.XCenter
     X_scale = pca_global.XScale
 
