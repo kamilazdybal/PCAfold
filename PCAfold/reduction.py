@@ -66,8 +66,8 @@ class PCA:
     **Attributes:** (read only)
 
         - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **XCenter** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **XScale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
         - **R** - covariance matrix.
         - **L** - eigenvalues.
         - **Q** - eigenvectors (vectors are stored in columns, rows correspond to weights).
@@ -118,7 +118,7 @@ class PCA:
             self.__neta = n_variables
 
         # Center and scale the data set:
-        self.__X_cs, self.__XCenter, self.__XScale = preprocess.center_scale(X, self.scaling, nocenter)
+        self.__X_cs, self.__X_center, self.__X_scale = preprocess.center_scale(X, self.scaling, nocenter)
 
         # Compute covariance matrix:
         self.__R = np.dot(self.X_cs.transpose(), self.X_cs) / (n_observations-1)
@@ -164,12 +164,12 @@ class PCA:
         return self.__X_cs
 
     @property
-    def XCenter(self):
-        return self.__XCenter
+    def X_center(self):
+        return self.__X_center
 
     @property
-    def XScale(self):
-        return self.__XScale
+    def X_scale(self):
+        return self.__X_scale
 
     @property
     def R(self):
@@ -231,7 +231,7 @@ class PCA:
             this data set will be pre-processed with the centers and scales
             computed on the data set used when constructing the PCA object.
         :param nocenter: (optional)
-            boolean specifying whether ``PCA.XCenter`` centers should be applied to
+            boolean specifying whether ``PCA.X_center`` centers should be applied to
             center the data set before transformation.
             If ``nocenter=True`` centers will not be applied on the
             data set.
@@ -265,11 +265,11 @@ class PCA:
 
         if nocenter:
             for i in range(0, n_variables):
-                x[:, i] = X[:, i] / self.XScale[i]
+                x[:, i] = X[:, i] / self.X_scale[i]
             principal_components = x.dot(A)
         else:
             for i in range(0, n_variables):
-                x[:, i] = (X[:, i] - self.XCenter[i]) / self.XScale[i]
+                x[:, i] = (X[:, i] - self.X_center[i]) / self.X_scale[i]
             principal_components = x.dot(A)
 
         return principal_components
@@ -316,7 +316,7 @@ class PCA:
         :param principal_components:
             matrix of :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
         :param nocenter: (optional)
-            boolean specifying whether ``PCA.XCenter`` centers should be applied to
+            boolean specifying whether ``PCA.X_center`` centers should be applied to
             un-center the reconstructed data set.
             If ``nocenter=True`` centers will not be applied on the
             reconstructed data set.
@@ -344,10 +344,10 @@ class PCA:
         x = principal_components.dot(A.transpose())
 
         if nocenter:
-            C_zeros = np.zeros_like(self.XCenter)
-            X_rec = preprocess.invert_center_scale(x, C_zeros, self.XScale)
+            C_zeros = np.zeros_like(self.X_center)
+            X_rec = preprocess.invert_center_scale(x, C_zeros, self.X_scale)
         else:
-            X_rec = preprocess.invert_center_scale(x, self.XCenter, self.XScale)
+            X_rec = preprocess.invert_center_scale(x, self.X_center, self.X_scale)
 
         return(X_rec)
 
@@ -797,7 +797,7 @@ class PCA:
         fid.close()
 
         with open(filename, 'ab') as fid:
-            np.savetxt(fid, np.array([self.XCenter]), delimiter=',', fmt='%6.12f')
+            np.savetxt(fid, np.array([self.X_center]), delimiter=',', fmt='%6.12f')
         fid.close()
 
         fid = open(filename, 'a')
@@ -805,7 +805,7 @@ class PCA:
         fid.close()
 
         with open(filename, 'ab') as fid:
-            np.savetxt(fid, np.array([self.XScale]), delimiter=',', fmt='%6.12f')
+            np.savetxt(fid, np.array([self.X_scale]), delimiter=',', fmt='%6.12f')
         fid.close()
 
     def set_retained_eigenvalues(self, method='SCREE GRAPH', option=None):
@@ -998,8 +998,8 @@ class PCA:
             - **iseq** - boolean for ``(a == b)``.
         """
         iseq = False
-        scalErr = np.abs(a.XScale - b.XScale) / np.max(np.abs(a.XScale))
-        centErr = np.abs(a.XCenter - b.XCenter) / np.max(np.abs(a.XCenter))
+        scalErr = np.abs(a.X_scale - b.X_scale) / np.max(np.abs(a.X_scale))
+        centErr = np.abs(a.X_center - b.X_center) / np.max(np.abs(a.X_center))
 
         RErr = np.abs(a.R - b.R) / np.max(np.abs(a.R))
         LErr = np.abs(a.L - b.L) / np.max(np.abs(a.L))
@@ -1007,7 +1007,7 @@ class PCA:
 
         tol = 10 * np.finfo(float).eps
 
-        if a.XScale.all() == b.XScale.all() and a.neta == b.neta and np.all(scalErr < tol) and np.all(
+        if a.X_scale.all() == b.X_scale.all() and a.neta == b.neta and np.all(scalErr < tol) and np.all(
                         centErr < tol) and np.all(RErr < tol) and np.all(QErr < tol) and np.all(LErr < tol):
             iseq = True
 
@@ -1103,8 +1103,8 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
         # Perform PCA on X_r:
         pca = PCA(X_r, scaling, n_components, useXTXeig=True)
-        C_r = pca.XCenter
-        D_r = pca.XScale
+        C_r = pca.X_center
+        D_r = pca.X_scale
 
         # Compute eigenvectors:
         eigenvectors = pca.Q
@@ -1127,8 +1127,8 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
         # Perform PCA on X_r:
         pca = PCA(X_r, 'none', n_components, useXTXeig=True, nocenter=True)
-        C_r = pca.XCenter
-        D_r = pca.XScale
+        C_r = pca.X_center
+        D_r = pca.X_scale
 
         # Compute eigenvectors:
         eigenvectors = pca.Q
@@ -1151,8 +1151,8 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
         # Perform PCA on X_r:
         pca = PCA(X_r, scaling, n_components, useXTXeig=True)
-        C_r = pca.XCenter
-        D_r = pca.XScale
+        C_r = pca.X_center
+        D_r = pca.X_scale
 
         # Compute eigenvectors:
         eigenvectors = pca.Q
@@ -1567,8 +1567,8 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 
     # Get a centered and scaled data set:
     X_cs = pca_global.X_cs
-    X_center = pca_global.XCenter
-    X_scale = pca_global.XScale
+    X_center = pca_global.X_center
+    X_scale = pca_global.X_scale
 
     # Compute global eigenvectors:
     global_eigenvectors = pca_global.Q

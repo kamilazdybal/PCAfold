@@ -19,7 +19,7 @@ class TestReduction(unittest.TestCase):
              np.linspace(0, np.pi, n_observations)))
         PHI, cntr, scl = preprocess.center_scale(PHI.T, 'NONE')
 
-        # create random means for the dataset for comparison with PCA XCenter
+        # create random means for the dataset for comparison with PCA X_center
         xbar = np.random.rand(1, PHI.shape[1])
 
         # svd on PHI to get Q and L for comparison with PCA Q and L
@@ -35,7 +35,7 @@ class TestReduction(unittest.TestCase):
 
         # comparing mean(centering), centered data, Q, and L
 
-        if np.any(xbar - pca.XCenter > tol) or np.any(xbar - pca2.XCenter > tol):
+        if np.any(xbar - pca.X_center > tol) or np.any(xbar - pca2.X_center > tol):
             self.assertTrue(False)
 
         if np.any(PHI - pca.X_cs > tol) or np.any(PHI - pca2.X_cs > tol):
