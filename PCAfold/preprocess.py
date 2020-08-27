@@ -88,7 +88,7 @@ def center_scale(X, scaling, nocenter=False):
 
     .. code:: python
 
-        from PCAfold.preprocess import center_scale
+        from PCAfold import center_scale
         import numpy as np
 
         X = np.random.rand(100,20)
@@ -200,7 +200,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
     .. code:: python
 
-        from PCAfold.preprocess import center_scale, invert_center_scale
+        from PCAfold import center_scale, invert_center_scale
         import numpy as np
 
         X = np.random.rand(100,20)
@@ -306,7 +306,7 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
 
     .. code:: python
 
-        from PCAfold.preprocess import remove_constant_vars
+        from PCAfold import remove_constant_vars
         import numpy as np
 
         X = np.random.rand(100,20)
@@ -385,6 +385,24 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     .. math::
 
         p = \\frac{||\mathbf{C_r}|| - ||\mathbf{C}||}{||\mathbf{C}||} \cdot 100\%
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import analyze_centers_change, DataSampler
+        import numpy as np
+
+        X = np.random.rand(100,10)
+
+        # Generate dummy sampling indices:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        selection = DataSampler(idx)
+        (idx_X_r, _) = selection.number(20, test_selection_option=1)
+
+        # Analyze the change in normalized centers:
+        (normalized_C, normalized_C_r, center_movement_percentage, plt) = analyze_centers_change(X, idx_X_r)
 
     :param X:
         original data set :math:`\mathbf{X}`.
@@ -1380,14 +1398,24 @@ def variable_bins(var, k, verbose=False):
     This function does clustering by dividing a variable vector ``var`` into
     bins of equal lengths.
 
-    **Example:**
-
-
     An example of how a vector can be partitioned with this function is presented below:
 
     .. image:: ../images/clustering-variable-bins.png
       :width: 600
       :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import variable_bins
+        import numpy as np
+
+        # Generate dummy variable:
+        x = np.linspace(-1,1,100)
+
+        # Create partitioning according to bins of x:
+        idx = variable_bins(x, 4, verbose=True)
 
     :param var:
         vector of variable values.
@@ -1449,13 +1477,24 @@ def predefined_variable_bins(var, split_values, verbose=False):
     When a split is performed at a given ``value_i``, the observation in ``var``
     that takes exactly that value is assigned to the newly created bin.
 
-    **Example:**
-
     An example of how a vector can be partitioned with this function is presented below:
 
     .. image:: ../images/clustering-predefined-variable-bins.png
       :width: 600
       :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import predefined_variable_bins
+        import numpy as np
+
+        # Generate dummy variable:
+        x = np.linspace(-1,1,100)
+
+        # Create partitioning according to pre-defined bins of x:
+        idx = predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
 
     :param var:
         vector of variable values.
@@ -1518,13 +1557,24 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     rich side. When ``k`` is odd, there will be one more cluster on the rich side
     compared to the lean side.
 
-    **Example:**
-
     An example of how a vector can be partitioned with this function is presented below:
 
     .. image:: ../images/clustering-mixture-fraction-bins.png
       :width: 600
       :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import mixture_fraction_bins
+        import numpy as np
+
+        # Generate dummy mixture fraction variable:
+        Z = np.linspace(0,1,100)
+
+        # Create partitioning according to bins of mixture fraction:
+        idx = mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
     :param Z:
         vector of mixture fraction values.
@@ -1610,8 +1660,6 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     Further clusters are found by splitting positive and negative values in a vector
     alternatingly into bins of equal lengths.
 
-    **Example:**
-
     Two examples of how a vector can be partitioned with this function are presented below.
 
     With ``split_at_zero=False``:
@@ -1634,6 +1682,19 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     This is to assure that there are at least four clusters: with negative
     values, with negative values close to zero, with positive values close to
     zero and with positive values.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import zero_neighborhood_bins
+        import numpy as np
+
+        # Generate dummy variable:
+        x = np.linspace(-100,100,1000)
+
+        # Create partitioning according to bins of x:
+        idx = zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
     :param var:
         vector of variable values.
@@ -1742,7 +1803,7 @@ def degrade_clusters(idx, verbose=False):
 
     .. code:: python
 
-        from PCAfold.preprocess import degrade_clusters
+        from PCAfold import degrade_clusters
 
         idx = [0, 0, 2, 0, 5, 10]
         (idx_degraded, k_update) = degrade_clusters(idx)
@@ -1826,7 +1887,7 @@ def flip_clusters(idx, dictionary):
 
     .. code:: python
 
-        from PCAfold.preprocess import flip_clusters
+        from PCAfold import flip_clusters
 
         idx = [0,0,0,1,1,1,1,2,2]
         flipped_idx = flip_clusters(idx, {1:2, 2:1})
@@ -2008,6 +2069,20 @@ def get_populations(idx, verbose=False):
     specified in the ``idx`` vector. As an example, if there are 100
     observations in the first cluster and 500 observations in the second cluster
     this function will return a list: ``[100, 500]``.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import variable_bins, get_populations
+        import numpy as np
+
+        # Generate dummy partitioning:
+        x = np.linspace(-1,1,100)
+        idx = variable_bins(x, 4, verbose=True)
+
+        # Compute cluster populations:
+        populations = get_populations(idx)
 
     :param idx:
         vector of cluster classifications.
