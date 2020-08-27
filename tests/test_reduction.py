@@ -98,27 +98,27 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            pca = PCA(test_data_set, scaling='auto', neta=2)
+            pca = PCA(test_data_set, scaling='auto', n_components=2)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca = PCA(test_data_set, scaling='auto', neta=3, nocenter=True)
+            pca = PCA(test_data_set, scaling='auto', n_components=3, nocenter=True)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca = PCA(test_data_set, scaling='pareto', neta=2, nocenter=True)
+            pca = PCA(test_data_set, scaling='pareto', n_components=2, nocenter=True)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca = PCA(test_data_set, scaling='auto', neta=2, useXTXeig=False)
+            pca = PCA(test_data_set, scaling='auto', n_components=2, useXTXeig=False)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca = PCA(test_data_set, scaling='range', neta=2, useXTXeig=False, nocenter=True)
+            pca = PCA(test_data_set, scaling='range', n_components=2, useXTXeig=False, nocenter=True)
         except Exception:
             self.assertTrue(False)
 
@@ -128,7 +128,7 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            pca = PCA(X_removed, scaling='range', neta=2)
+            pca = PCA(X_removed, scaling='range', n_components=2)
         except Exception:
             self.assertTrue(False)
 
@@ -140,13 +140,13 @@ class TestReduction(unittest.TestCase):
         test_data_set_constant[:,5] = np.ones((100,))
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='none', neta=-1)
+            pca = PCA(test_data_set, scaling='none', n_components=-1)
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='auto', neta=30)
+            pca = PCA(test_data_set, scaling='auto', n_components=30)
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='auto', neta=3, useXTXeig=1)
+            pca = PCA(test_data_set, scaling='auto', n_components=3, useXTXeig=1)
 
         with self.assertRaises(ValueError):
             pca = PCA(test_data_set, scaling='auto', nocenter=1)
@@ -155,22 +155,22 @@ class TestReduction(unittest.TestCase):
             pca = PCA(test_data_set, scaling=False)
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='none', neta=True)
+            pca = PCA(test_data_set, scaling='none', n_components=True)
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='none', neta=5, nocenter='False')
+            pca = PCA(test_data_set, scaling='none', n_components=5, nocenter='False')
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='auto', neta=3, useXTXeig='True')
+            pca = PCA(test_data_set, scaling='auto', n_components=3, useXTXeig='True')
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set_constant, scaling='auto', neta=2)
+            pca = PCA(test_data_set_constant, scaling='auto', n_components=2)
 
         with self.assertRaises(ValueError):
             pca = PCA(test_data_set_constant)
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set_constant, scaling='range', neta=5)
+            pca = PCA(test_data_set_constant, scaling='range', n_components=5)
 
     def test_transform_allowed_calls(self):
 
@@ -208,7 +208,7 @@ class TestReduction(unittest.TestCase):
         r2_test = np.ones((20,))
 
         try:
-            pca_X = PCA(test_data_set, scaling='auto', neta=20, useXTXeig=True, nocenter=False)
+            pca_X = PCA(test_data_set, scaling='auto', n_components=20, useXTXeig=True, nocenter=False)
             r2_values = pca_X.calculate_r2(test_data_set)
             comparison = r2_values == r2_test
             self.assertTrue(comparison.all())

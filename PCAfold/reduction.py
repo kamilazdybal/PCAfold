@@ -28,21 +28,24 @@ class PCA:
         from PCAfold import PCA
         import numpy as np
 
+        # Generate dummy data set:
         X = np.random.rand(100,20)
-        pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='none', n_components=2, useXTXeig=True, nocenter=False)
 
     :param X:
         original data set :math:`\mathbf{X}`.
     :param scaling: (optional)
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
-    :param neta: (optional)
-        number of retained Principal Components :math:`q`. If set to ``0`` all eigenvalues are retained.
+    :param n_components: (optional)
+        number of retained Principal Components :math:`q`. If set to 0 all are retained.
     :param useXTXeig: (optional)
-        method for obtaining the eigenvalues ``L`` and eigenvectors ``Q``:
+        method for obtaining the eigenvalues and eigenvectors:
 
-            * ``useXTXeig=False`` uses singular-value decomposition (from ``scipy.linalg.svd``)
-            * ``useXTXeig=True`` (default) uses ``numpy.linalg.eigh`` on the covariance matrix ``R``
+            * ``useXTXeig=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+            * ``useXTXeig=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
 
     :raises ValueError:
         if the original data set :math:`\mathbf{X}` has more variables (columns)
@@ -55,7 +58,7 @@ class PCA:
         if ``scaling`` method is not a string or is not within the available scalings.
 
     :raises ValueError:
-        if ``neta`` is not an integer or is negative.
+        if ``n_components`` is not an integer or is negative.
 
     :raises ValueError:
         if ``useXTXeig`` is not a boolean.
@@ -74,7 +77,7 @@ class PCA:
         - **loadings** - loadings (vectors are stored in columns, rows correspond to weights).
     """
 
-    def __init__(self, X, scaling='std', neta=0, useXTXeig=True, nocenter=False):
+    def __init__(self, X, scaling='std', n_components=0, useXTXeig=True, nocenter=False):
 
         # Check X:
         (n_observations, n_variables) = np.shape(X)
@@ -92,15 +95,12 @@ class PCA:
             if scaling.lower() not in _scalings_list:
                 raise ValueError("Unrecognized scaling method.")
 
-        # Check neta:
-        if not isinstance(neta, int):
-            raise ValueError("Parameter `neta` has to be an integer.")
+        # Check n_components:
+        if not isinstance(n_components, int) or isinstance(n_components, bool):
+            raise ValueError("Parameter `n_components` has to be an integer.")
         else:
-            if (neta < 0) or (neta > n_variables):
-                raise ValueError("Parameter `neta` cannot be negative or larger than number of variables in a data set.")
-            else:
-                if isinstance(neta, bool):
-                    raise ValueError("Parameter `neta` has to be an integer.")
+            if (n_components < 0) or (n_components > n_variables):
+                raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
 
         # Check useXTXeig:
         if not isinstance(useXTXeig, bool):
@@ -112,10 +112,12 @@ class PCA:
 
         self.__scaling = scaling.upper()
 
-        if neta > 0:
-            self.__neta = neta
+        if n_components > 0:
+            self.__neta = n_components
+            self.__n_components = n_components
         else:
             self.__neta = n_variables
+            self.__n_components = n_variables
 
         # Center and scale the data set:
         self.__X_cs, self.__X_center, self.__X_scale = preprocess.center_scale(X, self.scaling, nocenter)
@@ -142,10 +144,10 @@ class PCA:
         self.__L = Lsort
 
         self.__nvar = len(self.L)
-        loadings_matrix = np.zeros((self.__nvar, self.neta))
+        loadings_matrix = np.zeros((self.__nvar, self.n_components))
 
         # Compute loadings:
-        for i in range(self.neta):
+        for i in range(self.n_components):
             for j in range(self.__nvar):
                 loadings_matrix[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
 
@@ -154,6 +156,10 @@ class PCA:
     @property
     def scaling(self):
         return self.__scaling
+
+    @property
+    def n_components(self):
+        return self.__n_components
 
     @property
     def neta(self):
@@ -218,8 +224,11 @@ class PCA:
             from PCAfold import PCA
             import numpy as np
 
+            # Generate dummy data set:
             X = np.random.rand(100,20)
-            pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='none', n_components=2, useXTXeig=True, nocenter=False)
 
             # Calculate the Principal Components:
             principal_components = pca_X.transform(X)
@@ -253,14 +262,14 @@ class PCA:
         if not isinstance(nocenter, bool):
             raise ValueError("Parameter `nocenter` has to be a boolean.")
 
-        neta = self.neta
+        n_components = self.neta
 
         (n_observations, n_variables) = np.shape(X)
 
         if n_variables != len(self.L):
             raise ValueError("Number of variables in a data set is inconsistent with number of eigenvectors.")
 
-        A = self.Q[:, 0:neta]
+        A = self.Q[:, 0:n_components]
         x = np.zeros_like(X, dtype=float)
 
         if nocenter:
@@ -304,8 +313,11 @@ class PCA:
             from PCAfold import PCA
             import numpy as np
 
+            # Generate dummy data set:
             X = np.random.rand(100,20)
-            pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='none', n_components=2, useXTXeig=True, nocenter=False)
 
             # Calculate the Principal Components:
             principal_components = pca_X.transform(X)
@@ -375,8 +387,11 @@ class PCA:
             from PCAfold import PCA
             import numpy as np
 
+            # Generate dummy data set:
             X = np.random.rand(100,20)
-            pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
 
             # Calculate the R2 values:
             r2 = pca_X.calculate_r2(X)
@@ -923,7 +938,7 @@ class PCA:
             import numpy as np
 
             X = np.random.rand(100,20)
-            pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
+            pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
 
             # Calculate the U-scores:
             u_scores = pca_X.u_scores(X)
@@ -963,7 +978,7 @@ class PCA:
             import numpy as np
 
             X = np.random.rand(100,20)
-            pca_X = PCA(X, scaling='auto', neta=10, useXTXeig=True, nocenter=False)
+            pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
 
             # Calculate the U-scores:
             w_scores = pca_X.w_scores(X)
