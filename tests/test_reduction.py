@@ -189,13 +189,13 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            x = pca.eta2x(scores)
+            x = pca.reconstruct(scores)
         except Exception:
             self.assertTrue(False)
 
         try:
             scores = pca.transform(test_data_set)
-            x = pca.eta2x(scores)
+            x = pca.reconstruct(scores)
             difference = abs(test_data_set - x)
             comparison = difference < 10**(-14)
             self.assertTrue(comparison.all())
@@ -222,7 +222,7 @@ class TestReduction(unittest.TestCase):
 
         pca = PCA(test_data_set, scaling='auto')
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             pca.transform(test_data_set_2)
 
     def test_pca_on_sampled_data_set_allowed_calls(self):

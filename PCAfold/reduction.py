@@ -198,15 +198,15 @@ class PCA:
 
         .. math::
 
-            \mathbf{Z_q} = (\mathbf{X} - \mathbf{C}) \mathbf{D}^{-1} \mathbf{A_q}
+            \mathbf{Z_q} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
 
-        if ``nocenter=True``:
+        If ``nocenter=True``:
 
         .. math::
 
-            \mathbf{Z_q} = \mathbf{X} \mathbf{D}^{-1} \mathbf{A_q}
+            \mathbf{Z_q} = \mathbf{X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
 
-        where :math:`\mathbf{C}` and :math:`\mathbf{D}` are centers and scales
+        Here :math:`\mathbf{C}` and :math:`\mathbf{D}` are centers and scales
         computed during ``PCA`` class initialization
         and :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors
         extracted from :math:`\mathbf{A}`.
@@ -231,21 +231,35 @@ class PCA:
             this data set will be pre-processed with the centers and scales
             computed on the data set used when constructing the PCA object.
         :param nocenter: (optional)
-            Defaults to centering. A nonzero argument here will result in no
-            centering being applied, even though it may be present in the
-            original PCA transformation. Use this option only if you know what
-            you are doing. PC source terms are an example of where we want this
-            to be flagged.
+            boolean specifying whether ``PCA.XCenter`` centers should be applied to
+            center the data set before transformation.
+            If ``nocenter=True`` centers will not be applied on the
+            data set.
+
+            .. warning::
+
+                Set ``nocenter=True`` only if you know what you are doing.
+
+        :raises ValueError:
+            if ``nocenter`` is not a boolean.
+
+        :raises ValueError:
+            if the number of variables in a data set is inconsistent with number of eigenvectors.
 
         :return:
             - **principal_components** - the :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
         """
 
+        if not isinstance(nocenter, bool):
+            raise ValueError("Parameter `nocenter` has to be a boolean.")
+
         neta = self.neta
 
         (n_observations, n_variables) = np.shape(X)
 
-        assert n_variables == len(self.L), "Number of variables inconsistent with number of eigenvectors."
+        if n_variables != len(self.L):
+            raise ValueError("Number of variables in a data set is inconsistent with number of eigenvectors.")
+
         A = self.Q[:, 0:neta]
         x = np.zeros_like(X, dtype=float)
 
@@ -260,14 +274,28 @@ class PCA:
 
         return principal_components
 
-    def eta2x(self, eta):
+    def reconstruct(self, principal_components, nocenter=False):
         """
-        This function calculates rank-:math:`q` reconstruction of the original
-        data set from the :math:`q`-first  Principal Components:
+        This function calculates rank-:math:`q` reconstruction of the
+        data set from the :math:`q`-first  Principal Components
+        :math:`\mathbf{Z_q}`.
+
+        If ``nocenter=False``:
 
         .. math::
 
-            \mathbf{X_{rec}} = \mathbf{Z_q} \mathbf{A_q}^{\mathbf{T}} \\cdot \mathbf{D} + \mathbf{C}
+            \mathbf{X_{rec}} = \mathbf{Z_q} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D} + \mathbf{C}
+
+        If ``nocenter=True``:
+
+        .. math::
+
+            \mathbf{X_{rec}} = \mathbf{Z_q} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D}
+
+        Here :math:`\mathbf{C}` and :math:`\mathbf{D}` are centers and scales
+        computed during ``PCA`` class initialization
+        and :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors
+        extracted from :math:`\mathbf{A}`.
 
         **Example:**
 
@@ -280,28 +308,46 @@ class PCA:
             pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
 
             # Calculate the Principal Components:
-            eta = pca_X.transform(X)
+            principal_components = pca_X.transform(X)
 
             # Calculate the reconstructed variables:
-            X_rec = pca_X.eta2x(eta)
+            X_rec = pca_X.reconstruct(principal_components)
 
-        :param eta:
+        :param principal_components:
             matrix of :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
+        :param nocenter: (optional)
+            boolean specifying whether ``PCA.XCenter`` centers should be applied to
+            un-center the reconstructed data set.
+            If ``nocenter=True`` centers will not be applied on the
+            reconstructed data set.
+
+            .. warning::
+
+                Set ``nocenter=True`` only if you know what you are doing.
+
+        :raises ValueError:
+            if ``nocenter`` is not a boolean.
 
         :return:
             - **X_rec** - rank-:math:`q` reconstruction of the original data set.
         """
 
-        n_observations, n_components = eta.shape
+        if not isinstance(nocenter, bool):
+            raise ValueError("Parameter `nocenter` has to be a boolean.")
 
-        assert n_components == self.neta, "Number of variables provided inconsistent with number of PCs."
+        (n_observations, n_components) = np.shape(principal_components)
 
         # Select n_components first Principal Components:
         A = self.Q[:, 0:n_components]
 
         # Calculate unscaled, uncentered approximation to the data:
-        x = eta.dot(A.transpose())
-        X_rec = preprocess.invert_center_scale(x, self.XCenter, self.XScale)
+        x = principal_components.dot(A.transpose())
+
+        if nocenter:
+            C_zeros = np.zeros_like(self.XCenter)
+            X_rec = preprocess.invert_center_scale(x, C_zeros, self.XScale)
+        else:
+            X_rec = preprocess.invert_center_scale(x, self.XCenter, self.XScale)
 
         return(X_rec)
 
@@ -346,7 +392,7 @@ class PCA:
 
         assert (n_observations > n_variables), "Need more observations than variables."
 
-        xapprox = self.eta2x(self.transform(X))
+        xapprox = self.reconstruct(self.transform(X))
         r2 = np.zeros(n_variables)
 
         for i in range(0, n_variables):
@@ -377,7 +423,7 @@ class PCA:
         """
         n_observations, nvar = X.shape
         self.neta = nvar
-        err = X - self.eta2x(self.transform(X))
+        err = X - self.reconstruct(self.transform(X))
         isBad = (np.max(np.abs(err), axis=0) / np.max(np.abs(X), axis=0) > 1e-10).any() or (
             np.min(np.abs(err), axis=0) / np.min(np.abs(X), axis=0) > 1e-10).any()
         if isBad and errorsAreFatal:

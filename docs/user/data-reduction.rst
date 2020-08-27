@@ -22,15 +22,15 @@ Class ``PCA``
 
 .. autoclass:: PCAfold.reduction.PCA
 
-``PCA.x2eta``
-=============
+``PCA.transform``
+=================
 
-.. autofunction:: PCAfold.reduction.PCA.x2eta
+.. autofunction:: PCAfold.reduction.PCA.transform
 
-``PCA.eta2x``
-=============
+``PCA.reconstruct``
+===================
 
-.. autofunction:: PCAfold.reduction.PCA.eta2x
+.. autofunction:: PCAfold.reduction.PCA.reconstruct
 
 ``PCA.calculate_r2``
 ====================
