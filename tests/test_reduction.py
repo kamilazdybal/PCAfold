@@ -47,16 +47,16 @@ class TestReduction(unittest.TestCase):
         if np.any(L - pca.L > tol) or np.any(L - pca2.L > tol):
             self.assertTrue(False)
 
-        # Check if feed eta's to PCA, return same eta's when do x2eta
-        eta = pca.x2eta(PHI + xbar)  # dataset as example of eta's
+        # Check if feed eta's to PCA, return same eta's when do transform
+        eta = pca.transform(PHI + xbar)  # dataset as example of eta's
 
         # both methods of PCA:
         pca = PCA(eta, 'NONE', useXTXeig=False)
         pca2 = PCA(eta, 'NONE', useXTXeig=True)
 
-        # x2eta transformation:
-        eta_new = pca.x2eta(eta)
-        eta_new2 = pca2.x2eta(eta)
+        # transform transformation:
+        eta_new = pca.transform(eta)
+        eta_new2 = pca2.transform(eta)
 
         # transformation can have different direction -> check sign is the same before compare eta's
         (n_observations, n_variables) = np.shape(PHI)
@@ -172,19 +172,19 @@ class TestReduction(unittest.TestCase):
         with self.assertRaises(ValueError):
             pca = PCA(test_data_set_constant, scaling='range', neta=5)
 
-    def test_x2eta_allowed_calls(self):
+    def test_transform_allowed_calls(self):
 
         test_data_set = np.random.rand(10,2)
 
         pca = PCA(test_data_set, scaling='auto')
 
         try:
-            pca.x2eta(test_data_set)
+            pca.transform(test_data_set)
         except Exception:
             self.assertTrue(False)
 
         try:
-            scores = pca.x2eta(test_data_set)
+            scores = pca.transform(test_data_set)
         except Exception:
             self.assertTrue(False)
 
@@ -194,7 +194,7 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            scores = pca.x2eta(test_data_set)
+            scores = pca.transform(test_data_set)
             x = pca.eta2x(scores)
             difference = abs(test_data_set - x)
             comparison = difference < 10**(-14)
@@ -215,7 +215,7 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
-    def test_x2eta_not_allowed_calls(self):
+    def test_transform_not_allowed_calls(self):
 
         test_data_set = np.random.rand(10,2)
         test_data_set_2 = np.random.rand(10,3)
@@ -223,7 +223,7 @@ class TestReduction(unittest.TestCase):
         pca = PCA(test_data_set, scaling='auto')
 
         with self.assertRaises(AssertionError):
-            pca.x2eta(test_data_set_2)
+            pca.transform(test_data_set_2)
 
     def test_pca_on_sampled_data_set_allowed_calls(self):
 

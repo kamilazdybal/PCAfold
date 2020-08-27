@@ -187,16 +187,29 @@ class PCA:
     def loadings(self):
         return self.__loadings
 
-    def x2eta(self, X, nocenter=False):
+    def transform(self, X, nocenter=False):
         """
-        This function calculates the :math:`q`-first Principal Components
-        given the original data:
+        This function transforms any data set :math:`\mathbf{X}` to the new
+        truncated basis :math:`\mathbf{A_q}` identified by PCA.
+        It computes the :math:`q`-first Principal Components
+        :math:`\mathbf{Z_q}` given the original data.
+
+        If ``nocenter=False``:
 
         .. math::
 
-            \mathbf{Z_q} = \mathbf{X_{cs}} \mathbf{A_q}
+            \mathbf{Z_q} = (\mathbf{X} - \mathbf{C}) \mathbf{D}^{-1} \mathbf{A_q}
 
-        where :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors.
+        if ``nocenter=True``:
+
+        .. math::
+
+            \mathbf{Z_q} = \mathbf{X} \mathbf{D}^{-1} \mathbf{A_q}
+
+        where :math:`\mathbf{C}` and :math:`\mathbf{D}` are centers and scales
+        computed during ``PCA`` class initialization
+        and :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors
+        extracted from :math:`\mathbf{A}`.
 
         **Example:**
 
@@ -209,7 +222,7 @@ class PCA:
             pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
 
             # Calculate the Principal Components:
-            eta = pca_X.x2eta(X)
+            principal_components = pca_X.transform(X)
 
         :param X:
             data set to transform. Note that it does not need to
@@ -225,25 +238,27 @@ class PCA:
             to be flagged.
 
         :return:
-            - **eta** - the :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
+            - **principal_components** - the :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
         """
 
         neta = self.neta
-        n_observations, nvar = X.shape
-        assert nvar == len(self.L), "Number of variables inconsistent with number of eigenvectors."
+
+        (n_observations, n_variables) = np.shape(X)
+
+        assert n_variables == len(self.L), "Number of variables inconsistent with number of eigenvectors."
         A = self.Q[:, 0:neta]
         x = np.zeros_like(X, dtype=float)
 
         if nocenter:
-            for i in range(0, nvar):
+            for i in range(0, n_variables):
                 x[:, i] = X[:, i] / self.XScale[i]
-            eta = x.dot(A)
+            principal_components = x.dot(A)
         else:
-            for i in range(0, nvar):
+            for i in range(0, n_variables):
                 x[:, i] = (X[:, i] - self.XCenter[i]) / self.XScale[i]
-            eta = x.dot(A)
+            principal_components = x.dot(A)
 
-        return eta
+        return principal_components
 
     def eta2x(self, eta):
         """
@@ -265,7 +280,7 @@ class PCA:
             pca_X = PCA(X, scaling='none', neta=2, useXTXeig=True, nocenter=False)
 
             # Calculate the Principal Components:
-            eta = pca_X.x2eta(X)
+            eta = pca_X.transform(X)
 
             # Calculate the reconstructed variables:
             X_rec = pca_X.eta2x(eta)
@@ -331,7 +346,7 @@ class PCA:
 
         assert (n_observations > n_variables), "Need more observations than variables."
 
-        xapprox = self.eta2x(self.x2eta(X))
+        xapprox = self.eta2x(self.transform(X))
         r2 = np.zeros(n_variables)
 
         for i in range(0, n_variables):
@@ -362,7 +377,7 @@ class PCA:
         """
         n_observations, nvar = X.shape
         self.neta = nvar
-        err = X - self.eta2x(self.x2eta(X))
+        err = X - self.eta2x(self.transform(X))
         isBad = (np.max(np.abs(err), axis=0) / np.max(np.abs(X), axis=0) > 1e-10).any() or (
             np.min(np.abs(err), axis=0) / np.min(np.abs(X), axis=0) > 1e-10).any()
         if isBad and errorsAreFatal:
@@ -587,7 +602,7 @@ class PCA:
             if len(x) == 0:
                 raise ValueError('You must supply the data vector x when using the M2 method.')
 
-            eta = self.x2eta(x)  # the PCs based on the full set of x.
+            eta = self.transform(x)  # the PCs based on the full set of x.
 
             nvarTot = self.__nvar
             neta = self.neta
@@ -604,7 +619,7 @@ class PCA:
                     # look at a PCA obtained from a subset of x.
                     xs = np.hstack((x[:, np.arange(i)], x[:, np.arange(i + 1, nvar)]))
                     pca2 = PCA(xs, self.scaling, neta)
-                    etaSub = pca2.x2eta(xs)
+                    etaSub = pca2.transform(xs)
 
                     cov = (etaSub.transpose()).dot(eta)  # covariance of the two sets of PCs
 
@@ -663,7 +678,7 @@ class PCA:
         r2vec = r2.copy()
 
         self.neta = np.max(neta, axis=0)
-        eta = self.x2eta(data)
+        eta = self.transform(data)
 
         for i in range(netapts):
             self.neta = neta[i]
@@ -852,7 +867,7 @@ class PCA:
 
             \mathbf{U_{scores}} = \mathbf{X_{cs}} \mathbf{A_q}
 
-        This function is equivalent to ``PCA.x2eta``.
+        This function is equivalent to ``PCA.transform``.
 
         **Example:**
 
@@ -878,7 +893,7 @@ class PCA:
             - **u_scores** - U-scores (Principal Components).
         """
 
-        u_scores = self.x2eta(X)
+        u_scores = self.transform(X)
 
         return(u_scores)
 
@@ -920,7 +935,7 @@ class PCA:
 
         eval = self.L[0:self.neta]
 
-        w_scores = self.x2eta(X).dot(np.diag(1 / np.sqrt(eval)))
+        w_scores = self.transform(X).dot(np.diag(1 / np.sqrt(eval)))
 
         return(w_scores)
 
@@ -1100,12 +1115,12 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         eigenvalues = pca.L
 
         # Compute local PC-scores (the original data set will be centered and scaled with C_r and D_r):
-        pc_scores = pca.x2eta(X, nocenter=False)
+        pc_scores = pca.transform(X, nocenter=False)
 
         if len(X_source) != 0:
 
             # Compute PC-sources:
-            pc_sources = pca.x2eta(X_source, nocenter=True)
+            pc_sources = pca.transform(X_source, nocenter=True)
 
     elif biasing_option == 4:
 
@@ -1523,7 +1538,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     eigenvalues = np.hstack((eigenvalues, np.reshape(global_eigenvalues, (n_variables, 1))/maximum_global_eigenvalue))
 
     # Compute global PC-scores:
-    global_pc_scores = pca_global.x2eta(X, nocenter=False)
+    global_pc_scores = pca_global.transform(X, nocenter=False)
 
     # Append the global PC-scores:
     pc_scores_matrix[:,:,0] = global_pc_scores
@@ -1534,7 +1549,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         X_source_cs = np.divide(X_source, X_scale)
 
         # Compute global PC-sources:
-        global_pc_sources = pca_global.x2eta(X_source, nocenter=True)
+        global_pc_sources = pca_global.transform(X_source, nocenter=True)
 
         # Append the global PC-sources:
         pc_sources_matrix[:,:,0] = global_pc_sources
