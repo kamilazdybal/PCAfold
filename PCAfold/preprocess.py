@@ -1024,7 +1024,8 @@ class DataSampler:
 
         Here it is understood that :math:`n_1` train samples were requested from
         the first cluster, :math:`n_2` from the second cluster and :math:`n_3`
-        from the third cluster. This can be achieved by setting:
+        from the third cluster, where :math:`n_i` can be interpreted as number
+        or as percentage. This can be achieved by setting:
 
         .. code:: python
 
