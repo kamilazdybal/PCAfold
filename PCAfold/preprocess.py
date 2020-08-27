@@ -91,6 +91,7 @@ def center_scale(X, scaling, nocenter=False):
         from PCAfold import center_scale
         import numpy as np
 
+        # Generate dummy data set:
         X = np.random.rand(100,20)
 
         # Center and scale:
@@ -203,6 +204,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
         from PCAfold import center_scale, invert_center_scale
         import numpy as np
 
+        # Generate dummy data set:
         X = np.random.rand(100,20)
 
         # Center and scale:
@@ -253,6 +255,7 @@ class PreProcessing:
         from PCAfold import PreProcessing
         import numpy as np
 
+        # Generate dummy data set with a constant variable:
         X = np.random.rand(100,20)
         X[:,5] = np.ones((100,))
 
@@ -309,6 +312,7 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
         from PCAfold import remove_constant_vars
         import numpy as np
 
+        # Generate dummy data set with a constant variable:
         X = np.random.rand(100,20)
         X[:,5] = np.ones((100,))
 
@@ -393,6 +397,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         from PCAfold import analyze_centers_change, DataSampler
         import numpy as np
 
+        # Generate dummy data set:
         X = np.random.rand(100,10)
 
         # Generate dummy sampling indices:
@@ -515,7 +520,10 @@ class DataSampler:
       from PCAfold import DataSampler
       import numpy as np
 
+      # Generate dummy idx vector:
       idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+      # Instantiate DataSampler class object:
       selection = DataSampler(idx, idx_test=[5,9], random_seed=100, verbose=True)
 
     :param idx:
@@ -700,8 +708,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
         **Train data:**
@@ -858,8 +871,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
         *Note:*
@@ -1012,8 +1030,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
         **Train data:**
@@ -1246,8 +1269,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         Due to the nature of this sampling technique, it is not necessary to
@@ -1261,8 +1289,14 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
+          n_observations = 100
           idx = np.zeros(n_observations)
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         **Train data:**
@@ -1805,7 +1839,10 @@ def degrade_clusters(idx, verbose=False):
 
         from PCAfold import degrade_clusters
 
+        # Generate dummy idx vector:
         idx = [0, 0, 2, 0, 5, 10]
+
+        # Degrade clusters:
         (idx_degraded, k_update) = degrade_clusters(idx)
 
     The code above will produce:
@@ -1819,9 +1856,12 @@ def degrade_clusters(idx, verbose=False):
 
     .. code:: python
 
-        from PCAfold.preprocess import degrade_clusters
+        from PCAfold import degrade_clusters
 
+        # Generate dummy idx vector:
         idx = [1, 1, 2, 2, 3, 3]
+
+        # Degrade clusters:
         (idx_degraded, k_update) = degrade_clusters(idx)
 
     will produce:
@@ -1889,7 +1929,10 @@ def flip_clusters(idx, dictionary):
 
         from PCAfold import flip_clusters
 
+        # Generate dummy idx vector:
         idx = [0,0,0,1,1,1,1,2,2]
+
+        # Swap cluster number 1 with cluster number 2:
         flipped_idx = flip_clusters(idx, {1:2, 2:1})
 
     The code above will produce:
@@ -2083,6 +2126,13 @@ def get_populations(idx, verbose=False):
 
         # Compute cluster populations:
         populations = get_populations(idx)
+
+    The code above will produce:
+
+    .. code-block:: text
+
+        >>> populations
+        [25, 25, 25, 25]
 
     :param idx:
         vector of cluster classifications.
