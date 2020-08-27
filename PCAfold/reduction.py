@@ -947,7 +947,10 @@ class PCA:
             from PCAfold import PCA
             import numpy as np
 
+            # Generate dummy data set:
             X = np.random.rand(100,20)
+
+            # Instantiate PCA class object:
             pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
 
             # Calculate the U-scores:
@@ -977,7 +980,8 @@ class PCA:
 
             \mathbf{W_{scores}} = \\frac{\mathbf{Z_q}}{\\sqrt{\mathbf{L_q}}}
 
-        where :math:`\mathbf{L_q}` are the :math:`q`-first eigenvalues.
+        where :math:`\mathbf{L_q}` are the :math:`q`-first eigenvalues extracted
+        from :math:`\mathbf{L}`.
         The W-scores are still uncorrelated and have variances equal unity.
 
         **Example:**
@@ -987,10 +991,13 @@ class PCA:
             from PCAfold import PCA
             import numpy as np
 
+            # Generate dummy data set:
             X = np.random.rand(100,20)
+
+            # Instantiate PCA class object:
             pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
 
-            # Calculate the U-scores:
+            # Calculate the W-scores:
             w_scores = pca_X.w_scores(X)
 
         :param X:
@@ -1070,7 +1077,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     section of the documentation for more information on the available options.
 
     :param X:
-        original (full) data set.
+        original (full) data set :math:`\mathbf{X}`.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
@@ -1082,7 +1089,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         integer specifying biasing option.
         Can only attain values 1, 2, 3 or 4.
     :param X_source: (optional)
-        source terms corresponding to the state-space variables in ``X``.
+        source terms corresponding to the state-space variables in :math:`\mathbf{X}`.
 
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3 or 4.
@@ -1404,7 +1411,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     data set :math:`\mathbf{X_r}`.
 
     :param X:
-        original (full) data set.
+        original (full) data set :math:`\mathbf{X}`.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
@@ -1511,7 +1518,8 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         :width: 700
         :align: center
 
-    Future implementation might include equilibration that slows down close to equilibrium. This might be helpful for sensitivity analysis.
+    Future implementation will include equilibration that slows down close to
+    equilibrium.
 
     **Interpretation for the outputs:**
 
@@ -1523,7 +1531,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         :align: center
 
     :param X:
-        original (full) data set.
+        original (full) data set :math:`\mathbf{X}`.
     :param idx:
         vector of cluster classifications.
         The first cluster has index 0.
