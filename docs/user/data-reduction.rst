@@ -235,6 +235,11 @@ Plotting functions
 
 .. autofunction:: PCAfold.reduction.plot_2d_manifold
 
+``plot_eigenvectors``
+=====================
+
+.. autofunction:: PCAfold.reduction.plot_eigenvectors
+
 --------------------------------------------------------------------------------
 
 ************

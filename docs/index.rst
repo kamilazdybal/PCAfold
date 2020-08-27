@@ -42,6 +42,6 @@ section for possible workflows that can be achieved with **PCAfold**.
 
    tutorials/demo-clustering
    tutorials/demo-sampling
-   tutorials/demo-global-vs-local-pca
+   tutorials/demo-pca
    tutorials/demo-pca-on-sampled-data-sets
    tutorials/demo-manifold-assessment

@@ -1802,3 +1802,101 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt
+
+def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_variables=[], plot_absolute=False, bar_color=None, title=None, save_filename=None):
+    """
+    This function plots a weights on eigenvectors. It will generate as many
+    plots as there are eigenvectors present in the ``eigenvectors`` matrix.
+
+    :param eigenvectors:
+        matrix of eigenvectors to plot. It can be supplied as an attribute of
+        the PCA class: ``PCA.Q``.
+    :param eigenvectors_indices:
+        list of integers specifying indexing of eigenvectors inside
+        ``eigenvectors`` supplied. If it is not supplied, it is assumed that
+        eigenvectors are numbered :math:`[0, 1, 2, \\dots, n]`, where :math:`n`
+        is the number of eigenvectors provided.
+    :param variable_names: (optional)
+        list of strings specifying variable names.
+    :param plot_variables: (optional)
+        list of integers specifying indices of variables to be plotted.
+        By default, all variables are plotted.
+    :param plot_absolute:
+        boolean specifying whether absolute values of eigenvectors should be plotted.
+    :param bar_color: (optional)
+        string specifying
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    if bar_color == None:
+        bar_color = '#191b27'
+
+    try:
+        (n_variables, n_components) = np.shape(eigenvectors)
+    except:
+        eigenvectors = eigenvectors[:, np.newaxis]
+        (n_variables, n_components) = np.shape(eigenvectors)
+
+    if len(eigenvectors_indices) == 0:
+        eigenvectors_indices = [i for i in range(0,n_components)]
+
+    # Create default labels for variables:
+    if len(variable_names) == 0:
+        variable_names = ['$X_{' + str(i) + '}$' for i in range(0, n_variables)]
+
+    x_range = np.arange(1, n_variables+1)
+
+    plot_handles = []
+
+    for n_pc in range(0,n_components):
+
+        fig, ax = plt.subplots(figsize=(n_variables, 6))
+
+        if plot_absolute:
+            plt.bar(x_range, abs(eigenvectors[:,n_pc]), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
+        else:
+            plt.bar(x_range, eigenvectors[:,n_pc], width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
+
+        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+        if plot_absolute:
+            plt.ylabel('PC-' + str(eigenvectors_indices[n_pc] + 1) + ' absolute weight [-]', fontsize=font_labels, **csfont)
+        else:
+            plt.ylabel('PC-' + str(eigenvectors_indices[n_pc] + 1) + ' weight [-]', fontsize=font_labels, **csfont)
+
+        plt.grid(alpha=0.3, zorder=0)
+        plt.xlim(0, n_variables+1.5)
+        if plot_absolute == True:
+            plt.ylim(-0.05,1.05)
+        else:
+            plt.ylim(-1.05,1.05)
+
+        ax.spines["top"].set_visible(True)
+        ax.spines["bottom"].set_visible(True)
+        ax.spines["right"].set_visible(True)
+        ax.spines["left"].set_visible(True)
+
+        if title != None:
+            plt.title(title, fontsize=font_title, **csfont)
+
+        if save_filename != None:
+            plt.savefig(save_filename + '-eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '.png', dpi = 500, bbox_inches='tight')
+
+        plot_handles.append(plt)
+
+    return plot_handles
+
+def plot_eigenvectors_comparison(eigenvectors_tuple, plot_variables=[], plot_absolute=False, x_label=None, y_label=None, title=None, save_filename=None):
+    pass
+
+
+
+def plot_eigenvalue_distribution(eigenvalues, normalized=False, x_label=None, y_label=None, title=None, save_filename=None):
+    pass

@@ -28,6 +28,9 @@ from .reduction import analyze_eigenvector_weights_change
 from .reduction import analyze_eigenvalue_distribution
 from .reduction import equilibrate_cluster_populations
 from .reduction import plot_2d_manifold
+from .reduction import plot_eigenvectors
+from .reduction import plot_eigenvectors_comparison
+from .reduction import plot_eigenvalue_distribution
 
 # Module: `analysis`
 from .kernel_regression import KReg
