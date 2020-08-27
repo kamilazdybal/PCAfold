@@ -58,7 +58,7 @@ class PCA:
         if ``scaling`` method is not a string or is not within the available scalings.
 
     :raises ValueError:
-        if ``n_components`` is not an integer or is negative.
+        if ``n_components`` is not an integer, is negative or larger than the number of variables in a data set.
 
     :raises ValueError:
         if ``useXTXeig`` is not a boolean.
@@ -111,6 +111,8 @@ class PCA:
             raise ValueError("Parameter `nocenter` has to be a boolean.")
 
         self.__scaling = scaling.upper()
+        self.__n_observations = n_observations
+        self.__n_variables = n_variables
 
         if n_components > 0:
             self.__neta = n_components
@@ -156,6 +158,14 @@ class PCA:
     @property
     def scaling(self):
         return self.__scaling
+
+    @property
+    def n_observations(self):
+        return self.__n_observations
+
+    @property
+    def n_variables(self):
+        return self.__n_variables
 
     @property
     def n_components(self):
@@ -262,7 +272,7 @@ class PCA:
         if not isinstance(nocenter, bool):
             raise ValueError("Parameter `nocenter` has to be a boolean.")
 
-        n_components = self.neta
+        n_components = self.n_components
 
         (n_observations, n_variables) = np.shape(X)
 
@@ -614,7 +624,7 @@ class PCA:
 
         if method == 'B2':  # B2 Method of Jolliffe (1972)
             nvar = self.__nvar
-            neta = self.neta
+            neta = self.n_components
             eigVec = self.Q  # eigenvectors
 
             # set indices for discarded variables by looking at eigenvectors
@@ -640,7 +650,7 @@ class PCA:
 
         elif method == 'B4':  # B4 Forward method
             nvar = self.__nvar
-            neta = self.neta
+            neta = self.n_components
             eigVec = self.Q  # eigenvectors
 
             # set indices for retained variables by looking at eigenvectors
@@ -666,7 +676,7 @@ class PCA:
             eta = self.transform(x)  # the PCs based on the full set of x.
 
             nvarTot = self.__nvar
-            neta = self.neta
+            neta = self.n_components
 
             idiscard = []
             q = nvarTot
@@ -994,7 +1004,7 @@ class PCA:
             - **w_scores** - W-scores (scaled Principal Components).
         """
 
-        eval = self.L[0:self.neta]
+        eval = self.L[0:self.n_components]
 
         w_scores = self.transform(X).dot(np.diag(1 / np.sqrt(eval)))
 
@@ -1022,7 +1032,7 @@ class PCA:
 
         tol = 10 * np.finfo(float).eps
 
-        if a.X_scale.all() == b.X_scale.all() and a.neta == b.neta and np.all(scalErr < tol) and np.all(
+        if a.X_scale.all() == b.X_scale.all() and a.n_components == b.n_components and np.all(scalErr < tol) and np.all(
                         centErr < tol) and np.all(RErr < tol) and np.all(QErr < tol) and np.all(LErr < tol):
             iseq = True
 
