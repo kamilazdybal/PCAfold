@@ -15,7 +15,7 @@ _scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '-1to1',
 def center_scale(X, scaling, nocenter=False):
     """
     This function centers and scales the data set. The effect of data pre-processing
-    on low-dimensional manifolds is studied in :cite:`Parente2013`.
+    on low-dimensional manifolds was studied in :cite:`Parente2013`.
 
     Below we understand that :math:`\mathbf{X}_i` is the :math:`i^{th}` column
     of :math:`\mathbf{X}`.

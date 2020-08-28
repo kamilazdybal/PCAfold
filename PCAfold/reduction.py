@@ -21,6 +21,17 @@ class PCA:
     This class enables performing Principal Component Analysis (PCA)
     of the original data set :math:`\mathbf{X}`.
 
+    Two options for performing PCA are implemented:
+
+    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
+    | | Eigendecomposition of the covariance matrix                                                    | | Singular Value Decomposition (SVD)                                        |
+    | | Set: ``useXTXeig=True``                                                                        | | Set: ``useXTXeig=False``                                                  |
+    +==================================================================================================+=============================================================================+
+    | Centering and scaling: :math:`\mathbf{X_{cs}}` as per ``preprocess.center_scale`` function                                                                                     |
+    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
+    | Eigendec. of :math:`1/(N-1) \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}`                        | SVD: :math:`\mathbf{X_{cs}} = \mathbf{U} \mathbf{S} \mathbf{V}^{\mathbf{T}}`|
+    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
+
     **Example:**
 
     .. code:: python
@@ -236,7 +247,7 @@ class PCA:
             (as per :cite:`Sutherland2009`)
             to obtain sources of Principal Components :math:`\mathbf{S_Z}`. In
             that case :math:`\mathbf{X} = \mathbf{S}` and the transformation
-            should be performed without centering:
+            should be performed *without* centering:
 
             .. math::
 
@@ -336,7 +347,7 @@ class PCA:
             (as per :cite:`Sutherland2009`)
             from the :math:`q`-first sources of Principal Components :math:`\mathbf{S_{Z_q}}`. In
             that case :math:`\mathbf{Z_q} = \mathbf{S_{Z_q}}` and the reconstruction
-            should be performed without uncentering:
+            should be performed *without* uncentering:
 
             .. math::
 
