@@ -380,3 +380,144 @@ class TestReduction(unittest.TestCase):
             plt.close()
         except Exception:
             self.assertTrue(False)
+
+    def test_plot_2d_manifold_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            plt = reduction.plot_2d_manifold(principal_components, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            plt = reduction.plot_2d_manifold(principal_components, color_variable=X[:,0], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            plt = reduction.plot_2d_manifold(principal_components, color_variable='k', x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            plt = reduction.plot_2d_manifold(principal_components, color_variable='k', x_label='$x$', y_label='$y$', colorbar_label='$x_1$', title='Title', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+    def test_plot_eigenvectors_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plts = reduction.plot_eigenvectors(pca_X.Q, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
+            for i in range(0, len(plts)):
+                plts[i].close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plts = reduction.plot_eigenvectors(pca_X.Q[:,0], eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
+            for i in range(0, len(plts)):
+                plts[i].close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plts = reduction.plot_eigenvectors(pca_X.Q[:,2:4], eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
+            for i in range(0, len(plts)):
+                plts[i].close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plts = reduction.plot_eigenvectors(pca_X.Q[:,0], eigenvectors_indices=[0], variable_names=['a', 'b', 'c', 'd', 'e'], plot_absolute=True, bar_color='r', title='Title', save_filename=None)
+            for i in range(0, len(plts)):
+                plts[i].close()
+        except Exception:
+            self.assertTrue(False)
+
+    def test_plot_eigenvectors_comparison_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_1 = PCA(X, scaling='auto', n_components=2)
+            pca_2 = PCA(X, scaling='range', n_components=2)
+            pca_3 = PCA(X, scaling='vast', n_components=2)
+            plt = reduction.plot_eigenvectors_comparison((pca_1.Q[:,0], pca_2.Q[:,0], pca_3.Q[:,0]), legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_1 = PCA(X, scaling='auto', n_components=2)
+            pca_2 = PCA(X, scaling='range', n_components=2)
+            pca_3 = PCA(X, scaling='vast', n_components=2)
+            plt = reduction.plot_eigenvectors_comparison((pca_1.Q[:,0], pca_2.Q[:,0], pca_3.Q[:,0]), legend_labels=['$a$', '$b$', '$c$'], variable_names=['a', 'b', 'c', 'd', 'e'], plot_absolute=True, color_map='viridis', title='Title', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+    def test_plot_eigenvalue_distribution_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt = reduction.plot_eigenvalue_distribution(pca_X.L, normalized=False, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt = reduction.plot_eigenvalue_distribution(pca_X.L, normalized=True, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt = reduction.plot_eigenvalue_distribution(pca_X.L, normalized=True, title='Title', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+    def test_plot_eigenvalue_distribution_comparison_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_1 = PCA(X, scaling='auto', n_components=2)
+            pca_2 = PCA(X, scaling='range', n_components=2)
+            pca_3 = PCA(X, scaling='vast', n_components=2)
+            plt = reduction.plot_eigenvalue_distribution_comparison((pca_1.L, pca_2.L, pca_3.L), legend_labels=[], normalized=False, color_map='coolwarm', title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_1 = PCA(X, scaling='auto', n_components=2)
+            pca_2 = PCA(X, scaling='range', n_components=2)
+            pca_3 = PCA(X, scaling='vast', n_components=2)
+            plt = reduction.plot_eigenvalue_distribution_comparison((pca_1.L, pca_2.L, pca_3.L), legend_labels=['Auto', 'Range', 'Vast'], normalized=True, color_map='viridis', title='Title', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)

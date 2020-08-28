@@ -1764,7 +1764,7 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
 
 def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None):
     """
-    This function plots a weights on eigenvectors. It will generate as many
+    This function plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
 
     :param eigenvectors:
@@ -1897,6 +1897,10 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
     if len(variable_names) == 0:
         variable_names = ['$X_{' + str(i) + '}$' for i in range(0, n_variables)]
 
+    # Create default labels for legend:
+    if len(legend_labels) == 0:
+        legend_labels = ['Set ' + str(i) + '' for i in range(1, n_sets+1)]
+
     x_range = np.arange(1, n_variables+1)
 
     plot_handles = []
@@ -1969,7 +1973,6 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         plt.plot(x_range, eigenvalues/np.max(eigenvalues), '-', c=color_plot, linewidth=line_width, alpha=1, zorder=1)
         plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
         plt.ylim(-0.05,1.05)
-
     else:
         plt.scatter(x_range, eigenvalues, c=color_plot, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
         plt.plot(x_range, eigenvalues, '-', c=color_plot, linewidth=line_width, alpha=1, zorder=1)
@@ -1984,6 +1987,78 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
     ax.spines["bottom"].set_visible(True)
     ax.spines["right"].set_visible(True)
     ax.spines["left"].set_visible(True)
+
+    if title != False:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
+def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', title=None, save_filename=None):
+    """
+    This function plots eigenvalue distribution.
+
+    :param eigenvalues_tuple:
+        a tuple of eigenvalues to plot. Each vector of eigenvalues inside a tuple
+        should be a 0D array. It can be supplied as an attribute of the
+        ``PCA`` class, for instance: ``(PCA_1.L, PCA_2.L)``.
+    :param legend_labels:
+        list of strings specifying labels for each element in the ``eigenvalues_tuple``.
+    :param normalized: (optional)
+        boolean specifying whether eigenvalues should be normalized to 1.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *coolwarm*.
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from matplotlib import cm
+
+    n_sets = len(eigenvalues_tuple)
+
+    (n_eigenvalues, ) = np.shape(eigenvalues_tuple[0])
+    x_range = np.arange(1, n_eigenvalues+1)
+
+    color_map_colors = cm.get_cmap(color_map, n_sets)
+    sets_colors = color_map_colors(np.linspace(0, 1, n_sets))
+
+    # Create default labels for legend:
+    if len(legend_labels) == 0:
+        legend_labels = ['Set ' + str(i) + '' for i in range(1, n_sets+1)]
+
+    fig, ax = plt.subplots(figsize=(n_eigenvalues, 6))
+
+    for n_set in range(0,n_sets):
+
+        if normalized:
+            plt.scatter(x_range, eigenvalues_tuple[n_set]/np.max(eigenvalues_tuple[n_set]), c=sets_colors[n_set].reshape(1,-1), marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2, label=legend_labels[n_set])
+            plt.plot(x_range, eigenvalues_tuple[n_set]/np.max(eigenvalues_tuple[n_set]), '-', c=sets_colors[n_set], linewidth=line_width, alpha=1, zorder=1)
+            plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
+            plt.ylim(-0.05,1.05)
+        else:
+            plt.scatter(x_range, eigenvalues_tuple[n_set], c=sets_colors[n_set].reshape(1,-1), marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2, label=legend_labels[n_set])
+            plt.plot(x_range, eigenvalues_tuple[n_set], '-', c=sets_colors[n_set], linewidth=line_width, alpha=1, zorder=1)
+            plt.ylabel('Eigenvalue [-]', fontsize=font_labels, **csfont)
+
+    plt.xticks(x_range, fontsize=font_axes, **csfont)
+    plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
+    plt.xlim(0, n_eigenvalues+1.5)
+    plt.grid(alpha=0.3, zorder=0)
+
+    ax.spines["top"].set_visible(True)
+    ax.spines["bottom"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    ax.spines["left"].set_visible(True)
+
+    plt.legend(loc='upper right', fancybox=True, shadow=True, fontsize=font_legend, markerscale=marker_scale_legend)
 
     if title != False:
         plt.title(title, fontsize=font_title, **csfont)

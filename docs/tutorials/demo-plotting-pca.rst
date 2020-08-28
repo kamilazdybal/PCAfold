@@ -127,6 +127,34 @@ Two eigenvalue normalizations are available:
     :width: 500
     :align: center
 
+**********************************
+Eigenvalue distribution comparison
+**********************************
+
+Eigenvalues resulting from, for instance, different ``PCA`` class objects can
+be compared on a single plot using ``reduction.plot_eigenvalues_comparison`` function.
+
+.. code::
+
+  plt = reduction.plot_eigenvalue_distribution_comparison((pca_X_Auto.L, pca_X_Range.L, pca_X_Vast.L), legend_labels=['Auto', 'Range', 'Vast'], normalized=True, color_map='coolwarm', title=None, save_filename=None)
+
+Plotting example
+^^^^^^^^^^^^^^^^
+
+Two eigenvalue normalizations are available:
+
+- No normalization. To use this variant set ``normalized=False``. Example can be seen below:
+
+.. image:: ../images/plotting-pca-eigenvalue-distribution-comparison.png
+    :width: 500
+    :align: center
+
+- Normalized to 1. To use this variant set ``normalized=True``. Example can be seen below:
+
+.. image:: ../images/plotting-pca-eigenvalue-distribution-comparison-normalized.png
+    :width: 500
+    :align: center
+
 ************************
 Two-dimensional manifold
 ************************
@@ -139,17 +167,23 @@ the Principal Components by transforming the original data set to the new basis:
 
   principal_components = pca_X_Vast.transform(X)
 
-and we plot the resulting manifold, additionally colored by one of the variables
-in the data set:
+and we plot the resulting manifold:
 
 .. code::
 
-  plt = reduction.plot_2d_manifold(principal_components, color_variable=X[:,0], x_label='$\mathbf{Z_1}$', y_label='$\mathbf{Z_2}$', colorbar_label='$T$ [-]', title=None, save_filename=None)
+  plt = reduction.plot_2d_manifold(principal_components, color_variable='k', x_label='$\mathbf{Z_1}$', y_label='$\mathbf{Z_2}$', colorbar_label=None, title=None, save_filename=None)
 
 Plotting example
 ^^^^^^^^^^^^^^^^
 
 Example of a plot:
+
+.. image:: ../images/plotting-pca-2d-manifold-black.png
+    :width: 400
+    :align: center
+
+By setting ``color_variable=X[:,0]`` parameter, the manifold can be additionally
+colored by the first variable in the data set:
 
 .. image:: ../images/plotting-pca-2d-manifold.png
     :width: 500
