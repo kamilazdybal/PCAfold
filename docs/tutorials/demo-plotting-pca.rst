@@ -155,6 +155,26 @@ Two eigenvalue normalizations are available:
     :width: 500
     :align: center
 
+*******************
+Cumulative variance
+*******************
+
+Cumulative variance computed from eigenvalues can be plotted using
+``reduction.plot_cumulative_variance`` function.
+
+.. code::
+
+  plt = reduction.plot_cumulative_variance(pca_X_Auto.L, n_components=0, title=None, save_filename=None)
+
+Plotting example
+^^^^^^^^^^^^^^^^
+
+Example of a plot:
+
+.. image:: ../images/cumulative-variance.png
+    :width: 500
+    :align: center
+
 ************************
 Two-dimensional manifold
 ************************

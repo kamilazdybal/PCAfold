@@ -521,3 +521,28 @@ class TestReduction(unittest.TestCase):
             plt.close()
         except Exception:
             self.assertTrue(False)
+
+    def test_plot_cumulative_variance_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt = reduction.plot_cumulative_variance(pca_X.L, n_components=0, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt = reduction.plot_cumulative_variance(pca_X.L, n_components=2, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt = reduction.plot_cumulative_variance(pca_X.L, n_components=3, title='Title', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)

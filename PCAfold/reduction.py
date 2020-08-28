@@ -519,30 +519,6 @@ class PCA:
 
         return r2
 
-    def plot_convergence(self, npc=0):
-        """
-        Plot the eigenvalues (bars) and the cumulative sum (line) to visualize
-        the percent variance in the data explained by each principal component
-        individually and by each principal component cumulatively.
-
-        :param npc: (optional)
-            how many principal components you want to visualize (default is all).
-
-        :return: (plot)
-        """
-        if npc == 0:
-            npc = self.__nvar
-        npcvec = np.arange(0, npc)
-        plt.plot(npcvec + 1, np.cumsum(self.L[npcvec]), 'b', label='Cumulative')
-        plt.bar(npcvec + 1, self.L[npcvec])
-        plt.xlim([0.5, npc + 0.5])
-        plt.xticks(npcvec + 1)
-        plt.xlabel('Principal Component')
-        plt.ylabel('Percent Variance Explained')
-        plt.legend()
-        plt.grid()
-        plt.show()
-
     def principal_variables(self, method='B2', x=[]):
         """
         Extract principal variables from a PCA
@@ -1828,7 +1804,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
             plt.ylabel('PC-' + str(eigenvectors_indices[n_pc] + 1) + ' weight [-]', fontsize=font_labels, **csfont)
 
         plt.grid(alpha=0.3, zorder=0)
-        plt.xlim(0, n_variables+1.5)
+        plt.xlim(0, n_variables+1)
         if plot_absolute == True:
             plt.ylim(-0.05,1.05)
         else:
@@ -1923,7 +1899,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=n_sets, fontsize=font_legend, markerscale=marker_scale_legend)
 
     plt.grid(alpha=0.3, zorder=0)
-    plt.xlim(0, n_variables+1.5)
+    plt.xlim(0, n_variables+1)
     if plot_absolute == True:
         plt.ylim(-0.05,1.05)
     else:
@@ -1980,7 +1956,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
 
     plt.xticks(x_range, fontsize=font_axes, **csfont)
     plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
-    plt.xlim(0, n_eigenvalues+1.5)
+    plt.xlim(0, n_eigenvalues+1)
     plt.grid(alpha=0.3, zorder=0)
 
     ax.spines["top"].set_visible(True)
@@ -2050,7 +2026,7 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
     plt.xticks(x_range, fontsize=font_axes, **csfont)
     plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
-    plt.xlim(0, n_eigenvalues+1.5)
+    plt.xlim(0, n_eigenvalues+1)
     plt.grid(alpha=0.3, zorder=0)
 
     ax.spines["top"].set_visible(True)
@@ -2059,6 +2035,64 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
     ax.spines["left"].set_visible(True)
 
     plt.legend(loc='upper right', fancybox=True, shadow=True, fontsize=font_legend, markerscale=marker_scale_legend)
+
+    if title != False:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
+def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filename=None):
+    """
+    This function plots the eigenvalues as bars and their cumulative sum to visualize
+    the percent variance in the data explained by each Principal Component
+    individually and by each Principal Component cumulatively.
+
+    :param eigenvalues:
+        a 0D vector of eigenvalues to analyze. It can be supplied as an attribute of the
+        ``PCA`` class: ``PCA.L``.
+    :param n_components: (optional)
+        how many principal components you want to visualize (default is all).
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    bar_color = '#191b27'
+    line_color = '#ff2f18'
+
+    (n_eigenvalues, ) = np.shape(eigenvalues)
+
+    if n_components == 0:
+        n_retained = n_eigenvalues
+    else:
+        n_retained = n_components
+
+    x_range = np.arange(1, n_retained+1)
+
+    fig, ax1 = plt.subplots(figsize=(n_retained, 6))
+
+    ax1.bar(x_range, eigenvalues[0:n_retained], color=bar_color, edgecolor=bar_color, align='center', zorder=2, label='Eigenvalue')
+    ax1.set_ylabel('Eigenvalue [-]', fontsize=font_labels, **csfont)
+    ax1.set_ylim(0,1.05)
+    ax1.grid(alpha=0.3, zorder=0)
+    ax1.set_xlabel('$q$ [-]', fontsize=font_labels, **csfont)
+
+    ax2 = ax1.twinx()
+    ax2.plot(x_range, np.cumsum(eigenvalues[0:n_retained])*100, 'o-', color=line_color, zorder=2, label='Cumulative')
+    ax2.set_ylabel('Variance explained [%]', color=line_color, fontsize=font_labels, **csfont)
+    ax2.set_ylim(0,105)
+    ax2.tick_params('y', colors=line_color)
+
+    plt.xlim(0, n_retained+1)
+    plt.xticks(x_range, fontsize=font_axes, **csfont)
 
     if title != False:
         plt.title(title, fontsize=font_title, **csfont)

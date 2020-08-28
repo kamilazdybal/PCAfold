@@ -47,11 +47,6 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.convergence
 
-``PCA.plot_convergence``
-========================
-
-.. autofunction:: PCAfold.reduction.PCA.plot_convergence
-
 ``PCA.principal_variables``
 ===========================
 
@@ -244,6 +239,11 @@ Plotting functions
 ================================
 
 .. autofunction:: PCAfold.reduction.plot_eigenvalue_distribution
+
+``plot_cumulative_variance``
+================================
+
+.. autofunction:: PCAfold.reduction.plot_cumulative_variance
 
 --------------------------------------------------------------------------------
 
