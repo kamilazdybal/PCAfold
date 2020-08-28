@@ -205,7 +205,7 @@ class PCA:
 
     def transform(self, X, nocenter=False):
         """
-        This function transforms any data set :math:`\mathbf{X}` to the new
+        This function transforms any data set :math:`\mathbf{X}` to a new
         truncated basis :math:`\mathbf{A_q}` identified by PCA.
         It computes the :math:`q`-first Principal Components
         :math:`\mathbf{Z_q}` given the original data.
@@ -226,6 +226,21 @@ class PCA:
         computed during ``PCA`` class initialization
         and :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors
         extracted from :math:`\mathbf{A}`.
+
+        .. warning::
+
+            Set ``nocenter=True`` only if you know what you are doing.
+
+            One example when ``nocenter`` should be set to ``True`` is
+            when transforming chemical source terms :math:`\mathbf{S}` to Principal Components space
+            (as per :cite:`Sutherland2009`)
+            to obtain sources of Principal Components :math:`\mathbf{S_Z}`. In
+            that case :math:`\mathbf{X} = \mathbf{S}` and the transformation
+            should be performed without centering:
+
+            .. math::
+
+                \mathbf{S_{Z_q}} = \mathbf{S} \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
 
         **Example:**
 
@@ -254,10 +269,6 @@ class PCA:
             center the data set before transformation.
             If ``nocenter=True`` centers will not be applied on the
             data set.
-
-            .. warning::
-
-                Set ``nocenter=True`` only if you know what you are doing.
 
         :raises ValueError:
             if ``nocenter`` is not a boolean.
@@ -316,6 +327,21 @@ class PCA:
         and :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors
         extracted from :math:`\mathbf{A}`.
 
+        .. warning::
+
+            Set ``nocenter=True`` only if you know what you are doing.
+
+            One example when ``nocenter`` should be set to ``True`` is
+            when reconstructing chemical source terms :math:`\mathbf{S}`
+            (as per :cite:`Sutherland2009`)
+            from the :math:`q`-first sources of Principal Components :math:`\mathbf{S_{Z_q}}`. In
+            that case :math:`\mathbf{Z_q} = \mathbf{S_{Z_q}}` and the reconstruction
+            should be performed without uncentering:
+
+            .. math::
+
+                \mathbf{S_{rec}} = \mathbf{S_{Z_q}} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D}
+
         **Example:**
 
         .. code:: python
@@ -342,10 +368,6 @@ class PCA:
             un-center the reconstructed data set.
             If ``nocenter=True`` centers will not be applied on the
             reconstructed data set.
-
-            .. warning::
-
-                Set ``nocenter=True`` only if you know what you are doing.
 
         :raises ValueError:
             if ``nocenter`` is not a boolean.

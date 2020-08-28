@@ -10,6 +10,7 @@ Dependencies
 **PCAfold** requires ``python3.7`` and the following packages:
 
 - ``copy``
+- ``Cython``
 - ``matplotlib``
 - ``numpy``
 - ``random``
