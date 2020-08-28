@@ -47,11 +47,6 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.convergence
 
-``PCA.eig_bar_plot_maker``
-==========================
-
-.. autofunction:: PCAfold.reduction.PCA.eig_bar_plot_maker
-
 ``PCA.plot_convergence``
 ========================
 
@@ -239,6 +234,16 @@ Plotting functions
 =====================
 
 .. autofunction:: PCAfold.reduction.plot_eigenvectors
+
+``plot_eigenvectors_comparison``
+================================
+
+.. autofunction:: PCAfold.reduction.plot_eigenvectors_comparison
+
+``plot_eigenvalue_distribution``
+================================
+
+.. autofunction:: PCAfold.reduction.plot_eigenvalue_distribution
 
 --------------------------------------------------------------------------------
 

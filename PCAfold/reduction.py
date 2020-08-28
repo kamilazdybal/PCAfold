@@ -519,49 +519,6 @@ class PCA:
 
         return r2
 
-    def eig_bar_plot_maker(self, neig, DataName, barWidth=0.3, plotABS=False):
-        """
-        Produces a bar plot of the weight of each state variable in the eigenvectors
-
-        **Example:**
-
-        .. code:: python
-
-            pca.eig_bar_plot_maker( neig )
-
-        :param neig:
-            number of eigenvectors that you want to keep in the plot
-        :param DataName:
-            list containing the names of the variables
-        :param barWidth: (optional)
-            width of each bar in the plot
-        :param plotABS: (optional)
-            default False - plots the eigenvectors keeping their sign
-            if True - plots the absolute value of the eigenvectors
-
-        :return: (plot)
-        """
-        assert (neig <= self.__nvar), "Number of eigenvectors specified is greater than the number of variables"
-        xtick = np.arange(len(self.Q))
-        for i in range(neig):
-            if i == 0:
-                lab = '1st EigVec'
-            elif i == 1:
-                lab = '2nd EigVec'
-            elif i == 2:
-                lab = '3rd EigVec'
-            else:
-                lab = str(i + 1) + 'th EigVec'
-            if plotABS:
-                plt.bar(xtick + (i - 1) * barWidth, np.abs(self.Q[:, i]), label=lab, width=barWidth, align='center')
-            else:
-                plt.bar(xtick + (i - 1) * barWidth, self.Q[:, i], label=lab, width=barWidth, align='center')
-        plt.xticks(xtick, DataName)
-        plt.grid()
-        plt.ylabel('Weights')
-        plt.legend()
-        plt.show()
-
     def plot_convergence(self, npc=0):
         """
         Plot the eigenvalues (bars) and the cumulative sum (line) to visualize
@@ -1810,7 +1767,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
 
     :param eigenvectors:
         matrix of eigenvectors to plot. It can be supplied as an attribute of
-        the PCA class: ``PCA.Q``.
+        the ``PCA`` class: ``PCA.Q``.
     :param eigenvectors_indices:
         list of integers specifying indexing of eigenvectors inside
         ``eigenvectors`` supplied. If it is not supplied, it is assumed that
@@ -1896,7 +1853,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
     :param eigenvectors_tuple:
         a tuple of eigenvectors to plot. Each eigenvector inside a tuple should be a 0D array.
-        It can be supplied as an attribute of the PCA class, for instance: ``(PCA.Q[:,0], PCA.Q[:,1])``.
+        It can be supplied as an attribute of the ``PCA`` class, for instance: ``(PCA.Q[:,0], PCA.Q[:,1])``.
     :param legend_labels:
         list of strings specifying labels for each element in the ``eigenvectors_tuple``.
     :param variable_names: (optional)
