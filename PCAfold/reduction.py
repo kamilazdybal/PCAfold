@@ -1803,7 +1803,7 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
 
     return plt
 
-def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_variables=[], plot_absolute=False, bar_color=None, title=None, save_filename=None):
+def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None):
     """
     This function plots a weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
@@ -1818,13 +1818,10 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         is the number of eigenvectors provided.
     :param variable_names: (optional)
         list of strings specifying variable names.
-    :param plot_variables: (optional)
-        list of integers specifying indices of variables to be plotted.
-        By default, all variables are plotted.
     :param plot_absolute:
         boolean specifying whether absolute values of eigenvectors should be plotted.
     :param bar_color: (optional)
-        string specifying
+        string specifying color of bars.
     :param title: (optional)
         string specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -1833,7 +1830,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         plot will not be saved.
 
     :return:
-        - **plt** - plot handle.
+        - **plot_handles** - list of plot handles.
     """
 
     if bar_color == None:
@@ -1893,10 +1890,146 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
 
     return plot_handles
 
-def plot_eigenvectors_comparison(eigenvectors_tuple, plot_variables=[], plot_absolute=False, x_label=None, y_label=None, title=None, save_filename=None):
-    pass
+def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None):
+    """
+    This function plots a comparison of weights on eigenvectors.
 
+    :param eigenvectors_tuple:
+        a tuple of eigenvectors to plot. Each eigenvector inside a tuple should be a 0D array.
+        It can be supplied as an attribute of the PCA class, for instance: ``(PCA.Q[:,0], PCA.Q[:,1])``.
+    :param legend_labels:
+        list of strings specifying labels for each element in the ``eigenvectors_tuple``.
+    :param variable_names: (optional)
+        list of strings specifying variable names.
+    :param plot_absolute:
+        boolean specifying whether absolute values of eigenvectors should be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *coolwarm*.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
 
+    :return:
+        - **plot_handles** - plot handles.
+    """
 
-def plot_eigenvalue_distribution(eigenvalues, normalized=False, x_label=None, y_label=None, title=None, save_filename=None):
-    pass
+    from matplotlib import cm
+
+    for i in range(0, len(eigenvectors_tuple)):
+        try:
+            (n_variables, n_components) = np.shape(eigenvectors_tuple[i])
+            raise ValueError("Eigenvectors inside eigenvectors_tuple has to be 0D arrays.")
+        except:
+            pass
+
+    n_sets = len(eigenvectors_tuple)
+
+    updated_bar_width = eigenvector_bar_width/n_sets
+
+    (n_variables, ) = np.shape(eigenvectors_tuple[0])
+
+    color_map_colors = cm.get_cmap(color_map, n_sets)
+    sets_colors = color_map_colors(np.linspace(0, 1, n_sets))
+
+    # Create default labels for variables:
+    if len(variable_names) == 0:
+        variable_names = ['$X_{' + str(i) + '}$' for i in range(0, n_variables)]
+
+    x_range = np.arange(1, n_variables+1)
+
+    plot_handles = []
+
+    fig, ax = plt.subplots(figsize=(n_variables, 6))
+
+    for n_set in range(0,n_sets):
+
+        if plot_absolute:
+            plt.bar(x_range + n_set*updated_bar_width, abs(eigenvectors_tuple[n_set]), width=updated_bar_width, color=sets_colors[n_set], edgecolor=sets_colors[n_set], align='center', zorder=2, label=legend_labels[n_set])
+        else:
+            plt.bar(x_range + n_set*updated_bar_width, eigenvectors_tuple[n_set], width=updated_bar_width, color=sets_colors[n_set], edgecolor=sets_colors[n_set], align='center', zorder=2, label=legend_labels[n_set])
+
+    plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+    if plot_absolute:
+        plt.ylabel('Absolute weight [-]', fontsize=font_labels, **csfont)
+    else:
+        plt.ylabel('Weight [-]', fontsize=font_labels, **csfont)
+
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=n_sets, fontsize=font_legend, markerscale=marker_scale_legend)
+
+    plt.grid(alpha=0.3, zorder=0)
+    plt.xlim(0, n_variables+1.5)
+    if plot_absolute == True:
+        plt.ylim(-0.05,1.05)
+    else:
+        plt.ylim(-1.05,1.05)
+
+    ax.spines["top"].set_visible(True)
+    ax.spines["bottom"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    ax.spines["left"].set_visible(True)
+
+    if title != None:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
+
+    return plt
+
+def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save_filename=None):
+    """
+    This function plots eigenvalue distribution.
+
+    :param eigenvalues:
+        a 0D vector of eigenvalues to plot. It can be supplied as an attribute of the
+        ``PCA`` class: ``PCA.L``.
+    :param normalized: (optional)
+        boolean specifying whether eigenvalues should be normalized to 1.
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    color_plot = '#191b27'
+
+    (n_eigenvalues, ) = np.shape(eigenvalues)
+    x_range = np.arange(1, n_eigenvalues+1)
+
+    fig, ax = plt.subplots(figsize=(n_eigenvalues, 6))
+
+    if normalized:
+        plt.scatter(x_range, eigenvalues/np.max(eigenvalues), c=color_plot, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+        plt.plot(x_range, eigenvalues/np.max(eigenvalues), '-', c=color_plot, linewidth=line_width, alpha=1, zorder=1)
+        plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
+        plt.ylim(-0.05,1.05)
+
+    else:
+        plt.scatter(x_range, eigenvalues, c=color_plot, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
+        plt.plot(x_range, eigenvalues, '-', c=color_plot, linewidth=line_width, alpha=1, zorder=1)
+        plt.ylabel('Eigenvalue [-]', fontsize=font_labels, **csfont)
+
+    plt.xticks(x_range, fontsize=font_axes, **csfont)
+    plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
+    plt.xlim(0, n_eigenvalues+1.5)
+    plt.grid(alpha=0.3, zorder=0)
+
+    ax.spines["top"].set_visible(True)
+    ax.spines["bottom"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    ax.spines["left"].set_visible(True)
+
+    if title != False:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt

@@ -40,7 +40,7 @@ We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
 .. code:: python
 
   pca = PCA(Dataset_global, 'none', 2, useXTXeig=True)
-  PC_scores_global = pca.x2eta(Dataset_global, nocenter=False)
+  PC_scores_global = pca.transform(Dataset_global, nocenter=False)
   eigenvectors_global = pca.Q
   eigenvalues_global = pca.L
 
@@ -98,13 +98,13 @@ An example function is shown below:
 
           # Perform PCA in a local cluster:
           pca = PCA(X_k, 'none', 2, useXTXeig=True)
-          PC_scores = pca.x2eta(X_k, nocenter=False)
+          PC_scores = pca.transform(X_k, nocenter=False)
           eigenvectors.append(pca.Q)
           eigenvalues.append(pca.L)
 
       return (eigenvectors, eigenvalues, PC_scores)
 
-Finally, we plot the identified global and local eigenvectors on top of the sythetic data sets.
+Finally, we plot the identified global and local eigenvectors on top of the synthetic data sets.
 The visual result of performing PCA globally and locally can be seen below:
 
 .. image:: ../images/tutorial-pca-global-local-pca.png
