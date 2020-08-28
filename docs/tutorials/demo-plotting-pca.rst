@@ -175,6 +175,14 @@ Example of a plot:
     :width: 500
     :align: center
 
+The number of eigenvalues to look at can also be truncated by setting
+``n_components`` input parameter accordingly. Example of a plot when
+``n_components=5`` in this case:
+
+.. image:: ../images/cumulative-variance-truncated.png
+    :width: 300
+    :align: center
+
 ************************
 Two-dimensional manifold
 ************************
