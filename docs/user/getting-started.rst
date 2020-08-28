@@ -33,6 +33,39 @@ Run the ``setup.py`` script as below to complete the installation:
 
 You are ready to ``import PCAfold``!
 
+Local documentation build
+-------------------------
+
+To build the documentation locally, you need ``sphinx`` installed on your machine,
+along with the following extensions:
+
+.. code-block:: text
+
+  sphinx.ext.todo
+  sphinx.ext.githubpages
+  sphinx.ext.autodoc
+  sphinx.ext.napoleon
+  sphinx.ext.mathjax
+  sphinx.ext.autosummary
+  sphinxcontrib.bibtex
+
+Then, navigate to `docs/` directory and build the documentation:
+
+.. code-block:: text
+
+  sphinx-build -b html . builddir
+
+  make html
+
+Documentation can then be opened in a web browser by opening
+``_build/html/index.html`` file.
+
+In MacOS you can open from the terminal:
+
+.. code-block:: text
+
+  open _build/html/index.html
+
 Testing
 ^^^^^^^
 
