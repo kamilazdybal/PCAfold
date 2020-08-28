@@ -41,7 +41,7 @@ Single eigenvectors
 
 Weights of a single eigenvector can be plotted using ``reduction.plot_eigenvectors`` function.
 Note that multiple eigenvectors can be passed as an input and this function will
-generate as many plots as many eigenvectors are supplied.
+generate as many plots as there are eigenvectors supplied.
 
 Below is an example of plotting just the first eigenvector:
 

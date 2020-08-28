@@ -1751,9 +1751,11 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
     plt.grid(alpha=0.3)
 
-    cb = fig.colorbar(scat)
-    cb.ax.tick_params(labelsize=font_colorbar_axes)
-    if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+    if not isinstance(color_variable, str):
+        if len(color_variable) != 0:
+            cb = fig.colorbar(scat)
+            cb.ax.tick_params(labelsize=font_colorbar_axes)
+            if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -1870,7 +1872,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         plot will not be saved.
 
     :return:
-        - **plot_handles** - plot handles.
+        - **plt** - plot handle.
     """
 
     from matplotlib import cm
