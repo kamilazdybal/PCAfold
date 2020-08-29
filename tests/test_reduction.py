@@ -126,6 +126,17 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+        try:
+            pca = PCA(X, scaling='auto', n_components=2)
+            pca.n_components = 10
+            current_n = pca.n_components
+            self.assertTrue(current_n == 10)
+            pca.n_components = pca.n_components_init
+            current_n = pca.n_components
+            self.assertTrue(current_n == 2)
+        except Exception:
+            self.assertTrue(False)
+
     def test_PCA_allowed_initializations(self):
 
         test_data_set = np.random.rand(100,20)
