@@ -30,8 +30,8 @@ class TestReduction(unittest.TestCase):
         Q = V.T[:, isort]
 
         # checking both methods for PCA:
-        pca = PCA(PHI + xbar, 'NONE', useXTXeig=False)
-        pca2 = PCA(PHI + xbar, 'NONE', useXTXeig=True)
+        pca = PCA(PHI + xbar, 'NONE', use_eigendec=False)
+        pca2 = PCA(PHI + xbar, 'NONE', use_eigendec=True)
 
         # comparing mean(centering), centered data, Q, and L
 
@@ -51,8 +51,8 @@ class TestReduction(unittest.TestCase):
         eta = pca.transform(PHI + xbar)  # dataset as example of eta's
 
         # both methods of PCA:
-        pca = PCA(eta, 'NONE', useXTXeig=False)
-        pca2 = PCA(eta, 'NONE', useXTXeig=True)
+        pca = PCA(eta, 'NONE', use_eigendec=False)
+        pca2 = PCA(eta, 'NONE', use_eigendec=True)
 
         # transform transformation:
         eta_new = pca.transform(eta)
@@ -113,12 +113,12 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            pca = PCA(test_data_set, scaling='auto', n_components=2, useXTXeig=False)
+            pca = PCA(test_data_set, scaling='auto', n_components=2, use_eigendec=False)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca = PCA(test_data_set, scaling='range', n_components=2, useXTXeig=False, nocenter=True)
+            pca = PCA(test_data_set, scaling='range', n_components=2, use_eigendec=False, nocenter=True)
         except Exception:
             self.assertTrue(False)
 
@@ -146,7 +146,7 @@ class TestReduction(unittest.TestCase):
             pca = PCA(test_data_set, scaling='auto', n_components=30)
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='auto', n_components=3, useXTXeig=1)
+            pca = PCA(test_data_set, scaling='auto', n_components=3, use_eigendec=1)
 
         with self.assertRaises(ValueError):
             pca = PCA(test_data_set, scaling='auto', nocenter=1)
@@ -161,7 +161,7 @@ class TestReduction(unittest.TestCase):
             pca = PCA(test_data_set, scaling='none', n_components=5, nocenter='False')
 
         with self.assertRaises(ValueError):
-            pca = PCA(test_data_set, scaling='auto', n_components=3, useXTXeig='True')
+            pca = PCA(test_data_set, scaling='auto', n_components=3, use_eigendec='True')
 
         with self.assertRaises(ValueError):
             pca = PCA(test_data_set_constant, scaling='auto', n_components=2)
@@ -208,7 +208,7 @@ class TestReduction(unittest.TestCase):
         r2_test = np.ones((20,))
 
         try:
-            pca_X = PCA(test_data_set, scaling='auto', n_components=20, useXTXeig=True, nocenter=False)
+            pca_X = PCA(test_data_set, scaling='auto', n_components=20, use_eigendec=True, nocenter=False)
             r2_values = pca_X.calculate_r2(test_data_set)
             comparison = r2_values == r2_test
             self.assertTrue(comparison.all())

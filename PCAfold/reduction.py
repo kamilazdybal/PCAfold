@@ -25,7 +25,7 @@ class PCA:
 
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
     | | Eigendecomposition of the covariance matrix                                                    | | Singular Value Decomposition (SVD)                                        |
-    | | Set: ``useXTXeig=True``                                                                        | | Set: ``useXTXeig=False``                                                  |
+    | | Set ``use_eigendec=True`` (default)                                                            | | Set ``use_eigendec=False``                                                |
     +==================================================================================================+=============================================================================+
     | Centering and scaling: :math:`\mathbf{X_{cs}}` as per ``preprocess.center_scale`` function                                                                                     |
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
@@ -43,7 +43,7 @@ class PCA:
         X = np.random.rand(100,20)
 
         # Instantiate PCA class object:
-        pca_X = PCA(X, scaling='none', n_components=2, useXTXeig=True, nocenter=False)
+        pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
 
     :param X:
         original data set :math:`\mathbf{X}`.
@@ -52,11 +52,11 @@ class PCA:
         ``preprocess.center_scale`` function.
     :param n_components: (optional)
         number of retained Principal Components :math:`q`. If set to 0 all are retained.
-    :param useXTXeig: (optional)
+    :param use_eigendec: (optional)
         method for obtaining the eigenvalues and eigenvectors:
 
-            * ``useXTXeig=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
-            * ``useXTXeig=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+            * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+            * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
 
     :raises ValueError:
         if the original data set :math:`\mathbf{X}` has more variables (columns)
@@ -72,7 +72,7 @@ class PCA:
         if ``n_components`` is not an integer, is negative or larger than the number of variables in a data set.
 
     :raises ValueError:
-        if ``useXTXeig`` is not a boolean.
+        if ``use_eigendec`` is not a boolean.
 
     :raises ValueError:
         if ``nocenter`` is not a boolean.
@@ -88,7 +88,7 @@ class PCA:
         - **loadings** - loadings (vectors are stored in columns, rows correspond to weights).
     """
 
-    def __init__(self, X, scaling='std', n_components=0, useXTXeig=True, nocenter=False):
+    def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
 
         # Check X:
         (n_observations, n_variables) = np.shape(X)
@@ -113,9 +113,9 @@ class PCA:
             if (n_components < 0) or (n_components > n_variables):
                 raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
 
-        # Check useXTXeig:
-        if not isinstance(useXTXeig, bool):
-            raise ValueError("Parameter `useXTXeig` has to be a boolean.")
+        # Check use_eigendec:
+        if not isinstance(use_eigendec, bool):
+            raise ValueError("Parameter `use_eigendec` has to be a boolean.")
 
         # Check nocenter:
         if not isinstance(nocenter, bool):
@@ -139,7 +139,7 @@ class PCA:
         self.__R = np.dot(self.X_cs.transpose(), self.X_cs) / (n_observations-1)
 
         # Perform PCA with eigendecomposition of the covariance matrix:
-        if useXTXeig:
+        if use_eigendec:
             L, Q = np.linalg.eigh(self.R)
             L = L / np.sum(L)
 
@@ -264,7 +264,7 @@ class PCA:
             X = np.random.rand(100,20)
 
             # Instantiate PCA class object:
-            pca_X = PCA(X, scaling='none', n_components=2, useXTXeig=True, nocenter=False)
+            pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
 
             # Calculate the Principal Components:
             principal_components = pca_X.transform(X)
@@ -364,7 +364,7 @@ class PCA:
             X = np.random.rand(100,20)
 
             # Instantiate PCA class object:
-            pca_X = PCA(X, scaling='none', n_components=2, useXTXeig=True, nocenter=False)
+            pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
 
             # Calculate the Principal Components:
             principal_components = pca_X.transform(X)
@@ -434,7 +434,7 @@ class PCA:
             X = np.random.rand(100,20)
 
             # Instantiate PCA class object:
-            pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
+            pca_X = PCA(X, scaling='auto', n_components=10, use_eigendec=True, nocenter=False)
 
             # Calculate the R2 values:
             r2 = pca_X.calculate_r2(X)
@@ -917,7 +917,7 @@ class PCA:
             X = np.random.rand(100,20)
 
             # Instantiate PCA class object:
-            pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
+            pca_X = PCA(X, scaling='auto', n_components=10, use_eigendec=True, nocenter=False)
 
             # Calculate the U-scores:
             u_scores = pca_X.u_scores(X)
@@ -961,7 +961,7 @@ class PCA:
             X = np.random.rand(100,20)
 
             # Instantiate PCA class object:
-            pca_X = PCA(X, scaling='auto', n_components=10, useXTXeig=True, nocenter=False)
+            pca_X = PCA(X, scaling='auto', n_components=10, use_eigendec=True, nocenter=False)
 
             # Calculate the W-scores:
             w_scores = pca_X.w_scores(X)
@@ -1100,7 +1100,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         X_r = X[idx_X_r,:]
 
         # Perform PCA on X_r:
-        pca = PCA(X_r, scaling, n_components, useXTXeig=True)
+        pca = PCA(X_r, scaling, n_components, use_eigendec=True)
         C_r = pca.X_center
         D_r = pca.X_scale
 
@@ -1124,7 +1124,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         X_r = X_cs[idx_X_r,:]
 
         # Perform PCA on X_r:
-        pca = PCA(X_r, 'none', n_components, useXTXeig=True, nocenter=True)
+        pca = PCA(X_r, 'none', n_components, use_eigendec=True, nocenter=True)
         C_r = pca.X_center
         D_r = pca.X_scale
 
@@ -1148,7 +1148,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         X_r = X[idx_X_r,:]
 
         # Perform PCA on X_r:
-        pca = PCA(X_r, scaling, n_components, useXTXeig=True)
+        pca = PCA(X_r, scaling, n_components, use_eigendec=True)
         C_r = pca.X_center
         D_r = pca.X_scale
 
@@ -1178,7 +1178,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         X_cs = (X - C_r) / D_r
 
         # Perform PCA on the original data set X:
-        pca = PCA(X_cs, 'none', n_components, useXTXeig=True, nocenter=True)
+        pca = PCA(X_cs, 'none', n_components, use_eigendec=True, nocenter=True)
 
         # Compute eigenvectors:
         eigenvectors = pca.Q
@@ -1409,7 +1409,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     n_components = 1
 
     # PCA on the original full data set X:
-    pca_original = PCA(X, scaling, n_components, useXTXeig=True)
+    pca_original = PCA(X, scaling, n_components, use_eigendec=True)
 
     # Compute eigenvalues:
     eigenvalues_original = pca_original.L
@@ -1439,7 +1439,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
     plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
-    plt.xlim(0, n_variables+1.5)
+    plt.xlim(0, n_variables+1)
     plt.grid(alpha=0.3, zorder=0)
 
     ax.spines["top"].set_visible(True)
@@ -1562,7 +1562,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     idx_train = []
 
     # Perform global PCA on the original data set X: ---------------------------
-    pca_global = PCA(X, scaling, n_components, useXTXeig=True)
+    pca_global = PCA(X, scaling, n_components, use_eigendec=True)
 
     # Get a centered and scaled data set:
     X_cs = pca_global.X_cs

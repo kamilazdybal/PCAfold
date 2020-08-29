@@ -39,7 +39,7 @@ We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
 
 .. code:: python
 
-  pca = PCA(Dataset_global, 'none', 2, useXTXeig=True)
+  pca = PCA(Dataset_global, 'none', 2, use_eigendec=True)
   PC_scores_global = pca.transform(Dataset_global, nocenter=False)
   eigenvectors_global = pca.Q
   eigenvalues_global = pca.L
@@ -97,7 +97,7 @@ An example function is shown below:
           X_k = X[idx==k]
 
           # Perform PCA in a local cluster:
-          pca = PCA(X_k, 'none', 2, useXTXeig=True)
+          pca = PCA(X_k, 'none', 2, use_eigendec=True)
           PC_scores = pca.transform(X_k, nocenter=False)
           eigenvectors.append(pca.Q)
           eigenvalues.append(pca.L)
