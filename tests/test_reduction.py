@@ -70,6 +70,62 @@ class TestReduction(unittest.TestCase):
         if np.any(eta - eta_new > tol) or np.any(eta - eta_new2 > tol):
             self.assertTrue(False)
 
+    def test_PCA_not_allowed_attribute_setting(self):
+
+        X = np.random.rand(100,20)
+        pca = PCA(X, scaling='auto', n_components=10)
+
+        with self.assertRaises(AttributeError):
+            pca.X_cs = 1
+        with self.assertRaises(AttributeError):
+            pca.X_center = 1
+        with self.assertRaises(AttributeError):
+            pca.X_scale = 1
+        with self.assertRaises(AttributeError):
+            pca.R = 1
+        with self.assertRaises(AttributeError):
+            pca.Q = 1
+        with self.assertRaises(AttributeError):
+            pca.L = 1
+        with self.assertRaises(AttributeError):
+            pca.loadings = 1
+        with self.assertRaises(AttributeError):
+            pca.scaling = 1
+        with self.assertRaises(AttributeError):
+            pca.n_variables = 1
+        with self.assertRaises(AttributeError):
+            pca.n_components_init = 1
+
+    def test_PCA_n_components_attribute(self):
+
+        X = np.random.rand(100,20)
+
+        try:
+            pca = PCA(X, scaling='auto', n_components=2)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca.n_components
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca = PCA(X, scaling='auto', n_components=2)
+            pca.n_components = 0
+            current_n = pca.n_components
+            self.assertTrue(current_n == 20)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca = PCA(X, scaling='auto', n_components=2)
+            pca.n_components = 10
+            current_n = pca.n_components
+            self.assertTrue(current_n == 10)
+        except Exception:
+            self.assertTrue(False)
+
     def test_PCA_allowed_initializations(self):
 
         test_data_set = np.random.rand(100,20)

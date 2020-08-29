@@ -80,6 +80,9 @@ class PCA:
     **Attributes:**
 
         - **n_components** - (can be re-set) number of retained Principal Components :math:`q`.
+        - **n_components_init** - (read only) number of retained Principal Components :math:`q` with which ``PCA`` class object was initialized.
+        - **scaling** - (read only) scaling criteria with which ``PCA`` class object was initialized.
+        - **n_variables** - (read only) number of variables of the original data set on which ``PCA`` class object was initialized.
         - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
         - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
         - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
@@ -106,6 +109,8 @@ class PCA:
         else:
             if scaling.lower() not in _scalings_list:
                 raise ValueError("Unrecognized scaling method.")
+            else:
+                self.__scaling = scaling.upper()
 
         # Check n_components:
         if not isinstance(n_components, int) or isinstance(n_components, bool):
@@ -113,6 +118,15 @@ class PCA:
         else:
             if (n_components < 0) or (n_components > n_variables):
                 raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
+            else:
+                if n_components > 0:
+                    self.__neta = n_components
+                    self.__n_components = n_components
+                    self.__n_components_init = n_components
+                else:
+                    self.__neta = n_variables
+                    self.__n_components = n_variables
+                    self.__n_components_init = n_variables
 
         # Check use_eigendec:
         if not isinstance(use_eigendec, bool):
@@ -121,17 +135,6 @@ class PCA:
         # Check nocenter:
         if not isinstance(nocenter, bool):
             raise ValueError("Parameter `nocenter` has to be a boolean.")
-
-        self.__scaling = scaling.upper()
-        self.__n_observations = n_observations
-        self.__n_variables = n_variables
-
-        if n_components > 0:
-            self.__neta = n_components
-            self.__n_components = n_components
-        else:
-            self.__neta = n_variables
-            self.__n_components = n_variables
 
         # Center and scale the data set:
         self.__X_cs, self.__X_center, self.__X_scale = preprocess.center_scale(X, self.scaling, nocenter)
@@ -157,31 +160,33 @@ class PCA:
         self.__Q = Qsort
         self.__L = Lsort
 
-        self.__nvar = len(self.L)
-        loadings_matrix = np.zeros((self.__nvar, self.n_components))
+        # Set number of variables in a data set (equal to the number of eigenvalues):
+        self.__n_variables = len(self.L)
 
         # Compute loadings:
+        loadings_matrix = np.zeros((self.n_variables, self.n_components))
+
         for i in range(self.n_components):
-            for j in range(self.__nvar):
+            for j in range(self.n_variables):
                 loadings_matrix[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
 
         self.__loadings = loadings_matrix
+
+    @property
+    def n_components(self):
+        return self.__n_components
+
+    @property
+    def n_components_init(self):
+        return self.__n_components_init
 
     @property
     def scaling(self):
         return self.__scaling
 
     @property
-    def n_observations(self):
-        return self.__n_observations
-
-    @property
     def n_variables(self):
         return self.__n_variables
-
-    @property
-    def n_components(self):
-        return self.__n_components
 
     @property
     def neta(self):
@@ -215,9 +220,18 @@ class PCA:
     def loadings(self):
         return self.__loadings
 
-
-
-
+    @n_components.setter
+    def n_components(self, new_n_components):
+        if not isinstance(new_n_components, int) or isinstance(new_n_components, bool):
+            raise ValueError("Parameter `n_components` has to be an integer.")
+        else:
+            if (new_n_components < 0) or (new_n_components > self.n_variables):
+                raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
+            else:
+                if new_n_components > 0:
+                    self.__n_components = new_n_components
+                else:
+                    self.__n_components = self.n_variables
 
     def transform(self, X, nocenter=False):
         """
@@ -594,7 +608,7 @@ class PCA:
         method = method.upper()
 
         if method == 'B2':  # B2 Method of Jolliffe (1972)
-            nvar = self.__nvar
+            nvar = self.n_variables
             neta = self.n_components
             eigVec = self.Q  # eigenvectors
 
@@ -620,7 +634,7 @@ class PCA:
             ikeep = sd[np.argsort(sd)]
 
         elif method == 'B4':  # B4 Forward method
-            nvar = self.__nvar
+            nvar = self.n_variables
             neta = self.n_components
             eigVec = self.Q  # eigenvectors
 
@@ -646,7 +660,7 @@ class PCA:
 
             eta = self.transform(x)  # the PCs based on the full set of x.
 
-            nvarTot = self.__nvar
+            nvarTot = self.n_variables
             neta = self.n_components
 
             idiscard = []
@@ -711,7 +725,7 @@ class PCA:
         :return:
             - **r2** - [neta,nvar] The r2 values.  Each column is a different variable and each row is for a different number of retained pcs.
         """
-        nvar = self.__nvar
+        nvar = self.n_variables
         neta = np.arange(nvar) + 1
         netapts = len(neta)
 
