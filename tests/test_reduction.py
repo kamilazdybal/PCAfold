@@ -8,6 +8,12 @@ from scipy import linalg as lg
 
 class TestReduction(unittest.TestCase):
 
+################################################################################
+#
+# Test PCA class
+#
+################################################################################
+
     def test_PCA_with_eigendec_vs_SVD(self):
 
         tol = 10 * np.finfo(float).eps
@@ -70,6 +76,7 @@ class TestReduction(unittest.TestCase):
         if np.any(eta - eta_new > tol) or np.any(eta - eta_new2 > tol):
             self.assertTrue(False)
 
+# Test if 10 PCA class attributes cannot be set by the user after `PCA` object has been created:
     def test_PCA_not_allowed_attribute_setting(self):
 
         X = np.random.rand(100,20)
@@ -96,6 +103,7 @@ class TestReduction(unittest.TestCase):
         with self.assertRaises(AttributeError):
             pca.n_components_init = 1
 
+# Test if all 11 available PCA class attributes can be accessed without error:
     def test_PCA_class_getting_attributes(self):
 
         X = np.random.rand(100,20)
@@ -116,6 +124,7 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+# Test n_components PCA class attribute - the only attribute that is allowed to be set
     def test_PCA_n_components_attribute(self):
 
         X = np.random.rand(100,20)
@@ -156,6 +165,39 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(current_n == 2)
         except Exception:
             self.assertTrue(False)
+
+    def test_PCA_n_components_attribute_not_allowed(self):
+
+        X = np.random.rand(100,20)
+
+        with self.assertRaises(ValueError):
+            pca = PCA(X, scaling='auto', n_components=-1)
+        with self.assertRaises(ValueError):
+            pca = PCA(X, scaling='auto', n_components=1.5)
+        with self.assertRaises(ValueError):
+            pca = PCA(X, scaling='auto', n_components=True)
+        with self.assertRaises(ValueError):
+            pca = PCA(X, scaling='auto', n_components='PC')
+
+        try:
+            pca = PCA(X, scaling='auto', n_components=10)
+        except Exception:
+            self.assertTrue(False)
+
+        with self.assertRaises(ValueError):
+            pca.n_components = -1
+
+        with self.assertRaises(ValueError):
+            pca.n_components = 21
+
+        with self.assertRaises(ValueError):
+            pca.n_components = True
+
+        with self.assertRaises(ValueError):
+            pca.n_components = 1.5
+
+        with self.assertRaises(ValueError):
+            pca.n_components = 'PC'
 
     def test_PCA_allowed_initializations(self):
 
@@ -289,6 +331,58 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+    def test_transform_not_allowed_calls(self):
+
+        test_data_set = np.random.rand(10,2)
+        test_data_set_2 = np.random.rand(10,3)
+
+        pca = PCA(test_data_set, scaling='auto')
+
+        with self.assertRaises(ValueError):
+            pca.transform(test_data_set_2)
+
+    def test_reconstruct_allowed_calls(self):
+        pass
+
+    def test_reconstruct_not_allowed_calls(self):
+        pass
+
+    def test_u_scores_allowed_calls(self):
+        pass
+
+    def test_u_scores_not_allowed_calls(self):
+        pass
+
+    def test_w_scores_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+
+        pca = PCA(X, scaling='auto')
+
+        try:
+            w_scores = pca.w_scores(X)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca.n_components = 5
+            w_scores = pca.w_scores(X)
+            (n_observations, n_w_scores) = np.shape(w_scores)
+            self.assertTrue(n_w_scores == 5)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca.n_components = 0
+            w_scores = pca.w_scores(X)
+            (n_observations, n_w_scores) = np.shape(w_scores)
+            self.assertTrue(n_w_scores == 10)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_w_scores_not_allowed_calls(self):
+        pass
+
     def test_calculate_r2_allowed_calls(self):
 
         test_data_set = np.random.rand(100,20)
@@ -302,15 +396,142 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
-    def test_transform_not_allowed_calls(self):
+    def test_calculate_r2_not_allowed_calls(self):
+        pass
 
-        test_data_set = np.random.rand(10,2)
-        test_data_set_2 = np.random.rand(10,3)
+    def test_r2_convergence_allowed_calls(self):
 
-        pca = PCA(test_data_set, scaling='auto')
+        X = np.random.rand(100,3)
+
+        pca = PCA(X, scaling='auto')
+
+        try:
+            r2 = pca.r2_convergence(X, 3, variable_names=[], print_width=10, verbose=False, save_filename=None)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            r2 = pca.r2_convergence(X, 3, variable_names=['a', 'b', 'c'], print_width=10, verbose=False, save_filename=None)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            r2 = pca.r2_convergence(X, 1, variable_names=[], print_width=10, verbose=False, save_filename=None)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            r2 = pca.r2_convergence(X, 1, variable_names=['a', 'b', 'c'], print_width=10, verbose=False, save_filename=None)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_r2_convergence_not_allowed_calls(self):
+        pass
+
+    def test_set_retained_eigenvalues_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+
+        pca = PCA(X, scaling='auto')
+
+        # This one is commented out since it requires user input:
+        # try:
+        #     pca.set_retained_eigenvalues(method='SCREE GRAPH')
+        # except Exception:
+        #     self.assertTrue(False)
+
+        try:
+            pca_new = pca.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.5)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_new = pca.set_retained_eigenvalues(method='INDIVIDUAL VARIANCE', option=0.5)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_new = pca.set_retained_eigenvalues(method='BROKEN STICK')
+        except Exception:
+            self.assertTrue(False)
+
+    def test_set_retained_eigenvalues_not_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+
+        pca = PCA(X, scaling='auto')
 
         with self.assertRaises(ValueError):
-            pca.transform(test_data_set_2)
+            pca.set_retained_eigenvalues(method='Method')
+        with self.assertRaises(ValueError):
+            pca.set_retained_eigenvalues(method='TOTAL VARIANCE', option=1.1)
+        with self.assertRaises(ValueError):
+            pca.set_retained_eigenvalues(method='TOTAL VARIANCE', option=-0.1)
+        with self.assertRaises(ValueError):
+            pca.set_retained_eigenvalues(method='INDIVIDUAL VARIANCE', option=1.1)
+        with self.assertRaises(ValueError):
+            pca.set_retained_eigenvalues(method='INDIVIDUAL VARIANCE', option=-0.1)
+
+    def test_principal_variables_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+
+        pca = PCA(X, scaling='auto')
+
+        try:
+            principal_variables_indices = pca.principal_variables(method='B2')
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            principal_variables_indices = pca.principal_variables(method='B4')
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            principal_variables_indices = pca.principal_variables(method='M2', x=X)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_principal_variables_not_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+
+        pca = PCA(X, scaling='auto')
+
+        with self.assertRaises(ValueError):
+            pca.principal_variables(method='M2')
+        with self.assertRaises(ValueError):
+            pca.principal_variables(method='Method')
+
+    def test_data_consistency_check_allowed_calls(self):
+        pass
+
+    def test_data_consistency_check_not_allowed_calls(self):
+        pass
+
+    def test_simulate_chemical_source_term_handling(self):
+
+        X = np.random.rand(200,10)
+        X_source = np.random.rand(200,10)
+
+        pca = PCA(X, scaling='auto')
+
+        try:
+            PC_source = pca.transform(X_source, nocenter=True)
+            PC_source_rec = pca.reconstruct(PC_source, nocenter=True)
+
+            difference = abs(X_source - PC_source_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+################################################################################
+#
+# Test PCA on sampled data sets functionalities of the `reduction` module
+#
+################################################################################
 
     def test_pca_on_sampled_data_set_allowed_calls(self):
 
@@ -467,6 +688,12 @@ class TestReduction(unittest.TestCase):
             plt.close()
         except Exception:
             self.assertTrue(False)
+
+################################################################################
+#
+# Test plotting functionalities of the `reduction` module
+#
+################################################################################
 
     def test_plot_2d_manifold_allowed_calls(self):
 
