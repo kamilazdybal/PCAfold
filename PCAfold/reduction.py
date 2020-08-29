@@ -538,7 +538,7 @@ class PCA:
 
         return okay
 
-    def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10):
+    def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10, verbose=False, save_filename=None):
         """
         This function prints :math:`R^2` values (as per ``PCA.calculate_r2``
         function) for reconstruction of the original data set :math:`\mathbf{X}`
@@ -577,6 +577,10 @@ class PCA:
             list of strings specifying variable names. If not specified variables will be numbered.
         :param print_width: (optional)
             width of columns printed out.
+        :param verbose: (optional)
+            boolean for printing out the table with :math:`R^2` values.
+        :param save_filename: (optional)
+            string specifying ``.txt`` save location/filename.
 
         :return:
             - **r2** - matrix of size ``(n_pcs, n_variables)`` containing the :math:`R^2` values\
@@ -610,9 +614,10 @@ class PCA:
         rownames.insert(0, 'n PCs')
         rownames.append('Mean')
 
-        print(row_format.format(*rownames))
-        for i, row in zip(neig, r2vec):
-            print(row_format.format(i, *row))
+        if verbose:
+            print(row_format.format(*rownames))
+            for i, row in zip(neig, r2vec):
+                print(row_format.format(i, *row))
 
         return r2
 
@@ -971,7 +976,7 @@ class PCA:
                 frac = float(input('Select the fraction of variance to preserve: '))
             neta = 1
             if (frac > 1.) or (frac < 0.):
-                raise ValueError('fraction of variance must be between 0 and 1')
+                raise ValueError('Fraction of variance must be between 0 and 1.')
             tot_var = np.sum(pca.L)
             neig = len(pca.L)
             fracVar = 0
@@ -985,7 +990,8 @@ class PCA:
             else:
                 print('Choose threshold between 0 and 1\n(1->Kaiser, 0.7->Joliffe)\n')
                 fac = float(input(''))
-            assert (fac > 0.) and (fac <= 1.), 'fraction of variance must be between 0 and 1'
+            if (fac > 1.) or (fac < 0.):
+                raise ValueError('Fraction of variance must be between 0 and 1.')
 
             cutoff = fac * pca.L.mean(axis=0)
             neta = 1
@@ -1008,8 +1014,10 @@ class PCA:
             pca.n_components = neta - 1
 
         elif method == 'SCREE PLOT' or method == 'SCREE GRAPH':
-            pca.plot_convergence()
+            plt = plot_cumulative_variance(pca.L, n_components=0, title=None, save_filename=None)
+            plt.show()
             pca.n_components = int(float(input('Select number of retained eigenvalues: ')))
+            plt.close()
 
         else:
             raise ValueError('Unsupported method: ' + method)
