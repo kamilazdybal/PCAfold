@@ -120,11 +120,9 @@ class PCA:
                 raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
             else:
                 if n_components > 0:
-                    self.__neta = n_components
                     self.__n_components = n_components
                     self.__n_components_init = n_components
                 else:
-                    self.__neta = n_variables
                     self.__n_components = n_variables
                     self.__n_components_init = n_variables
 
@@ -187,10 +185,6 @@ class PCA:
     @property
     def n_variables(self):
         return self.__n_variables
-
-    @property
-    def neta(self):
-        return self.__neta
 
     @property
     def X_cs(self):
@@ -499,7 +493,7 @@ class PCA:
             is consistent with the PCA object.
         """
         n_observations, nvar = X.shape
-        self.neta = nvar
+        self.n_components = nvar
         err = X - self.reconstruct(self.transform(X))
         isBad = (np.max(np.abs(err), axis=0) / np.max(np.abs(X), axis=0) > 1e-10).any() or (
             np.min(np.abs(err), axis=0) / np.min(np.abs(X), axis=0) > 1e-10).any()
@@ -551,8 +545,8 @@ class PCA:
 
         neig = np.zeros((nmax), dtype=int)
         for i in range(nmax):
-            self.neta = i + 1
-            neig[i] = self.neta
+            self.n_components = i + 1
+            neig[i] = self.n_components
             r2[i, :] = self.calculate_r2(X)
 
             r2vec[i, 0:-1] = np.round(r2[i, :], 8)
@@ -733,11 +727,11 @@ class PCA:
         r2 = np.zeros((netapts, nvar))
         r2vec = r2.copy()
 
-        self.neta = np.max(neta, axis=0)
+        self.n_components = np.max(neta, axis=0)
         eta = self.transform(data)
 
         for i in range(netapts):
-            self.neta = neta[i]
+            self.n_components = neta[i]
             r2[i, :] = self.calculate_r2(data)
 
         # dump out information
@@ -877,7 +871,7 @@ class PCA:
             while (fracVar < frac) and (neta <= neig):
                 fracVar += pca.L[neta - 1] / tot_var
                 neta += 1
-            pca.neta = neta - 1
+            pca.n_components = neta - 1
         elif method == 'INDIVIDUAL VARIANCE':
             if option:
                 fac = option
@@ -893,7 +887,7 @@ class PCA:
             else:
                 while (pca.L[neta - 1] > cutoff) and neta <= neig:
                     neta += 1
-            pca.neta = neta - 1
+            pca.n_components = neta - 1
 
         elif method == 'BROKEN STICK':
             neta = 1
@@ -904,11 +898,11 @@ class PCA:
                     broken_stick += 1 / j
                 stick_stop = pca.L[neta - 1] > broken_stick
                 neta += 1
-            pca.neta = neta - 1
+            pca.n_components = neta - 1
 
         elif method == 'SCREE PLOT' or method == 'SCREE GRAPH':
             pca.plot_convergence()
-            pca.neta = int(float(input('Select number of retained eigenvalues: ')))
+            pca.n_components = int(float(input('Select number of retained eigenvalues: ')))
 
         else:
             raise ValueError('Unsupported method: ' + method)

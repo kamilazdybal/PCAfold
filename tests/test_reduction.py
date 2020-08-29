@@ -8,7 +8,7 @@ from scipy import linalg as lg
 
 class TestReduction(unittest.TestCase):
 
-    def test_PCA(self):
+    def test_PCA_with_eigendec_vs_SVD(self):
 
         tol = 10 * np.finfo(float).eps
 
@@ -95,6 +95,26 @@ class TestReduction(unittest.TestCase):
             pca.n_variables = 1
         with self.assertRaises(AttributeError):
             pca.n_components_init = 1
+
+    def test_PCA_class_getting_attributes(self):
+
+        X = np.random.rand(100,20)
+        pca = PCA(X, scaling='auto', n_components=10)
+
+        try:
+            pca.X_cs
+            pca.X_center
+            pca.X_scale
+            pca.R
+            pca.Q
+            pca.L
+            pca.loadings
+            pca.scaling
+            pca.n_variables
+            pca.n_components_init
+            pca.n_components
+        except Exception:
+            self.assertTrue(False)
 
     def test_PCA_n_components_attribute(self):
 
