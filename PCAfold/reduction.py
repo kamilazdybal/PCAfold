@@ -64,7 +64,7 @@ class PCA:
     :param n_components: (optional)
         number of retained Principal Components :math:`q`. If set to 0 all are retained.
     :param use_eigendec: (optional)
-        method for obtaining the eigenvalues and eigenvectors:
+        boolean specifying the method for obtaining eigenvalues and eigenvectors:
 
             * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
             * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
@@ -98,8 +98,8 @@ class PCA:
         - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
         - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
         - **R** - (read only) covariance matrix.
-        - **L** - (read only) eigenvalues.
-        - **Q** - (read only) eigenvectors (vectors are stored in columns, rows correspond to weights).
+        - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
+        - **Q** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
         - **loadings** - (read only) loadings (vectors are stored in columns, rows correspond to weights).
     """
 
@@ -616,36 +616,54 @@ class PCA:
 
     def principal_variables(self, method='B2', x=[]):
         """
-        Extract principal variables from a PCA
+        This function extracts Principal Variables (PVs) from a PCA.
+
+        The following methods are currently supported:
+
+        * ``'B4'`` - selects Principal Variables based on the variables\
+        contained in the eigenvectors corresponding to the largest\
+        eigenvalues.
+
+        * ``'B2'`` - selects Principal Variables based on variables contained in the\
+        smallest eigenvalues. These are discarded and the remaining\
+        variables are used as the PVs.
+
+        * ``'M2'`` - at each iteration, each remaining variable is analyzed\
+        via PCA. *Note:* this is a very expensive method.
+
+        For more detailed information on the options implemented here the user
+        is referred to :cite:`Jolliffe2002`.
 
         **Example:**
 
         .. code:: python
 
-            ikeep = principal_variables()
-            ikeep = principal_variables('B4')
-            ikeep = principal_variables('M2', X )
+            from PCAfold import PCA
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,5)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=3)
+
+            # Select Principal Variables (PVs) using M2 method:
+            principal_variables_indices = pca_X.principal_variables(method='M2', X)
 
         :param method: (optional)
-            the method for determining the principal variables.
-            The following methods are currently supported:
-
-            * ``'B4'`` - selects principal variables based on the variables\
-            contained in the eigenvectors corresponding to the largest\
-            eigenvalues.
-            * ``'B2'`` - selects pvs based on variables contained in the\
-            smallest eigenvalues.  These are discarded and the remaining\
-            variables are used as the principal variables.  This is the default\
-            method.
-            * ``'M2'`` - at each iteration, each remaining variable is analyzed\
-            via PCA. This is a very expensive method.
+            string specifying the method for determining the Principal Variables (PVs).
 
         :param x: (optional)
-            data arranged with observations in rows and variables in columns.
-            Note that this is only required for the ``'M2'`` method.
+            data set to accompany ``'M2'`` method. Note that this is *only* required for the ``'M2'`` method.
+
+        :raises ValueError:
+            if the method selected is not ``'B4'``, ``'B2'`` or ``'M2'``.
+
+        :raises ValueError:
+            if the data set ``x`` is not supplied when ``method='M2'``.
 
         :return:
-            - **ikeep** - a vector of indices of retained variables
+            - **principal_variables_indices** - a vector of indices of retained Principal Variables (PVs).
         """
 
         method = method.upper()
@@ -674,7 +692,7 @@ class PCA:
                         idisc[i] = ivar
                         break
             sd = np.setdiff1d(np.arange(nvar), idisc)
-            ikeep = sd[np.argsort(sd)]
+            principal_variables_indices = sd[np.argsort(sd)]
 
         elif method == 'B4':  # B4 Forward method
             nvar = self.n_variables
@@ -683,7 +701,7 @@ class PCA:
 
             # set indices for retained variables by looking at eigenvectors
             # corresponding to the retained eigenvalues
-            ikeep = -1 * np.ones(neta)
+            principal_variables_indices = -1 * np.ones(neta)
 
             for i in range(neta):
                 isrt = np.argsort(-np.abs(eigVec[:, i]))  # descending order
@@ -692,10 +710,10 @@ class PCA:
                 # that has not yet been identified.
                 for j in range(nvar):
                     ivar = isrt[j]
-                    if np.all(ikeep != ivar):
-                        ikeep[i] = ivar
+                    if np.all(principal_variables_indices != ivar):
+                        principal_variables_indices[i] = ivar
                         break
-            ikeep = ikeep[np.argsort(ikeep)]
+            principal_variables_indices = principal_variables_indices[np.argsort(principal_variables_indices)]
 
         elif method == 'M2':  # Note: this is EXPENSIVE
             if len(x) == 0:
@@ -736,16 +754,19 @@ class PCA:
                 ii = np.setdiff1d(np.arange(nvarTot), idiscard)
                 idisc = ii[idisc]
                 idiscard.append(idisc)
-                print('discarding variable: %i\n' % (idisc + 1))
+                print('Discarding variable: %i\n' % (idisc + 1))
 
                 q -= 1
 
             sd = np.setdiff1d(np.arange(nvarTot), idiscard)
-            ikeep = sd[np.argsort(sd)]
+            principal_variables_indices = sd[np.argsort(sd)]
 
         else:
             raise ValueError('Invalid method ' + method + ' for identifying principle variables')
-        return ikeep
+
+        principal_variables_indices = principal_variables_indices.astype(int)
+
+        return principal_variables_indices
 
     # def r2converge(self, data, names=[], fname=None):
     #     """
@@ -869,41 +890,70 @@ class PCA:
 
     def set_retained_eigenvalues(self, method='SCREE GRAPH', option=None):
         """
-        Help determine how many eigenvalues to retain.
+        This function helps determine how many Principal Components (PCs) should be retained.
         The following methods are available:
 
-        - ``'TOTAL VARIANCE'`` retain the eigenvalues needed to account for a\
-        specific percentage of the total variance (i.e. 80%). The required\
-        number of PCs is then the smallest value of m for which this chosen\
-        percentage is exceeded.
+        * ``'TOTAL VARIANCE'`` - retain the PCs whose eigenvalues account for a\
+        specific percentage of the total variance. The required\
+        number of PCs is then the smallest value of :math:`q` for which this chosen\
+        percentage is exceeded. Fraction of variance can be supplied using the\
+        ``option`` parameter. For instance, set ``option=0.6`` if you want to\
+        account for 60% variance. If variance is not supplied in the ``option``\
+        paramter, the user will be asked to input it during function execution.
 
-        * ``'INDIVIDUAL VARIANCE'`` retain the components whose eigenvalues are\
+        * ``'INDIVIDUAL VARIANCE'`` - retain the PCs whose eigenvalues are\
         greater than the average of the eigenvalues :cite:`Kaiser1960` or than 0.7\
-        times he average of the eigenvalues :cite:`Jolliffe2002`. For a correlation\
-        matrix this average equals 1.
+        times the average of the eigenvalues :cite:`Jolliffe2002`. For a correlation\
+        matrix this average equals 1. Fraction of variance can be supplied using the\
+        ``option`` parameter. For instance, set ``option=0.6`` if you want to\
+        account for 60% variance. If variance is not supplied in the ``option``\
+        paramter, the user will be asked to input it during function execution.
 
-        * ``'BROKEN STICK'`` select the retained PCs according to the Broken\
-        Stick Model.
+        * ``'BROKEN STICK'`` - retain the PCs according to the *Broken Stick Model*.
 
-        * ``'SCREE GRAPH'`` use the scree graph, a plot of the eigenvalues\
+        * ``'SCREE GRAPH'`` - retain the PCs using the scree graph, a plot of the eigenvalues\
         agaist their indexes, and look for a natural break between the large\
         and small eigenvalues.
+
+        For more detailed information on the options implemented here the user
+        is referred to :cite:`Jolliffe2002`.
 
         **Example:**
 
         .. code:: python
 
-            pca = pca.set_retained_eigenvalues( method )
+            from PCAfold import PCA
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,5)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=5)
+
+            # Compute a new ``PCA`` class object with the new number of retained components:
+            pca_X_new = pca_X.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.6)
+
+            # The new number of Principal Components that has been set:
+            print(pca_X_new.n_components)
 
         This function provides a few methods to select the number of eigenvalues
         to be retained in the PCA reduction.
 
         :param method: (optional)
-            method to use in selecting retained eigenvalues.
-            Default is ``'SCREE GRAPH'``
+            string specifying the method to use in selecting retained eigenvalues.
         :param option: (optional)
-            if not supplied, information will be obtained interactively.
-            Only used for the ``'TOTAL VARIANCE'`` and ``'INDIVIDUAL VARIANCE'`` methods.
+            additional parameter used for the ``'TOTAL VARIANCE'`` and
+            ``'INDIVIDUAL VARIANCE'`` methods. If not supplied, information
+            will be obtained interactively.
+
+        :raises ValueError:
+            if the fraction of retained variance supplied by the ``option`` parameter
+            is not a number between 0 and 1.
+
+        :raises ValueError:
+            if the method selected is not ``'TOTAL VARIANCE'``, ``'INDIVIDUAL VARIANCE'``,
+            ``'BROKEN STICK'`` or ``'SCREE GRAPH'``.
 
         :return:
             - **pca** - the PCA object with the number of retained eigenvalues set on it.
