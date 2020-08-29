@@ -474,16 +474,32 @@ class PCA:
 
     def data_consistency_check(self, X, errorsAreFatal=True):
         """
-        Checks if the supplied data matrix ``X`` is consistent with the PCA object.
+        This function checks if the supplied data matrix ``X`` is consistent
+        with the ``PCA`` class object.
 
         **Example:**
 
         .. code:: python
 
-            pca.data_consistency_check( X, errorsAreFatal )
+            from PCAfold import PCA
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,20)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=10)
+
+            # This data set will be consistent:
+            X_1 = np.random.rand(50,20)
+            pca_X.data_consistency_check(X_1)
+
+            # This data set will not be consistent:
+            X_2 = np.random.rand(100,10)
+            pca_X.data_consistency_check(X_2)
 
         :param X:
-            the independent variables.
+            data set to check.
         :param errorsAreFatal: (optional)
             flag indicating if an error should be raised if an incompatibility
             is detected - default is True.
@@ -492,59 +508,81 @@ class PCA:
             - **okay** - boolean for whether or not supplied data matrix ``X``\
             is consistent with the PCA object.
         """
-        n_observations, nvar = X.shape
-        self.n_components = nvar
+
+        (n_observations, n_variables) = np.shape(X)
+
+        self.n_components = n_variables
+
         err = X - self.reconstruct(self.transform(X))
+
         isBad = (np.max(np.abs(err), axis=0) / np.max(np.abs(X), axis=0) > 1e-10).any() or (
             np.min(np.abs(err), axis=0) / np.min(np.abs(X), axis=0) > 1e-10).any()
+
         if isBad and errorsAreFatal:
             raise ValueError('it appears that the data is not consistent with the data used to construct the PCA')
+
         okay = not isBad
+
         return okay
 
-    def convergence(self, X, nmax, names=[], printwidth=10):
+    def convergence(self, X, n_pcs, variable_names=[], print_width=10):
         """
-        Print :math:`R^2` values as a function of number of retained eigenvalues.
+        This function prints :math:`R^2` values (as per ``PCA.calculate_r2``
+        function) for reconstruction of the original data set :math:`\mathbf{X}`
+        as a function of number of retained Principal Components (PCs).
 
         **Example:**
 
         .. code:: python
 
-            pca.convergence( X, nmax )
-            pca.convergence( X, nmax, names )
+            from PCAfold import PCA
+            import numpy as np
 
-        Print :math:`R^2` values retaining 1-5 eigenvalues:
+            # Generate dummy data set:
+            X = np.random.rand(100,3)
 
-        .. code:: python
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=3)
 
-            pca.convergence(X,5)
+            # Compute and print convergence of R2 values:
+            r2 = pca_X.convergence(X, n_pcs=3, variable_names=['X1', 'X2', 'X3'], print_width=10)
+
+        The code above will print :math:`R^2` values retaining 1-3 PCs:
+
+        .. code-block:: text
+
+            | n PCs      | X1         | X2         | X3         | Mean       |
+            | 1          | 0.17857365 | 0.53258736 | 0.49905763 | 0.40340621 |
+            | 2          | 0.99220888 | 0.57167479 | 0.61150487 | 0.72512951 |
+            | 3          | 1.0        | 1.0        | 1.0        | 1.0        |
 
         :param X:
-            the original dataset.
-        :param nmax:
+            original dataset :math:`\mathbf{X}`.
+        :param n_pcs:
             the maximum number of PCs to consider.
-        :param names: (optional)
-            the names of the variables - otherwise variables are numbered.
-        :param printwidth: (optional)
+        :param variable_names: (optional)
+            list of strings specifying variable names. If not specified variables will be numbered.
+        :param print_width: (optional)
             width of columns printed out.
 
         :return:
-            - **r2** matrix ``(nmax,nvar)`` containing the :math:`R^2` values\
-            for each variable as a function of the number of retained eigenvalues.
+            - **r2** - matrix of size ``(n_pcs, n_variables)`` containing the :math:`R^2` values\
+            for each variable as a function of the number of retained PCs.
         """
+
         n_observations, nvar = X.shape
-        r2 = np.zeros((nmax, nvar))
-        r2vec = np.zeros((nmax, nvar + 1))
+        r2 = np.zeros((n_pcs, nvar))
+        r2vec = np.zeros((n_pcs, nvar + 1))
         self.data_consistency_check(X)
 
-        if len(names) > 0:
-            assert len(names) == nvar, "Number of names given is not consistent with number of variables."
+        if len(variable_names) > 0:
+            assert len(variable_names) == nvar, "Number of names given is not consistent with number of variables."
         else:
             for i in range(nvar):
-                names.append(str(i + 1))
+                variable_names.append(str(i + 1))
 
-        neig = np.zeros((nmax), dtype=int)
-        for i in range(nmax):
+        neig = np.zeros((n_pcs), dtype=int)
+        for i in range(n_pcs):
             self.n_components = i + 1
             neig[i] = self.n_components
             r2[i, :] = self.calculate_r2(X)
@@ -554,9 +592,9 @@ class PCA:
 
         row_format = '|'
         for i in range(nvar + 2):
-            row_format += ' {' + str(i) + ':<' + str(printwidth) + '} |'
-        rownames = names
-        rownames.insert(0, 'n Eig')
+            row_format += ' {' + str(i) + ':<' + str(print_width) + '} |'
+        rownames = variable_names
+        rownames.insert(0, 'n PCs')
         rownames.append('Mean')
 
         print(row_format.format(*rownames))
