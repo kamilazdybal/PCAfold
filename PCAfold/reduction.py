@@ -525,7 +525,7 @@ class PCA:
 
         return okay
 
-    def convergence(self, X, n_pcs, variable_names=[], print_width=10):
+    def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10):
         """
         This function prints :math:`R^2` values (as per ``PCA.calculate_r2``
         function) for reconstruction of the original data set :math:`\mathbf{X}`
@@ -736,94 +736,100 @@ class PCA:
             raise ValueError('Invalid method ' + method + ' for identifying principle variables')
         return ikeep
 
-    def r2converge(self, data, names=[], fname=None):
+    # def r2converge(self, data, names=[], fname=None):
+    #     """
+    #     Evaluate r2 values as a function of the number of retained eigenvalues.
+    #
+    #     **Example:**
+    #
+    #     .. code:: python
+    #
+    #         r2, neta = pca.r2converge( data )
+    #         r2, neta = pca.r2converge( data, names, 'r2.csv' )
+    #
+    #     :param data:
+    #         the data to fit.
+    #     :param names: (optional)
+    #         names of the data.
+    #     :param fname: (optional)
+    #         file to output r2 information to.
+    #
+    #     :return:
+    #         - **r2** - [neta,nvar] The r2 values.  Each column is a different variable and each row is for a different number of retained pcs.
+    #     """
+    #     nvar = self.n_variables
+    #     neta = [i+1 for i in range(0,nvar)]
+    #     netapts = len(neta)
+    #
+    #     n_observations, nvar = data.shape
+    #     r2 = np.zeros((netapts, nvar))
+    #     r2vec = r2.copy()
+    #
+    #     self.n_components = int(np.max(neta, axis=0))
+    #     eta = self.transform(data)
+    #
+    #     for i in range(netapts):
+    #         self.n_components = neta[i]
+    #         r2[i, :] = self.calculate_r2(data)
+    #
+    #     # dump out information
+    #     if len(names) != 0:
+    #         assert len(names) == nvar, "Number of names given is not consistent with number of variables."
+    #
+    #         if fname:
+    #             fid = open(fname, 'w')
+    #             fid.write("neta:")
+    #             for n in names:
+    #                 fid.write(',%8s' % n)
+    #             fid.write('\n')
+    #             fid.close()
+    #
+    #             for i in range(netapts):
+    #                 fid = open(fname, 'a')
+    #                 fid.write('%4i' % (i + 1))
+    #                 fid.close()
+    #
+    #                 with open(fname, 'ab') as fid:
+    #                     np.savetxt(fid, np.array([r2[i, :]]), delimiter=' ', fmt=',%8.4f')
+    #                 fid.close()
+    #         else:
+    #             row_format = '|'
+    #             printwidth = 10
+    #             for i in range(nvar + 1):
+    #                 row_format += ' {' + str(i) + ':<' + str(printwidth) + '} |'
+    #             rownames = names
+    #             rownames.insert(0, 'neta')
+    #
+    #             print(row_format.format(*rownames))
+    #             for i, row in zip(neta, np.round(r2, 8)):
+    #                 print(row_format.format(i, *row))
+    #
+    #     return r2, neta
+
+    def save_to_txt(self, filename):
         """
-        Evaluate r2 values as a function of the number of retained eigenvalues.
+        This function writes the eigenvector matrix :math:`\mathbf{A}`,
+        centering :math:`\mathbf{C}` and scaling :math:`\mathbf{D}`
+        vectors to ``.txt`` file.
 
         **Example:**
 
         .. code:: python
 
-            r2, neta = pca.r2converge( data )
-            r2, neta = pca.r2converge( data, names, 'r2.csv' )
+            from PCAfold import PCA
+            import numpy as np
 
-        :param data:
-            the data to fit.
-        :param names: (optional)
-            names of the data.
-        :param fname: (optional)
-            file to output r2 information to.
+            # Generate dummy data set:
+            X = np.random.rand(100,5)
 
-        :return:
-            - **r2** - [neta,nvar] The r2 values.  Each column is a different variable and each row is for a different number of retained pcs.
-        """
-        nvar = self.n_variables
-        neta = np.arange(nvar) + 1
-        netapts = len(neta)
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=5)
 
-        n_observations, nvar = data.shape
-        r2 = np.zeros((netapts, nvar))
-        r2vec = r2.copy()
-
-        self.n_components = np.max(neta, axis=0)
-        eta = self.transform(data)
-
-        for i in range(netapts):
-            self.n_components = neta[i]
-            r2[i, :] = self.calculate_r2(data)
-
-        # dump out information
-        if len(names) != 0:
-            assert len(names) == nvar, "Number of names given is not consistent with number of variables."
-
-            if fname:
-                fid = open(fname, 'w')
-                fid.write("neta:")
-                for n in names:
-                    fid.write(',%8s' % n)
-                fid.write('\n')
-                fid.close()
-
-                for i in range(netapts):
-                    fid = open(fname, 'a')
-                    fid.write('%4i' % (i + 1))
-                    fid.close()
-
-                    with open(fname, 'ab') as fid:
-                        np.savetxt(fid, np.array([r2[i, :]]), delimiter=' ', fmt=',%8.4f')
-                    fid.close()
-            else:
-                row_format = '|'
-                printwidth = 10
-                for i in range(nvar + 1):
-                    row_format += ' {' + str(i) + ':<' + str(printwidth) + '} |'
-                rownames = names
-                rownames.insert(0, 'neta')
-
-                print(row_format.format(*rownames))
-                for i, row in zip(neta, np.round(r2, 8)):
-                    print(row_format.format(i, *row))
-
-        return r2, neta
-
-    def write_file_for_cpp(self, filename):
-        """
-        Writes the eigenvector matrix, centering and scaling vectors to .txt
-        for reading into C++.
-        *Note*: This function writes only the eigenvector matrix, centering and
-        scaling factors - not all of the pca properties.
-
-        **Example:**
-
-        .. code:: python
-
-            pca = PCA( x )
-            pca.wite2file('pcaData.txt')
+            # Save the PCA results to .txt:
+            pca_X.save_to_txt('pca_X_Data.txt')
 
         :param filename:
-            path (including name of text file) for destination of data file
-
-        :return: (creates the ``.txt`` file in the destination specified by filename)
+            string specifying ``.txt`` save location/filename.
         """
 
         fid = open(filename, 'w')

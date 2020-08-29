@@ -47,15 +47,10 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.calculate_r2
 
-``PCA.convergence``
-===================
+``PCA.r2_convergence``
+======================
 
-.. autofunction:: PCAfold.reduction.PCA.convergence
-
-``PCA.r2converge``
-==================
-
-.. autofunction:: PCAfold.reduction.PCA.r2converge
+.. autofunction:: PCAfold.reduction.PCA.r2_convergence
 
 ``PCA.set_retained_eigenvalues``
 ================================
@@ -72,10 +67,10 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.data_consistency_check
 
-``PCA.write_file_for_cpp``
+``PCA.save_to_txt``
 ==========================
 
-.. autofunction:: PCAfold.reduction.PCA.write_file_for_cpp
+.. autofunction:: PCAfold.reduction.PCA.save_to_txt
 
 Functions for performing PCA on sampled data sets
 =================================================
