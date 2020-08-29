@@ -749,3 +749,21 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(np.shape(preprocessed.X_cs) == (100,20))
         except Exception:
             self.assertTrue(False)
+
+    def test_PreProcessing_not_allowed_attribute_setting(self):
+
+        test_data_set = np.random.rand(100,20)
+        pp = PreProcessing(test_data_set, scaling='auto')
+
+        with self.assertRaises(AttributeError):
+            pp.X_cs = 1
+        with self.assertRaises(AttributeError):
+            pp.X_center = 1
+        with self.assertRaises(AttributeError):
+            pp.X_scale = 1
+        with self.assertRaises(AttributeError):
+            pp.X_removed = 1
+        with self.assertRaises(AttributeError):
+            pp.idx_removed = 1
+        with self.assertRaises(AttributeError):
+            pp.idx_retained = 1

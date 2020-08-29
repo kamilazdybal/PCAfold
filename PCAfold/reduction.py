@@ -77,15 +77,16 @@ class PCA:
     :raises ValueError:
         if ``nocenter`` is not a boolean.
 
-    **Attributes:** (read only)
+    **Attributes:**
 
-        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
-        - **R** - covariance matrix.
-        - **L** - eigenvalues.
-        - **Q** - eigenvectors (vectors are stored in columns, rows correspond to weights).
-        - **loadings** - loadings (vectors are stored in columns, rows correspond to weights).
+        - **n_components** - (can be re-set) number of retained Principal Components :math:`q`.
+        - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        - **R** - (read only) covariance matrix.
+        - **L** - (read only) eigenvalues.
+        - **Q** - (read only) eigenvectors (vectors are stored in columns, rows correspond to weights).
+        - **loadings** - (read only) loadings (vectors are stored in columns, rows correspond to weights).
     """
 
     def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -213,6 +214,10 @@ class PCA:
     @property
     def loadings(self):
         return self.__loadings
+
+
+
+
 
     def transform(self, X, nocenter=False):
         """

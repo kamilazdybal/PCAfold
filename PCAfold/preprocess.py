@@ -273,18 +273,42 @@ class PreProcessing:
 
     **Attributes:**
 
-        - **X_removed** - data set with removed constant columns.
-        - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
-        - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
-        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_removed** - (read only) data set with removed constant columns.
+        - **idx_removed** - (read only) the indices of columns removed from :math:`\mathbf{X}`.
+        - **idx_retained** - (read only) the indices of columns retained in :math:`\mathbf{X}`.
+        - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
     """
 
     def __init__(self, X, scaling='none', nocenter=False):
 
-        (self.X_removed, self.idx_removed, self.idx_retained) = remove_constant_vars(X)
-        (self.X_cs, self.X_center, self.X_scale) = center_scale(self.X_removed, scaling, nocenter=nocenter)
+        (self.__X_removed, self.__idx_removed, self.__idx_retained) = remove_constant_vars(X)
+        (self.__X_cs, self.__X_center, self.__X_scale) = center_scale(self.X_removed, scaling, nocenter=nocenter)
+
+    @property
+    def X_removed(self):
+        return self.__X_removed
+
+    @property
+    def idx_removed(self):
+        return self.__idx_removed
+
+    @property
+    def idx_retained(self):
+        return self.__idx_retained
+
+    @property
+    def X_cs(self):
+        return self.__X_cs
+
+    @property
+    def X_center(self):
+        return self.__X_center
+
+    @property
+    def X_scale(self):
+        return self.__X_scale
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
