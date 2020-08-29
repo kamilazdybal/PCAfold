@@ -32,41 +32,6 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.reconstruct
 
-``PCA.calculate_r2``
-====================
-
-.. autofunction:: PCAfold.reduction.PCA.calculate_r2
-
-``PCA.data_consistency_check``
-==============================
-
-.. autofunction:: PCAfold.reduction.PCA.data_consistency_check
-
-``PCA.convergence``
-===================
-
-.. autofunction:: PCAfold.reduction.PCA.convergence
-
-``PCA.principal_variables``
-===========================
-
-.. autofunction:: PCAfold.reduction.PCA.principal_variables
-
-``PCA.r2converge``
-==================
-
-.. autofunction:: PCAfold.reduction.PCA.r2converge
-
-``PCA.write_file_for_cpp``
-==========================
-
-.. autofunction:: PCAfold.reduction.PCA.write_file_for_cpp
-
-``PCA.set_retained_eigenvalues``
-================================
-
-.. autofunction:: PCAfold.reduction.PCA.set_retained_eigenvalues
-
 ``PCA.u_scores``
 ================
 
@@ -76,6 +41,41 @@ Class ``PCA``
 ================
 
 .. autofunction:: PCAfold.reduction.PCA.w_scores
+
+``PCA.calculate_r2``
+====================
+
+.. autofunction:: PCAfold.reduction.PCA.calculate_r2
+
+``PCA.convergence``
+===================
+
+.. autofunction:: PCAfold.reduction.PCA.convergence
+
+``PCA.r2converge``
+==================
+
+.. autofunction:: PCAfold.reduction.PCA.r2converge
+
+``PCA.set_retained_eigenvalues``
+================================
+
+.. autofunction:: PCAfold.reduction.PCA.set_retained_eigenvalues
+
+``PCA.principal_variables``
+===========================
+
+.. autofunction:: PCAfold.reduction.PCA.principal_variables
+
+``PCA.data_consistency_check``
+==============================
+
+.. autofunction:: PCAfold.reduction.PCA.data_consistency_check
+
+``PCA.write_file_for_cpp``
+==========================
+
+.. autofunction:: PCAfold.reduction.PCA.write_file_for_cpp
 
 Functions for performing PCA on sampled data sets
 =================================================
