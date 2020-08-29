@@ -89,6 +89,8 @@ after changing ``styles.py`` file:
 
   python3.7 setup.py install
 
+All plotting functions return handles to generated plots.
+
 Workflows
 ---------
 

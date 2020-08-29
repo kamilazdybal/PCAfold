@@ -189,14 +189,14 @@ plot:
     :width: 260
     :align: center
 
-Analyze eigenvector weights movement
-------------------------------------
+Analyze eigenvector weights change
+----------------------------------
 
 The ``eigenvectors`` 3D array obtained from ``equilibrate_cluster_populations``
 can now be used as an input parameter for plotting the eigenvector weights change
 as we were gradually equilibrating cluster populations.
 
-We are going to plot the first eigenvector (PC-1) weights movement with three
+We are going to plot the first eigenvector (PC-1) weights change with three
 variants of normalization.
 To access the first eigenvector one can simply do:
 
@@ -214,7 +214,7 @@ and so on.
 
 .. code:: python
 
-  reduction.analyze_eigenvector_weights_movement(eigenvectors[:,0,:], state_space_names, plot_variables=[], normalize=False, zero_norm=False, title=title, save_filename=save_filename)
+  reduction.analyze_eigenvector_weights_change(eigenvectors[:,0,:], state_space_names, plot_variables=[], normalize=False, zero_norm=False, title=title, save_filename=save_filename)
 
 Plotting example
 ^^^^^^^^^^^^^^^^
@@ -229,7 +229,7 @@ Three weight normalization variants are available:
     :align: center
 
 - Normalizing so that the highest weight is equal to 1 and the smallest weight \
-  is between 0 and 1. This is useful for judging the severity of the weight movement. \
+  is between 0 and 1. This is useful for judging the severity of the weight change. \
   To use this variant set ``normalize=True`` and ``zero_norm=False``. \
   Example can be seen below:
 

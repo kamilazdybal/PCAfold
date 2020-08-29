@@ -52,6 +52,37 @@ python3.7 setup.py install
 
 You are ready to `import PCAfold`!
 
+### Local documentation build
+
+To build the documentation locally, you need `sphinx` installed on your machine,
+along with the following extensions:
+
+```
+sphinx.ext.todo
+sphinx.ext.githubpages
+sphinx.ext.autodoc
+sphinx.ext.napoleon
+sphinx.ext.mathjax
+sphinx.ext.autosummary
+sphinxcontrib.bibtex
+```
+
+Then, navigate to `docs/` directory and build the documentation:
+
+```
+sphinx-build -b html . builddir
+
+make html
+```
+
+Documentation main page `_build/html/index.html` can be opened in a web browser.
+
+In MacOS you can open it directly from the terminal:
+
+```
+open _build/html/index.html
+```
+
 ### Testing
 
 To run regression tests from the base repo directory run:
@@ -59,4 +90,18 @@ To run regression tests from the base repo directory run:
 ```
 python3.7 -m unittest discover
 ```
+
 To switch verbose on, use the `-v` flag.
+
+## Plotting
+
+Some functions within **PCAfold** result in plot outputs. Global styles for the
+plots are set using the `styles.py` file. This file can be updated with new
+settings that will be seen globally by **PCAfold** modules. Re-build the project
+after changing `styles.py` file:
+
+```
+python3.7 setup.py install
+```
+
+All plotting functions return handles to generated plots.
