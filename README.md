@@ -29,6 +29,7 @@ this software, such as K-Means algorithm or Artificial Neural Networks.
 **PCAfold** requires `python3.7` and the following packages:
 
 - `copy`
+- `Cython`
 - `matplotlib`
 - `numpy`
 - `random`
