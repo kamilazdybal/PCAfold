@@ -558,7 +558,7 @@ class PCA:
             pca_X = PCA(X, scaling='auto', n_components=3)
 
             # Compute and print convergence of R2 values:
-            r2 = pca_X.convergence(X, n_pcs=3, variable_names=['X1', 'X2', 'X3'], print_width=10)
+            r2 = pca_X.convergence(X, n_pcs=3, variable_names=['X1', 'X2', 'X3'], print_width=10, verbose=True)
 
         The code above will print :math:`R^2` values retaining 1-3 PCs:
 
