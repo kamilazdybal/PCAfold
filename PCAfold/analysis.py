@@ -64,14 +64,14 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
 
     .. math::
 
-        \\mathcal{N}(\\sigma) = \\frac{\\sum_{i=1}^n (y_i - \\mathcal{K}_{i}(\\sigma))^2}{\\sum_{i=1}^n (y_i - \\bar{y} )^2}
+        \\mathcal{N}(\\sigma) = \\frac{\\sum_{i=1}^n (y_i - \\mathcal{K}(\\hat{x}_i; \\sigma))^2}{\\sum_{i=1}^n (y_i - \\bar{y} )^2}
 
-    where :math:`\\bar{y}` is the average quantity over the whole manifold and :math:`\\mathcal{K}_{i}(\\sigma)` is the
+    where :math:`\\bar{y}` is the average quantity over the whole manifold and :math:`\\mathcal{K}(\\hat{x}_i; \\sigma)` is the
     weighted average quantity calculated using kernel regression with a Gaussian kernel of bandwidth :math:`\\sigma` centered
     around the :math:`i^{th}` observation. :math:`n` is the number of observations.
     :math:`\\mathcal{N}(\\sigma)` is computed for each bandwidth in an array of bandwidth values.
-    By default, the ``indepvars`` are centered and scaled to reside inside a unit box so that the bandwidths have the
-    same meaning in each dimensions. Therefore, the bandwidth and its involved calculations are applied in the normalized
+    By default, the ``indepvars`` (:math:`x`) are centered and scaled to reside inside a unit box (resulting in :math:`\\hat{x}`) so that the bandwidths have the
+    same meaning in each dimension. Therefore, the bandwidth and its involved calculations are applied in the normalized
     independent variable space. This may be turned off by setting ``scale_unit_box`` to False.
     The bandwidth values may be specified directly through ``bandwidth_values`` or default values will be calculated as a
     logspace from ``min_bandwidth`` to ``max_bandwidth`` with ``npts_bandwidth`` number of values. If left unspecified,
@@ -204,9 +204,9 @@ def logistic_fit(normalized_variance_values, bandwidth_values, show_plot=False):
 
     if show_plot:
         diff = normalized_variance_values - logistic
-        plt.plot(log_bandwidth_values, normalized_variance_values, 'k*-', label='original')
-        plt.plot(log_bandwidth_values, logistic, 'r*', label='fit')
-        plt.plot(log_bandwidth_values, diff, 'b*', label='difference')
+        plt.plot(log_bandwidth_values, normalized_variance_values, 'k.-', label='original')
+        plt.plot(log_bandwidth_values, logistic, 'r--', label='fit')
+        plt.plot(log_bandwidth_values, diff, 'b--', label='difference')
         plt.xlabel('log(normalized bandwidth)')
         plt.ylabel('normalized variance')
         plt.grid()

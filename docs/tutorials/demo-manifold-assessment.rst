@@ -9,11 +9,11 @@ manifold quality and dimensionality as well as comparing manifolds
 (parameterizations) in terms of representing dependent variables of
 interest.
 
-.. code:: ipython3
+.. code:: python
 
     import numpy as np
     import matplotlib.pyplot as plt
-    from PCAfold import compute_normalized_variance, PreProcessing, PCA, logistic_fit, assess_manifolds
+    from PCAfold import compute_normalized_variance, PCA, logistic_fit, assess_manifolds
 
 Here we are creating a two-dimensional manifold to assess with a
 dependent variable. Independent variables :math:`x` and :math:`y` and
@@ -33,7 +33,7 @@ dependent variable :math:`f` will be defined as
 
 for a grid :math:`g` between [-0.5,1].
 
-.. code:: ipython3
+.. code:: python
 
     npts = 1001
     grid = np.linspace(-0.5,1.,npts)
@@ -63,7 +63,7 @@ independent and dependent variables must be arranged into
 two-dimensional arrays size npts by number of variables. This is done in
 the following code.
 
-.. code:: ipython3
+.. code:: python
 
     indepvars = np.vstack((x, y)).T
     depvars = np.expand_dims(f, axis=1)
@@ -96,7 +96,7 @@ are applied to the independent variables after they are centered and
 scaled inside a unit box (by default), and therefore are referred to as
 normalized bandwidth in the following plots.
 
-.. code:: ipython3
+.. code:: python
 
     depvar_name = 'depvar' # dependent variable name
     bandwidth = np.logspace(-6,1) # array of bandwidth values
@@ -119,7 +119,7 @@ over the manifold. Therefore the desired curve for an optimal manifold
 is one that has a single smooth rise that occurs at larger bandwidth
 values.
 
-.. code:: ipython3
+.. code:: python
 
     plt.semilogx(orig1Dx.bandwidth_values,orig1Dx.normalized_variance[depvar_name],label='orig,1D_x')
     plt.semilogx(orig1Dy.bandwidth_values,orig1Dy.normalized_variance[depvar_name],label='orig,1D_y')
@@ -177,7 +177,7 @@ parameter and manifold spread parameter. The manifold uniqueness
 parameter of the one-dimensional manifolds being less than ~0.999
 indicates these representations have overlapping states.
 
-.. code:: ipython3
+.. code:: python
 
     variance_data_dict = {}
     variance_data_dict['orig,1D_x'] = orig1Dx
@@ -210,7 +210,7 @@ when ``show_plot`` is set to True.
 The first plot is a one-dimensional manifold with overlap while the
 second plot is for the two-dimensional manifold.
 
-.. code:: ipython3
+.. code:: python
 
     print('Example of overlapping manifold resulting in bad logistic fit:')
     spread, R2 = logistic_fit(orig1Dx.normalized_variance[depvar_name], orig1Dx.bandwidth_values, show_plot=True)
@@ -257,11 +257,11 @@ created with different scalings. The first uses the default scaling
 resulting manifolds are shown below for comparison to the original. The
 dimensions for the PCA manifolds are referred to as PC1 and PC2.
 
-.. code:: ipython3
+.. code:: python
 
     # PCA using std scaling
     pca_std = PCA(indepvars)
-    eta_std = pca_std.x2eta(indepvars)
+    eta_std = pca_std.transform(indepvars)
 
     plt.scatter(eta_std[:,0], eta_std[:,1], c=f, s=2, cmap='rainbow')
     plt.colorbar()
@@ -273,7 +273,7 @@ dimensions for the PCA manifolds are referred to as PC1 and PC2.
 
     # PCA using pareto scaling
     pca_pareto = PCA(indepvars,'pareto')
-    eta_pareto = pca_pareto.x2eta(indepvars)
+    eta_pareto = pca_pareto.transform(indepvars)
 
     plt.scatter(eta_pareto[:,0], eta_pareto[:,1], c=f, s=2, cmap='rainbow')
     plt.colorbar()
@@ -298,7 +298,7 @@ manifolds in one and two dimensional space. Since PCA orders the PCs
 according the amount of variance explained, we will use PC1 for
 representing a one-dimensional manifold.
 
-.. code:: ipython3
+.. code:: python
 
     pca1D_std = compute_normalized_variance(eta_std[:,:1], depvars, [depvar_name],bandwidth_values=bandwidth)
     pca2D_std = compute_normalized_variance(eta_std,       depvars, [depvar_name],bandwidth_values=bandwidth)
@@ -324,7 +324,7 @@ fewer regions of overlap than the others. This can be seen in collapsing
 the ``std`` PCA figure above onto PC1 alone compared to collapsing the
 other manifolds onto one dimension.
 
-.. code:: ipython3
+.. code:: python
 
     variance_data_dict['pca_std,1D'] = pca1D_std
     variance_data_dict['pca_std,2D'] = pca2D_std
