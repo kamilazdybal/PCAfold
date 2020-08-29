@@ -38,7 +38,9 @@ class PCA:
     | | Eigendecomposition of the covariance matrix                                                    | | Singular Value Decomposition (SVD)                                        |
     | | Set ``use_eigendec=True`` (default)                                                            | | Set ``use_eigendec=False``                                                |
     +==================================================================================================+=============================================================================+
-    | Centering and scaling: :math:`\mathbf{X_{cs}}` as per ``preprocess.center_scale`` function                                                                                     |
+    | | **Centering and scaling** (as per ``preprocess.center_scale`` function):                                                                                                     |
+    | | If ``nocenter=False``: :math:`\mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                                                                             |
+    | | If ``nocenter=True``: :math:`\mathbf{X_{cs}} = \mathbf{X} \cdot \mathbf{D}^{-1}`                                                                                             |
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
     | Eigendec. of :math:`1/(N-1) \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}`                        | SVD: :math:`\mathbf{X_{cs}} = \mathbf{U} \mathbf{S} \mathbf{V}^{\mathbf{T}}`|
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
@@ -433,8 +435,8 @@ class PCA:
     def calculate_r2(self, X):
         """
         This function calculates coefficient of determination :math:`R^2` values
-        for the rank-:math:`q` reconstruction of the original
-        data set :math:`\mathbf{X_{rec}}`:
+        for the rank-:math:`q` reconstruction :math:`\mathbf{X_{rec}}` of the original
+        data set :math:`\mathbf{X}`:
 
         .. math::
 
