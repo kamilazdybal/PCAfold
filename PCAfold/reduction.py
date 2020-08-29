@@ -44,6 +44,9 @@ class PCA:
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
     | Eigendec. of :math:`1/(N-1) \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}`                        | SVD: :math:`\mathbf{X_{cs}} = \mathbf{U} \mathbf{S} \mathbf{V}^{\mathbf{T}}`|
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
+    | | **Modes:**                                                                                     | | **Modes:**                                                                |
+    | | Eigenvectors :math:`\mathbf{A}`                                                                | | :math:`\mathbf{A} = \mathbf{V}^{\mathbf{T}}`                              |
+    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
 
     **Example:**
 
@@ -540,7 +543,8 @@ class PCA:
 
     def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10, verbose=False, save_filename=None):
         """
-        This function prints :math:`R^2` values (as per ``PCA.calculate_r2``
+        This function returns and/or prints and/or saves to ``.txt`` file
+        :math:`R^2` values (as per ``PCA.calculate_r2``
         function) for reconstruction of the original data set :math:`\mathbf{X}`
         as a function of number of retained Principal Components (PCs).
 
