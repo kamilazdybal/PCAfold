@@ -342,16 +342,629 @@ class TestReduction(unittest.TestCase):
             pca.transform(test_data_set_2)
 
     def test_reconstruct_allowed_calls(self):
-        pass
+
+        X = np.random.rand(100,10)
+
+        try:
+            pca_X = PCA(X, scaling='auto')
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=5)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2, nocenter=True)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            X_2 = np.random.rand(200,10)
+            principal_components = pca_X.transform(X_2, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            X_2 = np.random.rand(200,10)
+            principal_components = pca_X.transform(X_2)
+            X_rec = pca_X.reconstruct(principal_components)
+        except Exception:
+            self.assertTrue(False)
 
     def test_reconstruct_not_allowed_calls(self):
-        pass
+
+        X = np.random.rand(100,10)
+        fake_PCs = np.random.rand(100,11)
+
+        pca = PCA(X, scaling='auto')
+        with self.assertRaises(ValueError):
+            X_rec = pca.reconstruct(fake_PCs)
+
+        pca = PCA(X, scaling='auto', n_components=4)
+        with self.assertRaises(ValueError):
+            X_rec = pca.reconstruct(fake_PCs)
+
+    def test_transform_reconstruct_on_all_available_scalings(self):
+
+        X = np.random.rand(100,10)
+
+        try:
+            pca_X = PCA(X, scaling='none', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='range', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='pareto', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='max', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='level', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='-1to1', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='poisson', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast_2', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast_3', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast_4', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_transform_reconstruct_on_all_available_scalings_with_no_centering(self):
+
+        X = np.random.rand(100,10)
+
+        try:
+            pca_X = PCA(X, scaling='none', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='range', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='pareto', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='max', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='level', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='-1to1', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='poisson', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast_2', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast_3', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='vast_4', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_transform_reconstruct_on_all_available_scalings_using_different_X(self):
+
+        X_init = np.random.rand(100,10)
+        X = np.random.rand(60,10)
+
+        try:
+            pca_X = PCA(X_init, scaling='none', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='auto', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='range', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='pareto', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='max', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='level', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='-1to1', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='poisson', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast_2', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast_3', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast_4', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_transform_reconstruct_on_all_available_scalings_using_different_X_with_no_centering(self):
+
+        X_init = np.random.rand(100,10)
+        X = np.random.rand(60,10)
+
+        try:
+            pca_X = PCA(X_init, scaling='none', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='auto', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='range', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='pareto', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='max', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='level', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='-1to1', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='poisson', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast_2', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast_3', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X_init, scaling='vast_4', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
 
     def test_u_scores_allowed_calls(self):
-        pass
+
+        X = np.random.rand(100,10)
+
+        try:
+            pca = PCA(X, scaling='auto')
+            u_scores = pca.u_scores(X)
+            (n_obs, n_u_scores) = np.shape(u_scores)
+            self.assertTrue(n_u_scores==10)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca = PCA(X, scaling='auto', n_components=4)
+            u_scores = pca.u_scores(X)
+            (n_obs, n_u_scores) = np.shape(u_scores)
+            self.assertTrue(n_u_scores==4)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca = PCA(X, scaling='auto', n_components=1)
+            u_scores = pca.u_scores(X)
+            (n_obs, n_u_scores) = np.shape(u_scores)
+            self.assertTrue(n_u_scores==1)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca = PCA(X, scaling='pareto', n_components=10)
+            u_scores = pca.u_scores(X)
+            (n_obs, n_u_scores) = np.shape(u_scores)
+            self.assertTrue(n_u_scores==10)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca = PCA(X, scaling='auto', n_components=4)
+            X_new = np.random.rand(50,10)
+            u_scores = pca.u_scores(X_new)
+            (n_obs, n_u_scores) = np.shape(u_scores)
+            self.assertTrue(n_u_scores==4)
+        except Exception:
+            self.assertTrue(False)
 
     def test_u_scores_not_allowed_calls(self):
-        pass
+
+        X = np.random.rand(20,4)
+        X_2 = np.random.rand(20,3)
+        X_3 = np.random.rand(20,5)
+
+        pca = PCA(X, scaling='auto')
+
+        with self.assertRaises(ValueError):
+            u_scores = pca.u_scores(X_2)
+
+        with self.assertRaises(ValueError):
+            u_scores = pca.u_scores(X_3)
 
     def test_w_scores_allowed_calls(self):
 
@@ -381,7 +994,18 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
     def test_w_scores_not_allowed_calls(self):
-        pass
+
+        X = np.random.rand(20,4)
+        X_2 = np.random.rand(20,3)
+        X_3 = np.random.rand(20,5)
+
+        pca = PCA(X, scaling='auto')
+
+        with self.assertRaises(ValueError):
+            u_scores = pca.w_scores(X_2)
+
+        with self.assertRaises(ValueError):
+            u_scores = pca.w_scores(X_3)
 
     def test_calculate_r2_allowed_calls(self):
 
@@ -395,9 +1019,6 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(comparison.all())
         except Exception:
             self.assertTrue(False)
-
-    def test_calculate_r2_not_allowed_calls(self):
-        pass
 
     def test_r2_convergence_allowed_calls(self):
 
@@ -505,10 +1126,45 @@ class TestReduction(unittest.TestCase):
             pca.principal_variables(method='Method')
 
     def test_data_consistency_check_allowed_calls(self):
-        pass
+
+        X = np.random.rand(100,20)
+        pca_X = PCA(X, scaling='auto', n_components=10)
+
+        try:
+            X_1 = np.random.rand(50,20)
+            is_consistent = pca_X.data_consistency_check(X_1)
+            self.assertTrue(is_consistent==True)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            X_2 = np.random.rand(100,10)
+            is_consistent = pca_X.data_consistency_check(X_2)
+            self.assertTrue(is_consistent==False)
+        except Exception:
+            self.assertTrue(False)
+
+        X_3 = np.random.rand(100,10)
+        with self.assertRaises(ValueError):
+            is_consistent = pca_X.data_consistency_check(X_3, errors_are_fatal=True)
+
+        try:
+            X_4 = np.random.rand(80,20)
+            is_consistent = pca_X.data_consistency_check(X_4, errors_are_fatal=True)
+            self.assertTrue(is_consistent==True)
+        except Exception:
+            self.assertTrue(False)
 
     def test_data_consistency_check_not_allowed_calls(self):
-        pass
+
+        X = np.random.rand(100,20)
+        pca_X = PCA(X, scaling='auto', n_components=10)
+
+        with self.assertRaises(ValueError):
+            is_consistent = pca_X.data_consistency_check(X, errors_are_fatal=1)
+
+        with self.assertRaises(ValueError):
+            is_consistent = pca_X.data_consistency_check(X, errors_are_fatal=0)
 
     def test_simulate_chemical_source_term_handling(self):
 
