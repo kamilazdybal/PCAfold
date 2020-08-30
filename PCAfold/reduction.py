@@ -438,6 +438,9 @@ class PCA:
         :raises ValueError:
             if ``nocenter`` is not a boolean.
 
+        :raises ValueError:
+            if the number of Principal Components supplied is larger than the number of eigenvectors computed by PCA.
+
         :return:
             - **X_rec** - rank-:math:`q` reconstruction of the original data set.
         """
@@ -446,6 +449,9 @@ class PCA:
             raise ValueError("Parameter `nocenter` has to be a boolean.")
 
         (n_observations, n_components) = np.shape(principal_components)
+
+        if n_components > self.n_variables:
+            raise ValueError("Number of Principal Components supplied is larger than the number of eigenvectors computed by PCA.")
 
         # Select n_components first Principal Components:
         A = self.Q[:, 0:n_components]
@@ -536,15 +542,15 @@ class PCA:
 
             # This data set will be consistent:
             X_1 = np.random.rand(50,20)
-            is_inconsistent = pca_X.data_consistency_check(X_1)
+            is_consistent = pca_X.data_consistency_check(X_1)
 
             # This data set will not be consistent but will not throw ValueError:
             X_2 = np.random.rand(100,10)
-            is_inconsistent = pca_X.data_consistency_check(X_2)
+            is_consistent = pca_X.data_consistency_check(X_2)
 
             # This data set will not be consistent and will throw ValueError:
             X_3 = np.random.rand(100,10)
-            is_inconsistent = pca_X.data_consistency_check(X_3, errors_are_fatal=True)
+            is_consistent = pca_X.data_consistency_check(X_3, errors_are_fatal=True)
 
         :param X:
             data set to check.
@@ -552,10 +558,19 @@ class PCA:
             boolean indicating if ValueError should be raised if an incompatibility
             is detected.
 
+        :raises ValueError:
+            if ``errors_are_fatal`` is not a boolean.
+
+        :raises ValueError:
+            when data set is not consistent with the ``PCA`` class object and ``errors_are_fatal=True`` flag has been set.
+
         :return:
             - **is_consistent** - boolean for whether or not supplied data matrix ``X``\
-            is consistent with the PCA object.
+            is consistent with the ``PCA`` class object.
         """
+
+        if not isinstance(errors_are_fatal, bool):
+            raise ValueError("Parameter `errors_are_fatal` has to be a boolean.")
 
         (n_observations, n_variables) = np.shape(X)
 
@@ -1083,7 +1098,7 @@ class PCA:
 
     def u_scores(self, X):
         """
-        Calculate the U-scores (Principal Components):
+        This function calculates the U-scores (Principal Components):
 
         .. math::
 
