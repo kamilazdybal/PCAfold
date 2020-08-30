@@ -501,6 +501,8 @@ class PCA:
             - **r2** - coefficient of determination values :math:`R^2` for the rank-:math:`q` reconstruction of the original data set.
         """
 
+        self.data_consistency_check(X, errors_are_fatal=True)
+
         (n_observations, n_variables) = np.shape(X)
 
         assert (n_observations > n_variables), "Need more observations than variables."
@@ -514,10 +516,10 @@ class PCA:
 
         return r2
 
-    def data_consistency_check(self, X, errorsAreFatal=True):
+    def data_consistency_check(self, X, errors_are_fatal=False):
         """
         This function checks if the supplied data matrix ``X`` is consistent
-        with the ``PCA`` class object.
+        with the current ``PCA`` class object.
 
         **Example:**
 
@@ -534,38 +536,56 @@ class PCA:
 
             # This data set will be consistent:
             X_1 = np.random.rand(50,20)
-            pca_X.data_consistency_check(X_1)
+            is_inconsistent = pca_X.data_consistency_check(X_1)
 
-            # This data set will not be consistent:
+            # This data set will not be consistent but will not throw ValueError:
             X_2 = np.random.rand(100,10)
-            pca_X.data_consistency_check(X_2)
+            is_inconsistent = pca_X.data_consistency_check(X_2)
+
+            # This data set will not be consistent and will throw ValueError:
+            X_3 = np.random.rand(100,10)
+            is_inconsistent = pca_X.data_consistency_check(X_3, errors_are_fatal=True)
 
         :param X:
             data set to check.
-        :param errorsAreFatal: (optional)
-            flag indicating if an error should be raised if an incompatibility
-            is detected - default is True.
+        :param errors_are_fatal: (optional)
+            boolean indicating if ValueError should be raised if an incompatibility
+            is detected.
 
         :return:
-            - **okay** - boolean for whether or not supplied data matrix ``X``\
+            - **is_consistent** - boolean for whether or not supplied data matrix ``X``\
             is consistent with the PCA object.
         """
 
         (n_observations, n_variables) = np.shape(X)
 
+        # Save the currently set n_components to re-set it back later:
+        initial_n_components = self.n_components
+
+        # Set n_components to the number of variables in a currently supplied data set:
         self.n_components = n_variables
 
-        err = X - self.reconstruct(self.transform(X))
+        is_inconsistent = False
 
-        isBad = (np.max(np.abs(err), axis=0) / np.max(np.abs(X), axis=0) > 1e-10).any() or (
-            np.min(np.abs(err), axis=0) / np.min(np.abs(X), axis=0) > 1e-10).any()
+        try:
+            X_rec = self.reconstruct(self.transform(X))
+        except Exception:
+            is_inconsistent = True
 
-        if isBad and errorsAreFatal:
-            raise ValueError('it appears that the data is not consistent with the data used to construct the PCA')
+        # err = X - self.reconstruct(self.transform(X))
+        #
+        # isBad = (np.max(np.abs(err), axis=0) / np.max(np.abs(X), axis=0) > 1e-10).any() or (
+        #     np.min(np.abs(err), axis=0) / np.min(np.abs(X), axis=0) > 1e-10).any()
 
-        okay = not isBad
+        # Set n_components back to what it was at the start of this function:
+        self.n_components = initial_n_components
 
-        return okay
+        if is_inconsistent and errors_are_fatal:
+            raise ValueError('It appears that the data set supplied is not consistent with the data used to construct the PCA object.')
+
+        is_consistent = not is_inconsistent
+
+        return is_consistent
 
     def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10, verbose=False, save_filename=None):
         """
@@ -618,9 +638,13 @@ class PCA:
         """
 
         n_observations, nvar = X.shape
+
+        # Save the currently set n_components to re-set it back later:
+        initial_n_components = self.n_components
+
         r2 = np.zeros((n_pcs, nvar))
         r2vec = np.zeros((n_pcs, nvar + 1))
-        self.data_consistency_check(X)
+        self.data_consistency_check(X, errors_are_fatal=True)
 
         if len(variable_names) > 0:
             assert len(variable_names) == nvar, "Number of names given is not consistent with number of variables."
@@ -649,6 +673,9 @@ class PCA:
             for i, row in zip(neig, r2vec):
                 print(row_format.format(i, *row))
 
+        # Set n_components back to what it was at the start of this function:
+        self.n_components = initial_n_components
+
         return r2
 
     def principal_variables(self, method='B2', x=[]):
@@ -661,7 +688,7 @@ class PCA:
         contained in the eigenvectors corresponding to the largest\
         eigenvalues.
 
-        * ``'B2'`` - selects Principal Variables based on variables contained in the\
+        * ``'B2'`` - selects Principal Variables based on the variables contained in the\
         smallest eigenvalues. These are discarded and the remaining\
         variables are used as the PVs.
 
@@ -875,7 +902,7 @@ class PCA:
     #
     #     return r2, neta
 
-    def save_to_txt(self, filename):
+    def save_to_txt(self, save_filename):
         """
         This function writes the eigenvector matrix :math:`\mathbf{A}`,
         centering :math:`\mathbf{C}` and scaling :math:`\mathbf{D}`
@@ -897,31 +924,31 @@ class PCA:
             # Save the PCA results to .txt:
             pca_X.save_to_txt('pca_X_Data.txt')
 
-        :param filename:
+        :param save_filename:
             string specifying ``.txt`` save location/filename.
         """
 
-        fid = open(filename, 'w')
+        fid = open(save_filename, 'w')
         fid.write('%s\n' % "Eigenvectors:")
         fid.close()
 
-        with open(filename, 'ab') as fid:
+        with open(save_filename, 'ab') as fid:
             np.savetxt(fid, self.Q, delimiter=',', fmt='%6.12f')
         fid.close()
 
-        fid = open(filename, 'a')
+        fid = open(save_filename, 'a')
         fid.write('\n%s\n' % "Centering Factors:")
         fid.close()
 
-        with open(filename, 'ab') as fid:
+        with open(save_filename, 'ab') as fid:
             np.savetxt(fid, np.array([self.X_center]), delimiter=',', fmt='%6.12f')
         fid.close()
 
-        fid = open(filename, 'a')
+        fid = open(save_filename, 'a')
         fid.write('\n%s\n' % "Scaling Factors:")
         fid.close()
 
-        with open(filename, 'ab') as fid:
+        with open(save_filename, 'ab') as fid:
             np.savetxt(fid, np.array([self.X_scale]), delimiter=',', fmt='%6.12f')
         fid.close()
 
@@ -936,7 +963,7 @@ class PCA:
         percentage is exceeded. Fraction of variance can be supplied using the\
         ``option`` parameter. For instance, set ``option=0.6`` if you want to\
         account for 60% variance. If variance is not supplied in the ``option``\
-        paramter, the user will be asked to input it during function execution.
+        paramter, the user will be asked for input during function execution.
 
         * ``'INDIVIDUAL VARIANCE'`` - retain the PCs whose eigenvalues are\
         greater than the average of the eigenvalues :cite:`Kaiser1960` or than 0.7\
@@ -944,7 +971,7 @@ class PCA:
         matrix this average equals 1. Fraction of variance can be supplied using the\
         ``option`` parameter. For instance, set ``option=0.6`` if you want to\
         account for 60% variance. If variance is not supplied in the ``option``\
-        paramter, the user will be asked to input it during function execution.
+        paramter, the user will be asked for input during function execution.
 
         * ``'BROKEN STICK'`` - retain the PCs according to the *Broken Stick Model*.
 
@@ -1091,6 +1118,8 @@ class PCA:
             - **u_scores** - U-scores (Principal Components).
         """
 
+        self.data_consistency_check(X, errors_are_fatal=True)
+
         u_scores = self.transform(X)
 
         return(u_scores)
@@ -1134,6 +1163,8 @@ class PCA:
         :return:
             - **w_scores** - W-scores (scaled Principal Components).
         """
+
+        self.data_consistency_check(X, errors_are_fatal=True)
 
         eval = self.L[0:self.n_components]
 
