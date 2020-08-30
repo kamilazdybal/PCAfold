@@ -42,7 +42,7 @@ class PCA:
     | | If ``nocenter=False``: :math:`\mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                                                                             |
     | | If ``nocenter=True``: :math:`\mathbf{X_{cs}} = \mathbf{X} \cdot \mathbf{D}^{-1}`                                                                                             |
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
-    | Eigendec. of :math:`1/(N-1) \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}`                        | SVD: :math:`\mathbf{X_{cs}} = \mathbf{U} \mathbf{S} \mathbf{V}^{\mathbf{T}}`|
+    | Eigendecomposition of the covariance matrix :math:`\mathbf{R}`                                   | SVD: :math:`\mathbf{X_{cs}} = \mathbf{U} \mathbf{S} \mathbf{V}^{\mathbf{T}}`|
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
     | | **Modes:**                                                                                     | | **Modes:**                                                                |
     | | Eigenvectors :math:`\mathbf{A}`                                                                | | :math:`\mathbf{A} = \mathbf{V}`                                           |
@@ -50,6 +50,29 @@ class PCA:
     | | **Amplitudes:**                                                                                | | **Amplitudes:**                                                           |
     | | Eigenvalues :math:`\mathbf{L}`                                                                 | | :math:`\mathbf{L} = diag(\mathbf{S})`                                     |
     +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
+
+    *Note:* For simplicity, we will from now on refer to :math:`\mathbf{A}` as the
+    matrix of eigenvectors and to :math:`\mathbf{L}` as the vector of eigenvalues,
+    irrespective of the method used to perform PCA.
+
+    Covariance matrix is computed at the class initialization as:
+
+    .. math::
+
+        \mathbf{R} = \\frac{1}{N-1} \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}
+
+    where :math:`N` is the number of observations in the data set :math:`\mathbf{X}`.
+
+    Loadings matrix :math:`\mathbf{l}` is computed at the class initialization as well
+    such that element :math:`\mathbf{l}_{ij}` is the corresponding scaled element
+    of the eigenvectors matrix :math:`\mathbf{A}_{ij}`:
+
+    .. math::
+
+        \mathbf{l}_{ij} = \\frac{\mathbf{A}_{ij} \\sqrt{\mathbf{L}_j}}{\\sqrt{\mathbf{R}_{ii}}}
+
+    where :math:`\mathbf{L}_j` is the :math:`j^{th}` eigenvalue and :math:`\mathbf{R}_{ii}`
+    is the :math:`i^{th}` element on the diagonal of the covariance matrix :math:`\mathbf{R}`.
 
     **Example:**
 
@@ -70,7 +93,7 @@ class PCA:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param n_components: (optional)
-        number of retained Principal Components :math:`q`. If set to 0 all are retained.
+        number of retained Principal Components :math:`q`. If set to 0 all PCs are retained.
     :param use_eigendec: (optional)
         boolean specifying the method for obtaining eigenvalues and eigenvectors:
 
