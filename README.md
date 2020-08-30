@@ -93,6 +93,9 @@ python3.7 -m unittest discover
 
 To switch verbose on, use the `-v` flag.
 
+All tests should be passing. If any of the tests is failing and you can’t sort
+out why, please open an issue on [GitLab](https://gitlab.multiscale.utah.edu/common/PCAfold).
+
 ## Plotting
 
 Some functions within **PCAfold** result in plot outputs. Global styles for the
