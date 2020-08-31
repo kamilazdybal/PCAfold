@@ -554,6 +554,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
     where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
     storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
     :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
+    Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
     Since Mahalanobis distance takes into account covariance between variables,
     observations with sufficiently large :math:`D_M` can be considered as outliers.
     For more detailed information on Mahalanobis distance the user is referred
@@ -562,19 +563,19 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
     Two options are implemented here:
 
     - ``'MULTIVARIATE TRIMMING'`` - removes a fraction\
-    of observations with largest :math:`D_M`. Parameter ``trimming_threshold``\
-    can be supplied to specify what fraction to use. Specifically,\
-    :math:`i^{th}` observation are classified as outliers if:
+    of observations with largest :math:`D_M`. The threshold above which\
+    observations will be classified as outliers can be specified using\
+    ``trimming_threshold`` parameter. Specifically,\
+    :math:`i^{th}` observation is classified as outlier if:
 
     .. math::
 
         D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
 
     - ``'PC CLASSIFIER'`` - an iterative procedure that takes into account major\
-    and minor Principal Components.
-
-    The methods implemented here were first proposed in :cite:`Shyu2003`.
-    The application of outlier detection technique to combustion data sets
+    and minor Principal Components.\
+    The method of Principal Component classifier was first proposed in\
+    :cite:`Shyu2003`. The application of this technique to combustion data sets\
     was studied in :cite:`Parente2013`.
 
     **Example:**
