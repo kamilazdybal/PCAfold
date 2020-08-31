@@ -35,7 +35,7 @@ We first set ``trimming_fraction=0.6``:
 
   (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.6, n_iterations=0, verbose=True)
 
-With ``verbose=True`` we will see some detailed information on outliers detected:
+With ``verbose=True`` we will see some more information on outliers detected:
 
 .. code-block:: text
 
@@ -45,16 +45,17 @@ We can visualize the observations that were classified as outliers using the
 ``preprocess.plot_2d_clustering``, assuming that the cluster :math:`k_0` (blue) will be
 observations with removed outliers and cluster :math:`k_1` (red) will be the detected outliers.
 
-We first create a dummy ``idx`` vector of cluster classifications based on
+We first create a dummy ``idx_new`` vector of cluster classifications based on
 ``idx_outliers`` obtained. This can for instance be done in the following way:
 
 .. code:: python
 
-  n_observations = N + N_outliers
   idx_new = np.zeros((n_observations,))
   for i in range(0, n_observations):
     if i in idx_outliers:
         idx_new[i] = 1
+
+where ``n_observations`` is the total number of observations in the data set.
 
 The result of this detection can be seen below:
 
@@ -68,6 +69,8 @@ Mahalanobis distances from the variables' centroids).
 .. code:: python
 
   (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.3, n_iterations=0, verbose=True)
+
+With ``verbose=True`` we will see some more information on outliers detected:
 
 .. code-block:: text
 
