@@ -40,6 +40,7 @@ section for possible workflows that can be achieved with **PCAfold**.
    :maxdepth: 2
    :caption: Tutorials & Demos
 
+   tutorials/demo-data-manipulation
    tutorials/demo-clustering
    tutorials/demo-sampling
    tutorials/demo-plotting-pca
