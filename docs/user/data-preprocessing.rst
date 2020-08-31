@@ -46,6 +46,11 @@ Class ``PreProcessing``
 
 .. autofunction:: PCAfold.preprocess.analyze_centers_change
 
+``outlier_detection``
+======================
+
+.. autofunction:: PCAfold.preprocess.outlier_detection
+
 --------------------------------------------------------------------------------
 
 ***************

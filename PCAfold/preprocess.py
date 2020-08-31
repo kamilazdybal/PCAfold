@@ -539,6 +539,170 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     return(normalized_C, normalized_C_r, center_movement_percentage, plt)
 
+def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.5, n_iterations=1000, verbose=False):
+    """
+    This function finds outliers in a data set :math:`\mathbf{X}` and returns
+    indices of observations without outliers as well as indices of the outliers
+    themselves.
+
+    Outliers are found based on multivariate Mahalanobis distance :math:`D_M`:
+
+    .. math::
+
+        D_M = (\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})
+
+    where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
+    storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
+    Since Mahalanobis distance takes into account covariance between variables,
+    observations with sufficiently large :math:`D_M` can be considered as outliers.
+    For more detailed information on Mahalanobis distance the user is referred
+    to :cite:`Bishop2006`.
+
+    Two options are implemented here:
+
+    - ``'MULTIVARIATE TRIMMING'`` - removes a fraction\
+    of observations with largest :math:`D_M`. Parameter ``trimming_fraction``\
+    can be supplied to specify what fraction to use. Specifically,\
+    :math:`i^{th}` observation are classified as outliers if:
+
+    .. math::
+
+        D_{M, i} > \\verb|trimming_fraction| \\cdot max(D_M)
+
+    - ``'PC CLASSIFIER'`` - an iterative procedure that takes into account major\
+    and minor Principal Components.
+
+    The methods implemented here were first proposed in :cite:`Shyu2003`.
+    The application of outlier detection technique to combustion data sets
+    was studied in :cite:`Parente2013`.
+
+    **Example:**
+
+    .. code::
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Find outliers:
+        (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.8, n_iterations=0, verbose=True)
+
+    :param X:
+        original data set :math:`\mathbf{X}`.
+    :param scaling:
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
+    :param detection_method: (optional)
+        string specifying the outlier detection method to use. It should be
+        ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
+    :param trimming_fraction: (optional)
+        trimming fraction to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
+    :param n_iterations: (optional)
+        maximum number of iterations.
+    :param verbose: (optional)
+        boolean for printing outlier detection details.
+
+    :raises ValueError:
+        if ``scaling`` is not a string or is not consistent with scalings available in the ``preprocess.center_scale`` function.
+    :raises ValueError:
+        if ``detection_method`` is not ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
+    :raises ValueError:
+        if ``trimming_fraction`` is not between 0-1.
+    :raises ValueError:
+        if ``n_iterations`` is not an integer or is negative.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
+
+    :return:
+        - **idx_outliers_removed** - indices of observations without outliers.
+        - **idx_outliers** - indices of observations that were classified as outliers.
+    """
+
+    _detection_methods = ['MULTIVARIATE TRIMMING', 'PC CLASSIFIER']
+
+    from PCAfold import PCA
+
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be a string.")
+    else:
+        if scaling.lower() not in _scalings_list:
+            raise ValueError("Unrecognized scaling method.")
+
+    if not isinstance(detection_method, str):
+        raise ValueError("Parameter `detection_method` has to be a string.")
+    else:
+        if detection_method.upper() not in _detection_methods:
+            raise ValueError("Unrecognized outlier detection method.")
+
+    if trimming_fraction < 0 or trimming_fraction > 1:
+        raise ValueError("Parameter `trimming_fraction` has to be between 0 and 1.")
+
+    if not isinstance(n_iterations, int) or isinstance(n_iterations, bool) or n_iterations < 0:
+        raise ValueError("Parameter `n_iterations` has to be a non-negative integer.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    (n_observations, n_variables) = np.shape(X)
+
+    idx_full = np.arange(0, n_observations)
+    idx_outliers_removed = []
+    idx_outliers = []
+
+    pca_X = PCA(X, scaling=scaling, n_components=0)
+
+    if detection_method.upper() == 'MULTIVARIATE TRIMMING':
+
+        means_of_X = np.mean(X, axis=0)
+
+        covariance_matrix = pca_X.R
+
+        inverse_covariance_matrix = np.linalg.inv(covariance_matrix)
+
+        mahalanobis_distances = np.zeros((n_observations,))
+
+        for n_obs in range(0, n_observations):
+
+            mahalanobis_distance = np.sqrt(np.dot((X[n_obs,:] - means_of_X), np.dot(inverse_covariance_matrix, (X[n_obs,:] - means_of_X))))
+            mahalanobis_distances[n_obs,] = mahalanobis_distance
+
+        minimum_mahalanobis_distance = np.min(mahalanobis_distances)
+        maximum_mahalanobis_distance = np.max(mahalanobis_distances)
+
+        range_mahalanobis_distance = maximum_mahalanobis_distance - minimum_mahalanobis_distance
+
+        (idx_outliers, ) = np.where(mahalanobis_distances > trimming_fraction * maximum_mahalanobis_distance)
+
+        idx_outliers_removed = np.setdiff1d(idx_full, idx_outliers)
+
+        if verbose:
+            n_outliers = len(idx_outliers)
+            print('Number of observations classified as outliers: ' + str(n_outliers))
+
+    elif detection_method.upper() == 'PC CLASSIFIER':
+        pass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    idx_outliers_removed = np.sort(idx_outliers_removed.astype(int))
+    idx_outliers = np.sort(idx_outliers.astype(int))
+
+    return (idx_outliers_removed, idx_outliers)
+
 ################################################################################
 #
 # Data Sampling

@@ -767,3 +767,55 @@ class TestManipulation(unittest.TestCase):
             pp.idx_removed = 1
         with self.assertRaises(AttributeError):
             pp.idx_retained = 1
+
+    def test_outliers_detection_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+
+        try:
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.6)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.6)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.2)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.1)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_outliers_detection_not_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='scaling')
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', detection_method='method')
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', verbose=1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', verbose=0)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', trimming_fraction=-1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', trimming_fraction=1.1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', n_iterations=-1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', n_iterations=1.5)
