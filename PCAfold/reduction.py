@@ -298,15 +298,15 @@ class PCA:
             Set ``nocenter=True`` only if you know what you are doing.
 
             One example when ``nocenter`` should be set to ``True`` is
-            when transforming chemical source terms :math:`\mathbf{S}` to Principal Components space
+            when transforming chemical source terms :math:`\mathbf{S_X}` to Principal Components space
             (as per :cite:`Sutherland2009`)
             to obtain sources of Principal Components :math:`\mathbf{S_Z}`. In
-            that case :math:`\mathbf{X} = \mathbf{S}` and the transformation
+            that case :math:`\mathbf{X} = \mathbf{S_X}` and the transformation
             should be performed *without* centering:
 
             .. math::
 
-                \mathbf{S_{Z_q}} = \mathbf{S} \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
+                \mathbf{S_{Z_q}} = \mathbf{S_X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
 
         **Example:**
 
@@ -398,7 +398,7 @@ class PCA:
             Set ``nocenter=True`` only if you know what you are doing.
 
             One example when ``nocenter`` should be set to ``True`` is
-            when reconstructing chemical source terms :math:`\mathbf{S}`
+            when reconstructing chemical source terms :math:`\mathbf{S_X}`
             (as per :cite:`Sutherland2009`)
             from the :math:`q`-first sources of Principal Components :math:`\mathbf{S_{Z_q}}`. In
             that case :math:`\mathbf{Z_q} = \mathbf{S_{Z_q}}` and the reconstruction
@@ -406,7 +406,7 @@ class PCA:
 
             .. math::
 
-                \mathbf{S_{rec}} = \mathbf{S_{Z_q}} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D}
+                \mathbf{S_{X, rec}} = \mathbf{S_{Z_q}} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D}
 
         **Example:**
 
