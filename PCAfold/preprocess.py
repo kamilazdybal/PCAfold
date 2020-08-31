@@ -549,10 +549,11 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
     .. math::
 
-        D_M = (\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})
+        D_M = (\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{R}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})
 
     where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
     storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
+    :math:`\mathbf{R}` is the covariance matrix computed as per ``PCA`` class.
     Since Mahalanobis distance takes into account covariance between variables,
     observations with sufficiently large :math:`D_M` can be considered as outliers.
     For more detailed information on Mahalanobis distance the user is referred
@@ -585,6 +586,12 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
         # Find outliers:
         (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.8, n_iterations=0, verbose=True)
+
+        # New data set without outliers can be obtained as:
+        X_outliers_removed = X[idx_outliers_removed,:]
+
+        # Observations that were classified as outliers can be obtained as:
+        X_outliers = X[idx_outliers,:]
 
     :param X:
         original data set :math:`\mathbf{X}`.
