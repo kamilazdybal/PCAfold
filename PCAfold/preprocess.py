@@ -581,11 +581,13 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
     .. code::
 
+        from PCAfold import outlier_detection
+
         # Generate dummy data set:
         X = np.random.rand(100,20)
 
         # Find outliers:
-        (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.8, n_iterations=0, verbose=True)
+        (idx_outliers_removed, idx_outliers) = outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.8, n_iterations=0, verbose=True)
 
         # New data set without outliers can be obtained as:
         X_outliers_removed = X[idx_outliers_removed,:]
