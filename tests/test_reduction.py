@@ -89,7 +89,7 @@ class TestReduction(unittest.TestCase):
         with self.assertRaises(AttributeError):
             pca.X_scale = 1
         with self.assertRaises(AttributeError):
-            pca.R = 1
+            pca.S = 1
         with self.assertRaises(AttributeError):
             pca.Q = 1
         with self.assertRaises(AttributeError):
@@ -113,7 +113,7 @@ class TestReduction(unittest.TestCase):
             pca.X_cs
             pca.X_center
             pca.X_scale
-            pca.R
+            pca.S
             pca.Q
             pca.L
             pca.loadings

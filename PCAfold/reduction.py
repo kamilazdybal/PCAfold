@@ -34,22 +34,22 @@ class PCA:
 
     Two options for performing PCA are implemented:
 
-    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
-    | | Eigendecomposition of the covariance matrix                                                    | | Singular Value Decomposition (SVD)                                        |
-    | | Set ``use_eigendec=True`` (default)                                                            | | Set ``use_eigendec=False``                                                |
-    +==================================================================================================+=============================================================================+
-    | | **Centering and scaling** (as per ``preprocess.center_scale`` function):                                                                                                     |
-    | | If ``nocenter=False``: :math:`\mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                                                                             |
-    | | If ``nocenter=True``: :math:`\mathbf{X_{cs}} = \mathbf{X} \cdot \mathbf{D}^{-1}`                                                                                             |
-    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
-    | Eigendecomposition of the covariance matrix :math:`\mathbf{R}`                                   | SVD: :math:`\mathbf{X_{cs}} = \mathbf{U} \mathbf{S} \mathbf{V}^{\mathbf{T}}`|
-    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
-    | | **Modes:**                                                                                     | | **Modes:**                                                                |
-    | | Eigenvectors :math:`\mathbf{A}`                                                                | | :math:`\mathbf{A} = \mathbf{V}`                                           |
-    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
-    | | **Amplitudes:**                                                                                | | **Amplitudes:**                                                           |
-    | | Eigenvalues :math:`\mathbf{L}`                                                                 | | :math:`\mathbf{L} = diag(\mathbf{S})`                                     |
-    +--------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------+
+    +--------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+    | | Eigendecomposition of the covariance matrix                                                    | | Singular Value Decomposition (SVD)                                             |
+    | | Set ``use_eigendec=True`` (default)                                                            | | Set ``use_eigendec=False``                                                     |
+    +==================================================================================================+==================================================================================+
+    | | **Centering and scaling** (as per ``preprocess.center_scale`` function):                                                                                                          |
+    | | If ``nocenter=False``: :math:`\mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1}`                                                                                  |
+    | | If ``nocenter=True``: :math:`\mathbf{X_{cs}} = \mathbf{X} \cdot \mathbf{D}^{-1}`                                                                                                  |
+    +--------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+    | Eigendecomposition of the covariance matrix :math:`\mathbf{S}`                                   | SVD: :math:`\mathbf{X_{cs}} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^{\mathbf{T}}`|
+    +--------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+    | | **Modes:**                                                                                     | | **Modes:**                                                                     |
+    | | Eigenvectors :math:`\mathbf{A}`                                                                | | :math:`\mathbf{A} = \mathbf{V}`                                                |
+    +--------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
+    | | **Amplitudes:**                                                                                | | **Amplitudes:**                                                                |
+    | | Eigenvalues :math:`\mathbf{L}`                                                                 | | :math:`\mathbf{L} = diag(\mathbf{\Sigma})`                                     |
+    +--------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+
 
     *Note:* For simplicity, we will from now on refer to :math:`\mathbf{A}` as the
     matrix of eigenvectors and to :math:`\mathbf{L}` as the vector of eigenvalues,
@@ -59,7 +59,7 @@ class PCA:
 
     .. math::
 
-        \mathbf{R} = \\frac{1}{N-1} \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}
+        \mathbf{S} = \\frac{1}{N-1} \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}
 
     where :math:`N` is the number of observations in the data set :math:`\mathbf{X}`.
 
@@ -69,10 +69,10 @@ class PCA:
 
     .. math::
 
-        \mathbf{l}_{ij} = \\frac{\mathbf{A}_{ij} \\sqrt{\mathbf{L}_j}}{\\sqrt{\mathbf{R}_{ii}}}
+        \mathbf{l}_{ij} = \\frac{\mathbf{A}_{ij} \\sqrt{\mathbf{L}_j}}{\\sqrt{\mathbf{S}_{ii}}}
 
-    where :math:`\mathbf{L}_j` is the :math:`j^{th}` eigenvalue and :math:`\mathbf{R}_{ii}`
-    is the :math:`i^{th}` element on the diagonal of the covariance matrix :math:`\mathbf{R}`.
+    where :math:`\mathbf{L}_j` is the :math:`j^{th}` eigenvalue and :math:`\mathbf{S}_{ii}`
+    is the :math:`i^{th}` element on the diagonal of the covariance matrix :math:`\mathbf{S}`.
 
     **Example:**
 
@@ -128,10 +128,10 @@ class PCA:
         - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
         - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
         - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
-        - **R** - (read only) covariance matrix.
+        - **S** - (read only) covariance matrix :math:`\mathbf{S}`.
         - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
         - **Q** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
-        - **loadings** - (read only) loadings (vectors are stored in columns, rows correspond to weights).
+        - **loadings** - (read only) loadings :math:`\mathbf{l}` (vectors are stored in columns, rows correspond to weights).
     """
 
     def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -180,11 +180,11 @@ class PCA:
         self.__X_cs, self.__X_center, self.__X_scale = preprocess.center_scale(X, self.scaling, nocenter)
 
         # Compute covariance matrix:
-        self.__R = np.dot(self.X_cs.transpose(), self.X_cs) / (n_observations-1)
+        self.__S = np.dot(self.X_cs.transpose(), self.X_cs) / (n_observations-1)
 
         # Perform PCA with eigendecomposition of the covariance matrix:
         if use_eigendec:
-            L, Q = np.linalg.eigh(self.R)
+            L, Q = np.linalg.eigh(self.S)
             L = L / np.sum(L)
 
         # Perform PCA with Singular Value Decomposition:
@@ -208,7 +208,7 @@ class PCA:
 
         for i in range(self.n_components):
             for j in range(self.n_variables):
-                loadings_matrix[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.R[j, j])
+                loadings_matrix[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.S[j, j])
 
         self.__loadings = loadings_matrix
 
@@ -241,8 +241,8 @@ class PCA:
         return self.__X_scale
 
     @property
-    def R(self):
-        return self.__R
+    def S(self):
+        return self.__S
 
     @property
     def Q(self):
@@ -1203,7 +1203,7 @@ class PCA:
         scalErr = np.abs(a.X_scale - b.X_scale) / np.max(np.abs(a.X_scale))
         centErr = np.abs(a.X_center - b.X_center) / np.max(np.abs(a.X_center))
 
-        RErr = np.abs(a.R - b.R) / np.max(np.abs(a.R))
+        RErr = np.abs(a.S - b.S) / np.max(np.abs(a.S))
         LErr = np.abs(a.L - b.L) / np.max(np.abs(a.L))
         QErr = np.abs(a.Q - b.Q) / np.max(np.abs(a.Q))
 

@@ -549,11 +549,11 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
     .. math::
 
-        D_M = (\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{R}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})
+        D_M = (\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})
 
     where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
     storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
-    :math:`\mathbf{R}` is the covariance matrix computed as per ``PCA`` class.
+    :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
     Since Mahalanobis distance takes into account covariance between variables,
     observations with sufficiently large :math:`D_M` can be considered as outliers.
     For more detailed information on Mahalanobis distance the user is referred
@@ -663,7 +663,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
         means_of_X = np.mean(X, axis=0)
 
-        covariance_matrix = pca_X.R
+        covariance_matrix = pca_X.S
 
         inverse_covariance_matrix = np.linalg.inv(covariance_matrix)
 
