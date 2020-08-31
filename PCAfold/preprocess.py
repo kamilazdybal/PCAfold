@@ -539,7 +539,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     return(normalized_C, normalized_C_r, center_movement_percentage, plt)
 
-def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.5, n_iterations=1000, verbose=False):
+def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, n_iterations=1000, verbose=False):
     """
     This function finds outliers in a data set :math:`\mathbf{X}` and returns
     indices of observations without outliers as well as indices of the outliers
@@ -562,13 +562,13 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
     Two options are implemented here:
 
     - ``'MULTIVARIATE TRIMMING'`` - removes a fraction\
-    of observations with largest :math:`D_M`. Parameter ``trimming_fraction``\
+    of observations with largest :math:`D_M`. Parameter ``trimming_threshold``\
     can be supplied to specify what fraction to use. Specifically,\
     :math:`i^{th}` observation are classified as outliers if:
 
     .. math::
 
-        D_{M, i} > \\verb|trimming_fraction| \\cdot max(D_M)
+        D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
 
     - ``'PC CLASSIFIER'`` - an iterative procedure that takes into account major\
     and minor Principal Components.
@@ -587,7 +587,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
         X = np.random.rand(100,20)
 
         # Find outliers:
-        (idx_outliers_removed, idx_outliers) = outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.8, n_iterations=0, verbose=True)
+        (idx_outliers_removed, idx_outliers) = outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_threshold=0.8, n_iterations=0, verbose=True)
 
         # New data set without outliers can be obtained as:
         X_outliers_removed = X[idx_outliers_removed,:]
@@ -603,7 +603,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
     :param detection_method: (optional)
         string specifying the outlier detection method to use. It should be
         ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
-    :param trimming_fraction: (optional)
+    :param trimming_threshold: (optional)
         trimming fraction to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
     :param n_iterations: (optional)
         maximum number of iterations.
@@ -615,7 +615,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
     :raises ValueError:
         if ``detection_method`` is not ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
     :raises ValueError:
-        if ``trimming_fraction`` is not between 0-1.
+        if ``trimming_threshold`` is not between 0-1.
     :raises ValueError:
         if ``n_iterations`` is not an integer or is negative.
     :raises ValueError:
@@ -642,8 +642,8 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
         if detection_method.upper() not in _detection_methods:
             raise ValueError("Unrecognized outlier detection method.")
 
-    if trimming_fraction < 0 or trimming_fraction > 1:
-        raise ValueError("Parameter `trimming_fraction` has to be between 0 and 1.")
+    if trimming_threshold < 0 or trimming_threshold > 1:
+        raise ValueError("Parameter `trimming_threshold` has to be between 0 and 1.")
 
     if not isinstance(n_iterations, int) or isinstance(n_iterations, bool) or n_iterations < 0:
         raise ValueError("Parameter `n_iterations` has to be a non-negative integer.")
@@ -679,7 +679,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
         range_mahalanobis_distance = maximum_mahalanobis_distance - minimum_mahalanobis_distance
 
-        (idx_outliers, ) = np.where(mahalanobis_distances > trimming_fraction * maximum_mahalanobis_distance)
+        (idx_outliers, ) = np.where(mahalanobis_distances > trimming_threshold * maximum_mahalanobis_distance)
 
         idx_outliers_removed = np.setdiff1d(idx_full, idx_outliers)
 

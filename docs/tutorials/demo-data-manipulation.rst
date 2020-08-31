@@ -27,13 +27,13 @@ This data set, with outliers visible as a cloud in the top right corner, can be 
   :align: center
 
 We will first detect outliers with ``'MULTIVARIATE TRIMMING'`` method and we
-will demonstrate the effect of setting two levels of ``trimming_fraction``.
+will demonstrate the effect of setting two levels of ``trimming_threshold``.
 
-We first set ``trimming_fraction=0.6``:
+We first set ``trimming_threshold=0.6``:
 
 .. code:: python
 
-  (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.6, n_iterations=0, verbose=True)
+  (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_threshold=0.6, n_iterations=0, verbose=True)
 
 With ``verbose=True`` we will see some more information on outliers detected:
 
@@ -63,12 +63,12 @@ The result of this detection can be seen below:
   :width: 350
   :align: center
 
-We then set the ``trimming_fraction=0.3`` which will capture outliers earlier (at smaller
+We then set the ``trimming_threshold=0.3`` which will capture outliers earlier (at smaller
 Mahalanobis distances from the variables' centroids).
 
 .. code:: python
 
-  (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_fraction=0.3, n_iterations=0, verbose=True)
+  (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_threshold=0.3, n_iterations=0, verbose=True)
 
 With ``verbose=True`` we will see some more information on outliers detected:
 
