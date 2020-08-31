@@ -549,7 +549,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
     .. math::
 
-        D_M = (\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})
+        D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
 
     where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
     storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
