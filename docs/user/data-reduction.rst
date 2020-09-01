@@ -72,26 +72,29 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.save_to_txt
 
-Functions for performing PCA on sampled data sets
-=================================================
+--------------------------------------------------------------------------------
+
+********************************************************
+PCA on sampled data sets
+********************************************************
 
 ``pca_on_sampled_data_set``
----------------------------
+===========================
 
 .. autofunction:: PCAfold.reduction.pca_on_sampled_data_set
 
 ``analyze_eigenvector_weights_change``
-----------------------------------------
+======================================
 
 .. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_change
 
 ``analyze_eigenvalue_distribution``
------------------------------------
+===================================
 
 .. autofunction:: PCAfold.reduction.analyze_eigenvalue_distribution
 
 ``equilibrate_cluster_populations``
------------------------------------
+===================================
 
 .. autofunction:: PCAfold.reduction.equilibrate_cluster_populations
 
