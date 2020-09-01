@@ -32,6 +32,8 @@ class PCA:
     This class enables performing Principal Component Analysis (PCA)
     of the original data set :math:`\mathbf{X}`.
 
+    For more detailed information on PCA the user is referred to :cite:`Jolliffe2002`.
+
     Two options for performing PCA are implemented:
 
     +--------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+

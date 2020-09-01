@@ -5,7 +5,7 @@ Data reduction
 ##############
 
 ``reduction`` module contains functions for performing Principal Component
-Analysis :cite:`Jolliffe2002`.
+Analysis (PCA).
 
 --------------------------------------------------------------------------------
 
