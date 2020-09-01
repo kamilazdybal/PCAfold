@@ -13,16 +13,66 @@ In this tutorial we present data manipulation functionalities of the ``preproces
 
 --------------------------------------------------------------------------------
 
-******************************
-Centering and scaling
-******************************
+************************************************
+Centering, scaling and constant variable removal
+************************************************
 
+We begin by generating a dummy data set:
 
+.. code:: python
 
+  import numpy as np
 
+  # Generate dummy data set:
+  X = np.random.rand(100,20)
 
+Several popular scaling options have been implemented such as Auto (std), Range,
+VAST or Pareto. Centering and scaling of data sets can be performed using
+``preprocess.center_scale`` function:
 
+.. code:: python
 
+  (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'range', nocenter=False)
+
+To invert the centering and scaling using the current centers and scales
+``preprocess.invert_center_scale`` function can be used:
+
+.. code:: python
+
+  X = invert_center_scale(X_cs, X_center, X_scale)
+
+If constant variables are present in the data set, they can be removed using
+``preprocess.remove_constant_vars`` function. If an artificial constant column is injected:
+
+.. code:: python
+
+  X[:,5] = np.ones((100,))
+
+it can be removed:
+
+.. code:: python
+
+  (X_removed, idx_removed, idx_retained) = remove_constant_vars(X)
+
+In addition to that, class ``PreProcessing`` can be used to store the combination
+of the above pre-processing.
+
+.. code:: python
+
+  preprocessed = PreProcessing(X, 'range', nocenter=False)
+
+Centered and scaled data set can then be accessed as class attribute:
+
+.. code:: python
+
+  preprocessed.X_cs
+
+as well as centers and scales:
+
+.. code:: python
+
+  preprocessed.X_center
+  preprocessed.X_scale
 
 --------------------------------------------------------------------------------
 
@@ -102,4 +152,6 @@ the original data set.
 Kernel density weighting
 ******************************
 
+In this tutorial we reproduce results from the following paper:
 
+Coussement, A., Gicquel, O., & Parente, A. (2012). Kernel density weighted principal component analysis of combustion processes. Combustion and flame, 159(9), 2844-2855.

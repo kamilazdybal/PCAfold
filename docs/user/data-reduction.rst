@@ -235,8 +235,13 @@ Plotting functions
 
 .. autofunction:: PCAfold.reduction.plot_eigenvalue_distribution
 
+``plot_eigenvalue_distribution_comparison``
+===========================================
+
+.. autofunction:: PCAfold.reduction.plot_eigenvalue_distribution_comparison
+
 ``plot_cumulative_variance``
-================================
+============================
 
 .. autofunction:: PCAfold.reduction.plot_cumulative_variance
 

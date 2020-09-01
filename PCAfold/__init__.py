@@ -32,6 +32,7 @@ from .reduction import plot_2d_manifold
 from .reduction import plot_eigenvectors
 from .reduction import plot_eigenvectors_comparison
 from .reduction import plot_eigenvalue_distribution
+from .reduction import plot_eigenvalue_distribution_comparison
 from .reduction import plot_cumulative_variance
 
 # Module: `analysis`
