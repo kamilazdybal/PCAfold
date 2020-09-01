@@ -23,7 +23,6 @@ We begin by generating a dummy data set:
 
   import numpy as np
 
-  # Generate dummy data set:
   X = np.random.rand(100,20)
 
 Several popular scaling options have been implemented such as Auto (std), Range,
@@ -39,27 +38,28 @@ To invert the centering and scaling using the current centers and scales
 
 .. code:: python
 
-  X = invert_center_scale(X_cs, X_center, X_scale)
+  X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
 
 If constant variables are present in the data set, they can be removed using
-``preprocess.remove_constant_vars`` function. If an artificial constant column is injected:
+``preprocess.remove_constant_vars`` function which can be a useful pre-processing
+before PCA is applied on a data set. If an artificial constant column is injected:
 
 .. code:: python
 
   X[:,5] = np.ones((100,))
 
-it can be removed:
+it can be removed by:
 
 .. code:: python
 
-  (X_removed, idx_removed, idx_retained) = remove_constant_vars(X)
+  (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X)
 
-In addition to that, class ``PreProcessing`` can be used to store the combination
-of the above pre-processing.
+In addition to that, an object of the ``PreProcessing`` class can be created and
+used to store the combination of the above pre-processing:
 
 .. code:: python
 
-  preprocessed = PreProcessing(X, 'range', nocenter=False)
+  preprocessed = preprocess.PreProcessing(X, 'range', nocenter=False)
 
 Centered and scaled data set can then be accessed as class attribute:
 
@@ -148,9 +148,9 @@ the original data set.
 
 --------------------------------------------------------------------------------
 
-******************************
+************************
 Kernel density weighting
-******************************
+************************
 
 In this tutorial we reproduce results from the following paper:
 
