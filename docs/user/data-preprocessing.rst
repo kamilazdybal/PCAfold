@@ -134,6 +134,8 @@ Apart from random splitting that can be achieved with the commonly used
 `sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_,
 extended methods are implemented here that allow for purposive sampling :cite:`Neyman1992`,
 such as drawing samples at certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
+These functionalities can be specifically used to tackle *imbalanced data sets*
+:cite:`He2009`, :cite:`Rastgoo2016`.
 
 The general idea is to divide the entire data set ``X`` (or its portion) into train and test samples as presented below:
 
