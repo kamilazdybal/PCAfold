@@ -2,16 +2,27 @@
           accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/regression/docs/tutorials/demo-data-manipulation.ipynb>`_.
 
 #################
-Data manipulation
+Preprocessing
 #################
 
-In this tutorial we present data manipulation functionalities of the ``preprocess`` module.
-
-To import the module:
+In this tutorial we present data manipulation functionalities of the ``preprocess`` module. To import the module:
 
 .. code:: python
 
   from PCAfold import preprocess
+
+--------------------------------------------------------------------------------
+
+******************************
+Centering and scaling
+******************************
+
+
+
+
+
+
+
 
 --------------------------------------------------------------------------------
 
@@ -84,3 +95,11 @@ The result of this detection can be seen below:
 
 It can be seen that the algorithm started to pick up outlier observations at the perimeter of
 the original data set.
+
+--------------------------------------------------------------------------------
+
+******************************
+Kernel density weighting
+******************************
+
+
