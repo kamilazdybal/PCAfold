@@ -701,14 +701,14 @@ class PCA:
 
         * ``'B4'`` - selects Principal Variables based on the variables\
         contained in the eigenvectors corresponding to the largest\
-        eigenvalues.
+        eigenvalues :cite:`Jolliffe1972`.
 
         * ``'B2'`` - selects Principal Variables based on the variables contained in the\
         smallest eigenvalues. These are discarded and the remaining\
-        variables are used as the PVs.
+        variables are used as the PVs :cite:`Jolliffe1972`.
 
         * ``'M2'`` - at each iteration, each remaining variable is analyzed\
-        via PCA. *Note:* this is a very expensive method.
+        via PCA :cite:`Krzanowski1987`. *Note:* this is a very expensive method.
 
         For more detailed information on the options implemented here the user
         is referred to :cite:`Jolliffe2002`.
@@ -982,13 +982,13 @@ class PCA:
 
         * ``'INDIVIDUAL VARIANCE'`` - retain the PCs whose eigenvalues are\
         greater than the average of the eigenvalues :cite:`Kaiser1960` or than 0.7\
-        times the average of the eigenvalues :cite:`Jolliffe2002`. For a correlation\
+        times the average of the eigenvalues :cite:`Jolliffe1972`. For a correlation\
         matrix this average equals 1. Fraction of variance can be supplied using the\
         ``option`` parameter. For instance, set ``option=0.6`` if you want to\
         account for 60% variance. If variance is not supplied in the ``option``\
         paramter, the user will be asked for input during function execution.
 
-        * ``'BROKEN STICK'`` - retain the PCs according to the *Broken Stick Model*.
+        * ``'BROKEN STICK'`` - retain the PCs according to the *Broken Stick Model* :cite:`Frontier1976`.
 
         * ``'SCREE GRAPH'`` - retain the PCs using the scree graph, a plot of the eigenvalues\
         agaist their indexes, and look for a natural break between the large\
