@@ -539,44 +539,67 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     return(normalized_C, normalized_C_r, center_movement_percentage, plt)
 
-def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, n_iterations=1000, verbose=False):
+def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
     """
     This function finds outliers in a data set :math:`\mathbf{X}` and returns
     indices of observations without outliers as well as indices of the outliers
     themselves.
 
-    Outliers are found based on multivariate Mahalanobis distance :math:`D_M`:
-
-    .. math::
-
-        D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
-
-    where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
-    storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
-    :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
-    Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
-    Since Mahalanobis distance takes into account covariance between variables,
-    observations with sufficiently large :math:`D_M` can be considered as outliers.
-    For more detailed information on Mahalanobis distance the user is referred
-    to :cite:`Bishop2006`.
-
     Two options are implemented here:
 
-    - ``'MULTIVARIATE TRIMMING'`` - removes a fraction\
-    of observations with largest :math:`D_M`. The threshold above which\
-    observations will be classified as outliers can be specified using\
-    ``trimming_threshold`` parameter. Specifically,\
-    :math:`i^{th}` observation is classified as outlier if:
+    - ``'MULTIVARIATE TRIMMING'``
 
-    .. math::
+        Outliers are detected based on multivariate Mahalanobis distance :math:`D_M`:
 
-        D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
+        .. math::
 
-    - ``'PC CLASSIFIER'`` - an iterative procedure that takes into account major\
-    and minor Principal Components.\
-    The method of Principal Component classifier was first proposed in\
-    :cite:`Shyu2003`. The application of this technique to combustion data sets\
-    was studied in :cite:`Parente2013`.
+            D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
+
+        where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
+        storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
+        :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
+        Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
+        Since Mahalanobis distance takes into account covariance between variables,
+        observations with sufficiently large :math:`D_M` can be considered as outliers.
+        For more detailed information on Mahalanobis distance the user is referred
+        to :cite:`Bishop2006`.
+
+        The threshold above which observations will be classified as outliers
+        can be specified using ``trimming_threshold`` parameter. Specifically,
+        the :math:`i^{th}` observation is classified as an outlier if:
+
+        .. math::
+
+            D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
+
+    - ``'PC CLASSIFIER'``
+
+        Outliers are detected based on major and minor Principal Components (PCs).
+        The method of Principal Component classifier (PCC) was first proposed in
+        :cite:`Shyu2003`. The application of this technique to combustion data sets
+        was studied in :cite:`Parente2013`. Specifically,
+        the :math:`i^{th}` observation is classified as an outlier
+        if the *first PC classifier* based on :math:`q`-first (major) PCs:
+
+        .. math::
+
+            \sum_{j=1}^{q} \\frac{z_{ij}^2}{L_j} > c_1
+
+        or if the *second PC classifier* based on :math:`(Q-k+1)`-last (minor) PCs:
+
+        .. math::
+
+            \sum_{j=k}^{Q} \\frac{z_{ij}^2}{L_j} > c_2
+
+        where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the Principal
+        Components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
+        eigenvalue from :math:`\mathbf{L}` (as per ``PCA`` class).
+        Major PCs are selected such that the total variance explained is 50%.
+        Minor PCs are selected such that the remaining variance they explain is 20%.
+
+        Coefficients :math:`c_1` and :math:`c_2` are found such that they
+        represent the ``quantile_threshold`` (by default 98.99%) quantile of the
+        empirical distributions of the first and second PC classifier respectively.
 
     **Example:**
 
@@ -588,7 +611,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
         X = np.random.rand(100,20)
 
         # Find outliers:
-        (idx_outliers_removed, idx_outliers) = outlier_detection(X, scaling='auto', detection_method='MULTIVARIATE TRIMMING', trimming_threshold=0.8, n_iterations=0, verbose=True)
+        (idx_outliers_removed, idx_outliers) = outlier_detection(X, scaling='auto', method='MULTIVARIATE TRIMMING', trimming_threshold=0.8, n_iterations=0, verbose=True)
 
         # New data set without outliers can be obtained as:
         X_outliers_removed = X[idx_outliers_removed,:]
@@ -601,24 +624,24 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
     :param scaling:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
-    :param detection_method: (optional)
+    :param method: (optional)
         string specifying the outlier detection method to use. It should be
         ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
     :param trimming_threshold: (optional)
-        trimming fraction to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
-    :param n_iterations: (optional)
-        maximum number of iterations.
+        trimming threshold to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
+    :param quantile_threshold: (optional)
+        quantile threshold to use in combination with ``'PC CLASSIFIER'`` method.
     :param verbose: (optional)
         boolean for printing outlier detection details.
 
     :raises ValueError:
         if ``scaling`` is not a string or is not consistent with scalings available in the ``preprocess.center_scale`` function.
     :raises ValueError:
-        if ``detection_method`` is not ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
+        if ``method`` is not ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
     :raises ValueError:
         if ``trimming_threshold`` is not between 0-1.
     :raises ValueError:
-        if ``n_iterations`` is not an integer or is negative.
+        if ``quantile_threshold`` is not between 0-1.
     :raises ValueError:
         if ``verbose`` is not a boolean.
 
@@ -637,17 +660,14 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
         if scaling.lower() not in _scalings_list:
             raise ValueError("Unrecognized scaling method.")
 
-    if not isinstance(detection_method, str):
-        raise ValueError("Parameter `detection_method` has to be a string.")
+    if not isinstance(method, str):
+        raise ValueError("Parameter `method` has to be a string.")
     else:
-        if detection_method.upper() not in _detection_methods:
+        if method.upper() not in _detection_methods:
             raise ValueError("Unrecognized outlier detection method.")
 
     if trimming_threshold < 0 or trimming_threshold > 1:
         raise ValueError("Parameter `trimming_threshold` has to be between 0 and 1.")
-
-    if not isinstance(n_iterations, int) or isinstance(n_iterations, bool) or n_iterations < 0:
-        raise ValueError("Parameter `n_iterations` has to be a non-negative integer.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
@@ -660,7 +680,7 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
 
     pca_X = PCA(X, scaling=scaling, n_components=0)
 
-    if detection_method.upper() == 'MULTIVARIATE TRIMMING':
+    if method.upper() == 'MULTIVARIATE TRIMMING':
 
         means_of_X = np.mean(X, axis=0)
 
@@ -688,25 +708,49 @@ def outlier_detection(X, scaling, detection_method='MULTIVARIATE TRIMMING', trim
             n_outliers = len(idx_outliers)
             print('Number of observations classified as outliers: ' + str(n_outliers))
 
-    elif detection_method.upper() == 'PC CLASSIFIER':
-        pass
+    elif method.upper() == 'PC CLASSIFIER':
 
+        principal_components = pca_X.transform(X)
+        eigenvalues = pca_X.L
+        n_components = pca_X.n_components
 
+        # Select major components based on 50% of the original data variance:
+        pca_major = pca_X.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.5)
+        n_major_components = pca_major.n_components
 
+        # Select minor components based on 20% of the total variance in the data:
+        pca_minor = pca_X.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.8)
+        n_minor_components = pca_minor.n_components
 
+        if verbose:
+            print("Major components that will be selected are: " + ', '.join([str(i) for i in range(1, n_major_components+1)]))
 
+        if verbose:
+            print("Minor components that will be selected are: " + ', '.join([str(i) for i in range(n_minor_components, n_components+1)]))
 
+        scaled_squared_PCs = np.divide(np.square(principal_components), eigenvalues)
 
+        distances_major = np.sum(scaled_squared_PCs[:,0:n_major_components], axis=1)
+        distances_minor = np.sum(scaled_squared_PCs[:,(n_minor_components-1):n_components], axis=1)
 
+        # Threshold coefficient c_1 (for major PCs):
+        threshold_coefficient_major = np.quantile(distances_major, quantile_threshold)
 
+        # Threshold coefficient c_2 (for minor PCs):
+        threshold_coefficient_minor = np.quantile(distances_minor, quantile_threshold)
 
+        (idx_outliers_major, ) = np.where((distances_major > threshold_coefficient_major))
+        (idx_outliers_minor, ) = np.where((distances_minor > threshold_coefficient_minor))
 
+        idx_outliers = np.vstack((idx_outliers_major[:,np.newaxis], idx_outliers_minor[:,np.newaxis]))
 
+        idx_outliers = np.unique(idx_outliers)
 
+        idx_outliers_removed = np.setdiff1d(idx_full, idx_outliers)
 
-
-
-
+        if verbose:
+            n_outliers = len(idx_outliers)
+            print('Number of observations classified as outliers: ' + str(n_outliers))
 
     idx_outliers_removed = np.sort(idx_outliers_removed.astype(int))
     idx_outliers = np.sort(idx_outliers.astype(int))
