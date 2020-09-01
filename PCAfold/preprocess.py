@@ -1840,7 +1840,9 @@ def predefined_variable_bins(var, split_values, verbose=False):
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
     This function does clustering by dividing a mixture fraction vector
-    ``Z`` into bins of equal lengths. The vector is first split to lean and rich
+    ``Z`` into bins of equal lengths. This technique can be used to partition
+    combustion data sets as proposed in :cite:`Parente2009`.
+    The vector is first split to lean and rich
     side (according to the stoichiometric mixture fraction ``Z_stoich``) and
     then the sides get divided further into clusters. When ``k`` is even,
     this function will always create equal number of clusters on the lean and
@@ -1972,6 +1974,15 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     This is to assure that there are at least four clusters: with negative
     values, with negative values close to zero, with positive values close to
     zero and with positive values.
+
+    .. note::
+
+        This clustering technique is well suited for partitioning chemical
+        source terms :math:`\mathbf{S_X}` or sources of Principal Components
+        :math:`\mathbf{S_Z}` (as per :cite:`Sutherland2009`) since it relies on
+        unbalanced vectors that have many observations numerically close to zero.
+        Using ``split_at_zero=True`` it can further differentiate between
+        negative and positive sources which have different physical effect.
 
     **Example:**
 
