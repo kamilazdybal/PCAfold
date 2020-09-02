@@ -564,7 +564,7 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
         Since Mahalanobis distance takes into account covariance between variables,
         observations with sufficiently large :math:`D_M` can be considered as outliers.
         For more detailed information on Mahalanobis distance the user is referred
-        to :cite:`Bishop2006`.
+        to :cite:`Bishop2006` or :cite:`DeMaesschalck2000`.
 
         The threshold above which observations will be classified as outliers
         can be specified using ``trimming_threshold`` parameter. Specifically,
