@@ -228,6 +228,11 @@ Plotting functions
 
 .. autofunction:: PCAfold.reduction.plot_2d_manifold
 
+``plot_parity``
+===============
+
+.. autofunction:: PCAfold.reduction.plot_parity
+
 ``plot_eigenvectors``
 =====================
 

@@ -152,6 +152,163 @@ the original data set.
 Kernel density weighting
 ************************
 
-In this tutorial we reproduce results from the following paper:
+In this tutorial we reproduce results on a synthetic data set from the following paper:
 
-Coussement, A., Gicquel, O., & Parente, A. (2012). Kernel density weighted principal component analysis of combustion processes. Combustion and flame, 159(9), 2844-2855.
+*Coussement, A., Gicquel, O., & Parente, A. (2012). Kernel density weighted principal component analysis of combustion processes. Combustion and flame, 159(9), 2844-2855.*
+
+We begin by generating the synthetic data set that has two distinct clouds with many
+observations and an intermediate region with few observations:
+
+.. code:: python
+
+  from PCAfold import KernelDensity
+  from PCAfold import PCA
+  from PCAfold import reduction
+  import numpy as np
+  import random
+
+  n_observations = 2021
+  x1 = np.zeros((n_observations,1))
+  x2 = np.zeros((n_observations,1))
+
+  for i in range(0,n_observations):
+
+    R = random.random()
+
+    if i <= 999:
+
+        x1[i] = -1 + 20*R
+        x2[i] = 5*x1[i] + 100*R
+
+    if i >= 1000 and i <= 1020:
+
+        x1[i] = 420 + 8*(i+1 - 1001)
+        x2[i] = 5000/200 * (x1[i] - 400) + 500*R
+
+    if i >= 1021 and i <= 2020:
+
+        x1[i] = 1000 + 20*R
+        x2[i] = 5*x1[i] + 100*R
+
+  X = np.hstack((x1, x2))
+
+This data set can be seen below:
+
+.. image:: ../images/kernel-density-original-data.png
+  :width: 350
+  :align: center
+
+We perform PCA on the data set and approximate it with a single Principal Component:
+
+.. code:: python
+
+  pca = PCA(X, scaling='auto', n_components=1)
+  PCs = pca.transform(X)
+  X_rec = pca.reconstruct(PCs)
+
+Using the ``reduction.plot_parity`` function we can visualize how each variable is reconstructed:
+
+.. image:: ../images/kernel-density-original-x1.png
+  :width: 350
+  :align: center
+
+.. image:: ../images/kernel-density-original-x2.png
+  :width: 350
+  :align: center
+
+We thus note that PCA adjusts to reconstruct well the two regions with many observations
+and the intermediate region is not reconstructed well.
+
+Single-variable case
+====================
+
+We will weight the data set using kernel density weighting method in order to
+give more importance to the intermediate region. Kernel density weighting
+can be performed by instantiating an object of the ``KernelDensity`` class.
+As the first variable we pass the entire centered and scaled data set and as a
+second variable we specify what should be the conditioning variable based on
+which weighting will be computed:
+
+.. code:: python
+
+  kernd_single = KernelDensity(pca.X_cs, pca.X_cs[:,0], verbose=True)
+
+With ``verbose=True`` we will see which case is being run:
+
+.. code-block:: text
+
+  Single-variable case will be applied.
+
+In general, whenever the conditioning variable is a single vector a single-variable
+case will be used.
+
+We then obtain the weighted data set:
+
+.. code::
+
+  X_weighted_single = kernd_single.X_weighted
+
+Weights :math:`\mathbf{W_c}` used to scale the data set can be accessed as well:
+
+.. code::
+
+  X_weighted_single = kernd_single.weights
+
+We perform PCA on the weighted data set and we project the centered and scaled
+original data set onto the basis identified on ``X_weighted_single``:
+
+.. code::
+
+  pca_single = PCA(X_weighted_single, 'none', n_components=1, nocenter=True)
+  PCs_single = pca_single.transform(pca.X_cs)
+
+Reconstruction of that data set can be obtained:
+
+.. code::
+
+  X_rec_single = pca_single.reconstruct(PCs_single)
+  X_rec_single = (X_rec_single * pca.X_scale) + pca.X_center
+
+We can now use ``reduction.plot_parity`` function to visualize the new reconstruction:
+
+.. image:: ../images/kernel-density-single-x1.png
+  :width: 350
+  :align: center
+
+.. image:: ../images/kernel-density-single-x2.png
+  :width: 350
+  :align: center
+
+We note that this time the intermediate region got better represented in the
+PCA reconstruction.
+
+Multi-variable case
+====================
+
+In a similar way, multi-variable case can be used by passing the entire two-dimensional
+data set as a conditioning variable:
+
+.. code:: python
+
+  kernd_multi = KernelDensity(pca.X_cs, pca.X_cs, verbose=True)
+
+We then perform analogous steps to obtain the new reconstruction:
+
+.. code:: python
+
+  X_weighted_multi = kernd_multi.X_weighted
+
+  pca_multi = PCA(X_weighted_multi, 'none', n_components=1)
+  PCs_multi = pca_multi.transform(pca.X_cs)
+  X_rec_multi = pca_multi.reconstruct(PCs_multi)
+  X_rec_multi = (X_rec_multi * pca.X_scale) + pca.X_center
+
+The result of this reconstruction can be seen below:
+
+.. image:: ../images/kernel-density-multi-x1.png
+  :width: 350
+  :align: center
+
+.. image:: ../images/kernel-density-multi-x2.png
+  :width: 350
+  :align: center
