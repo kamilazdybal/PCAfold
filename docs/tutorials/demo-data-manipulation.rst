@@ -165,7 +165,6 @@ observations and an intermediate region with few observations:
   from PCAfold import PCA
   from PCAfold import reduction
   import numpy as np
-  import random
 
   n_observations = 2021
   x1 = np.zeros((n_observations,1))
@@ -173,7 +172,7 @@ observations and an intermediate region with few observations:
 
   for i in range(0,n_observations):
 
-    R = random.random()
+    R = np.random.rand()
 
     if i <= 999:
 
