@@ -922,8 +922,8 @@ class PCA:
     def save_to_txt(self, save_filename):
         """
         This function writes the eigenvector matrix :math:`\mathbf{A}`,
-        centering :math:`\mathbf{C}` and scaling :math:`\mathbf{D}`
-        vectors to ``.txt`` file.
+        loadings :math:`\mathbf{l}`, centering :math:`\mathbf{C}`
+        and scaling :math:`\mathbf{D}` vectors to ``.txt`` file.
 
         **Example:**
 
@@ -951,6 +951,14 @@ class PCA:
 
         with open(save_filename, 'ab') as fid:
             np.savetxt(fid, self.Q, delimiter=',', fmt='%6.12f')
+        fid.close()
+
+        fid = open(save_filename, 'a')
+        fid.write('\n%s\n' % "Loadings:")
+        fid.close()
+
+        with open(save_filename, 'ab') as fid:
+            np.savetxt(fid, self.loadings, delimiter=',', fmt='%6.12f')
         fid.close()
 
         fid = open(save_filename, 'a')
