@@ -2455,11 +2455,36 @@ def flip_clusters(idx, dictionary):
 
 def get_centroids(X, idx):
     """
-    This function computes the centroids for the clustering specified in the
-    ``idx`` vector.
+    This function computes the centroids for each cluster specified in the
+    ``idx`` vector. Centroids :math:`c_i` of cluster :math:`k_i` are computed as:
+
+    .. math::
+
+        c_i = mean(\mathbf{x}_i)
+
+    where :math:`\mathbf{x}_i` are the observations belonging to cluster :math:`k_i`
+    of all variables in the data set :math:`\mathbf{X}`. Centroids of all variables
+    from all clusters are then stored in the matrix :math:`\mathbf{c}` returned.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import get_centroids
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Generate dummy clustering of the data set:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Compute the centroids of each cluster:
+        centroids = get_centroids(X, idx)
 
     :param X:
-        data set for computing the cluster centroids.
+        data set :math:`\mathbf{X}` for computing the cluster centroids.
     :param idx:
         vector of cluster classifications.
 
@@ -2468,7 +2493,7 @@ def get_centroids(X, idx):
         number of elements in the ``idx`` vector.
 
     :return:
-        - **centroids** - matrix of cluster centroids. It has size ``k`` times number of observations.
+        - **centroids** - matrix of centroids of all :math:`k` clusters. It has size :math:`k` times number of variables.
     """
 
     # Degrade clusters if needed:
@@ -2494,32 +2519,40 @@ def get_centroids(X, idx):
 
     return(centroids)
 
-def get_partition(X, idx, verbose=False):
+def get_partition(X, idx):
     """
-    This function partitions the observations from the original global data
-    set ``X`` into local clusters according to ``idx`` provided. It returns a
-    tuple of three variables ``(data_in_clusters, data_idx_in_clusters, k_new)``,
-    where ``data_in_clusters`` are the original observations from ``X`` divided
-    into clusters, ``data_idx_in_clusters`` are the indices of the original
-    observations divided into clusters. If any cluster is empty or has less
-    observations assigned to it that the number of variables, that cluster will
-    be removed and the observations that were assigned to it will not appear
-    in ``data_in_clusters`` nor in ``data_idx_in_clusters``. The new number of
-    clusters ``k_new`` is computed taking into account any possibly removed
-    clusters.
+    This function partitions the observations from the original data
+    set :math:`\mathbf{X}` into :math:`k` clusters according to ``idx`` provided.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import get_partitioning
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Generate dummy clustering of the data set:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Generate partitioning of the data set according to idx:
+        (X_in_clusters, idx_in_clusters) = get_partitioning(X, idx)
 
     :param X:
         data set to partition.
     :param idx:
         vector of cluster classifications.
-        The first cluster has index 0.
-    :param verbose: (optional)
-        boolean for printing details.
+
+    :raises ValueError:
+        if the number of observations in the data set ``X`` does not match the
+        number of elements in the ``idx`` vector.
 
     :return:
-        - **data_in_clusters** - list of ``k_new`` arrays that contains original data set observations in each cluster.
-        - **data_idx_in_clusters** - list of ``k_new`` arrays that contains indices of the original data set observations in each cluster.
-        - **k_new** - the updated number of clusters.
+        - **X_in_clusters** - list of :math:`k` arrays that contains original data set observations partitioned to :math:`k` clusters.
+        - **idx_in_clusters** - list of :math:`k` arrays that contains indices of the original data set observations partitioned to :math:`k` clusters.
     """
 
     try:
@@ -2528,44 +2561,32 @@ def get_partition(X, idx, verbose=False):
         (n_observations, ) = np.shape(X)
         n_variables = 1
 
-    # Remove empty clusters from indexing:
+    # Check if the number of indices in `idx` is the same as the number of observations in a data set:
+    if n_observations != len(idx):
+        raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
+
+    # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
-        (idx, _) = degrade_clusters(idx, verbose)
-        if verbose==True:
-            print('Empty clusters will be removed.')
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     k = len(np.unique(idx))
 
-    idx_clust = []
-    n_points = np.zeros(k)
-    data_in_clusters = []
-    data_idx_in_clusters = []
+    idx_in_clusters = []
+    X_in_clusters = []
 
     for i in range(0,k):
 
         indices_to_append = np.argwhere(idx==i).ravel()
-        idx_clust.append(indices_to_append)
-        n_points[i] = len(indices_to_append)
+        idx_in_clusters.append(indices_to_append)
 
-        if ((n_points[i] < n_variables) and (n_points[i] > 0)):
-            if verbose==True:
-                print('Too few points (' + str(int(n_points[i])) + ') in cluster ' + str(i) + ', cluster will be removed.')
+        if n_variables == 1:
+            X_in_clusters.append(X[indices_to_append])
+        else:
+            X_in_clusters.append(X[indices_to_append,:])
 
-    # Find those cluster numbers where the number of observations is not less than number of variables:
-    nz_idx = np.argwhere(n_points >= n_variables).ravel()
+    return(X_in_clusters, idx_in_clusters)
 
-    # Compute the new number of clusters taking into account removed clusters:
-    k_new = len(nz_idx)
-
-    for i in range(0,k_new):
-
-        # Assign observations to clusters:
-        data_idx_in_clusters.append(idx_clust[nz_idx[i]])
-        data_in_clusters.append(X[data_idx_in_clusters[i],:])
-
-    return(data_in_clusters, data_idx_in_clusters, k_new)
-
-def get_populations(idx, verbose=False):
+def get_populations(idx):
     """
     This function computes populations (number of observations) in clusters
     specified in the ``idx`` vector. As an example, if there are 100
@@ -2596,8 +2617,6 @@ def get_populations(idx, verbose=False):
     :param idx:
         vector of cluster classifications.
         The first cluster has index 0.
-    :param verbose: (optional)
-        boolean for printing details.
 
     :return:
         - **populations** - list of cluster populations. Each entry referes to one cluster ordered according to ``idx``.
@@ -2607,7 +2626,7 @@ def get_populations(idx, verbose=False):
 
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
-        (idx, _) = degrade_clusters(idx, verbose)
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     # Find the number of clusters:
     k = len(np.unique(idx))
