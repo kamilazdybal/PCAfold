@@ -688,6 +688,25 @@ class KernelDensity:
 
         \mathbf{W_c} = \\frac{\\frac{1}{\mathbf{K_c}}}{max(\\frac{1}{\mathbf{K_c}})}
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import KernelDensity
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Perform kernel density weighting based on the first variable:
+        kerneld = KernelDensity(X, X[:,0])
+
+        # Access the weighted data set:
+        X_weighted = kerneld.X_weighted
+
+        # Access the weights used to scale the data set:
+        weights = kerneld.weights
+
     :param X:
         original data set :math:`\mathbf{X}` that should be weighted.
     :param conditioning_variable:
