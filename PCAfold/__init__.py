@@ -8,6 +8,7 @@ from .preprocess import invert_center_scale
 from .preprocess import remove_constant_vars
 from .preprocess import PreProcessing
 from .preprocess import outlier_detection
+from .preprocess import KernelDensity
 from .preprocess import DataSampler
 from .preprocess import variable_bins
 from .preprocess import predefined_variable_bins

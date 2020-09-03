@@ -611,6 +611,319 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 
     return (idx_outliers_removed, idx_outliers)
 
+class KernelDensity:
+    """
+    This class enables kernel density weighting of data sets
+    based on *single-variable* or *multi-variable* case :cite:`Coussement2012`.
+
+    The goal of both cases is to obtain vector of weights :math:`\mathbf{W_c}` that
+    has the same number of elements as there are observations in the original
+    data set :math:`\mathbf{X}`.
+    Each observation will then get multiplied by the corresponding weight from
+    :math:`\mathbf{W_c}`.
+
+    .. note::
+
+        The kernel density weighting technique is usually very expensive, even
+        on data sets with relatively small number of observations.
+        Since the single-variable case is a cheaper option than the multi-variable
+        case, it is recommended that this technique is tried first on larger data
+        sets.
+
+    Gaussian kernel is used in both approaches:
+
+    .. math::
+
+        K_{c, c'} = \sqrt{\\frac{1}{2 \pi h^2}} exp(- \\frac{d^2}{2 h^2})
+
+    :math:`h` is the kernel bandwidth:
+
+    .. math::
+
+        h = \Big( \\frac{4 \hat{\sigma}}{3 n} \Big)^{1/5}
+
+    where :math:`\hat{\sigma}` is the standard deviation of the considered variable
+    and :math:`n` is the number of observations in the data set.
+
+    :math:`d` is the distance between two observations :math:`c` and :math:`c'`:
+
+    .. math::
+
+        d = |x_c - x_{c'}|
+
+    **Single-variable**
+
+    If the conditioning variable is a single vector, weighting will be performed
+    according to the *single-variable* case. It begins by summing Gaussian kernels:
+
+    .. math::
+
+        \mathbf{K_c} = \sum_{c' = 1}^{c' = n} \\frac{1}{n} K_{c, c'}
+
+    Weights are computed as:
+
+    .. math::
+
+        \mathbf{W_c} = \\frac{\\frac{1}{\mathbf{K_c}}}{max(\\frac{1}{\mathbf{K_c}})}
+
+    **Multi-variable**
+
+    If the conditioning variable is a matrix of multiple variables, weighting will
+    be performed according to the *multi-variable* case. It begins by summing
+    Gaussian kernels for a variable :math:`k`:
+
+    .. math::
+
+        \mathbf{K_{c, k}} = \sum_{c' = 1}^{c' = n} \\frac{1}{n} K_{c, c', k}
+
+    Global density taking into account all variables is then obtained as:
+
+    .. math::
+
+        \mathbf{K_{c}} = \prod_{k=1}^{k=Q} \mathbf{K_{c, k}}
+
+    Weights are computed as:
+
+    .. math::
+
+        \mathbf{W_c} = \\frac{\\frac{1}{\mathbf{K_c}}}{max(\\frac{1}{\mathbf{K_c}})}
+
+    :param X:
+        original data set :math:`\mathbf{X}` that should be weighted.
+    :param conditioning_variable:
+        either a single variable or multiple variables to be used as a
+        conditioning variable for kernel weighting procedure. Note that it can also
+        be passed as the original data set :math:`\mathbf{X}`.
+
+    **Attributes:**
+
+        - **weights** - vector of computed weights :math:`\mathbf{W_c}`.
+        - **X_weighted** - weighted data set (each observation in\
+        :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`).
+    """
+
+    def __init__(self, X, conditioning_variable, verbose=False):
+
+        try:
+            (n_observations, n_variables) = np.shape(conditioning_variable)
+        except:
+            (n_observations, n_variables) = np.shape(conditioning_variable[:,np.newaxis])
+
+        if n_variables == 1:
+
+            if verbose: print('Single-variable case will be applied.')
+
+            self.__weights = self.__single_variable_observation_weights(conditioning_variable)
+
+        elif n_variables > 1:
+
+            if verbose: print('Multi-variable case will be applied.')
+
+            self.__weights = self.__multi_variable_observation_weights(conditioning_variable)
+
+        self.__X_weighted = np.multiply(X, self.weights)
+
+    @property
+    def weights(self):
+        return self.__weights
+
+    @property
+    def X_weighted(self):
+        return self.__X_weighted
+
+    # Computes eq.(26):
+    def __bandwidth(self, n, mean_standard_deviation):
+        """
+        This function computes kernel bandwidth as:
+
+        .. math::
+
+            h = \Big( \\frac{4 \hat{\sigma}}{3 n} \Big)^{1/5}
+
+        :param n:
+            number of observations in a data set or a variable vector.
+        :param mean_standard_deviation:
+            mean standard deviation in the entire data set or a variable vector.
+
+        :returns:
+            - **h** - kernel bandwidth, scalar.
+        """
+
+        h = (4*mean_standard_deviation/(3*n))**(1/5)
+
+        return(h)
+
+    # Computes eq.(21):
+    def __distance(self, x_1, x_2):
+        """
+        This function computes distance between two observations:
+
+        .. math::
+
+            d = |x_1 - x_2|
+
+        :param x_1:
+            first observation.
+        :param x_2:
+            second observation.
+
+        :returns:
+            - **d** - distance between the first and second observation.
+        """
+
+        d = abs(x_1 - x_2)
+
+        return(d)
+
+    # Computes eq.(22):
+    def __gaussian_kernel(self, x1, x2, n, mean_standard_deviation):
+        """
+        This function computes a Gaussian kernel:
+
+        .. math::
+
+            K = \sqrt{\\frac{1}{2 \pi h^2}} exp(- \\frac{d^2}{2 h^2})
+
+        :param x_1:
+            first observation.
+        :param x_2:
+            second observation.
+        :param n:
+            number of observations in a data set or a variable vector.
+        :param mean_standard_deviation:
+            mean standard deviation in the entire data set or a variable vector.
+
+        :returns:
+            - **K** - Gaussian kernel.
+        """
+
+        d = self.__distance(x1, x2)
+        h = self.__bandwidth(n, mean_standard_deviation)
+
+        K = (1/(2*np.pi*h**2))**0.5 * np.exp(- d/(2*h**2))
+
+        return(K)
+
+    # Computes eq.(23):
+    def __variable_density(self, x, mean_standard_deviation):
+        """
+        This function computes a vector of variable densities for all observations.
+
+        :param x:
+            single variable vector.
+        :param mean_standard_deviation:
+            mean standard deviation in the entire data set or a variable vector.
+
+        :returns:
+            - **Kck** - a vector of variable densities for all observations, it has the same size as the variable vector `x`.
+        """
+
+        n = len(x)
+
+        Kck = np.zeros((n,1))
+
+        for i in range(0,n):
+
+            gaussian_kernel_sum = 0
+
+            for j in range(0,n):
+
+                gaussian_kernel_sum = gaussian_kernel_sum + self.__gaussian_kernel(x[i], x[j], n, mean_standard_deviation)
+
+            Kck[i] = 1/n * gaussian_kernel_sum
+
+        return(Kck)
+
+    # Computes eq.(24):
+    def __multi_variable_global_density(self, X):
+        """
+        This function computes a vector of variable global densities for a
+        multi-variable case, for all observations.
+
+        :param X:
+            multi-variable data set matrix.
+
+        :returns:
+            - **Kc** - a vector of global densities for all observations.
+        """
+
+        (n, n_vars) = np.shape(X)
+
+        mean_standard_deviation = np.mean(np.std(X, axis=0))
+
+        Kck_matrix = np.zeros((n, n_vars))
+
+        for variable in range(0, n_vars):
+
+            Kck_matrix[:,variable] = np.reshape(self.__variable_density(X[:,variable], mean_standard_deviation), (n,))
+
+        # Compute the global densities vector:
+        Kc = np.zeros((n,1))
+
+        K = 1
+
+        for i in range(0,n):
+
+            Kc[i] = K * np.prod(Kck_matrix[i,:])
+
+        return(Kc)
+
+    # Computes eq.(25):
+    def __multi_variable_observation_weights(self, X):
+        """
+        This function computes a vector of observation weights for a
+        multi-variable case.
+
+        :param X:
+            multi-variable data set matrix.
+
+        :returns:
+            - **W_c** - a vector of observation weights.
+        """
+
+        (n, n_vars) = np.shape(X)
+
+        W_c = np.zeros((n,1))
+
+        Kc = self.__multi_variable_global_density(X)
+
+        Kc_inv = 1/Kc
+
+        for i in range(0,n):
+
+            W_c[i] = Kc_inv[i] / np.max(Kc_inv)
+
+        return(W_c)
+
+    # Computes eq.(20):
+    def __single_variable_observation_weights(self, x):
+        """
+        This function computes a vector of observation weights for a
+        single-variable case.
+
+        :param x:
+            single variable vector.
+
+        :returns:
+            - **W_c** - a vector of observation weights.
+        """
+
+        n = len(x)
+
+        mean_standard_deviation = np.std(x)
+
+        W_c = np.zeros((n,1))
+
+        Kc = self.__variable_density(x, mean_standard_deviation)
+
+        Kc_inv = 1/Kc
+
+        for i in range(0,n):
+
+            W_c[i] = Kc_inv[i] / np.max(Kc_inv)
+
+        return(W_c)
+
 ################################################################################
 #
 # Data Sampling

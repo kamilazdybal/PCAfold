@@ -46,6 +46,11 @@ Class ``PreProcessing``
 
 .. autofunction:: PCAfold.preprocess.outlier_detection
 
+Class ``KernelDensity``
+=======================
+
+.. autoclass:: PCAfold.preprocess.KernelDensity
+
 --------------------------------------------------------------------------------
 
 ***************
