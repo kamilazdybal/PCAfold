@@ -4,6 +4,7 @@ from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import PCA
 from PCAfold import PreProcessing
+from PCAfold import KernelDensity
 
 
 class TestManipulation(unittest.TestCase):
@@ -858,3 +859,50 @@ class TestManipulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0.9, quantile_threshold=-1)
+
+    def test_KernelDensity_allowed_calls(self):
+
+        X = np.random.rand(100,20)
+
+        try:
+            kerneld = KernelDensity(X, X[:,1])
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            kerneld = KernelDensity(X, X[:,4:9])
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            kerneld = KernelDensity(X, X[:,0])
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            kerneld = KernelDensity(X, X)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            kerneld.X_weighted
+            kerneld.weights
+        except Exception:
+            self.assertTrue(False)
+
+    def test_KernelDensity_not_allowed_calls(self):
+
+        X = np.random.rand(100,20)
+        kerneld = KernelDensity(X, X[:,1])
+
+        with self.assertRaises(AttributeError):
+            kerneld.X_weighted = 1
+
+        with self.assertRaises(AttributeError):
+            kerneld.weights = 1
+
+        with self.assertRaises(ValueError):
+            kerneld = KernelDensity(X, X[20:30,1])
+
+        with self.assertRaises(ValueError):
+            kerneld = KernelDensity(X, X[20:30,:])

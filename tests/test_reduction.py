@@ -1404,6 +1404,46 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+    def test_plot_parity_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            plt = reduction.plot_parity(X[:,0], X_rec[:,0], color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            plt = reduction.plot_parity(X[:,0], X_rec[:,0], color_variable=X[:,0], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            plt = reduction.plot_parity(X[:,0], X_rec[:,0], color_variable='k', x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            plt = reduction.plot_parity(X[:,0], X_rec[:,0], color_variable='k', x_label='$x$', y_label='$y$', colorbar_label='$x_1$', title='Title', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
     def test_plot_eigenvectors_allowed_calls(self):
 
         X = np.random.rand(100,5)

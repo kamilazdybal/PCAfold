@@ -714,6 +714,9 @@ class KernelDensity:
         conditioning variable for kernel weighting procedure. Note that it can also
         be passed as the original data set :math:`\mathbf{X}`.
 
+    :raises ValueError:
+        if the number of observations in ``X`` is different than the number of observations in ``conditioning_variable``.
+
     **Attributes:**
 
         - **weights** - vector of computed weights :math:`\mathbf{W_c}`.
@@ -723,10 +726,15 @@ class KernelDensity:
 
     def __init__(self, X, conditioning_variable, verbose=False):
 
+        (n_observations_X, n_variables_X) = np.shape(X)
+
         try:
             (n_observations, n_variables) = np.shape(conditioning_variable)
         except:
             (n_observations, n_variables) = np.shape(conditioning_variable[:,np.newaxis])
+
+        if n_observations_X != n_observations:
+            raise ValueError("The data set to weight and the conditioning variable should have the same number of observations.")
 
         if n_variables == 1:
 
