@@ -723,10 +723,10 @@ class PCA:
             import numpy as np
 
             # Generate dummy data set:
-            X = np.random.rand(100,5)
+            X = np.random.rand(100,20)
 
             # Instantiate PCA class object:
-            pca_X = PCA(X, scaling='auto', n_components=3)
+            pca_X = PCA(X, scaling='auto')
 
             # Select Principal Variables (PVs) using M2 method:
             principal_variables_indices = pca_X.principal_variables(method='M2', X)
@@ -1015,10 +1015,10 @@ class PCA:
             import numpy as np
 
             # Generate dummy data set:
-            X = np.random.rand(100,5)
+            X = np.random.rand(100,20)
 
             # Instantiate PCA class object:
-            pca_X = PCA(X, scaling='auto', n_components=5)
+            pca_X = PCA(X, scaling='auto')
 
             # Compute a new ``PCA`` class object with the new number of retained components:
             pca_X_new = pca_X.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.6)

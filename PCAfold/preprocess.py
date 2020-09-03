@@ -2528,7 +2528,7 @@ def get_partition(X, idx):
 
     .. code::
 
-        from PCAfold import get_partitioning
+        from PCAfold import get_partition
         import numpy as np
 
         # Generate dummy data set:
@@ -2539,7 +2539,7 @@ def get_partition(X, idx):
         idx[50:80] = 1
 
         # Generate partitioning of the data set according to idx:
-        (X_in_clusters, idx_in_clusters) = get_partitioning(X, idx)
+        (X_in_clusters, idx_in_clusters) = get_partition(X, idx)
 
     :param X:
         data set to partition.
