@@ -216,3 +216,30 @@ colored by the first variable in the data set:
 .. image:: ../images/plotting-pca-2d-manifold.png
     :width: 500
     :align: center
+
+************************
+Parity plot
+************************
+
+Parity plots of reconstructed variables can be visualized using
+`reduction.plot_parity` function. We approximate the data set using the previously
+obtained two Principal Components:
+
+.. code::
+
+  X_rec = pca_X_Vast.reconstruct(principal_components)
+
+and we generate the parity plot:
+
+.. code::
+
+  plt = reduction.plot_parity(X[:,0], X_rec[:,0], x_label='Observed $T$', y_label='Reconstructed $T$', save_filename=None)
+
+Plotting example
+^^^^^^^^^^^^^^^^
+
+Example of a plot:
+
+.. image:: ../images/plotting-pca-parity.png
+    :width: 500
+    :align: center
