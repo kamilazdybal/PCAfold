@@ -83,6 +83,11 @@ PCA on sampled data sets
 
 .. autofunction:: PCAfold.reduction.pca_on_sampled_data_set
 
+``analyze_centers_change``
+==========================
+
+.. autofunction:: PCAfold.reduction.analyze_centers_change
+
 ``analyze_eigenvector_weights_change``
 ======================================
 

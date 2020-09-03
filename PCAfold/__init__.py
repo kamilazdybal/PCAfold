@@ -7,7 +7,6 @@ from .preprocess import center_scale
 from .preprocess import invert_center_scale
 from .preprocess import remove_constant_vars
 from .preprocess import PreProcessing
-from .preprocess import analyze_centers_change
 from .preprocess import outlier_detection
 from .preprocess import DataSampler
 from .preprocess import variable_bins
@@ -25,6 +24,7 @@ from .preprocess import plot_2d_train_test_samples
 # Module: `reduction`
 from .reduction import PCA
 from .reduction import pca_on_sampled_data_set
+from .reduction import analyze_centers_change
 from .reduction import analyze_eigenvector_weights_change
 from .reduction import analyze_eigenvalue_distribution
 from .reduction import equilibrate_cluster_populations
