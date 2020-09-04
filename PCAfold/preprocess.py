@@ -671,19 +671,19 @@ class KernelDensity:
 
     If the ``conditioning_variable`` argument is a matrix of multiple variables, weighting will
     be performed according to the *multi-variable* case. It begins by summing
-    Gaussian kernels for a variable :math:`k`:
+    Gaussian kernels for a :math:`k^{th}` variable:
 
     .. math::
 
-        \mathbf{K_{c, k}} = \sum_{c' = 1}^{c' = n} \\frac{1}{n} K_{c, c', k}
+        \mathbf{K_c}_{, k} = \sum_{c' = 1}^{c' = n} \\frac{1}{n} K_{c, c', k}
 
     Global density taking into account all variables is then obtained as:
 
     .. math::
 
-        \mathbf{K_{c}} = \prod_{k=1}^{k=Q} \mathbf{K_{c, k}}
+        \mathbf{K_{c}} = \prod_{k=1}^{k=Q} \mathbf{K_c}_{, k}
 
-    and weights are computed as:
+    where :math:`Q` is the total number of conditioning variables, and weights are computed as:
 
     .. math::
 
