@@ -614,9 +614,10 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 class KernelDensity:
     """
     This class enables kernel density weighting of data sets
-    based on *single-variable* or *multi-variable* case :cite:`Coussement2012`.
+    based on *single-variable* or *multi-variable* case as proposed in
+    :cite:`Coussement2012`.
 
-    The goal of both cases is to obtain vector of weights :math:`\mathbf{W_c}` that
+    The goal of both cases is to obtain a vector of weights :math:`\mathbf{W_c}` that
     has the same number of elements as there are observations in the original
     data set :math:`\mathbf{X}`.
     Each observation will then get multiplied by the corresponding weight from
@@ -624,9 +625,9 @@ class KernelDensity:
 
     .. note::
 
-        The kernel density weighting technique is usually very expensive, even
+        Kernel density weighting technique is usually very expensive, even
         on data sets with relatively small number of observations.
-        Since the single-variable case is a cheaper option than the multi-variable
+        Since the *single-variable* case is a cheaper option than the *multi-variable*
         case, it is recommended that this technique is tried first on larger data
         sets.
 
@@ -653,14 +654,14 @@ class KernelDensity:
 
     **Single-variable**
 
-    If the conditioning variable is a single vector, weighting will be performed
+    If the ``conditioning_variable`` argument is a single vector, weighting will be performed
     according to the *single-variable* case. It begins by summing Gaussian kernels:
 
     .. math::
 
         \mathbf{K_c} = \sum_{c' = 1}^{c' = n} \\frac{1}{n} K_{c, c'}
 
-    Weights are computed as:
+    and weights are then computed as:
 
     .. math::
 
@@ -668,7 +669,7 @@ class KernelDensity:
 
     **Multi-variable**
 
-    If the conditioning variable is a matrix of multiple variables, weighting will
+    If the ``conditioning_variable`` argument is a matrix of multiple variables, weighting will
     be performed according to the *multi-variable* case. It begins by summing
     Gaussian kernels for a variable :math:`k`:
 
@@ -682,7 +683,7 @@ class KernelDensity:
 
         \mathbf{K_{c}} = \prod_{k=1}^{k=Q} \mathbf{K_{c, k}}
 
-    Weights are computed as:
+    and weights are computed as:
 
     .. math::
 
@@ -708,11 +709,11 @@ class KernelDensity:
         weights = kerneld.weights
 
     :param X:
-        original data set :math:`\mathbf{X}` that should be weighted.
+        data set :math:`\mathbf{X}` that should be weighted.
     :param conditioning_variable:
         either a single variable or multiple variables to be used as a
         conditioning variable for kernel weighting procedure. Note that it can also
-        be passed as the original data set :math:`\mathbf{X}`.
+        be passed as the data set :math:`\mathbf{X}`.
 
     :raises ValueError:
         if the number of observations in ``X`` is different than the number of observations in ``conditioning_variable``.
