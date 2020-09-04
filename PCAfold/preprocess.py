@@ -2700,7 +2700,9 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         plotted.
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
@@ -2773,7 +2775,9 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         plotted.
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.

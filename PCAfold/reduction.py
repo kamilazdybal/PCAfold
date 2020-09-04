@@ -1507,7 +1507,10 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
-
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+        
     :return:
         - **normalized_C** - normalized centers :math:`||\mathbf{C}||`.
         - **normalized_C_r** - normalized centers :math:`||\mathbf{C_r}||`.
@@ -1658,6 +1661,9 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :raises ValueError:
         if the number of variables in ``variable_names`` list does not
@@ -1818,6 +1824,9 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
@@ -2182,6 +2191,9 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
@@ -2241,6 +2253,9 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
@@ -2299,6 +2314,9 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plot_handles** - list of plot handles.
@@ -2382,6 +2400,9 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
         plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
@@ -2468,6 +2489,9 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
@@ -2527,6 +2551,9 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
@@ -2596,6 +2623,9 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
 
     :return:
         - **plt** - plot handle.
