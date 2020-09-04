@@ -113,7 +113,7 @@ This section explains the choice for ``biasing_option`` input parameter in some
 of the functions in this module.
 The general goal for PCA on sampled data sets is to bias PCA with some
 information about the sampled data set :math:`\mathbf{X_r}`.
-Biasing option parameter will control how PCA is performed on/informed by
+Biasing option parameter will control how PCA is performed on or informed by
 :math:`\mathbf{X_r}` data set sampled from :math:`\mathbf{X}`.
 
 It is assumed that centers and scales computed on

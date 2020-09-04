@@ -1256,6 +1256,25 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id4>`_
     section of the documentation for more information on the available options.
 
+    **Example:**
+
+    .. code::
+
+        from PCAfold import pca_on_sampled_data_set, DataSampler
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Generate dummy sampling indices:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        selection = DataSampler(idx)
+        (idx_X_r, _) = selection.number(20, test_selection_option=1)
+
+        # Perform PCA on sampled data set:
+        (eigenvalues, eigenvectors, pc_scores, pc_sources, C, D, C_r, D_r) = pca_on_sampled_data_set(X, idx_X_r, scaling='auto', n_components=2, biasing_option=1)
+
     :param X:
         original (full) data set :math:`\mathbf{X}`.
     :param idx_X_r:
@@ -1585,6 +1604,29 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
     ``zero_norm=True`` in order to normalize weights such that they are between
     0 and 1 (this is not done by default).
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import equilibrate_cluster_populations, analyze_eigenvector_weights_change
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Generate dummy sampling indices:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Run cluster equlibration:
+        (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = equilibrate_cluster_populations(X, idx, 'auto', n_components=2, biasing_option=1, n_iterations=1, random_seed=100, verbose=True)
+
+        # Analyze weights change on the first eigenvector:
+        plt = analyze_eigenvector_weights_change(eigenvectors_matrix[:,0,:])
+
+        # Analyze weights change on the second eigenvector:
+        plt = analyze_eigenvector_weights_change(eigenvectors_matrix[:,1,:])
+
     :param eigenvectors:
         matrix of concatenated eigenvectors coming from different data sets or
         from different iterations. It should be size ``(n_variables, n_versions)``.
@@ -1738,6 +1780,25 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     performed on the original data set :math:`\mathbf{X}` and on the sampled
     data set :math:`\mathbf{X_r}`.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import analyze_eigenvalue_distribution, DataSampler
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Generate dummy sampling indices:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        selection = DataSampler(idx)
+        (idx_X_r, _) = selection.number(20, test_selection_option=1)
+
+        # Analyze the change in eigenvalue distribution:
+        plt = analyze_eigenvalue_distribution(X, idx_X_r, 'auto', biasing_option=1)
+
     :param X:
         original (full) data set :math:`\mathbf{X}`.
     :param idx_X_r:
@@ -1857,6 +1918,23 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     .. image:: ../images/cbpca-equlibrate-outputs.png
         :width: 700
         :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import equilibrate_cluster_populations
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Generate dummy sampling indices:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Run cluster equlibration:
+        (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = equilibrate_cluster_populations(X, idx, 'auto', n_components=2, biasing_option=1, n_iterations=1, random_seed=100, verbose=True)
 
     :param X:
         original (full) data set :math:`\mathbf{X}`.
