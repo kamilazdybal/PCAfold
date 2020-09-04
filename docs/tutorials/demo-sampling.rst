@@ -308,7 +308,7 @@ Let's request 10% of the total data to be train data.
   percentage sampling. The only difference is that percentage sampling will
   maintain the percentage ``perc`` exact within each cluster while this function
   will typically result in some small variations from ``perc`` in each cluster
-  since it is sampling independently of cluster classifications.
+  since it is sampling independently of cluster definitions.
 
 Select test data with ``test_selection_option=1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
