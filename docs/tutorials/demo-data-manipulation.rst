@@ -251,7 +251,7 @@ Weights :math:`\mathbf{W_c}` used to scale the data set can be accessed as well:
 
 .. code::
 
-  X_weighted_single = kernd_single.weights
+  weights_single = kernd_single.weights
 
 We perform PCA on the weighted data set and we project the centered and scaled
 original data set onto the basis identified on ``X_weighted_single``:
@@ -296,6 +296,7 @@ We then perform analogous steps to obtain the new reconstruction:
 .. code:: python
 
   X_weighted_multi = kernd_multi.X_weighted
+  weights_multi = kernd_multi.weights
 
   pca_multi = PCA(X_weighted_multi, 'none', n_components=1)
   PCs_multi = pca_multi.transform(pca.X_cs)
