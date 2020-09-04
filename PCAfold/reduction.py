@@ -606,7 +606,7 @@ class PCA:
 
     def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10, verbose=False, save_filename=None):
         """
-        This function returns and/or prints and/or saves to ``.txt`` file
+        This function returns and optionally prints and/or saves to ``.txt`` file
         :math:`R^2` values (as per ``PCA.calculate_r2``
         function) for reconstruction of the original data set :math:`\mathbf{X}`
         as a function of number of retained Principal Components (PCs).
