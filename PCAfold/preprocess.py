@@ -1909,6 +1909,8 @@ def variable_bins(var, k, verbose=False):
 
     :raises ValueError:
         if number of clusters ``k`` is not a positive integer.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
@@ -1917,6 +1919,9 @@ def variable_bins(var, k, verbose=False):
     # Check that the number of clusters is an integer and is non-zero:
     if not (isinstance(k, int) and k > 0):
         raise ValueError("The number of clusters must be a positive integer.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     var_min = np.min(var)
     var_max = np.max(var)
@@ -1989,10 +1994,15 @@ def predefined_variable_bins(var, split_values, verbose=False):
     :raises ValueError:
         if any value within ``split_values`` is not within the range of
         vector ``var`` values.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
     """
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     var_min = np.min(var)
     var_max = np.max(var)
@@ -2072,10 +2082,15 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     :raises ValueError:
         if number of clusters ``k`` is not a positive integer.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
     """
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     # Check that the number of clusters is an integer and is non-zero:
     if not (isinstance(k, int) and k > 0):
@@ -2218,10 +2233,15 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
         if the requested offset from zero crosses the minimum or maximum value
         of the variable vector ``var``. If that is the case, it is
         recommended to lower the ``zero_offset_percentage`` value.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
     """
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     # Check that the number of clusters is an integer and is larger than 2:
     if (not split_at_zero) and (not (isinstance(k, int) and k > 2)):
@@ -2338,11 +2358,16 @@ def degrade_clusters(idx, verbose=False):
 
     :raises ValueError:
         if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx_degraded** degraded vector of cluster classifications. The first cluster has index 0.
         - **k_update** - the updated number of clusters.
     """
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     if isinstance(idx, list):
         if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
