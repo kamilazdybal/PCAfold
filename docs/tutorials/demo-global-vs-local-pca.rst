@@ -41,7 +41,7 @@ We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
 
   pca = PCA(Dataset_global, 'none', 2, use_eigendec=True)
   PC_scores_global = pca.transform(Dataset_global, nocenter=False)
-  eigenvectors_global = pca.Q
+  eigenvectors_global = pca.A
   eigenvalues_global = pca.L
 
 Similarly, we generate another synthetic data set that is composed of two distinct clouds of points:
@@ -99,7 +99,7 @@ An example function is shown below:
           # Perform PCA in a local cluster:
           pca = PCA(X_k, 'none', 2, use_eigendec=True)
           PC_scores = pca.transform(X_k, nocenter=False)
-          eigenvectors.append(pca.Q)
+          eigenvectors.append(pca.A)
           eigenvalues.append(pca.L)
 
       return (eigenvectors, eigenvalues, PC_scores)

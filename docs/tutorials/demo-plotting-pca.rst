@@ -47,13 +47,13 @@ Below is an example of plotting just the first eigenvector:
 
 .. code::
 
-  plt = reduction.plot_eigenvectors(pca_X_Auto.Q[:,0], variable_names=X_names, plot_absolute=False, title=None, save_filename=None)
+  plt = reduction.plot_eigenvectors(pca_X_Auto.A[:,0], variable_names=X_names, plot_absolute=False, title=None, save_filename=None)
 
 To plot all eigenvectors resulting from a single ``PCA`` class object:
 
 .. code::
 
-  plts = reduction.plot_eigenvectors(pca_X_Auto.Q, variable_names=X_names, plot_absolute=False, title=None, save_filename=None)
+  plts = reduction.plot_eigenvectors(pca_X_Auto.A, variable_names=X_names, plot_absolute=False, title=None, save_filename=None)
 
 Plotting example
 ^^^^^^^^^^^^^^^^
@@ -81,7 +81,7 @@ be compared on a single plot using ``reduction.plot_eigenvectors_comparison`` fu
 
 .. code::
 
-  plt = reduction.plot_eigenvectors_comparison((pca_X_Auto.Q[:,0], pca_X_Range.Q[:,0], pca_X_Vast.Q[:,0]), legend_labels=['Auto', 'Range', 'Vast'], variable_names=X_names, plot_absolute=False, color_map='coolwarm', title=None, save_filename=None)
+  plt = reduction.plot_eigenvectors_comparison((pca_X_Auto.A[:,0], pca_X_Range.A[:,0], pca_X_Vast.A[:,0]), legend_labels=['Auto', 'Range', 'Vast'], variable_names=X_names, plot_absolute=False, color_map='coolwarm', title=None, save_filename=None)
 
 Plotting example
 ^^^^^^^^^^^^^^^^
