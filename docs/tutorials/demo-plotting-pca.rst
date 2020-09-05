@@ -222,7 +222,7 @@ Parity plot
 ************************
 
 Parity plots of reconstructed variables can be visualized using
-`reduction.plot_parity` function. We approximate the data set using the previously
+``reduction.plot_parity`` function. We approximate the data set using the previously
 obtained two Principal Components:
 
 .. code::
