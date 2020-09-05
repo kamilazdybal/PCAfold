@@ -26,7 +26,7 @@ To import the modules:
 
 A general overview for performing PCA on sampled data set is presented below:
 
-.. image:: ../images/cluster-biased-PCA-scheme-sampling-highlighted.png
+.. image:: ../images/PCA-on-sampled-data-set.png
   :width: 700
 
 The main goal is to inform PCA of some of the characteristics of the sampled
