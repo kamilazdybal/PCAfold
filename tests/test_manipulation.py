@@ -758,71 +758,85 @@ class TestManipulation(unittest.TestCase):
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', method='MULTIVARIATE TRIMMING', trimming_threshold=0.6)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='MULTIVARIATE TRIMMING', trimming_threshold=0.6)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', method='MULTIVARIATE TRIMMING', trimming_threshold=0.2)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', method='MULTIVARIATE TRIMMING', trimming_threshold=0.1)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', method='PC CLASSIFIER')
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='range', method='PC CLASSIFIER')
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='pareto', method='PC CLASSIFIER')
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', method='PC CLASSIFIER', quantile_threshold=0.9)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='range', method='PC CLASSIFIER', quantile_threshold=0.99)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='pareto', method='PC CLASSIFIER', quantile_threshold=0.8)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0, quantile_threshold=0.5)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1, quantile_threshold=0.9)
+            self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 

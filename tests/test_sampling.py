@@ -48,37 +48,47 @@ class TestSampling(unittest.TestCase):
 
         (idx_train, idx_test) = sam.number(40, test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.percentage(40, test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.manual({0: 1, 1: 4, 2: 1, 3: 1, 4: 1}, sampling_type='number',
                                            test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.random(40, test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.number(40, test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.percentage(40, test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.manual({0: 1, 1: 1, 2: 1, 3: 1, 4: 1}, sampling_type='number',
                                            test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.random(10, test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.manual({0: 10, 1: 10, 2: 60, 3: 10, 4: 80}, sampling_type='percentage',
                                            test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
         (idx_train, idx_test) = sam.manual({0: 40, 1: 40, 2: 40, 3: 40, 4: 40}, sampling_type='percentage',
                                            test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
 
     def test_predefined_idx_test(self):
         idx = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5, 10, 10, 10, 10, 10])
@@ -87,46 +97,56 @@ class TestSampling(unittest.TestCase):
 
         (idx_train, idx_test) = sam.number(40, test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.percentage(40, test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.manual({0: 1, 1: 1, 2: 1, 3: 1, 4: 1}, sampling_type='number',
                                            test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.random(40, test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.number(40, test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.percentage(40, test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.manual({0: 1, 1: 1, 2: 1, 3: 1, 4: 1}, sampling_type='number',
                                            test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.random(10, test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.manual({0: 20, 1: 80, 2: 60, 3: 80, 4: 80}, sampling_type='percentage',
                                            test_selection_option=1)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
         (idx_train, idx_test) = sam.manual({0: 40, 1: 40, 2: 40, 3: 40, 4: 40}, sampling_type='percentage',
                                            test_selection_option=2)
         self.assertTrue(len(np.setdiff1d(idx_test, idx_train)) != 0)
+        self.assertTrue(not np.any(np.in1d(idx_train, idx_test)))
         self.assertTrue(np.array_equal(idx_test_predefined, idx_test))
 
 
