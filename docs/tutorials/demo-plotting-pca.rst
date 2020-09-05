@@ -199,7 +199,7 @@ and we plot the resulting manifold:
 
 .. code::
 
-  plt = reduction.plot_2d_manifold(principal_components, color_variable='k', x_label='$\mathbf{Z_1}$', y_label='$\mathbf{Z_2}$', colorbar_label=None, title=None, save_filename=None)
+  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable='k', x_label='$\mathbf{Z_1}$', y_label='$\mathbf{Z_2}$', colorbar_label=None, title=None, save_filename=None)
 
 Plotting example
 ^^^^^^^^^^^^^^^^

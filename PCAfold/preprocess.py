@@ -2711,7 +2711,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     from matplotlib import cm
 
     n_clusters = len(np.unique(idx))
-    populations = get_populations(idx, verbose=False)
+    populations = get_populations(idx)
 
     x = x.ravel()
     y = y.ravel()
@@ -2786,7 +2786,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     from matplotlib import cm
 
     n_clusters = len(np.unique(idx))
-    populations = get_populations(idx, verbose=False)
+    populations = get_populations(idx)
 
     x = x.ravel()
     y = y.ravel()

@@ -1510,7 +1510,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
-        
+
     :return:
         - **normalized_C** - normalized centers :math:`||\mathbf{C}||`.
         - **normalized_C_r** - normalized centers :math:`||\mathbf{C_r}||`.
@@ -2160,19 +2160,19 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
+def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold given the matrix
     defining the manifold.
 
-    :param manifold_2d:
-        matrix specifying the 2-dimensional manifold. It is assumed that the
-        first column will be :math:`x`-axis values and second column will be
-        the :math:`y`-axis values.
+    :param x:
+        variable on the :math:`x`-axis.
+    :param y:
+        variable on the :math:`y`-axis.
     :param color_variable: (optional)
         a 1D vector or string specifying color for the manifold. If it is a
         vector, it has to have length consistent with the number of observations
-        in ``manifold_2d`` matrix.
+        in ``x`` and ``y`` vectors.
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.
@@ -2202,9 +2202,9 @@ def plot_2d_manifold(manifold_2d, color_variable=[], x_label=None, y_label=None,
     fig, axs = plt.subplots(1, 1, figsize=(6,6))
 
     if len(color_variable) == 0:
-        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
     else:
-        scat = plt.scatter(manifold_2d[:,0].ravel(), manifold_2d[:,1].ravel(), c=color_variable, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        scat = plt.scatter(x.ravel(), y.ravel(), c=color_variable, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
@@ -2234,7 +2234,7 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
     :param color_variable: (optional)
         a 1D vector or string specifying color for the manifold. If it is a
         vector, it has to have length consistent with the number of observations
-        in ``manifold_2d`` matrix.
+        in ``variable`` vector.
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.

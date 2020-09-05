@@ -1375,7 +1375,7 @@ class TestReduction(unittest.TestCase):
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
             principal_components = pca_X.transform(X)
-            plt = reduction.plot_2d_manifold(principal_components, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)
@@ -1383,7 +1383,7 @@ class TestReduction(unittest.TestCase):
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
             principal_components = pca_X.transform(X)
-            plt = reduction.plot_2d_manifold(principal_components, color_variable=X[:,0], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=X[:,0], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)
@@ -1391,7 +1391,7 @@ class TestReduction(unittest.TestCase):
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
             principal_components = pca_X.transform(X)
-            plt = reduction.plot_2d_manifold(principal_components, color_variable='k', x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
+            plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable='k', x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)
@@ -1399,7 +1399,7 @@ class TestReduction(unittest.TestCase):
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
             principal_components = pca_X.transform(X)
-            plt = reduction.plot_2d_manifold(principal_components, color_variable='k', x_label='$x$', y_label='$y$', colorbar_label='$x_1$', title='Title', save_filename=None)
+            plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable='k', x_label='$x$', y_label='$y$', colorbar_label='$x_1$', title='Title', save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)
