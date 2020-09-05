@@ -625,7 +625,7 @@ class PCA:
             pca_X = PCA(X, scaling='auto', n_components=3)
 
             # Compute and print convergence of R2 values:
-            r2 = pca_X.convergence(X, n_pcs=3, variable_names=['X1', 'X2', 'X3'], print_width=10, verbose=True)
+            r2 = pca_X.r2_convergence(X, n_pcs=3, variable_names=['X1', 'X2', 'X3'], print_width=10, verbose=True)
 
         The code above will print :math:`R^2` values retaining 1-3 PCs:
 
@@ -649,12 +649,34 @@ class PCA:
         :param save_filename: (optional)
             string specifying ``.txt`` save location/filename.
 
+        :raises ValueError:
+            if ``n_pcs`` is not a positive integer or is larger than the number of variables in a data set provided.
+        :raises ValueError:
+            if the number of variables in ``variable_names`` is not consistent with the number of variables in a data set provided.
+        :raises ValueError:
+            if ``save_filename`` is not a string.
+        :raises ValueError:
+            if ``verbose`` is not a boolean.
+
         :return:
             - **r2** - matrix of size ``(n_pcs, n_variables)`` containing the :math:`R^2` values\
             for each variable as a function of the number of retained PCs.
         """
 
+        if not isinstance(n_pcs, int) or n_pcs < 1 or isinstance(n_pcs, bool):
+            raise ValueError("Parameter `n_pcs` has to be a positive integer.")
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
+
+        if save_filename != None:
+            if not isinstance(save_filename, str):
+                raise ValueError("Parameter `save_filename` has to be a string.")
+
         n_observations, nvar = X.shape
+
+        if n_pcs > nvar:
+            raise ValueError("Parameter `n_pcs` cannot be larger than the number of variables in a data set.")
 
         # Save the currently set n_components to re-set it back later:
         initial_n_components = self.n_components
@@ -664,10 +686,13 @@ class PCA:
         self.data_consistency_check(X, errors_are_fatal=True)
 
         if len(variable_names) > 0:
-            assert len(variable_names) == nvar, "Number of names given is not consistent with number of variables."
+            if len(variable_names) != nvar:
+                raise ValueError("Number of variables in `variable_names` is not consistent with the number of variables in a data set.")
+            rows_names = cp.deepcopy(variable_names)
         else:
+            rows_names = []
             for i in range(nvar):
-                variable_names.append(str(i + 1))
+                rows_names.append(str(i + 1))
 
         neig = np.zeros((n_pcs), dtype=int)
         for i in range(n_pcs):
@@ -681,14 +706,33 @@ class PCA:
         row_format = '|'
         for i in range(nvar + 2):
             row_format += ' {' + str(i) + ':<' + str(print_width) + '} |'
-        rownames = variable_names
-        rownames.insert(0, 'n PCs')
-        rownames.append('Mean')
+        rows_names.insert(0, 'n PCs')
+        rows_names.append('Mean')
 
         if verbose:
-            print(row_format.format(*rownames))
+            print(row_format.format(*rows_names))
             for i, row in zip(neig, r2vec):
                 print(row_format.format(i, *row))
+
+        if save_filename != None:
+
+            fid = open(save_filename, 'w')
+            fid.write("n PCs")
+
+            for name in rows_names[1::]:
+                fid.write(',%8s' % name)
+
+            fid.write('\n')
+            fid.close()
+
+            for i in range(n_pcs):
+                fid = open(save_filename, 'a')
+                fid.write('%4i' % (i + 1))
+                fid.close()
+
+                with open(save_filename, 'ab') as fid:
+                    np.savetxt(fid, np.array([r2vec[i, :]]), delimiter=' ', fmt=',%8.4f')
+                fid.close()
 
         # Set n_components back to what it was at the start of this function:
         self.n_components = initial_n_components
@@ -848,76 +892,6 @@ class PCA:
         principal_variables_indices = principal_variables_indices.astype(int)
 
         return principal_variables_indices
-
-    # def r2converge(self, data, names=[], fname=None):
-    #     """
-    #     Evaluate r2 values as a function of the number of retained eigenvalues.
-    #
-    #     **Example:**
-    #
-    #     .. code:: python
-    #
-    #         r2, neta = pca.r2converge( data )
-    #         r2, neta = pca.r2converge( data, names, 'r2.csv' )
-    #
-    #     :param data:
-    #         the data to fit.
-    #     :param names: (optional)
-    #         names of the data.
-    #     :param fname: (optional)
-    #         file to output r2 information to.
-    #
-    #     :return:
-    #         - **r2** - [neta,nvar] The r2 values.  Each column is a different variable and each row is for a different number of retained pcs.
-    #     """
-    #     nvar = self.n_variables
-    #     neta = [i+1 for i in range(0,nvar)]
-    #     netapts = len(neta)
-    #
-    #     n_observations, nvar = data.shape
-    #     r2 = np.zeros((netapts, nvar))
-    #     r2vec = r2.copy()
-    #
-    #     self.n_components = int(np.max(neta, axis=0))
-    #     eta = self.transform(data)
-    #
-    #     for i in range(netapts):
-    #         self.n_components = neta[i]
-    #         r2[i, :] = self.calculate_r2(data)
-    #
-    #     # dump out information
-    #     if len(names) != 0:
-    #         assert len(names) == nvar, "Number of names given is not consistent with number of variables."
-    #
-    #         if fname:
-    #             fid = open(fname, 'w')
-    #             fid.write("neta:")
-    #             for n in names:
-    #                 fid.write(',%8s' % n)
-    #             fid.write('\n')
-    #             fid.close()
-    #
-    #             for i in range(netapts):
-    #                 fid = open(fname, 'a')
-    #                 fid.write('%4i' % (i + 1))
-    #                 fid.close()
-    #
-    #                 with open(fname, 'ab') as fid:
-    #                     np.savetxt(fid, np.array([r2[i, :]]), delimiter=' ', fmt=',%8.4f')
-    #                 fid.close()
-    #         else:
-    #             row_format = '|'
-    #             printwidth = 10
-    #             for i in range(nvar + 1):
-    #                 row_format += ' {' + str(i) + ':<' + str(printwidth) + '} |'
-    #             rownames = names
-    #             rownames.insert(0, 'neta')
-    #
-    #             print(row_format.format(*rownames))
-    #             for i, row in zip(neta, np.round(r2, 8)):
-    #                 print(row_format.format(i, *row))
-    #
-    #     return r2, neta
 
     def save_to_txt(self, save_filename):
         """
@@ -2162,7 +2136,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 
 def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
     """
-    This function plots a 2-dimensional manifold given the matrix
+    This function plots a 2-dimensional manifold given two vectors
     defining the manifold.
 
     :param x:
