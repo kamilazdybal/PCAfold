@@ -47,7 +47,7 @@ class TestReduction(unittest.TestCase):
         if np.any(PHI - pca.X_cs > tol) or np.any(PHI - pca2.X_cs > tol):
             self.assertTrue(False)
 
-        if np.any(Q - pca.Q > tol) or np.any(Q - pca2.Q > tol):
+        if np.any(Q - pca.A > tol) or np.any(Q - pca2.A > tol):
             self.assertTrue(False)
 
         if np.any(L - pca.L > tol) or np.any(L - pca2.L > tol):
@@ -91,7 +91,7 @@ class TestReduction(unittest.TestCase):
         with self.assertRaises(AttributeError):
             pca.S = 1
         with self.assertRaises(AttributeError):
-            pca.Q = 1
+            pca.A = 1
         with self.assertRaises(AttributeError):
             pca.L = 1
         with self.assertRaises(AttributeError):
@@ -114,7 +114,7 @@ class TestReduction(unittest.TestCase):
             pca.X_center
             pca.X_scale
             pca.S
-            pca.Q
+            pca.A
             pca.L
             pca.loadings
             pca.scaling
@@ -1450,7 +1450,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
-            plts = reduction.plot_eigenvectors(pca_X.Q, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
+            plts = reduction.plot_eigenvectors(pca_X.A, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
             for i in range(0, len(plts)):
                 plts[i].close()
         except Exception:
@@ -1458,7 +1458,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
-            plts = reduction.plot_eigenvectors(pca_X.Q[:,0], eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
+            plts = reduction.plot_eigenvectors(pca_X.A[:,0], eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
             for i in range(0, len(plts)):
                 plts[i].close()
         except Exception:
@@ -1466,7 +1466,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
-            plts = reduction.plot_eigenvectors(pca_X.Q[:,2:4], eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
+            plts = reduction.plot_eigenvectors(pca_X.A[:,2:4], eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None)
             for i in range(0, len(plts)):
                 plts[i].close()
         except Exception:
@@ -1474,7 +1474,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             pca_X = PCA(X, scaling='auto', n_components=2)
-            plts = reduction.plot_eigenvectors(pca_X.Q[:,0], eigenvectors_indices=[0], variable_names=['a', 'b', 'c', 'd', 'e'], plot_absolute=True, bar_color='r', title='Title', save_filename=None)
+            plts = reduction.plot_eigenvectors(pca_X.A[:,0], eigenvectors_indices=[0], variable_names=['a', 'b', 'c', 'd', 'e'], plot_absolute=True, bar_color='r', title='Title', save_filename=None)
             for i in range(0, len(plts)):
                 plts[i].close()
         except Exception:
@@ -1488,7 +1488,7 @@ class TestReduction(unittest.TestCase):
             pca_1 = PCA(X, scaling='auto', n_components=2)
             pca_2 = PCA(X, scaling='range', n_components=2)
             pca_3 = PCA(X, scaling='vast', n_components=2)
-            plt = reduction.plot_eigenvectors_comparison((pca_1.Q[:,0], pca_2.Q[:,0], pca_3.Q[:,0]), legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None)
+            plt = reduction.plot_eigenvectors_comparison((pca_1.A[:,0], pca_2.A[:,0], pca_3.A[:,0]), legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)
@@ -1497,7 +1497,7 @@ class TestReduction(unittest.TestCase):
             pca_1 = PCA(X, scaling='auto', n_components=2)
             pca_2 = PCA(X, scaling='range', n_components=2)
             pca_3 = PCA(X, scaling='vast', n_components=2)
-            plt = reduction.plot_eigenvectors_comparison((pca_1.Q[:,0], pca_2.Q[:,0], pca_3.Q[:,0]), legend_labels=['$a$', '$b$', '$c$'], variable_names=['a', 'b', 'c', 'd', 'e'], plot_absolute=True, color_map='viridis', title='Title', save_filename=None)
+            plt = reduction.plot_eigenvectors_comparison((pca_1.A[:,0], pca_2.A[:,0], pca_3.A[:,0]), legend_labels=['$a$', '$b$', '$c$'], variable_names=['a', 'b', 'c', 'd', 'e'], plot_absolute=True, color_map='viridis', title='Title', save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)

@@ -132,7 +132,7 @@ class PCA:
         - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
         - **S** - (read only) covariance matrix :math:`\mathbf{S}`.
         - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
-        - **Q** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
+        - **A** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
         - **loadings** - (read only) loadings :math:`\mathbf{l}` (vectors are stored in columns, rows correspond to weights).
     """
 
@@ -199,7 +199,7 @@ class PCA:
         isort = np.argsort(-np.diagonal(np.diag(L)))
         Lsort = L[isort]
         Qsort = Q[:, isort]
-        self.__Q = Qsort
+        self.__A = Qsort
         self.__L = Lsort
 
         # Set number of variables in a data set (equal to the number of eigenvalues):
@@ -210,7 +210,7 @@ class PCA:
 
         for i in range(self.n_components):
             for j in range(self.n_variables):
-                loadings_matrix[j, i] = (self.Q[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.S[j, j])
+                loadings_matrix[j, i] = (self.A[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.S[j, j])
 
         self.__loadings = loadings_matrix
 
@@ -247,8 +247,8 @@ class PCA:
         return self.__S
 
     @property
-    def Q(self):
-        return self.__Q
+    def A(self):
+        return self.__A
 
     @property
     def L(self):
@@ -358,7 +358,7 @@ class PCA:
         if n_variables != len(self.L):
             raise ValueError("Number of variables in a data set is inconsistent with number of eigenvectors.")
 
-        A = self.Q[:, 0:n_components]
+        A = self.A[:, 0:n_components]
         x = np.zeros_like(X, dtype=float)
 
         if nocenter:
@@ -456,7 +456,7 @@ class PCA:
             raise ValueError("Number of Principal Components supplied is larger than the number of eigenvectors computed by PCA.")
 
         # Select n_components first Principal Components:
-        A = self.Q[:, 0:n_components]
+        A = self.A[:, 0:n_components]
 
         # Calculate unscaled, uncentered approximation to the data:
         x = principal_components.dot(A.transpose())
@@ -796,7 +796,7 @@ class PCA:
         if method == 'B2':  # B2 Method of Jolliffe (1972)
             nvar = self.n_variables
             neta = self.n_components
-            eigVec = self.Q  # eigenvectors
+            eigVec = self.A  # eigenvectors
 
             # set indices for discarded variables by looking at eigenvectors
             # corresponding to the discarded eigenvalues
@@ -822,7 +822,7 @@ class PCA:
         elif method == 'B4':  # B4 Forward method
             nvar = self.n_variables
             neta = self.n_components
-            eigVec = self.Q  # eigenvectors
+            eigVec = self.A  # eigenvectors
 
             # set indices for retained variables by looking at eigenvectors
             # corresponding to the retained eigenvalues
@@ -924,7 +924,7 @@ class PCA:
         fid.close()
 
         with open(save_filename, 'ab') as fid:
-            np.savetxt(fid, self.Q, delimiter=',', fmt='%6.12f')
+            np.savetxt(fid, self.A, delimiter=',', fmt='%6.12f')
         fid.close()
 
         fid = open(save_filename, 'a')
@@ -1189,7 +1189,7 @@ class PCA:
 
         RErr = np.abs(a.S - b.S) / np.max(np.abs(a.S))
         LErr = np.abs(a.L - b.L) / np.max(np.abs(a.L))
-        QErr = np.abs(a.Q - b.Q) / np.max(np.abs(a.Q))
+        QErr = np.abs(a.A - b.A) / np.max(np.abs(a.A))
 
         tol = 10 * np.finfo(float).eps
 
@@ -1312,7 +1312,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         D_r = pca.X_scale
 
         # Compute eigenvectors:
-        eigenvectors = pca.Q
+        eigenvectors = pca.A
 
         # Compute eigenvalues:
         eigenvalues = pca.L
@@ -1336,7 +1336,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         D_r = pca.X_scale
 
         # Compute eigenvectors:
-        eigenvectors = pca.Q
+        eigenvectors = pca.A
 
         # Compute eigenvalues:
         eigenvalues = pca.L
@@ -1360,7 +1360,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         D_r = pca.X_scale
 
         # Compute eigenvectors:
-        eigenvectors = pca.Q
+        eigenvectors = pca.A
 
         # Compute eigenvalues:
         eigenvalues = pca.L
@@ -1388,7 +1388,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         pca = PCA(X_cs, 'none', n_components, use_eigendec=True, nocenter=True)
 
         # Compute eigenvectors:
-        eigenvectors = pca.Q
+        eigenvectors = pca.A
 
         # Compute eigenvalues:
         eigenvalues = pca.L
@@ -2001,7 +2001,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     X_scale = pca_global.X_scale
 
     # Compute global eigenvectors:
-    global_eigenvectors = pca_global.Q
+    global_eigenvectors = pca_global.A
 
     # Compute global eigenvalues:
     global_eigenvalues = pca_global.L
@@ -2278,7 +2278,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
 
     :param eigenvectors:
         matrix of eigenvectors to plot. It can be supplied as an attribute of
-        the ``PCA`` class: ``PCA.Q``.
+        the ``PCA`` class: ``PCA.A``.
     :param eigenvectors_indices:
         list of integers specifying indexing of eigenvectors inside
         ``eigenvectors`` supplied. If it is not supplied, it is assumed that
@@ -2367,7 +2367,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
     :param eigenvectors_tuple:
         a tuple of eigenvectors to plot. Each eigenvector inside a tuple should be a 0D array.
-        It can be supplied as an attribute of the ``PCA`` class, for instance: ``(PCA.Q[:,0], PCA.Q[:,1])``.
+        It can be supplied as an attribute of the ``PCA`` class, for instance: ``(PCA.A[:,0], PCA.A[:,1])``.
     :param legend_labels:
         list of strings specifying labels for each element in the ``eigenvectors_tuple``.
     :param variable_names: (optional)
