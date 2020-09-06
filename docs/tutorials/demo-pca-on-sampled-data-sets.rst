@@ -32,7 +32,7 @@ A general overview for performing PCA on sampled data set is presented below:
 The main goal is to inform PCA of some of the characteristics of the sampled
 data set :math:`\mathbf{X_r}`. There are several ways in which that information
 can be incorporated within PCA transformation and they can be controlled using a selected
-`biasing option <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id4>`_
+`biasing option <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id14>`_
 and setting the ``biasing_option`` input parameter whenever needed. In this
 example, we choose ``biasing_option=2``. It is understood that PCA performed on a
 sampled data set is *biased* in some way, since that data set contains different
