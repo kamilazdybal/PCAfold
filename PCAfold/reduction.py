@@ -2147,6 +2147,24 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
     This function plots a 2-dimensional manifold given two vectors
     defining the manifold.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_2d_manifold
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Obtain 2-dimensional manifold from PCA:
+        pca_X = PCA(X)
+        principal_components = pca_X.transform(X)
+
+        # Plot the manifold:
+        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', title='2D manifold', save_filename='2d-manifold.pdf')
+        plt.close()
+
     :param x:
         variable on the :math:`x`-axis.
     :param y:
@@ -2208,6 +2226,25 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
 def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
     """
     This function plots a parity plot between a variable and its reconstruction.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_parity
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Obtain PCA reconstruction of the data set:
+        pca_X = PCA(X, n_components=8)
+        principal_components = pca_X.transform(X)
+        X_rec = pca_X.reconstruct(principal_components)
+
+        # Parity plot for the reconstruction of the first variable:
+        plt = plot_parity(X[:,0], X_rec[:,0], color_variable='k', x_label='Observed $X_1$', y_label='Reconstructed $X_1$', colorbar_label=None, title='Parity plot', save_filename='parity-plot.pdf')
+        plt.close()
 
     :param variable:
         vector specifying the original variable.
@@ -2275,6 +2312,25 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
     """
     This function plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_eigenvectors
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Perform PCA and obtain eigenvectors:
+        pca_X = PCA(X, n_components=2)
+        eigenvectors = pca_X.A
+
+        # Plot second and third eigenvector:
+        plts = plot_eigenvectors(eigenvectors[:,1:3], eigenvectors_indices=[1,2], variable_names=['$a_1$', '$a_2$', '$a_3$'], plot_absolute=False, bar_color=None, title='PCA on X', save_filename='PCA-X.pdf')
+        plts[0].close()
+        plts[1].close()
 
     :param eigenvectors:
         matrix of eigenvectors to plot. It can be supplied as an attribute of
@@ -2355,7 +2411,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
             plt.title(title, fontsize=font_title, **csfont)
 
         if save_filename != None:
-            plt.savefig(save_filename + '-eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '.png', dpi = 500, bbox_inches='tight')
+            plt.savefig('eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename, dpi = 500, bbox_inches='tight')
 
         plot_handles.append(plt)
 
@@ -2364,6 +2420,24 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
 def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None):
     """
     This function plots a comparison of weights on eigenvectors.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_eigenvectors_comparison
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Perform PCA and obtain eigenvectors:
+        pca_X = PCA(X, n_components=2)
+        eigenvectors = pca_X.A
+
+        # Plot comparaison of first and second eigenvector:
+        plt = plot_eigenvectors_comparison((eigenvectors[:,0], eigenvectors[:,1]), legend_labels=['PC-1', 'PC-2'], variable_names=['$a_1$', '$a_2$', '$a_3$'], plot_absolute=False, color_map='coolwarm', title='PCA on X', save_filename='PCA-X.pdf')
+        plt.close()
 
     :param eigenvectors_tuple:
         a tuple of eigenvectors to plot. Each eigenvector inside a tuple should be a 0D array.
@@ -2453,13 +2527,31 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
-        plt.savefig(save_filename + '.png', dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt
 
 def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save_filename=None):
     """
     This function plots eigenvalue distribution.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_eigenvalue_distribution
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA and obtain eigenvalues:
+        pca_X = PCA(X)
+        eigenvalues = pca_X.L
+
+        # Plot eigenvalue distribution:
+        plt = plot_eigenvalue_distribution(eigenvalues, normalized=True, title='PCA on X', save_filename='PCA-X.pdf')
+        plt.close()
 
     :param eigenvalues:
         a 0D vector of eigenvalues to plot. It can be supplied as an attribute of the
@@ -2516,7 +2608,28 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
 
 def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', title=None, save_filename=None):
     """
-    This function plots eigenvalue distribution.
+    This function plots a comparison of eigenvalue distributions.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_eigenvalue_distribution_comparison
+        import numpy as np
+
+        # Generate dummy data sets:
+        X = np.random.rand(100,10)
+        Y = np.random.rand(100,10)
+
+        # Perform PCA and obtain eigenvalues:
+        pca_X = PCA(X)
+        eigenvalues_X = pca_X.L
+        pca_Y = PCA(Y)
+        eigenvalues_Y = pca_Y.L
+
+        # Plot eigenvalue distribution comparison:
+        plt = plot_eigenvalue_distribution_comparison((eigenvalues_X, eigenvalues_Y), legend_labels=['PCA on X', 'PCA on Y'], normalized=True, title='PCA on X and Y', save_filename='PCA-X-Y.pdf')
+        plt.close()
 
     :param eigenvalues_tuple:
         a tuple of eigenvalues to plot. Each vector of eigenvalues inside a tuple
@@ -2594,6 +2707,24 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
     This function plots the eigenvalues as bars and their cumulative sum to visualize
     the percent variance in the data explained by each Principal Component
     individually and by each Principal Component cumulatively.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_cumulative_variance
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA and obtain eigenvalues:
+        pca_X = PCA(X)
+        eigenvalues = pca_X.L
+
+        # Plot eigenvalue distribution:
+        plt = plot_cumulative_variance(eigenvalues, n_components=0, title='PCA on X', save_filename='PCA-X.pdf')
+        plt.close()
 
     :param eigenvalues:
         a 0D vector of eigenvalues to analyze. It can be supplied as an attribute of the
