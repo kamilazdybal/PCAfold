@@ -2722,7 +2722,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
         pca_X = PCA(X)
         eigenvalues = pca_X.L
 
-        # Plot eigenvalue distribution:
+        # Plot the cumulative variance from eigenvalues:
         plt = plot_cumulative_variance(eigenvalues, n_components=0, title='PCA on X', save_filename='PCA-X.pdf')
         plt.close()
 
