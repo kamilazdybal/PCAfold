@@ -2674,6 +2674,24 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     This function plots a 2-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import variable_bins, plot_2d_clustering
+        import numpy as np
+
+        # Generate dummy data set:
+        x = np.linspace(-1,1,100)
+        y = -x**2 + 1
+
+        # Generate dummy clustering of the data set:
+        idx = variable_bins(x, 4, verbose=Falses)
+
+        # Plot the clustering result:
+        plt = plot_2d_clustering(x, y, idx, x_label='$x$', y_label='$y$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(10,6), title='x-y data set', save_filename='clustering.pdf')
+        plt.close()
+
     :param x:
         variable on the :math:`x`-axis.
     :param y:
@@ -2744,6 +2762,28 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     This function plots a 2-dimensional manifold divided into train and test
     samples. Number of observations in train and test data respectively will be
     plotted in the legend.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import variable_bins, DataSampler, plot_2d_train_test_samples
+        import numpy as np
+
+        # Generate dummy data set:
+        x = np.linspace(-1,1,100)
+        y = -x**2 + 1
+
+        # Generate dummy clustering of the data set:
+        idx = variable_bins(x, 4, verbose=False)
+
+        # Generate dummy sampling of the data set:
+        sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
+        (idx_train, idx_test) = sample.number(40, test_selection_option=1)
+
+        # Plot the sampling result:
+        plt = plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label='$x$', y_label='$y$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(12,6), title='x-y data set', save_filename='sampling.pdf')
+        plt.close()
 
     :param x:
         variable on the :math:`x`-axis.
