@@ -460,6 +460,7 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
     .. code::
 
         from PCAfold import outlier_detection
+        import numpy as np
 
         # Generate dummy data set:
         X = np.random.rand(100,20)
