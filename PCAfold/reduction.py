@@ -1264,7 +1264,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     :param X_source: (optional)
         source terms :math:`\mathbf{S}` corresponding to the state-space
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
-        representing reactive flows :cite:`Sutherland2009`.
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`.
 
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3 or 4.
@@ -1273,7 +1273,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         - **eigenvalues** - biased eigenvalues :math:`\mathbf{L_r}`.
         - **eigenvectors** - biased eigenvectors :math:`\mathbf{A_r}`.
         - **pc_scores** - :math:`q`-first biased Principal Components :math:`\mathbf{Z_r}`.
-        - **pc_sources** - :math:`q`-first biased sources of Principal Components :math:`\mathbf{S_{Z_r}}` as per :cite:`Sutherland2009`.\
+        - **pc_sources** - :math:`q`-first biased sources of Principal Components :math:`\mathbf{S_{Z_r}}`. More information can be found in :cite:`Sutherland2009`.\
         This parameter is only computed if ``X_source`` input parameter was specified.
         - **C** - a vector of centers that were used to pre-process the\
         original full data set :math:`\mathbf{X}`.
@@ -1939,7 +1939,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     :param X_source:
         source terms :math:`\mathbf{S}` corresponding to the state-space
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
-        representing reactive flows :cite:`Sutherland2009`.
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`.
     :param n_components:
         number of :math:`q`-first Principal Components that will be saved.
     :param biasing_option:
@@ -1964,9 +1964,9 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         - **eigenvalues** - collected eigenvalues from each iteration.
         - **eigenvectors_matrix** - collected eigenvectors from each iteration.\
         This is a 3D array of size ``(n_variables, n_components, n_iterations+1)``.
-        - **pc_scores_matrix** - collected PC scores from each iteration.\
+        - **pc_scores_matrix** - collected Principal Components from each iteration.\
         This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
-        - **pc_sources_matrix** - collected PC sources from each iteration.\
+        - **pc_sources_matrix** - collected sources of Principal Components from each iteration.\
         This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
         - **idx_train** - the final training indices from the equilibrated iteration.
         - **C_r** - a vector of final centers that were used to center\
