@@ -2559,7 +2559,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
     :param normalized: (optional)
         boolean specifying whether eigenvalues should be normalized to 1.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
+        string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
@@ -2598,7 +2598,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
     ax.spines["right"].set_visible(True)
     ax.spines["left"].set_visible(True)
 
-    if title != False:
+    if title != None:
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
@@ -2642,7 +2642,7 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
     :param color_map: (optional)
         colormap to use as per ``matplotlib.cm``. Default is *coolwarm*.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
+        string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
@@ -2694,7 +2694,7 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
     plt.legend(loc='upper right', fancybox=True, shadow=True, fontsize=font_legend, markerscale=marker_scale_legend)
 
-    if title != False:
+    if title != None:
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
@@ -2732,7 +2732,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
     :param n_components: (optional)
         how many principal components you want to visualize (default is all).
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
+        string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
@@ -2773,7 +2773,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
     plt.xlim(0, n_retained+1)
     plt.xticks(x_range, fontsize=font_axes, **csfont)
 
-    if title != False:
+    if title != None:
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:

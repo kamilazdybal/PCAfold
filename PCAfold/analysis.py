@@ -365,7 +365,7 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
+        string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
@@ -464,7 +464,7 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
+        string specifying plot title. If set to ``None``
         title will not be plotted.
     :param save_filename: (optional)
         plot save location/filename. If set to ``None`` plot will not be saved.
