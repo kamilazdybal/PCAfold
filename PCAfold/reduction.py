@@ -1255,34 +1255,38 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
     :param scaling:
-        data scaling criterion.
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
     :param n_components:
         number of first Principal Components that will be saved.
     :param biasing_option:
         integer specifying biasing option.
         Can only attain values 1, 2, 3 or 4.
     :param X_source: (optional)
-        source terms corresponding to the state-space variables in :math:`\mathbf{X}`.
+        source terms :math:`\mathfb{S}` corresponding to the state-space
+        variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows :cite:`Sutherland2009`.
 
     :raises ValueError:
         if ``biasing_option`` is not 1, 2, 3 or 4.
 
     :return:
-        - **eigenvalues** - collected eigenvalues from each iteration.
-        - **eigenvectors** - collected eigenvectors from each iteration.\
-        This is a 2D array of size ``(n_variables, n_components)``.
-        - **pc_scores** - collected PC scores from each iteration.\
+        - **eigenvalues** - biased eigenvalues :math:`\mathbf{L_r}`. This is\
+        a 0D array of size ``(n_variables,)``.
+        - **eigenvectors** - biased eigenvectors :math:`\mathbf{A_r}`.\
+        This is a 2D array of size ``(n_variables, n_variables)``.
+        - **pc_scores** - biased Principal Components :math:`\mathbf{Z_r}`.\
         This is a 2D array of size ``(n_observations, n_components)``.
-        - **pc_sources** - collected PC sources from each iteration.\
+        - **pc_sources** - biased sources of Principal Components :math:`\mathbf{S_{Z_r}}` as per :cite:`Sutherland2009`.\
         This is a 2D array of size ``(n_observations, n_components)``.
         - **C** - a vector of centers that were used to pre-process the\
-        original full data set.
+        original full data set :math:`\mathbf{X}`.
         - **D** - a vector of scales that were used to pre-process the\
-        original full data set.
+        original full data set :math:`\mathbf{X}`.
         - **C_r** - a vector of centers that were used to pre-process the\
-        sampled data set.
+        sampled data set :math:`\mathbf{X_r}`.
         - **D_r** - a vector of scales that were used to pre-process the\
-        sampled data set.
+        sampled data set :math:`\mathbf{X_r}`.
     """
 
     # Check that `biasing_option` parameter was passed correctly:
@@ -1789,7 +1793,8 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
     :param scaling:
-        data scaling criterion.
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
     :param biasing_option:
         integer specifying biasing option.
         Can only attain values 1, 2, 3 or 4.
@@ -1933,9 +1938,12 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         vector of cluster classifications.
         The first cluster has index 0.
     :param scaling:
-        data scaling criterion.
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
     :param X_source:
-        source terms corresponding to the state-space variables in ``X``.
+        source terms :math:`\mathfb{S}` corresponding to the state-space
+        variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows :cite:`Sutherland2009`.
     :param n_components:
         number of first Principal Components that will be saved.
     :param biasing_option:
