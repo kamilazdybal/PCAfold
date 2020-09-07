@@ -11,11 +11,8 @@ __status__ = "Production"
 
 import numpy as np
 import copy as cp
-import pandas as pd
 from scipy import linalg as lg
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.cm as cm
 from PCAfold import preprocess
 from PCAfold import DataSampler
 from PCAfold.styles import *

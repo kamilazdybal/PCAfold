@@ -209,7 +209,7 @@ class KReg:
 
     def predict(self, query_points, bandwidth, n_neighbors=None):
         """
-        Calculate dependent variable predictions at ``query_points``. (:math:`v` in the class equations)
+        Calculate dependent variable predictions at ``query_points``.
 
         :param query_points:
             array of independent variable points to query the model (n_points x n_independent_variables)

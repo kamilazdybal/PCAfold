@@ -30,11 +30,9 @@ this software, such as K-Means algorithm or Artificial Neural Networks.
 
 **PCAfold** requires `python3.7` and the following packages:
 
-- `copy`
 - `Cython`
 - `matplotlib`
 - `numpy`
-- `random`
 - `scipy`
 
 ### Build from source
@@ -49,7 +47,9 @@ cd PCAfold
 Run the `setup.py` script as below to complete the installation:
 
 ```
+python3.7 setup.py build_ext --inplace
 python3.7 setup.py install
+
 ```
 
 You are ready to `import PCAfold`!

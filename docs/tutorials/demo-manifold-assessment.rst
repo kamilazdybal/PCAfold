@@ -13,7 +13,7 @@ interest.
 
     import numpy as np
     import matplotlib.pyplot as plt
-    from PCAfold import compute_normalized_variance, PCA, logistic_fit, assess_manifolds
+    from PCAfold import compute_normalized_variance, PCA, logistic_fit, assess_manifolds, plot_normalized_variance, plot_normalized_variance_comparison
 
 Here we are creating a two-dimensional manifold to assess with a
 dependent variable. Independent variables :math:`x` and :math:`y` and
@@ -42,6 +42,7 @@ for a grid :math:`g` between [-0.5,1].
     y = np.cos(grid)**2
 
     f = grid**3+grid
+    depvar_name = 'f' # dependent variable name
 
     plt.scatter(x, y, c=f, s=5, cmap='rainbow')
     plt.colorbar()
@@ -89,12 +90,25 @@ models for accurate representations of the dependent variables of
 interest. Details on the normalized variance equations may be found in
 the documentation.
 
-We will be defining an array for the bandwidths in order for the same
-values to be applied to our manifolds of interest, but by default,
-values are computed according to interpoint distances. These bandwidths
-are applied to the independent variables after they are centered and
-scaled inside a unit box (by default), and therefore are referred to as
-normalized bandwidth in the following plots.
+The bandwidths are applied to the independent variables after they are
+centered and scaled inside a unit box (by default). The bandwidth values
+may be computed by default according to interpoint distances or may be
+specified directly by the user.
+
+Below is a demonstration of using default bandwidth values and plotting
+the resulting normalized variance.
+
+.. code:: python
+
+    orig2D_default  = compute_normalized_variance(indepvars, depvars, [depvar_name])
+
+    plt = plot_normalized_variance(orig2D_default, figure_size=(6,4))
+    plt.show()
+
+.. image:: ../images/output_7_0.png
+
+Now we will define an array for the bandwidths in order for the same
+values to be applied to our manifolds of interest.
 
 .. code:: python
 
@@ -121,21 +135,11 @@ values.
 
 .. code:: python
 
-    plt.semilogx(orig1Dx.bandwidth_values,orig1Dx.normalized_variance[depvar_name],label='orig,1D_x')
-    plt.semilogx(orig1Dy.bandwidth_values,orig1Dy.normalized_variance[depvar_name],label='orig,1D_y')
-    plt.semilogx(orig2D.bandwidth_values,orig2D.normalized_variance[depvar_name],label='orig,2D')
-    plt.grid()
-    plt.legend()
-    plt.ylabel('normalized variance')
-    plt.xlabel('normalized bandwidth')
-    plt.title('normalized variance for '+depvar_name)
-    plt.xlim([np.min(bandwidth),np.max(bandwidth)])
+    plt = plot_normalized_variance_comparison((orig1Dx, orig1Dy, orig2D), ([], [], []), ('Blues', 'Reds', 'Greens'), title='Normalized variance for '+depvar_name, figure_size=(7,4))
+    plt.legend(['orig,1D_x', 'orig,1D_y', 'orig,2D'])
     plt.show()
 
-
-
-
-.. image:: ../images/output_9_0.png
+.. image:: ../images/output_11_0.png
 
 
 The ``assess_manifolds`` function may be used for a clearer visual
@@ -191,7 +195,7 @@ indicates these representations have overlapping states.
 
 
 
-.. image:: ../images/output_11_0.png
+.. image:: ../images/output_13_0.png
 
 
 .. parsed-literal::
@@ -228,7 +232,7 @@ second plot is for the two-dimensional manifold.
 
 
 
-.. image:: ../images/output_13_1.png
+.. image:: ../images/output_15_1.png
 
 
 .. parsed-literal::
@@ -240,7 +244,7 @@ second plot is for the two-dimensional manifold.
 
 
 
-.. image:: ../images/output_13_3.png
+.. image:: ../images/output_15_3.png
 
 
 .. parsed-literal::
@@ -286,11 +290,11 @@ dimensions for the PCA manifolds are referred to as PC1 and PC2.
 
 
 
-.. image:: ../images/output_15_0.png
+.. image:: ../images/output_17_0.png
 
 
 
-.. image:: ../images/output_15_1.png
+.. image:: ../images/output_17_1.png
 
 
 We call ``compute_normalized_variance`` in order to assess these
@@ -338,7 +342,7 @@ other manifolds onto one dimension.
 
 
 
-.. image:: ../images/output_19_0.png
+.. image:: ../images/output_21_0.png
 
 
 .. parsed-literal::
