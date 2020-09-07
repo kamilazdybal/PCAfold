@@ -1,4 +1,4 @@
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/pcafold/badge/?version=latest)](https://pcafold.readthedocs.io/en/latest/?badge=latest)
 
 # PCAfold
@@ -9,14 +9,16 @@ It incorporates a variety of data pre-processing tools (including data clusterin
 and sampling), uses PCA as a dimensionality reduction technique and introduces
 metrics to judge the topology of the low-dimensional manifolds.
 
-### [PCAfold Documentation](https://pcafold.readthedocs.io/en/latest/)
+## [PCAfold documentation](https://pcafold.readthedocs.io/en/latest/) at Read the Docs
+
+Software documentation contains a thorough user guide including equations, references and example code snippets. Numerous illustrative tutorials and demos are presented as well. The corresponding Jupyter notebooks can also be found in the `docs/tutorials` directory.
 
 ## Software architecture
 
 A general overview for using **PCAfold** modules is presented in the diagram
 below:
 
-![Screenshot](docs/images/PCAfold-diagram.png)
+![Screenshot](docs/images/PCAfold-software-architecture.png)
 
 Each module's functionalities can also be used as a standalone tool for
 performing a specific task and can easily combine with techniques outside of
@@ -52,37 +54,6 @@ python3.7 setup.py install
 
 You are ready to `import PCAfold`!
 
-### Local documentation build
-
-To build the documentation locally, you need `sphinx` installed on your machine,
-along with the following extensions:
-
-```
-sphinx.ext.todo
-sphinx.ext.githubpages
-sphinx.ext.autodoc
-sphinx.ext.napoleon
-sphinx.ext.mathjax
-sphinx.ext.autosummary
-sphinxcontrib.bibtex
-```
-
-Then, navigate to `docs/` directory and build the documentation:
-
-```
-sphinx-build -b html . builddir
-
-make html
-```
-
-Documentation main page `_build/html/index.html` can be opened in a web browser.
-
-In MacOS you can open it directly from the terminal:
-
-```
-open _build/html/index.html
-```
-
 ### Testing
 
 To run regression tests from the base repo directory run:
@@ -96,15 +67,9 @@ To switch verbose on, use the `-v` flag.
 All tests should be passing. If any of the tests is failing and you can’t sort
 out why, please open an issue on [GitLab](https://gitlab.multiscale.utah.edu/common/PCAfold).
 
-## Plotting
+## Authors and contacts
 
-Some functions within **PCAfold** result in plot outputs. Global styles for the
-plots are set using the `styles.py` file. This file can be updated with new
-settings that will be seen globally by **PCAfold** modules. Re-build the project
-after changing `styles.py` file:
-
-```
-python3.7 setup.py install
-```
-
-All plotting functions return handles to generated plots.
+- **Kamila Zdybał**, *Université Libre de Bruxelles*, `Kamila.Zdybal@ulb.ac.be`
+- **Elizabeth Armstrong**, *The University of Utah*, `Elizabeth.Armstrong@chemeng.utah.edu`
+- **Alessandro Parente**, *Université Libre de Bruxelles*, `Alessandro.Parente@ulb.ac.be`
+- **James C. Sutherland**, *The University of Utah*, `James.Sutherland@chemeng.utah.edu`
