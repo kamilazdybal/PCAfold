@@ -89,6 +89,22 @@ Class ``KReg``
 
 --------------------------------------------------------------------------------
 
+******************
+Plotting functions
+******************
+
+``plot_normalized_variance``
+============================
+
+.. autofunction:: PCAfold.analysis.plot_normalized_variance
+
+``plot_normalized_variance_comparison``
+=======================================
+
+.. autofunction:: PCAfold.analysis.plot_normalized_variance_comparison
+
+--------------------------------------------------------------------------------
+
 ************
 Bibliography
 ************

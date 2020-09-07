@@ -15,6 +15,7 @@ from scipy.spatial import KDTree
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from matplotlib.cm import ScalarMappable
+from PCAfold.styles import *
 
 
 class VarianceData:
@@ -317,3 +318,207 @@ def assess_manifolds(variancedata_dict, assess_method='min', show_plot=True):
         plt.show()
 
     return datadict
+
+################################################################################
+#
+# Plotting functions
+#
+################################################################################
+
+def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title=None, save_filename=None):
+    """
+    This function plots normalized variance :math:`\mathcal{N}(\sigma)` over
+    bandwith values :math:`\sigma` from an object of a ``VarianceData`` class.
+
+    *Note:* this function can accomodate plotting up to 18 variables at once.
+    You can specify which variables should be plotted using ``plot_variables`` list.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, plot_normalized_variance
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+
+        # Plot normalized variance quantities:
+        plt = plot_normalized_variance(variance_data, plot_variables=[0,1,2], color_map='Blues', figure_size=(10,5), title='Normalized variance', save_filename='N.pdf')
+        plt.close()
+
+    :param variance_data:
+        an object of ``VarianceData`` class objects whose normalized variance quantities
+        should be plotted.
+    :param plot_variables: (optional)
+        list of integers specifying indices of variables to be plotted.
+        By default, all variables are plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *Blues*.
+    :param figure_size:
+        tuple specifying figure size.
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from matplotlib import cm
+    color_map_colors = cm.get_cmap(color_map)
+
+    markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
+
+    # Extract quantities from the VarianceData class object:
+    variable_names = variance_data.variable_names
+    bandwidth_values = variance_data.bandwidth_values
+    normalized_variance = variance_data.normalized_variance
+
+    if len(plot_variables) != 0:
+        variables_to_plot = []
+        for i in plot_variables:
+            variables_to_plot.append(variable_names[i])
+    else:
+        variables_to_plot = variable_names
+
+    n_variables = len(variables_to_plot)
+
+    if n_variables == 1:
+        variable_colors = np.flipud(color_map_colors([0.8]))
+    else:
+        variable_colors = np.flipud(color_map_colors(np.linspace(0.2, 0.8, n_variables)))
+
+    figure = plt.figure(figsize=figure_size)
+
+    # Plot the normalized variance:
+    for i, variable_name in enumerate(variables_to_plot):
+        plt.semilogx(bandwidth_values, normalized_variance[variable_name], markers_list[i], label=variable_name, color=variable_colors[i])
+
+    plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
+    plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
+    plt.grid(alpha=grid_opacity)
+    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
+def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tuple, color_map_tuple, figure_size=(10,5), title=None, save_filename=None):
+    """
+    This function plots a comparison of normalized variance :math:`\mathcal{N}(\sigma)` over
+    bandwith values :math:`\sigma` from several objects of a ``VarianceData`` class.
+
+    *Note:* this function can accomodate plotting up to 18 variables at once.
+    You can specify which variables should be plotted using ``plot_variables`` list.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, plot_normalized_variance_comparison
+        import numpy as np
+
+        # Generate dummy data sets:
+        X = np.random.rand(100,5)
+        Y = np.random.rand(100,5)
+
+        # Perform PCA to obtain low-dimensional manifolds:
+        pca_X = PCA(X, n_components=2)
+        pca_Y = PCA(Y, n_components=2)
+        principal_components_X = pca_X.transform(X)
+        principal_components_Y = pca_Y.transform(Y)
+
+        # Compute normalized variance quantities:
+        variance_data_X = compute_normalized_variance(principal_components_X, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+        variance_data_Y = compute_normalized_variance(principal_components_Y, Y, depvar_names=['F', 'G', 'H', 'I', 'J'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+
+        # Plot a comparison of normalized variance quantities:
+        plt = plot_normalized_variance_comparison((variance_data_X, variance_data_Y), ([0,1,2], [0,1,2]), ('Blues', 'Reds'), title='Normalized variance comparison', save_filename='N.pdf')
+        plt.close()
+
+    :param variance_data_tuple:
+        a tuple of ``VarianceData`` class objects whose normalized variance quantities
+        should be compared on one plot. For instance: ``(variance_data_1, variance_data_2)``.
+    :param plot_variables_tuple:
+        list of integers specifying indices of variables to be plotted.
+        It should have as many elements as there are ``VarianceData`` class objects supplied.
+        For instance: ``([], [])`` will plot all variables.
+    :param color_map_tuple:
+        colormap to use as per ``matplotlib.cm``.
+        It should have as many elements as there are ``VarianceData`` class objects supplied.
+        For instance: ``('Blues', 'Reds')``.
+    :param figure_size:
+        tuple specifying figure size.
+    :param title: (optional)
+        boolean or string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from matplotlib import cm
+
+    markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
+
+    figure = plt.figure(figsize=figure_size)
+
+    variable_count = 0
+
+    for variance_data, plot_variables, color_map in zip(variance_data_tuple, plot_variables_tuple, color_map_tuple):
+
+        color_map_colors = cm.get_cmap(color_map)
+
+        # Extract quantities from the VarianceData class object:
+        variable_names = variance_data.variable_names
+        bandwidth_values = variance_data.bandwidth_values
+        normalized_variance = variance_data.normalized_variance
+
+        if len(plot_variables) != 0:
+            variables_to_plot = []
+            for i in plot_variables:
+                variables_to_plot.append(variable_names[i])
+        else:
+            variables_to_plot = variable_names
+
+        n_variables = len(variables_to_plot)
+
+        if n_variables == 1:
+            variable_colors = np.flipud(color_map_colors([0.8]))
+        else:
+            variable_colors = np.flipud(color_map_colors(np.linspace(0.2, 0.8, n_variables)))
+
+        # Plot the normalized variance:
+        for i, variable_name in enumerate(variables_to_plot):
+            plt.semilogx(bandwidth_values, normalized_variance[variable_name], markers_list[variable_count], label=variable_name, color=variable_colors[i])
+
+            variable_count = variable_count + 1
+
+    plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
+    plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
+    plt.grid(alpha=grid_opacity)
+    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt

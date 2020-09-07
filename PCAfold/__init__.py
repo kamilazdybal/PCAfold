@@ -43,3 +43,5 @@ from .analysis import compute_normalized_variance
 from .analysis import r2value
 from .analysis import logistic_fit
 from .analysis import assess_manifolds
+from .analysis import plot_normalized_variance
+from .analysis import plot_normalized_variance_comparison

@@ -2328,7 +2328,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         eigenvectors = pca_X.A
 
         # Plot second and third eigenvector:
-        plts = plot_eigenvectors(eigenvectors[:,1:3], eigenvectors_indices=[1,2], variable_names=['$a_1$', '$a_2$', '$a_3$'], plot_absolute=False, bar_color=None, title='PCA on X', save_filename='PCA-X.pdf')
+        plts = plot_eigenvectors(eigenvectors[:,[1,2]], eigenvectors_indices=[1,2], variable_names=['$a_1$', '$a_2$', '$a_3$'], plot_absolute=False, bar_color=None, title='PCA on X', save_filename='PCA-X.pdf')
         plts[0].close()
         plts[1].close()
 
