@@ -362,7 +362,7 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         By default, all variables are plotted.
     :param color_map: (optional)
         colormap to use as per ``matplotlib.cm``. Default is *Blues*.
-    :param figure_size:
+    :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
         boolean or string specifying plot title. If set to ``None``
@@ -461,7 +461,7 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         colormap to use as per ``matplotlib.cm``.
         It should have as many elements as there are ``VarianceData`` class objects supplied.
         For instance: ``('Blues', 'Reds')``.
-    :param figure_size:
+    :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
         boolean or string specifying plot title. If set to ``None``
