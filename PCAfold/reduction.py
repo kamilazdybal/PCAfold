@@ -1262,7 +1262,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     :param biasing_option:
         integer specifying biasing option. Can only attain values 1, 2, 3 or 4.
     :param X_source: (optional)
-        source terms :math:`\mathbf{S}` corresponding to the state-space
+        source terms :math:`\mathbf{S_X}` corresponding to the state-space
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
         representing reactive flows. More information can be found in :cite:`Sutherland2009`.
 
@@ -1275,13 +1275,13 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         - **pc_scores** - :math:`q`-first biased Principal Components :math:`\mathbf{Z_r}`.
         - **pc_sources** - :math:`q`-first biased sources of Principal Components :math:`\mathbf{S_{Z_r}}`. More information can be found in :cite:`Sutherland2009`.\
         This parameter is only computed if ``X_source`` input parameter was specified.
-        - **C** - a vector of centers that were used to pre-process the\
+        - **C** - a vector of centers :math:`\mathbf{C}` that were used to pre-process the\
         original full data set :math:`\mathbf{X}`.
-        - **D** - a vector of scales that were used to pre-process the\
+        - **D** - a vector of scales :math:`\mathbf{D}` that were used to pre-process the\
         original full data set :math:`\mathbf{X}`.
-        - **C_r** - a vector of centers that were used to pre-process the\
+        - **C_r** - a vector of centers :math:`\mathbf{C_r}` that were used to pre-process the\
         sampled data set :math:`\mathbf{X_r}`.
-        - **D_r** - a vector of scales that were used to pre-process the\
+        - **D_r** - a vector of scales :math:`\mathbf{D_r}` that were used to pre-process the\
         sampled data set :math:`\mathbf{X_r}`.
     """
 
@@ -1937,7 +1937,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param X_source:
-        source terms :math:`\mathbf{S}` corresponding to the state-space
+        source terms :math:`\mathbf{S_X}` corresponding to the state-space
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
         representing reactive flows. More information can be found in :cite:`Sutherland2009`.
     :param n_components:
