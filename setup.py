@@ -11,7 +11,7 @@ is_mac = platform.system() == 'Darwin'
 if is_mac:
     cython_extra_compile_args += ['-stdlib=libc++']
 
-kreg_cython = cythonize(Extension(name='PCAfold.kernel_regression',
+kreg_cython = cythonize(Extension(name='src.kernel_regression',
                                   sources=[os.path.join('src', 'kernel_regression_cython.pyx')],
                                   extra_compile_args=cython_extra_compile_args,
                                   language='c++'))
