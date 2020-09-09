@@ -1573,3 +1573,181 @@ class TestReduction(unittest.TestCase):
             plt.close()
         except Exception:
             self.assertTrue(False)
+
+    def test_calculate_r2_on_all_avaiable_scalings(self):
+
+        test_data_set = np.random.rand(1000,20)
+        r2_test = np.ones((20,))
+
+        try:
+            pca_X = PCA(test_data_set, scaling='none', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='auto', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='pareto', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='range', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='level', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='max', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='poisson', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_2', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_3', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_4', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+    def test_calculate_r2_on_all_avaiable_scalings_with_no_centering(self):
+
+        test_data_set = np.random.rand(1000,20)
+        r2_test = np.ones((20,))
+
+        try:
+            pca_X = PCA(test_data_set, scaling='none', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='auto', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='pareto', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='range', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='level', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='max', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='poisson', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_2', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_3', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_4', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
