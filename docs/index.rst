@@ -46,4 +46,5 @@ section for possible workflows that can be achieved with **PCAfold**.
    tutorials/demo-plotting-pca
    tutorials/demo-global-vs-local-pca
    tutorials/demo-pca-on-sampled-data-sets
+   tutorials/demo-handling-source-terms
    tutorials/demo-manifold-assessment
