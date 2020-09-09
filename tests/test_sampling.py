@@ -597,3 +597,359 @@ class TestDataSampler(unittest.TestCase):
         sampling = DataSampler(idx_random, idx_test=idx_test, random_seed=None, verbose=False)
         with self.assertRaises(ValueError):
             (idx_train, idx_test) = sampling.random(80, test_selection_option=2)
+
+class TestRandomSeed(unittest.TestCase):
+
+    def test_random_seed_number(self):
+
+        idx = np.zeros((1000,))
+        idx[500:800] = 1
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.number(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.number(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.number(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.number(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.number(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.number(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.number(40, test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.number(40, test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.number(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.number(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.number(40, test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.number(40, test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_random_seed_percentage(self):
+
+        idx = np.zeros((1000,))
+        idx[500:800] = 1
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.percentage(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.percentage(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.percentage(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.percentage(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.percentage(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.percentage(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.percentage(40, test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.percentage(40, test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.percentage(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.percentage(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.percentage(40, test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.percentage(40, test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_random_seed_manual_by_number(self):
+
+        idx = np.zeros((1000,))
+        idx[500:800] = 1
+
+        sampling_dictionary_number = {0:300, 1:150}
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='number', test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_random_seed_manual_by_percentage(self):
+
+        idx = np.zeros((1000,))
+        idx[500:800] = 1
+
+        sampling_dictionary_number = {0:30, 1:15}
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.manual(sampling_dictionary_number, sampling_type='percentage', test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+    def test_random_seed_random(self):
+
+        idx = np.zeros((1000,))
+        idx[500:800] = 1
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.random(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.random(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.random(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.random(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.random(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.random(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.random(40, test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.random(40, test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+            (idx_train, idx_test) = sampling.random(40, test_selection_option=1)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=123, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.random(40, test_selection_option=1)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+            (idx_train, idx_test) = sampling.random(40, test_selection_option=2)
+
+            for i in range(0,10):
+                sampling = DataSampler(idx, idx_test=[1,100,200], random_seed=1234, verbose=False)
+                (idx_train_i, idx_test_i) = sampling.random(40, test_selection_option=2)
+                self.assertTrue((idx_train_i == idx_train).all())
+        except Exception:
+            self.assertTrue(False)
