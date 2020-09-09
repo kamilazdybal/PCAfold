@@ -8,15 +8,20 @@ Data preprocessing
 including centering and scaling, outlier detection and removal, data clustering
 and data sampling.
 
+.. note:: The format for the user-supplied input data matrix
+  :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}` common to all modules is that
+  :math:`N` observations are stored in rows and :math:`Q` variables are stored
+  in columns. The initial dimensionality of the data set is determined by the
+  number of variables :math:`Q`. Typically, :math:`N \gg Q`.
+
+  The corresponding representation of the user-supplied data set in the code
+  is ``X`` and the dimensions are denoted as ``(n_observations, n_variables)``.
+
 --------------------------------------------------------------------------------
 
 *****************
 Data manipulation
 *****************
-
-.. note:: It is assumed that the rows of the data set :math:`\mathbf{X}` correspond to
-  observations and columns correspond to variables.
-  It has dimensions ``(n_observations, n_variables)``.
 
 This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.
@@ -129,7 +134,7 @@ Auxiliary functions
 Data sampling
 *************
 
-Functions for splitting data sets into train and test data for use in machine learning algorithms.
+This section includes functions for splitting data sets into train and test data for use in machine learning algorithms.
 Apart from random splitting that can be achieved with the commonly used
 `sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_,
 extended methods are implemented here that allow for purposive sampling :cite:`Neyman1992`,

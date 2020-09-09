@@ -7,15 +7,20 @@ Data reduction
 ``reduction`` module contains functions for performing Principal Component
 Analysis (PCA).
 
+.. note:: The format for the user-supplied input data matrix
+  :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}` common to all modules is that
+  :math:`N` observations are stored in rows and :math:`Q` variables are stored
+  in columns. The initial dimensionality of the data set is determined by the
+  number of variables :math:`Q`. Typically, :math:`N \gg Q`.
+
+  The corresponding representation of the user-supplied data set in the code
+  is ``X`` and the dimensions are denoted as ``(n_observations, n_variables)``.
+
 --------------------------------------------------------------------------------
 
 ****************************
 Principal Component Analysis
 ****************************
-
-.. note:: It is assumed that the rows of the data set :math:`\mathbf{X}` on which PCA is
-  performed correspond to observations and columns correspond to variables.
-  It has dimensions ``(n_observations, n_variables)``.
 
 Class ``PCA``
 =============
