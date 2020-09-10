@@ -84,25 +84,28 @@ An example function is shown below:
 
   def local_pca(X, idx):
 
-      n_k = len(np.unique(idx))
+      n_clusters = len(np.unique(idx))
 
       # Initialize the outputs:
       eigenvectors = []
       eigenvalues = []
-      PC_scores = []
+      principal_components = []
 
-      for k in range(0, n_k):
+      for k in range(0, n_clusters):
 
           # Extract local cluster:
-          X_k = X[idx==k]
+          X_k = X[idx==k,:]
 
           # Perform PCA in a local cluster:
-          pca = PCA(X_k, 'none', 2, use_eigendec=True)
-          PC_scores = pca.transform(X_k, nocenter=False)
+          pca = PCA(X_k, scaling='none', n_components=2, use_eigendec=True)
+          Z = pca.transform(X_k, nocenter=False)
+
+          # Save the local eigenvectors, eigenvalues and PCs:
           eigenvectors.append(pca.A)
           eigenvalues.append(pca.L)
+          principal_components.append(Z)
 
-      return (eigenvectors, eigenvalues, PC_scores)
+      return (eigenvectors, eigenvalues, principal_components)
 
 Finally, we plot the identified global and local eigenvectors on top of the synthetic data sets.
 The visual result of performing PCA globally and locally can be seen below:

@@ -62,13 +62,13 @@ Two weight normalizations are available:
 
 - No normalization. To use this variant set ``plot_absolute=False``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-eigenvector-1.png
+.. image:: ../images/eigenvector-1-plotting-pca.png
     :width: 500
     :align: center
 
 - Absolute values. To use this variant set ``plot_absolute=True``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-absolute-eigenvector-1.png
+.. image:: ../images/eigenvector-1-plotting-pca-absolute.png
     :width: 500
     :align: center
 
