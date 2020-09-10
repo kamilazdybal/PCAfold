@@ -2309,7 +2309,7 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
 
     return plt
 
-def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None):
+def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_path=None, save_filename=None):
     """
     This function plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
@@ -2350,12 +2350,15 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
     :param title: (optional)
         string specifying plot title. If set to ``None`` title will not be
         plotted.
+    :param save_path: (optional)
+        string specifying plot save location.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
+        string specifying plot save filename. If set to ``None``
         plot will not be saved.
         You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
-        is ``.png``.
+        is ``.png``. Note that a prefix ``eigenvector-#`` will be added out front
+        the filename, where ``#`` is the number of the currently plotted eigenvector.
 
     :return:
         - **plot_handles** - list of plot handles.
@@ -2412,7 +2415,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
             plt.title(title, fontsize=font_title, **csfont)
 
         if save_filename != None:
-            plt.savefig('eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename, dpi = 500, bbox_inches='tight')
+            plt.savefig(save_path + 'eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename, dpi = 500, bbox_inches='tight')
 
         plot_handles.append(plt)
 
