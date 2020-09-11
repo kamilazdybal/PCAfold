@@ -46,23 +46,23 @@ def kreg_evaluate(np.ndarray[double, ndim=2] x_np,
 class KReg:
     """
     A class for building and evaluating Nadaraya-Watson kernel regression models using a Gaussian kernel.
-    The regression estimator for dependent variables :math:`v` corresponding to independent variables :math:`u` can be
-    evaluated using a set of :math:`n` observations of independent variables (:math:`x`) and dependent variables
+    The regression estimator :math:`\\mathcal{K}(u; \\sigma)` evaluated at independent variables :math:`u` can be
+    expressed using a set of :math:`n` observations of independent variables (:math:`x`) and dependent variables
     (:math:`y`) as follows
 
     .. math::
 
-            v(u) = \\frac{\\sum_{i=1}^{n} \\mathcal{K}(u; x_i, \\sigma) y_i}{\\sum_{i=1}^{n} \\mathcal{K}(u ;x_i, \\sigma)}
+            \\mathcal{K}(u; \\sigma) = \\frac{\\sum_{i=1}^{n} \\mathcal{W}_i(u; \\sigma) y_i}{\\sum_{i=1}^{n} \\mathcal{W}_i(u; \\sigma)}
 
     where a Gaussian kernel of bandwidth :math:`\\sigma` is used as
 
     .. math::
-        \\mathcal{K}(u; x_i, \\sigma) = \\exp \\left( \\frac{-|| x_i - u ||_2^2}{\\sigma^2} \\right)
+        \\mathcal{W}_i(u; \\sigma) = \\exp \\left( \\frac{-|| x_i - u ||_2^2}{\\sigma^2} \\right)
 
     Both constant and variable bandwidths are supported. Kernels with anisotropic bandwidths are calculated as
 
     .. math::
-        \\mathcal{K}(u; x_i, \\sigma) = \\exp \\left( -|| \\text{diag}(\\sigma)^{-1} (x_i - u) ||_2^2 \\right)
+        \\mathcal{W}_i(u; \\sigma) = \\exp \\left( -|| \\text{diag}(\\sigma)^{-1} (x_i - u) ||_2^2 \\right)
 
     where :math:`\\sigma` is a vector of bandwidths per independent variable.
 
@@ -209,7 +209,7 @@ class KReg:
 
     def predict(self, query_points, bandwidth, n_neighbors=None):
         """
-        Calculate dependent variable predictions at ``query_points``. (:math:`v` in the class equations)
+        Calculate dependent variable predictions at ``query_points``.
 
         :param query_points:
             array of independent variable points to query the model (n_points x n_independent_variables)

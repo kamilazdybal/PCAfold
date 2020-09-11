@@ -4,8 +4,17 @@
 Manifold analysis
 #################
 
-``analysis`` module contains functions for assessing the intrinsic
+The ``analysis`` module contains functions for assessing the intrinsic
 dimensionality and quality of manifolds.
+
+.. note:: The format for the user-supplied input data matrix
+  :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}` common to all modules is that
+  :math:`N` observations are stored in rows and :math:`Q` variables are stored
+  in columns. The initial dimensionality of the data set is determined by the
+  number of variables :math:`Q`. Typically, :math:`N \gg Q`.
+
+  The corresponding representation of the user-supplied data set in the code
+  is ``X`` and the dimensions are denoted as ``(n_observations, n_variables)``.
 
 --------------------------------------------------------------------------------
 
@@ -86,6 +95,22 @@ Class ``KReg``
 =========================================================
 
 .. autofunction:: PCAfold.kernel_regression.KReg.compute_nearest_neighbors_bandwidth_anisotropic
+
+--------------------------------------------------------------------------------
+
+******************
+Plotting functions
+******************
+
+``plot_normalized_variance``
+============================
+
+.. autofunction:: PCAfold.analysis.plot_normalized_variance
+
+``plot_normalized_variance_comparison``
+=======================================
+
+.. autofunction:: PCAfold.analysis.plot_normalized_variance_comparison
 
 --------------------------------------------------------------------------------
 

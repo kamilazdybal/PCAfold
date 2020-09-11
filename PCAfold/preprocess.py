@@ -1,3 +1,14 @@
+"""preprocess.py: module for data pre-processing."""
+
+__author__ = "Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
+__copyright__ = "Copyright (c) 2020, Kamila Zdybal and Elizabeth Armstrong"
+__credits__ = ["Department of Chemical Engineering, University of Utah, Salt Lake City, Utah, USA", "Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
+__license__ = "MIT"
+__version__ = "1.0.0"
+__maintainer__ = ["Kamila Zdybal", "Elizabeth Armstrong"]
+__email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "James.Sutherland@chemeng.utah.edu"]
+__status__ = "Production"
+
 import numpy as np
 import random
 import copy
@@ -10,360 +21,937 @@ from PCAfold.styles import *
 #
 ################################################################################
 
+_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '-1to1', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+
 def center_scale(X, scaling, nocenter=False):
     """
-    This function centers and scales the data set. Centering is always performed
-    by subtracting the mean of each column:
+    This function centers and scales the data set.
+
+    In the discussion below we understand that :math:`\mathbf{X}_i` is the :math:`i^{th}` column
+    of :math:`\mathbf{X}`.
+
+    - Centering is performed by subtracting a center :math:`C_i` from
+      :math:`\mathbf{X}_i`, where centers for all columns are stored
+      in a vector :math:`\mathbf{C}`:
+
+        .. math::
+
+            \mathbf{X_c} = \mathbf{X} - \mathbf{C}
+
+      Centers for each column are computed as:
+
+        .. math::
+
+            C_i = mean(\mathbf{X}_i)
+
+      The only exception is the *-1 to 1* scaling which introduces a different
+      quantity to center each column.
+
+    - Scaling is performed by dividing :math:`\mathbf{X}_i` by a scaling
+      factor :math:`d_i`, where scaling factors
+      for all columns are stored in a vector :math:`\mathbf{D}`:
+
+      .. math::
+
+          \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
+
+    If both centering and scaling is applied:
 
     .. math::
 
-        \mathbf{X_c} = \mathbf{X} - mean(\mathbf{X})
-
-    Scaling is performed by dividing :math:`i^{th}` column by a certain scaling
-    factor :math:`d_i`, where scaling factors for all columns are stored in a vector
-    :math:`\mathbf{d}`:
-
-    .. math::
-
-        \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{d}^{-1}
+        \mathbf{X_{cs}} = (\mathbf{X} - \mathbf{C}) \\cdot \mathbf{D}^{-1}
 
     Several scaling options are implemented here:
 
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Scaling method  | ``scaling`` | Scaling factor                                                   |
-    +=================+=============+==================================================================+
-    | None            | ``'none'``  | 1                                                                |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Auto            | ``'auto'``  | :math:`\sigma`                                                   |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Pareto          | ``'pareto'``| :math:`\sigma^2`                                                 |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Vast            | ``'vast'``  | :math:`\sigma^2 / mean(\mathbf{X})`                              |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Range           | ``'range'`` | :math:`max(\mathbf{X}) - min(\mathbf{X})`                        |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Level           | ``'level'`` | :math:`mean(\mathbf{X})`                                         |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Max             | ``'max'``   | :math:`max(\mathbf{X})`                                          |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Poisson         |``'poisson'``| :math:`\sqrt{mean(\mathbf{X})}`                                  |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Vast-2          | ``'vast_2'``| :math:`\sigma^2 \cdot k^2 / mean(\mathbf{X})`                    |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Vast-3          | ``'vast_3'``| :math:`\sigma^2 \cdot k^2 / max(\mathbf{X})`                     |
-    +-----------------+-------------+------------------------------------------------------------------+
-    | Vast-4          | ``'vast_4'``| :math:`\sigma^2 \cdot k^2 / (max(\mathbf{X}) - min(\mathbf{X}))` |
-    +-----------------+-------------+------------------------------------------------------------------+
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Scaling method             | ``scaling``              | Scaling factor :math:`d_i`                                         |
+    +============================+==========================+====================================================================+
+    | None                       | ``'none'``               | 1                                                                  |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Auto                       | ``'auto'`` or ``'std'``  | :math:`\sigma`                                                     |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Pareto :cite:`Noda2008`    | ``'pareto'``             | :math:`\sigma^2`                                                   |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | VAST :cite:`Keun2003`      | ``'vast'``               | :math:`\sigma^2 / mean(\mathbf{X}_i)`                              |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Range                      | ``'range'``              | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                      |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | | -1 to 1                  | | ``'-1to1'``            | | :math:`d_i = 0.5 \cdot (max(\mathbf{X}_i) - min(\mathbf{X}_i))`  |
+    | |                          | |                        | | :math:`C_i = 0.5 \cdot (max(\mathbf{X}_i) + min(\mathbf{X}_i))`  |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Level                      | ``'level'``              | :math:`mean(\mathbf{X}_i)`                                         |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Max                        | ``'max'``                | :math:`max(\mathbf{X}_i)`                                          |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Poisson :cite:`Keenan2004` |``'poisson'``             | :math:`\sqrt{mean(\mathbf{X}_i)}`                                  |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Vast-2                     | ``'vast_2'``             | :math:`\sigma^2 k^2 / mean(\mathbf{X}_i)`                          |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Vast-3                     | ``'vast_3'``             | :math:`\sigma^2 k^2 / max(\mathbf{X}_i)`                           |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Vast-4                     | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(\mathbf{X}_i) - min(\mathbf{X}_i))`     |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
 
-    where :math:`\sigma` is standard deviation and :math:`k` is kurtosis.
+    where :math:`\sigma` is the standard deviation of :math:`\mathbf{X}_i`
+    and :math:`k` is the kurtosis of :math:`\mathbf{X}_i`.
 
-    When both centering and scaling is applied:
-
-    .. math::
-
-        \mathbf{X_{cs}} = (\mathbf{X} - mean(\mathbf{X})) \\cdot \mathbf{d}^{-1}
+    The effect of data pre-processing (including scaling) on low-dimensional manifolds was studied
+    in :cite:`Parente2013`.
 
     **Example:**
 
     .. code:: python
 
-        (X_cs, C, d) = center_scale(X, 'range', nocenter=False)
+        from PCAfold import center_scale
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Center and scale:
+        (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
 
     :param X:
-        data matrix to pre-process. Columns correspond to variables and rows
-        correspond to observations.
+        original data set :math:`\mathbf{X}`.
     :param scaling:
         string specifying the scaling methodology.
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
 
     :raises ValueError:
-        if ``scaling`` method is not within the available scalings.
+        if ``scaling`` method is not a string or is not within the available scalings.
+
+    :raises ValueError:
+        if ``nocenter`` is not a boolean.
 
     :return:
-        - **Xout** - the centered and scaled data
-        - **xbar** - vector containig centers of each variable.
-        - **d** - the value for scaling
+        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
     """
 
-    _scalings_list = ['none', 'auto', 'pareto', 'vast', 'range', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be a string.")
+    else:
+        if scaling.lower() not in _scalings_list:
+            raise ValueError("Unrecognized scaling method.")
 
-    if scaling.lower() not in _scalings_list:
-        raise ValueError("Unrecognized scaling method.")
+    if not isinstance(nocenter, bool):
+        raise ValueError("Parameter `nocenter` has to be a boolean.")
 
-    Xout = np.zeros_like(X, dtype=float)
-    xbar = X.mean(axis=0)
-    npts, nvar = X.shape
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        X = X[:,np.newaxis]
+        (n_observations, n_variables) = np.shape(X)
 
-    dev = 0 * xbar
-    kurt = 0 * xbar
+    X_cs = np.zeros_like(X, dtype=float)
+    X_center = X.mean(axis=0)
 
-    for i in range(0, nvar):
-        # calculate the standard deviation (required for some scalings)
+    dev = 0 * X_center
+    kurt = 0 * X_center
+
+    for i in range(0, n_variables):
+
+        # Calculate the standard deviation (required for some scalings):
         dev[i] = np.std(X[:, i], ddof=0)
 
-        # calculate the kurtosis (required for some scalings)
-        kurt[i] = np.sum((X[:, i] - xbar[i]) ** 4) / npts / (np.sum((X[:, i] - xbar[i]) ** 2) / npts) ** 2
+        # Calculate the kurtosis (required for some scalings):
+        kurt[i] = np.sum((X[:, i] - X_center[i]) ** 4) / n_observations / (np.sum((X[:, i] - X_center[i]) ** 2) / n_observations) ** 2
 
     scaling = scaling.upper()
     eps = np.finfo(float).eps
     if scaling == 'NONE' or scaling == '':
-        d = np.ones(nvar)
+       X_scale = np.ones(n_variables)
     elif scaling == 'AUTO' or scaling == 'STD':
-        d = dev
+       X_scale = dev
     elif scaling == 'VAST':
-        d = dev * dev / (xbar + eps)
+       X_scale = dev * dev / (X_center + eps)
     elif scaling == 'VAST_2':
-        d = dev * dev * kurt * kurt / (xbar + eps)
+       X_scale = dev * dev * kurt * kurt / (X_center + eps)
     elif scaling == 'VAST_3':
-        d = dev * dev * kurt * kurt / np.max(X, axis=0)
+       X_scale = dev * dev * kurt * kurt / np.max(X, axis=0)
     elif scaling == 'VAST_4':
-        d = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
+       X_scale = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
     elif scaling == 'RANGE':
-        d = np.max(X, axis=0) - np.min(X, axis=0)
+       X_scale = np.max(X, axis=0) - np.min(X, axis=0)
+    elif scaling == '-1TO1':
+       X_center = 0.5*(np.max(X, axis=0) + np.min(X, axis=0))
+       X_scale = 0.5*(np.max(X, axis=0) - np.min(X, axis=0))
     elif scaling == 'LEVEL':
-        d = xbar
+       X_scale = X_center
     elif scaling == 'MAX':
-        d = np.max(X, axis=0)
+       X_scale = np.max(X, axis=0)
     elif scaling == 'PARETO':
-        d = np.zeros(nvar)
-        for i in range(0, nvar):
-            d[i] = np.sqrt(np.std(X[:, i], ddof=0))
+       X_scale = np.zeros(n_variables)
+       for i in range(0, n_variables):
+           X_scale[i] = np.sqrt(np.std(X[:, i], ddof=0))
     elif scaling == 'POISSON':
-        d = np.sqrt(xbar)
+       X_scale = np.sqrt(X_center)
     else:
         raise ValueError('Unsupported scaling option')
 
-    for i in range(0, nvar):
+    for i in range(0, n_variables):
         if nocenter:
-            Xout[:, i] = (X[:, i]) / d[i]
+            X_cs[:, i] = (X[:, i]) / X_scale[i]
         else:
-            Xout[:, i] = (X[:, i] - xbar[i]) / d[i]
+            X_cs[:, i] = (X[:, i] - X_center[i]) / X_scale[i]
 
     if nocenter:
-        xbar = np.zeros(nvar)
+        X_center = np.zeros(n_variables)
 
-    return Xout, xbar, d
+    return(X_cs, X_center, X_scale)
 
-def invert_center_scale(X_cs, x_center, x_scale):
+def invert_center_scale(X_cs, X_center, X_scale):
     """
     This function inverts whatever centering and scaling was done by
     ``center_scale`` function:
 
     .. math::
 
-        \mathbf{X} = \mathbf{X_{cs}} \\cdot \mathbf{d} + \mathbf{C}
+        \mathbf{X} = \mathbf{X_{cs}} \\cdot \mathbf{D} + \mathbf{C}
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import center_scale, invert_center_scale
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Center and scale:
+        (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
+
+        # Uncenter and unscale:
+        X = invert_center_scale(X_cs, X_center, X_scale)
 
     :param X_cs:
-        data matrix to pre-process. Columns correspond to variables and rows
-        correspond to observations.
-    :param x_center:
+        centered and scaled data set :math:`\mathbf{X_{cs}}`.
+    :param X_center:
         vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-    :param x_scale:
-        vector of scales :math:`\mathbf{d}` applied on the original data set :math:`\mathbf{X}`.
+    :param X_scale:
+        vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
 
     :return:
-        - **X** - the original data set :math:`\mathbf{X}`.
+        - **X** - original data set :math:`\mathbf{X}`.
     """
 
-    X = np.zeros_like(X_cs, dtype=float)
+    try:
+        (_, n_variables) = np.shape(X_cs)
+    except:
+        n_variables = 1
 
-    for i in range(0, len(x_center)):
-        X[:, i] = X_cs[:, i] * x_scale[i] + x_center[i]
+    if n_variables == 1:
+        X = X_cs * X_scale + X_center
+    else:
+        X = np.zeros_like(X_cs, dtype=float)
+        for i in range(0, n_variables):
+            X[:, i] = X_cs[:, i] * X_scale[i] + X_center[i]
 
-    return X
+    return(X)
 
 class PreProcessing:
     """
-    This class performs basic data manipulation and stores the result of that
-    manipulation. Specifically:
+    This class performs a composition of data manipulation done by ``remove_constant_vars``
+    and ``center_scale`` functions on the original data set
+    :math:`\mathbf{X}`. It can be used to store the result of that manipulation.
+    Specifically, it:
 
-    - checks for the constant values and removes them,
+    - checks for constant columns in a data set and removes them,
     - centers and scales the data.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PreProcessing
+        import numpy as np
+
+        # Generate dummy data set with a constant variable:
+        X = np.random.rand(100,20)
+        X[:,5] = np.ones((100,))
+
+        # Instantiate PreProcessing class object:
+        preprocessed = PreProcessing(X, 'range', nocenter=False)
+
     :param X:
-        data matrix to pre-process. Columns correspond to variables and rows
-        correspond to observations.
+        original data set :math:`\mathbf{X}`.
     :param scaling:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
+
+    **Attributes:**
+
+        - **X_removed** - (read only) data set with removed constant columns.
+        - **idx_removed** - (read only) the indices of columns removed from :math:`\mathbf{X}`.
+        - **idx_retained** - (read only) the indices of columns retained in :math:`\mathbf{X}`.
+        - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
     """
 
     def __init__(self, X, scaling='none', nocenter=False):
 
-        self.manipulated, self.idx_removed, self.original, self.idx_retained = remove_constant_vars(X)
-        self.Xout, self.xbar, self.d = center_scale(X, scaling, nocenter=nocenter)
+        (self.__X_removed, self.__idx_removed, self.__idx_retained) = remove_constant_vars(X)
+        (self.__X_cs, self.__X_center, self.__X_scale) = center_scale(self.X_removed, scaling, nocenter=nocenter)
+
+    @property
+    def X_removed(self):
+        return self.__X_removed
+
+    @property
+    def idx_removed(self):
+        return self.__idx_removed
+
+    @property
+    def idx_retained(self):
+        return self.__idx_retained
+
+    @property
+    def X_cs(self):
+        return self.__X_cs
+
+    @property
+    def X_center(self):
+        return self.__X_center
+
+    @property
+    def X_scale(self):
+        return self.__X_scale
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
-    Remove any constant variables (columns) in the data set :math:`\mathbf{X}`.
-    Specifically pre-processing for PCA so the eigenvalue calculation
-    doesn't break.
+    This function removes any constant columns in the data set :math:`\mathbf{X}`.
+    The :math:`i^{th}` column :math:`\mathbf{X}_i` is considered constant if either of the following is true:
+
+    - the maximum of an absolute value of a column :math:`\mathbf{X}_i` is less than ``maxtol``:
+
+    .. math::
+
+        max(|\mathbf{X}_i|) < \\verb|maxtol|
+
+    - the ratio of the range of values in a column :math:`\mathbf{X}_i` to :math:`max(|\mathbf{X}_i|)` is less than ``rangetol``:
+
+    .. math::
+
+        \\frac{max(\mathbf{X}_i) - min(\mathbf{X}_i)}{max(|\mathbf{X}_i|)} < \\verb|rangetol|
+
+    Specifically, it can be used as pre-processing for PCA so the eigenvalue
+    calculation doesn't break.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import remove_constant_vars
+        import numpy as np
+
+        # Generate dummy data set with a constant variable:
+        X = np.random.rand(100,20)
+        X[:,5] = np.ones((100,))
+
+        # Remove the constant column:
+        (X_removed, idx_removed, idx_retained) = remove_constant_vars(X)
 
     :param X:
-        original data.
+        original data set :math:`\mathbf{X}`.
     :param maxtol:
-        tolerance for the maximum absolute value of a column (variable) in
-        ``X`` to be saved.
+        tolerance for :math:`max(|\mathbf{X}_i|)`.
     :param rangetol:
-        tolerance for the range (max-min) over the maximum absolute value of
-        a column (variable) in X to be saved.
+        tolerance for :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)` over :math:`max(|\mathbf{X}_i|)`.
 
     :return:
-        - **manipulated** - the manipulated data.
+        - **X_removed** - original data set :math:`\mathbf{X}` with any constant columns removed.
         - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
-        - **original** - the original data :math:`\mathbf{X}`.
         - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
     """
-    npts, nvar = X.shape
-    original = np.copy(X)
+
+    (n_observations, n_variables) = np.shape(X)
+
     idx_removed = []
     idx_retained = []
-    for i in reversed(range(0, nvar)):
+
+    for i in reversed(range(0, n_variables)):
+
         min = np.min(X[:, i], axis=0)
         max = np.max(X[:, i], axis=0)
         maxabs = np.max(np.abs(X[:, i]), axis=0)
+
         if (maxabs < maxtol) or ((max - min) / maxabs < rangetol):
             X = np.delete(X, i, 1)
             idx_removed.append(i)
         else:
             idx_retained.append(i)
-    manipulated = X
+
+    X_removed = X
     idx_removed = idx_removed[::-1]
     idx_retained = idx_retained[::-1]
-    return manipulated, idx_removed, original, idx_retained
 
-def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], title=None, save_filename=None):
+    return(X_removed, idx_removed, idx_retained)
+
+def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
     """
-    This function analyzes the change in normalized centers computed on the
-    sampled subset of the original data set :math:`\mathbf{X_r}` with respect
-    to the full original data set :math:`\mathbf{X}`.
+    This function finds outliers in a data set :math:`\mathbf{X}` and returns
+    indices of observations without outliers as well as indices of the outliers
+    themselves.
 
-    The original data set :math:`\mathbf{X}` is first normalized so that each
-    variable ranges from 0 to 1:
+    Two options are implemented here:
 
-    .. math::
+    - ``'MULTIVARIATE TRIMMING'``
 
-        ||\mathbf{X}|| = \\frac{\mathbf{X} - min(\mathbf{X})}{max(\mathbf{X} - min(\mathbf{X}))}
+        Outliers are detected based on multivariate Mahalanobis distance :math:`D_M`:
 
-    This normalization is done so that centers can be compared across variables
-    on one plot.
-    Samples are then extracted from :math:`||\mathbf{X}||`, according to
-    ``idx_X_r``, to form :math:`||\mathbf{X_r}||`.
+        .. math::
 
-    Normalized centers are computed as:
+            D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
 
-    .. math::
+        where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
+        storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
+        :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
+        Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
+        Since Mahalanobis distance takes into account covariance between variables,
+        observations with sufficiently large :math:`D_M` can be considered as outliers.
+        For more detailed information on Mahalanobis distance the user is referred
+        to :cite:`Bishop2006` or :cite:`DeMaesschalck2000`.
 
-        ||\mathbf{C}|| = mean(||\mathbf{X}||)
+        The threshold above which observations will be classified as outliers
+        can be specified using ``trimming_threshold`` parameter. Specifically,
+        the :math:`i^{th}` observation is classified as an outlier if:
 
-    .. math::
+        .. math::
 
-        ||\mathbf{C_r}|| = mean(||\mathbf{X_r}||)
+            D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
 
-    Percentage measuring the relative change in normalized centers is
-    computed as:
+    - ``'PC CLASSIFIER'``
 
-    .. math::
+        Outliers are detected based on major and minor Principal Components (PCs).
+        The method of Principal Component classifier (PCC) was first proposed in
+        :cite:`Shyu2003`. The application of this technique to combustion data sets
+        was studied in :cite:`Parente2013`. Specifically,
+        the :math:`i^{th}` observation is classified as an outlier
+        if the *first PC classifier* based on :math:`q`-first (major) PCs:
 
-        p = \\frac{||\mathbf{C_r}|| - ||\mathbf{C}||}{||\mathbf{C}||} \cdot 100\%
+        .. math::
+
+            \sum_{j=1}^{q} \\frac{z_{ij}^2}{L_j} > c_1
+
+        or if the *second PC classifier* based on :math:`(Q-k+1)`-last (minor) PCs:
+
+        .. math::
+
+            \sum_{j=k}^{Q} \\frac{z_{ij}^2}{L_j} > c_2
+
+        where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the Principal
+        Components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
+        eigenvalue from :math:`\mathbf{L}` (as per ``PCA`` class).
+        Major PCs are selected such that the total variance explained is 50%.
+        Minor PCs are selected such that the remaining variance they explain is 20%.
+
+        Coefficients :math:`c_1` and :math:`c_2` are found such that they
+        represent the ``quantile_threshold`` (by default 98.99%) quantile of the
+        empirical distributions of the first and second PC classifier respectively.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import outlier_detection
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Find outliers:
+        (idx_outliers_removed, idx_outliers) = outlier_detection(X, scaling='auto', method='MULTIVARIATE TRIMMING', trimming_threshold=0.8, verbose=True)
+
+        # New data set without outliers can be obtained as:
+        X_outliers_removed = X[idx_outliers_removed,:]
+
+        # Observations that were classified as outliers can be obtained as:
+        X_outliers = X[idx_outliers,:]
 
     :param X:
-        original (full) data set.
-    :param idx_X_r:
-        vector of indices that should be extracted from :math:`\mathbf{X}` to
-        form :math:`\mathbf{X_r}`. For instance, it can be obtained as
-        sampled train indices using sampling functionalities of this module.
-    :param variable_names: (optional)
-        list of strings specifying variable names.
-    :param plot_variables: (optional)
-        list of integers specifying indices of variables to be plotted.
-        By default, all variables are plotted.
-    :param legend_label: (optional)
-        list of strings specifying labels for the legend. First entry will refer
-        to :math:`||\mathbf{C}||` and second entry to :math:`||\mathbf{C_r}||`.
-        If the list is empty, legend will not be plotted.
-    :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
-    :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
+        original data set :math:`\mathbf{X}`.
+    :param scaling:
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
+    :param method: (optional)
+        string specifying the outlier detection method to use. It should be
+        ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
+    :param trimming_threshold: (optional)
+        trimming threshold to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
+    :param quantile_threshold: (optional)
+        quantile threshold to use in combination with ``'PC CLASSIFIER'`` method.
+    :param verbose: (optional)
+        boolean for printing outlier detection details.
+
+    :raises ValueError:
+        if ``scaling`` is not a string or is not consistent with scalings available in the ``preprocess.center_scale`` function.
+    :raises ValueError:
+        if ``method`` is not ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
+    :raises ValueError:
+        if ``trimming_threshold`` is not between 0-1.
+    :raises ValueError:
+        if ``quantile_threshold`` is not between 0-1.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
-        - **normalized_C** - normalized centers :math:`||\mathbf{C}||`.
-        - **normalized_C_r** - normalized centers :math:`||\mathbf{C_r}||`.
-        - **center_movement_percentage** - percentage :math:`p`\
-        measuring the relative change in normalized centers.
+        - **idx_outliers_removed** - indices of observations without outliers.
+        - **idx_outliers** - indices of observations that were classified as outliers.
     """
 
-    color_X = '#191b27'
-    color_X_r = '#ff2f18'
-    color_link = '#bbbbbb'
+    _detection_methods = ['MULTIVARIATE TRIMMING', 'PC CLASSIFIER']
 
-    (n_observations_X, n_variables) = np.shape(X)
+    from PCAfold import PCA
 
-    # Create default labels for variables:
-    if len(variable_names) == 0:
-        variable_names = ['$X_{' + str(i) + '}$' for i in range(0, n_variables)]
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be a string.")
+    else:
+        if scaling.lower() not in _scalings_list:
+            raise ValueError("Unrecognized scaling method.")
 
-    if len(plot_variables) != 0:
-        X = X[:,plot_variables]
-        variable_names = [variable_names[i] for i in plot_variables]
-        (_, n_variables) = np.shape(X)
+    if not isinstance(method, str):
+        raise ValueError("Parameter `method` has to be a string.")
+    else:
+        if method.upper() not in _detection_methods:
+            raise ValueError("Unrecognized outlier detection method.")
 
-    X_normalized = (X - np.min(X, axis=0))
-    X_normalized = X_normalized / np.max(X_normalized, axis=0)
+    if trimming_threshold < 0 or trimming_threshold > 1:
+        raise ValueError("Parameter `trimming_threshold` has to be between 0 and 1.")
 
-    # Extract X_r using the provided idx_X_r:
-    X_r_normalized = X_normalized[idx_X_r,:]
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
-    # Find centers:
-    normalized_C = np.mean(X_normalized, axis=0)
-    normalized_C_r = np.mean(X_r_normalized, axis=0)
+    (n_observations, n_variables) = np.shape(X)
 
-    # Compute the relative percentage by how much the center has moved:
-    center_movement_percentage = (normalized_C_r - normalized_C) / normalized_C * 100
+    idx_full = np.arange(0, n_observations)
+    idx_outliers_removed = []
+    idx_outliers = []
 
-    x_range = np.arange(1, n_variables+1)
+    pca_X = PCA(X, scaling=scaling, n_components=0)
 
-    fig, ax = plt.subplots(figsize=(n_variables, 6))
+    if method.upper() == 'MULTIVARIATE TRIMMING':
 
-    plt.scatter(x_range, normalized_C, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
-    plt.scatter(x_range, normalized_C_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
-    plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
-    plt.yticks(fontsize=font_axes, **csfont)
-    plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
-    plt.ylim(-0.05,1.05)
-    plt.xlim(0, n_variables+1.5)
-    plt.grid(alpha=0.3, zorder=0)
+        means_of_X = np.mean(X, axis=0)
 
-    for i in range(0, n_variables):
+        covariance_matrix = pca_X.S
 
-        dy = normalized_C_r[i] - normalized_C[i]
-        plt.arrow(x_range[i], normalized_C[i], 0, dy, color=color_link, ls='-', lw=1, zorder=1)
+        inverse_covariance_matrix = np.linalg.inv(covariance_matrix)
 
-    if title != None:
-        plt.title(title, fontsize=font_title, **csfont)
+        mahalanobis_distances = np.zeros((n_observations,))
 
-    for i, value in enumerate(center_movement_percentage):
-        plt.text(i+1.05, normalized_C_r[i]+0.01, str(int(value)) + ' %', fontsize=font_text, c=color_X_r, **csfont)
+        for n_obs in range(0, n_observations):
 
-    ax.spines["top"].set_visible(True)
-    ax.spines["bottom"].set_visible(True)
-    ax.spines["right"].set_visible(True)
-    ax.spines["left"].set_visible(True)
+            mahalanobis_distance = np.sqrt(np.dot((X[n_obs,:] - means_of_X), np.dot(inverse_covariance_matrix, (X[n_obs,:] - means_of_X))))
+            mahalanobis_distances[n_obs,] = mahalanobis_distance
 
-    if len(legend_label) != 0:
+        minimum_mahalanobis_distance = np.min(mahalanobis_distances)
+        maximum_mahalanobis_distance = np.max(mahalanobis_distances)
 
-        lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
+        range_mahalanobis_distance = maximum_mahalanobis_distance - minimum_mahalanobis_distance
 
-    if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        (idx_outliers, ) = np.where(mahalanobis_distances > trimming_threshold * maximum_mahalanobis_distance)
 
-    return (normalized_C, normalized_C_r, center_movement_percentage)
+        idx_outliers_removed = np.setdiff1d(idx_full, idx_outliers)
+
+        if verbose:
+            n_outliers = len(idx_outliers)
+            print('Number of observations classified as outliers: ' + str(n_outliers))
+
+    elif method.upper() == 'PC CLASSIFIER':
+
+        principal_components = pca_X.transform(X)
+        eigenvalues = pca_X.L
+        n_components = pca_X.n_components
+
+        # Select major components based on 50% of the original data variance:
+        pca_major = pca_X.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.5)
+        n_major_components = pca_major.n_components
+
+        # Select minor components based on 20% of the total variance in the data:
+        pca_minor = pca_X.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.8)
+        n_minor_components = pca_minor.n_components
+
+        if verbose:
+            print("Major components that will be selected are: " + ', '.join([str(i) for i in range(1, n_major_components+1)]))
+
+        if verbose:
+            print("Minor components that will be selected are: " + ', '.join([str(i) for i in range(n_minor_components, n_components+1)]))
+
+        scaled_squared_PCs = np.divide(np.square(principal_components), eigenvalues)
+
+        distances_major = np.sum(scaled_squared_PCs[:,0:n_major_components], axis=1)
+        distances_minor = np.sum(scaled_squared_PCs[:,(n_minor_components-1):n_components], axis=1)
+
+        # Threshold coefficient c_1 (for major PCs):
+        threshold_coefficient_major = np.quantile(distances_major, quantile_threshold)
+
+        # Threshold coefficient c_2 (for minor PCs):
+        threshold_coefficient_minor = np.quantile(distances_minor, quantile_threshold)
+
+        (idx_outliers_major, ) = np.where((distances_major > threshold_coefficient_major))
+        (idx_outliers_minor, ) = np.where((distances_minor > threshold_coefficient_minor))
+
+        idx_outliers = np.vstack((idx_outliers_major[:,np.newaxis], idx_outliers_minor[:,np.newaxis]))
+
+        idx_outliers = np.unique(idx_outliers)
+
+        idx_outliers_removed = np.setdiff1d(idx_full, idx_outliers)
+
+        if verbose:
+            n_outliers = len(idx_outliers)
+            print('Number of observations classified as outliers: ' + str(n_outliers))
+
+    idx_outliers_removed = np.sort(idx_outliers_removed.astype(int))
+    idx_outliers = np.sort(idx_outliers.astype(int))
+
+    return (idx_outliers_removed, idx_outliers)
+
+class KernelDensity:
+    """
+    This class enables kernel density weighting of data sets
+    based on *single-variable* or *multi-variable* case as proposed in
+    :cite:`Coussement2012`.
+
+    The goal of both cases is to obtain a vector of weights :math:`\mathbf{W_c}` that
+    has the same number of elements as there are observations in the original
+    data set :math:`\mathbf{X}`.
+    Each observation will then get multiplied by the corresponding weight from
+    :math:`\mathbf{W_c}`.
+
+    .. note::
+
+        Kernel density weighting technique is usually very expensive, even
+        on data sets with relatively small number of observations.
+        Since the *single-variable* case is a cheaper option than the *multi-variable*
+        case, it is recommended that this technique is tried first on larger data
+        sets.
+
+    Gaussian kernel is used in both approaches:
+
+    .. math::
+
+        K_{c, c'} = \sqrt{\\frac{1}{2 \pi h^2}} exp(- \\frac{d^2}{2 h^2})
+
+    :math:`h` is the kernel bandwidth:
+
+    .. math::
+
+        h = \Big( \\frac{4 \hat{\sigma}}{3 n} \Big)^{1/5}
+
+    where :math:`\hat{\sigma}` is the standard deviation of the considered variable
+    and :math:`n` is the number of observations in the data set.
+
+    :math:`d` is the distance between two observations :math:`c` and :math:`c'`:
+
+    .. math::
+
+        d = |x_c - x_{c'}|
+
+    **Single-variable**
+
+    If the ``conditioning_variable`` argument is a single vector, weighting will be performed
+    according to the *single-variable* case. It begins by summing Gaussian kernels:
+
+    .. math::
+
+        \mathbf{K_c} = \sum_{c' = 1}^{c' = n} \\frac{1}{n} K_{c, c'}
+
+    and weights are then computed as:
+
+    .. math::
+
+        \mathbf{W_c} = \\frac{\\frac{1}{\mathbf{K_c}}}{max(\\frac{1}{\mathbf{K_c}})}
+
+    **Multi-variable**
+
+    If the ``conditioning_variable`` argument is a matrix of multiple variables, weighting will
+    be performed according to the *multi-variable* case. It begins by summing
+    Gaussian kernels for a :math:`k^{th}` variable:
+
+    .. math::
+
+        \mathbf{K_c}_{, k} = \sum_{c' = 1}^{c' = n} \\frac{1}{n} K_{c, c', k}
+
+    Global density taking into account all variables is then obtained as:
+
+    .. math::
+
+        \mathbf{K_{c}} = \prod_{k=1}^{k=Q} \mathbf{K_c}_{, k}
+
+    where :math:`Q` is the total number of conditioning variables, and weights are computed as:
+
+    .. math::
+
+        \mathbf{W_c} = \\frac{\\frac{1}{\mathbf{K_c}}}{max(\\frac{1}{\mathbf{K_c}})}
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import KernelDensity
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Perform kernel density weighting based on the first variable:
+        kerneld = KernelDensity(X, X[:,0])
+
+        # Access the weighted data set:
+        X_weighted = kerneld.X_weighted
+
+        # Access the weights used to scale the data set:
+        weights = kerneld.weights
+
+    :param X:
+        data set :math:`\mathbf{X}` that should be weighted.
+    :param conditioning_variable:
+        either a single variable or multiple variables to be used as a
+        conditioning variable for kernel weighting procedure. Note that it can also
+        be passed as the data set :math:`\mathbf{X}`.
+
+    :raises ValueError:
+        if the number of observations in ``X`` is different than the number of observations in ``conditioning_variable``.
+
+    **Attributes:**
+
+        - **weights** - vector of computed weights :math:`\mathbf{W_c}`.
+        - **X_weighted** - weighted data set (each observation in\
+        :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`).
+    """
+
+    def __init__(self, X, conditioning_variable, verbose=False):
+
+        (n_observations_X, n_variables_X) = np.shape(X)
+
+        try:
+            (n_observations, n_variables) = np.shape(conditioning_variable)
+        except:
+            (n_observations, n_variables) = np.shape(conditioning_variable[:,np.newaxis])
+
+        if n_observations_X != n_observations:
+            raise ValueError("The data set to weight and the conditioning variable should have the same number of observations.")
+
+        if n_variables == 1:
+
+            if verbose: print('Single-variable case will be applied.')
+
+            self.__weights = self.__single_variable_observation_weights(conditioning_variable)
+
+        elif n_variables > 1:
+
+            if verbose: print('Multi-variable case will be applied.')
+
+            self.__weights = self.__multi_variable_observation_weights(conditioning_variable)
+
+        self.__X_weighted = np.multiply(X, self.weights)
+
+    @property
+    def weights(self):
+        return self.__weights
+
+    @property
+    def X_weighted(self):
+        return self.__X_weighted
+
+    # Computes eq.(26):
+    def __bandwidth(self, n, mean_standard_deviation):
+        """
+        This function computes kernel bandwidth as:
+
+        .. math::
+
+            h = \Big( \\frac{4 \hat{\sigma}}{3 n} \Big)^{1/5}
+
+        :param n:
+            number of observations in a data set or a variable vector.
+        :param mean_standard_deviation:
+            mean standard deviation in the entire data set or a variable vector.
+
+        :returns:
+            - **h** - kernel bandwidth, scalar.
+        """
+
+        h = (4*mean_standard_deviation/(3*n))**(1/5)
+
+        return(h)
+
+    # Computes eq.(21):
+    def __distance(self, x_1, x_2):
+        """
+        This function computes distance between two observations:
+
+        .. math::
+
+            d = |x_1 - x_2|
+
+        :param x_1:
+            first observation.
+        :param x_2:
+            second observation.
+
+        :returns:
+            - **d** - distance between the first and second observation.
+        """
+
+        d = abs(x_1 - x_2)
+
+        return(d)
+
+    # Computes eq.(22):
+    def __gaussian_kernel(self, x1, x2, n, mean_standard_deviation):
+        """
+        This function computes a Gaussian kernel:
+
+        .. math::
+
+            K = \sqrt{\\frac{1}{2 \pi h^2}} exp(- \\frac{d^2}{2 h^2})
+
+        :param x_1:
+            first observation.
+        :param x_2:
+            second observation.
+        :param n:
+            number of observations in a data set or a variable vector.
+        :param mean_standard_deviation:
+            mean standard deviation in the entire data set or a variable vector.
+
+        :returns:
+            - **K** - Gaussian kernel.
+        """
+
+        d = self.__distance(x1, x2)
+        h = self.__bandwidth(n, mean_standard_deviation)
+
+        K = (1/(2*np.pi*h**2))**0.5 * np.exp(- d/(2*h**2))
+
+        return(K)
+
+    # Computes eq.(23):
+    def __variable_density(self, x, mean_standard_deviation):
+        """
+        This function computes a vector of variable densities for all observations.
+
+        :param x:
+            single variable vector.
+        :param mean_standard_deviation:
+            mean standard deviation in the entire data set or a variable vector.
+
+        :returns:
+            - **Kck** - a vector of variable densities for all observations, it has the same size as the variable vector `x`.
+        """
+
+        n = len(x)
+
+        Kck = np.zeros((n,1))
+
+        for i in range(0,n):
+
+            gaussian_kernel_sum = 0
+
+            for j in range(0,n):
+
+                gaussian_kernel_sum = gaussian_kernel_sum + self.__gaussian_kernel(x[i], x[j], n, mean_standard_deviation)
+
+            Kck[i] = 1/n * gaussian_kernel_sum
+
+        return(Kck)
+
+    # Computes eq.(24):
+    def __multi_variable_global_density(self, X):
+        """
+        This function computes a vector of variable global densities for a
+        multi-variable case, for all observations.
+
+        :param X:
+            multi-variable data set matrix.
+
+        :returns:
+            - **Kc** - a vector of global densities for all observations.
+        """
+
+        (n, n_vars) = np.shape(X)
+
+        mean_standard_deviation = np.mean(np.std(X, axis=0))
+
+        Kck_matrix = np.zeros((n, n_vars))
+
+        for variable in range(0, n_vars):
+
+            Kck_matrix[:,variable] = np.reshape(self.__variable_density(X[:,variable], mean_standard_deviation), (n,))
+
+        # Compute the global densities vector:
+        Kc = np.zeros((n,1))
+
+        K = 1
+
+        for i in range(0,n):
+
+            Kc[i] = K * np.prod(Kck_matrix[i,:])
+
+        return(Kc)
+
+    # Computes eq.(25):
+    def __multi_variable_observation_weights(self, X):
+        """
+        This function computes a vector of observation weights for a
+        multi-variable case.
+
+        :param X:
+            multi-variable data set matrix.
+
+        :returns:
+            - **W_c** - a vector of observation weights.
+        """
+
+        (n, n_vars) = np.shape(X)
+
+        W_c = np.zeros((n,1))
+
+        Kc = self.__multi_variable_global_density(X)
+
+        Kc_inv = 1/Kc
+
+        for i in range(0,n):
+
+            W_c[i] = Kc_inv[i] / np.max(Kc_inv)
+
+        return(W_c)
+
+    # Computes eq.(20):
+    def __single_variable_observation_weights(self, x):
+        """
+        This function computes a vector of observation weights for a
+        single-variable case.
+
+        :param x:
+            single variable vector.
+
+        :returns:
+            - **W_c** - a vector of observation weights.
+        """
+
+        n = len(x)
+
+        mean_standard_deviation = np.std(x)
+
+        W_c = np.zeros((n,1))
+
+        Kc = self.__variable_density(x, mean_standard_deviation)
+
+        Kc_inv = 1/Kc
+
+        for i in range(0,n):
+
+            W_c[i] = Kc_inv[i] / np.max(Kc_inv)
+
+        return(W_c)
 
 ################################################################################
 #
@@ -382,7 +970,10 @@ class DataSampler:
       from PCAfold import DataSampler
       import numpy as np
 
+      # Generate dummy idx vector:
       idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+      # Instantiate DataSampler class object:
       selection = DataSampler(idx, idx_test=[5,9], random_seed=100, verbose=True)
 
     :param idx:
@@ -567,8 +1158,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.number(20, test_selection_option=1)
 
         **Train data:**
@@ -639,7 +1235,7 @@ class DataSampler:
             raise ValueError("Test selection option can only be 1 or 2.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Initialize vector of indices 0..n_observations:
@@ -725,8 +1321,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.percentage(20, test_selection_option=1)
 
         *Note:*
@@ -734,7 +1335,7 @@ class DataSampler:
         train sample distribution as random sampling (``DataSampler.random``).
         This sampling can be useful in cases where one cluster is significantly
         smaller than others and there is a chance that this cluster will not get
-        covereed in the train data if random sampling was used.
+        covered in the train data if random sampling was used.
 
         **Train data:**
 
@@ -797,12 +1398,12 @@ class DataSampler:
             raise ValueError("Test selection option can only be 1 or 2.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
-        idx_full = np.arange(0,n_observations)
+        idx_full = np.arange(0, n_observations)
         idx_test = np.unique(np.array(self.idx_test))
         idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
@@ -879,8 +1480,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.manual({0:1, 1:1, 2:1}, sampling_type='number', test_selection_option=1)
 
         **Train data:**
@@ -909,7 +1515,8 @@ class DataSampler:
 
         Here it is understood that :math:`n_1` train samples were requested from
         the first cluster, :math:`n_2` from the second cluster and :math:`n_3`
-        from the third cluster. This can be achieved by setting:
+        from the third cluster, where :math:`n_i` can be interpreted as number
+        or as percentage. This can be achieved by setting:
 
         .. code:: python
 
@@ -967,7 +1574,7 @@ class DataSampler:
             raise ValueError("Variable `sampling_type` has to be one of the following: 'percentage' or 'number'.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Check that dictionary has consistend number of entries with respect to `idx`:
@@ -1112,8 +1719,13 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
           idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx, verbose=True)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         Due to the nature of this sampling technique, it is not necessary to
@@ -1127,8 +1739,14 @@ class DataSampler:
           from PCAfold import DataSampler
           import numpy as np
 
+          # Generate dummy idx vector:
+          n_observations = 100
           idx = np.zeros(n_observations)
+
+          # Instantiate DataSampler class object:
           selection = DataSampler(idx)
+
+          # Generate sampling:
           (idx_train, idx_test) = selection.random(20, test_selection_option=1)
 
         **Train data:**
@@ -1192,7 +1810,7 @@ class DataSampler:
             raise ValueError("Test selection option can only be 1 or 2.")
 
         # Degrade clusters if needed:
-        if len(np.unique(self.idx)) != (np.max(self.idx)+1):
+        if (len(np.unique(self.idx)) != (np.max(self.idx)+1)) or (np.min(self.idx) != 0):
             (self.idx, _) = degrade_clusters(self.idx, verbose=False)
 
         # Initialize vector of indices 0..n_observations:
@@ -1264,14 +1882,24 @@ def variable_bins(var, k, verbose=False):
     This function does clustering by dividing a variable vector ``var`` into
     bins of equal lengths.
 
-    **Example:**
-
-
     An example of how a vector can be partitioned with this function is presented below:
 
     .. image:: ../images/clustering-variable-bins.png
       :width: 600
       :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import variable_bins
+        import numpy as np
+
+        # Generate dummy variable:
+        x = np.linspace(-1,1,100)
+
+        # Create partitioning according to bins of x:
+        idx = variable_bins(x, 4, verbose=True)
 
     :param var:
         vector of variable values.
@@ -1282,6 +1910,8 @@ def variable_bins(var, k, verbose=False):
 
     :raises ValueError:
         if number of clusters ``k`` is not a positive integer.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
@@ -1290,6 +1920,9 @@ def variable_bins(var, k, verbose=False):
     # Check that the number of clusters is an integer and is non-zero:
     if not (isinstance(k, int) and k > 0):
         raise ValueError("The number of clusters must be a positive integer.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     var_min = np.min(var)
     var_max = np.max(var)
@@ -1313,8 +1946,8 @@ def variable_bins(var, k, verbose=False):
                     idx.append(cl)
 
     # Degrade clusters if needed:
-    if np.size(np.unique(idx)) != k:
-        (idx, k) = degrade_clusters(idx, verbose)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose)
 
     idx = np.asarray(idx)
 
@@ -1333,13 +1966,24 @@ def predefined_variable_bins(var, split_values, verbose=False):
     When a split is performed at a given ``value_i``, the observation in ``var``
     that takes exactly that value is assigned to the newly created bin.
 
-    **Example:**
-
     An example of how a vector can be partitioned with this function is presented below:
 
     .. image:: ../images/clustering-predefined-variable-bins.png
       :width: 600
       :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import predefined_variable_bins
+        import numpy as np
+
+        # Generate dummy variable:
+        x = np.linspace(-1,1,100)
+
+        # Create partitioning according to pre-defined bins of x:
+        idx = predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
 
     :param var:
         vector of variable values.
@@ -1351,10 +1995,15 @@ def predefined_variable_bins(var, split_values, verbose=False):
     :raises ValueError:
         if any value within ``split_values`` is not within the range of
         vector ``var`` values.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
     """
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     var_min = np.min(var)
     var_max = np.max(var)
@@ -1382,8 +2031,8 @@ def predefined_variable_bins(var, split_values, verbose=False):
                     idx.append(cl)
 
     # Degrade clusters if needed:
-    if np.size(np.unique(idx)) != k:
-        (idx, k) = degrade_clusters(idx, verbose)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose)
 
     idx = np.asarray(idx)
 
@@ -1395,21 +2044,32 @@ def predefined_variable_bins(var, split_values, verbose=False):
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
     This function does clustering by dividing a mixture fraction vector
-    ``Z`` into bins of equal lengths. The vector is first split to lean and rich
+    ``Z`` into bins of equal lengths. This technique can be used to partition
+    combustion data sets as proposed in :cite:`Parente2009`.
+    The vector is first split to lean and rich
     side (according to the stoichiometric mixture fraction ``Z_stoich``) and
-    then the sides get divided further into clusters. When ``k`` is even,
-    this function will always create equal nu
-    mber of clusters on the lean and
-    rich side. When ``k`` is odd, there will be one more cluster on the rich side
-    compared to the lean side.
-
-    **Example:**
+    then the sides get divided further into clusters. When ``k`` is odd,
+    there will always be one more cluster on the side with larger range in
+    mixture fraction space compared to the other side.
 
     An example of how a vector can be partitioned with this function is presented below:
 
     .. image:: ../images/clustering-mixture-fraction-bins.png
       :width: 600
       :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import mixture_fraction_bins
+        import numpy as np
+
+        # Generate dummy mixture fraction variable:
+        Z = np.linspace(0,1,100)
+
+        # Create partitioning according to bins of mixture fraction:
+        idx = mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
     :param Z:
         vector of mixture fraction values.
@@ -1422,14 +2082,24 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     :raises ValueError:
         if number of clusters ``k`` is not a positive integer.
+    :raises ValueError:
+        if the stoichiometric mixture fraction is not a number between 0 and 1.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
     """
 
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
     # Check that the number of clusters is an integer and is non-zero:
     if not (isinstance(k, int) and k > 0):
         raise ValueError("The number of clusters must be a positive integer.")
+
+    if Z_stoich < 0 or Z_stoich > 1:
+        raise ValueError("Stoichiometric mixture fraction should be between 0 and 1.")
 
     # Number of interval borders:
     n_bins_borders = k + 1
@@ -1445,11 +2115,21 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     else:
 
-        # Z-space lower than stoichiometric mixture fraction:
-        borders_lean = np.linspace(min_Z, Z_stoich, int(np.ceil(n_bins_borders/2)))
+        if Z_stoich <= 0.5:
 
-        # Z-space higher than stoichiometric mixture fraction:
-        borders_rich = np.linspace(Z_stoich, max_Z, int(np.ceil((n_bins_borders+1)/2)))
+            # Z-space lower than stoichiometric mixture fraction:
+            borders_lean = np.linspace(min_Z, Z_stoich, int(np.ceil(n_bins_borders/2)))
+
+            # Z-space higher than stoichiometric mixture fraction:
+            borders_rich = np.linspace(Z_stoich, max_Z, int(np.ceil((n_bins_borders+1)/2)))
+
+        else:
+
+            # Z-space lower than stoichiometric mixture fraction:
+            borders_lean = np.linspace(min_Z, Z_stoich, int(np.ceil((n_bins_borders+1)/2)))
+
+            # Z-space higher than stoichiometric mixture fraction:
+            borders_rich = np.linspace(Z_stoich, max_Z, int(np.ceil(n_bins_borders/2)))
 
         # Combine the two partitions:
         borders = np.concatenate((borders_lean[0:-1], borders_rich))
@@ -1467,8 +2147,8 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     idx = [int(i) for i in idx]
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose=False)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     idx = np.asarray(idx)
 
@@ -1477,31 +2157,29 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     return(idx)
 
-def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
+def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
-    This function does clustering by dividing a source (or PC-source) vector
-    ``source`` into bins. It can be useful for partitioning any variable
+    This function aims to separate close-to-zero observations in a vector into one
+    cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
+    It can be useful for partitioning any variable
     that has many observations clustered around zero value and relatively few
     observations far away from zero on either side.
-    It aims to separate close-to-zero observations into one
-    cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
+
     The offset from zero at which splits are performed is computed
     based on the input parameter ``zero_offset_percentage``:
 
     .. math::
 
-        \\verb|offset| = \\frac{(max(\\verb|source|) - min(\\verb|source|)) \cdot \\verb|zero_offset_percentage|}{100}
+        \\verb|offset| = \\frac{(max(\\verb|var|) - min(\\verb|var|)) \cdot \\verb|zero_offset_percentage|}{100}
 
-    Further clusters are found by splitting positive and negative sources
+    Further clusters are found by splitting positive and negative values in a vector
     alternatingly into bins of equal lengths.
-
-    **Example:**
 
     Two examples of how a vector can be partitioned with this function are presented below.
 
     With ``split_at_zero=False``:
 
-    .. image:: ../images/clustering-source-bins.png
+    .. image:: ../images/clustering-zero-neighborhood-bins.png
       :width: 700
       :align: center
 
@@ -1511,7 +2189,7 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
 
     With ``split_at_zero=True``:
 
-    .. image:: ../images/clustering-source-bins-zero-split.png
+    .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.png
       :width: 700
       :align: center
 
@@ -1520,18 +2198,40 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
     values, with negative values close to zero, with positive values close to
     zero and with positive values.
 
-    :param source:
+    .. note::
+
+        This clustering technique is well suited for partitioning chemical
+        source terms :math:`\mathbf{S_X}` or sources of Principal Components
+        :math:`\mathbf{S_Z}` (as per :cite:`Sutherland2009`) since it relies on
+        unbalanced vectors that have many observations numerically close to zero.
+        Using ``split_at_zero=True`` it can further differentiate between
+        negative and positive sources which have different physical effect.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import zero_neighborhood_bins
+        import numpy as np
+
+        # Generate dummy variable:
+        x = np.linspace(-100,100,1000)
+
+        # Create partitioning according to bins of x:
+        idx = zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+
+    :param var:
         vector of variable values.
     :param k:
         number of clusters to partition the data.
         Cannot be smaller than 3 if ``split_at_zero=False`` or smaller
         than 4 if ``split_at_zero=True``.
     :param zero_offset_percentage: (optional)
-        percentage of :math:`(max(\\verb|source|) - min(\\verb|source|))`
+        percentage of :math:`max(\\verb|var|) - min(\\verb|var|)` range
         to take as the offset from zero value. For instance, set
         ``zero_offset_percentage=10`` if you want 10% as offset.
     :param split_at_zero: (optional)
-        boolean specifying whether partitioning should be done at ``source=0``.
+        boolean specifying whether partitioning should be done at ``var=0``.
     :param verbose: (optional)
         boolean for printing clustering details.
 
@@ -1540,18 +2240,23 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         ``split_at_zero=False`` or smaller than 4 when ``split_at_zero=True``.
 
     :raises ValueError:
-        if the source vector ``source`` has only non-negative or only
+        if the vector ``var`` has only non-negative or only
         non-positive values. For such vectors it is recommended to use
         ``predefined_variable_bins`` function instead.
 
     :raises ValueError:
         if the requested offset from zero crosses the minimum or maximum value
-        of the source vector ``source``. If that is the case, it is
+        of the variable vector ``var``. If that is the case, it is
         recommended to lower the ``zero_offset_percentage`` value.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx** - vector of cluster classifications.
     """
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     # Check that the number of clusters is an integer and is larger than 2:
     if (not split_at_zero) and (not (isinstance(k, int) and k > 2)):
@@ -1561,20 +2266,20 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
     if split_at_zero and (not (isinstance(k, int) and k > 3)):
         raise ValueError("The number of clusters must be an integer not smaller than 4 when splitting at zero.")
 
-    source_min = np.min(source)
-    source_max = np.max(source)
-    source_range = abs(source_max - source_min)
-    offset = zero_offset_percentage * source_range / 100
+    var_min = np.min(var)
+    var_max = np.max(var)
+    var_range = abs(var_max - var_min)
+    offset = zero_offset_percentage * var_range / 100
 
-    # Basic checks on the source vector:
-    if not (source_min <= 0):
+    # Basic checks on the variable vector:
+    if not (var_min <= 0):
         raise ValueError("Source vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
 
-    if not (source_max >= 0):
+    if not (var_max >= 0):
         raise ValueError("Source vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
 
-    if (source_min > -offset) or (source_max < offset):
-        raise ValueError("Offset from zero crosses the minimum or maximum value of the source vector. Consider lowering `zero_offset_percentage`.")
+    if (var_min > -offset) or (var_max < offset):
+        raise ValueError("Offset from zero crosses the minimum or maximum value of the variable vector. Consider lowering `zero_offset_percentage`.")
 
     # Number of interval borders:
     if split_at_zero:
@@ -1583,10 +2288,10 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
         n_bins_borders = k
 
     # Generate cluster borders on the negative side:
-    borders_negative = np.linspace(source_min, -offset, int(np.ceil(n_bins_borders/2)))
+    borders_negative = np.linspace(var_min, -offset, int(np.ceil(n_bins_borders/2)))
 
     # Generate cluster borders on the positive side:
-    borders_positive = np.linspace(offset, source_max, int(np.ceil((n_bins_borders+1)/2)))
+    borders_positive = np.linspace(offset, var_max, int(np.ceil((n_bins_borders+1)/2)))
 
     # Combine the two partitions:
     if split_at_zero:
@@ -1596,22 +2301,22 @@ def source_bins(source, k, zero_offset_percentage=0.1, split_at_zero=False, verb
 
     # Bin data matrices initialization:
     idx_clust = []
-    idx = np.zeros((len(source),))
+    idx = np.zeros((len(var),))
 
     # Create the cluster division vector:
     for bin in range(0,k):
 
-        idx_clust.append(np.where((source >= borders[bin]) & (source <= borders[bin+1])))
+        idx_clust.append(np.where((var >= borders[bin]) & (var <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
     idx = np.asarray([int(i) for i in idx])
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose=False)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     if verbose==True:
-        __print_verbose_information_clustering(source, idx, borders)
+        __print_verbose_information_clustering(var, idx, borders)
 
     return(idx)
 
@@ -1625,23 +2330,68 @@ def degrade_clusters(idx, verbose=False):
 
     **Example:**
 
-    Starting with an ``idx`` that is the following:
-    ``[0, 0, 2, 0, 5, 10]`` this function turns this ``idx`` to:
-    ``[0, 0, 1, 0, 2, 3]``, where clusters are numbered with consecutive integers.
+    .. code:: python
 
-    Alternatively, if ``idx`` is: ``[1, 1, 2, 2, 3, 3]`` this function turns
-    this ``idx`` to: ``[0, 0, 1, 1, 2, 2]`` so that the smallest cluster number
-    is equal to ``0``.
+        from PCAfold import degrade_clusters
+
+        # Generate dummy idx vector:
+        idx = [0, 0, 2, 0, 5, 10]
+
+        # Degrade clusters:
+        (idx_degraded, k_update) = degrade_clusters(idx)
+
+    The code above will produce:
+
+    .. code-block:: text
+
+        >>> idx_degraded
+        array([0, 0, 1, 0, 2, 3])
+
+    Alternatively:
+
+    .. code:: python
+
+        from PCAfold import degrade_clusters
+
+        # Generate dummy idx vector:
+        idx = [1, 1, 2, 2, 3, 3]
+
+        # Degrade clusters:
+        (idx_degraded, k_update) = degrade_clusters(idx)
+
+    will produce:
+
+    .. code-block:: text
+
+        >>> idx_degraded
+        array([0, 0, 1, 1, 2, 2])
 
     :param idx:
-        raw vector of cluster classifications.
+        vector of cluster classifications.
     :param verbose: (optional)
         boolean for printing clustering details.
+
+    :raises ValueError:
+        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
+    :raises ValueError:
+        if ``verbose`` is not a boolean.
 
     :return:
         - **idx_degraded** degraded vector of cluster classifications. The first cluster has index 0.
         - **k_update** - the updated number of clusters.
     """
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    if isinstance(idx, list):
+        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    elif isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    else:
+        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
 
     index = 0
     dictionary = {}
@@ -1669,19 +2419,70 @@ def degrade_clusters(idx, verbose=False):
 
 def flip_clusters(idx, dictionary):
     """
-    This function flips the cluster labelling according to instructions provided
+    This function flips cluster labelling according to instructions provided
     in the dictionary. For a ``dictionary = {key : value}``, a cluster with a
     number ``key`` will get a number ``value``.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import flip_clusters
+
+        # Generate dummy idx vector:
+        idx = [0,0,0,1,1,1,1,2,2]
+
+        # Swap cluster number 1 with cluster number 2:
+        flipped_idx = flip_clusters(idx, {1:2, 2:1})
+
+    The code above will produce:
+
+    .. code-block:: text
+
+        >>> flipped_idx
+        array([0, 0, 0, 2, 2, 2, 2, 1, 1])
+
     :param idx:
         vector of cluster classifications.
-        The first cluster has index 0.
     :param dictionary:
-        a dictionary specifying the cluster numeration flipping instructions.
+        dictionary specifying instructions for cluster label flipping.
+
+    :raises ValueError:
+        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
+
+    :raises ValueError:
+        if any ``key`` or ``value`` is not an integer.
+
+    :raises ValueError:
+        if any ``key`` is not found within ``idx``.
 
     :return:
-        - **flipped_idx** - vector of cluster classifications. The first cluster has index 0.
+        - **flipped_idx** - re-labelled vector of cluster classifications.
     """
+
+    if isinstance(idx, list):
+        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    elif isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Vector of cluster classifications can only contain integers.")
+    else:
+        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
+
+    # Check that keys and values are properly defined:
+    for key, value in dictionary.items():
+
+        # Check that all keys are present in the `idx`:
+        if key not in np.unique(idx):
+            raise ValueError("Key " + str(key) + " does not match an entry in `idx`.")
+
+        # Check that keys are non-negative integers:
+        if not isinstance(key, int):
+            raise ValueError("Error in key " + str(key) + ". Key must be an integer.")
+
+        # Check that values are non-negative integers:
+        if not isinstance(value, int):
+            raise ValueError("Error in value " + str(value) + ". Value must be an integer.")
 
     flipped_idx = []
 
@@ -1695,26 +2496,50 @@ def flip_clusters(idx, dictionary):
 
 def get_centroids(X, idx):
     """
-    This function computes the centroids for the clustering specified in the
-    ``idx`` vector.
+    This function computes the centroids for each cluster specified in the
+    ``idx`` vector. Centroids :math:`c_i` of cluster :math:`k_i` are computed as:
+
+    .. math::
+
+        c_i = mean(\mathbf{x}_i)
+
+    where :math:`\mathbf{x}_i` are the observations belonging to cluster :math:`k_i`
+    of all variables in the data set :math:`\mathbf{X}`. Centroids of all variables
+    from all clusters are then stored in the matrix :math:`\mathbf{c}` returned.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import get_centroids
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Generate dummy clustering of the data set:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Compute the centroids of each cluster:
+        centroids = get_centroids(X, idx)
 
     :param X:
-        data set for computing the cluster centroids.
+        data set :math:`\mathbf{X}` for computing the cluster centroids.
     :param idx:
         vector of cluster classifications.
-        The first cluster has index 0.
 
     :raises ValueError:
         if the number of observations in the data set ``X`` does not match the
         number of elements in the ``idx`` vector.
 
     :return:
-        - **centroids** - matrix of cluster centroids. It has size ``k`` times number of observations.
+        - **centroids** - matrix of centroids of all :math:`k` clusters. It has size :math:`k` times number of variables.
     """
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose=False)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     (n_observations, n_variables) = np.shape(X)
 
@@ -1735,32 +2560,40 @@ def get_centroids(X, idx):
 
     return(centroids)
 
-def get_partition(X, idx, verbose=False):
+def get_partition(X, idx):
     """
-    This function partitions the observations from the original global data
-    set ``X`` into local clusters according to ``idx`` provided. It returns a
-    tuple of three variables ``(data_in_clusters, data_idx_in_clusters, k_new)``,
-    where ``data_in_clusters`` are the original observations from ``X`` divided
-    into clusters, ``data_idx_in_clusters`` are the indices of the original
-    observations divided into clusters. If any cluster is empty or has less
-    observations assigned to it that the number of variables, that cluster will
-    be removed and the observations that were assigned to it will not appear
-    in ``data_in_clusters`` nor in ``data_idx_in_clusters``. The new number of
-    clusters ``k_new`` is computed taking into account any possibly removed
-    clusters.
+    This function partitions the observations from the original data
+    set :math:`\mathbf{X}` into :math:`k` clusters according to ``idx`` provided.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import get_partition
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Generate dummy clustering of the data set:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Generate partitioning of the data set according to idx:
+        (X_in_clusters, idx_in_clusters) = get_partition(X, idx)
 
     :param X:
         data set to partition.
     :param idx:
         vector of cluster classifications.
-        The first cluster has index 0.
-    :param verbose: (optional)
-        boolean for printing details.
+
+    :raises ValueError:
+        if the number of observations in the data set ``X`` does not match the
+        number of elements in the ``idx`` vector.
 
     :return:
-        - **data_in_clusters** - list of ``k_new`` arrays that contains original data set observations in each cluster.
-        - **data_idx_in_clusters** - list of ``k_new`` arrays that contains indices of the original data set observations in each cluster.
-        - **k_new** - the updated number of clusters.
+        - **X_in_clusters** - list of :math:`k` arrays that contains original data set observations partitioned to :math:`k` clusters.
+        - **idx_in_clusters** - list of :math:`k` arrays that contains indices of the original data set observations partitioned to :math:`k` clusters.
     """
 
     try:
@@ -1769,55 +2602,62 @@ def get_partition(X, idx, verbose=False):
         (n_observations, ) = np.shape(X)
         n_variables = 1
 
-    # Remove empty clusters from indexing:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, _) = degrade_clusters(idx, verbose)
-        if verbose==True:
-            print('Empty clusters will be removed.')
+    # Check if the number of indices in `idx` is the same as the number of observations in a data set:
+    if n_observations != len(idx):
+        raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
+
+    # Degrade clusters if needed:
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     k = len(np.unique(idx))
 
-    idx_clust = []
-    n_points = np.zeros(k)
-    data_in_clusters = []
-    data_idx_in_clusters = []
+    idx_in_clusters = []
+    X_in_clusters = []
 
     for i in range(0,k):
 
         indices_to_append = np.argwhere(idx==i).ravel()
-        idx_clust.append(indices_to_append)
-        n_points[i] = len(indices_to_append)
+        idx_in_clusters.append(indices_to_append)
 
-        if ((n_points[i] < n_variables) and (n_points[i] > 0)):
-            if verbose==True:
-                print('Too few points (' + str(int(n_points[i])) + ') in cluster ' + str(i) + ', cluster will be removed.')
+        if n_variables == 1:
+            X_in_clusters.append(X[indices_to_append])
+        else:
+            X_in_clusters.append(X[indices_to_append,:])
 
-    # Find those cluster numbers where the number of observations is not less than number of variables:
-    nz_idx = np.argwhere(n_points >= n_variables).ravel()
+    return(X_in_clusters, idx_in_clusters)
 
-    # Compute the new number of clusters taking into account removed clusters:
-    k_new = len(nz_idx)
-
-    for i in range(0,k_new):
-
-        # Assign observations to clusters:
-        data_idx_in_clusters.append(idx_clust[nz_idx[i]])
-        data_in_clusters.append(X[data_idx_in_clusters[i],:])
-
-    return(data_in_clusters, data_idx_in_clusters, k_new)
-
-def get_populations(idx, verbose=False):
+def get_populations(idx):
     """
     This function computes populations (number of observations) in clusters
     specified in the ``idx`` vector. As an example, if there are 100
     observations in the first cluster and 500 observations in the second cluster
     this function will return a list: ``[100, 500]``.
 
+    **Example:**
+
+    .. code::
+
+        from PCAfold import variable_bins, get_populations
+        import numpy as np
+
+        # Generate dummy partitioning:
+        x = np.linspace(-1,1,100)
+        idx = variable_bins(x, 4, verbose=True)
+
+        # Compute cluster populations:
+        populations = get_populations(idx)
+
+    The code above will produce:
+
+    .. code-block:: text
+
+        >>> populations
+        [25, 25, 25, 25]
+
     :param idx:
         vector of cluster classifications.
         The first cluster has index 0.
-    :param verbose: (optional)
-        boolean for printing details.
 
     :return:
         - **populations** - list of cluster populations. Each entry referes to one cluster ordered according to ``idx``.
@@ -1826,15 +2666,15 @@ def get_populations(idx, verbose=False):
     populations = []
 
     # Degrade clusters if needed:
-    if len(np.unique(idx)) != (np.max(idx)+1):
-        (idx, k_new) = degrade_clusters(idx, verbose)
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
 
     # Find the number of clusters:
     k = len(np.unique(idx))
 
     for i in range(0,k):
 
-        populations.append((idx==i).sum())
+        populations.append(int((idx==i).sum()))
 
     return(populations)
 
@@ -1848,6 +2688,24 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     """
     This function plots a 2-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import variable_bins, plot_2d_clustering
+        import numpy as np
+
+        # Generate dummy data set:
+        x = np.linspace(-1,1,100)
+        y = -x**2 + 1
+
+        # Generate dummy clustering of the data set:
+        idx = variable_bins(x, 4, verbose=False)
+
+        # Plot the clustering result:
+        plt = plot_2d_clustering(x, y, idx, x_label='$x$', y_label='$y$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(10,6), title='x-y data set', save_filename='clustering.pdf')
+        plt.close()
 
     :param x:
         variable on the :math:`x`-axis.
@@ -1875,13 +2733,18 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         plotted.
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
     """
 
     from matplotlib import cm
 
     n_clusters = len(np.unique(idx))
-    populations = get_populations(idx, verbose=False)
+    populations = get_populations(idx)
 
     x = x.ravel()
     y = y.ravel()
@@ -1907,11 +2770,35 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
+    return plt
+
 def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold divided into train and test
     samples. Number of observations in train and test data respectively will be
     plotted in the legend.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import variable_bins, DataSampler, plot_2d_train_test_samples
+        import numpy as np
+
+        # Generate dummy data set:
+        x = np.linspace(-1,1,100)
+        y = -x**2 + 1
+
+        # Generate dummy clustering of the data set:
+        idx = variable_bins(x, 4, verbose=False)
+
+        # Generate dummy sampling of the data set:
+        sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
+        (idx_train, idx_test) = sample.number(40, test_selection_option=1)
+
+        # Plot the sampling result:
+        plt = plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label='$x$', y_label='$y$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(12,6), title='x-y data set', save_filename='sampling.pdf')
+        plt.close()
 
     :param x:
         variable on the :math:`x`-axis.
@@ -1943,13 +2830,18 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         plotted.
     :param save_filename: (optional)
         string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
     """
 
     from matplotlib import cm
 
     n_clusters = len(np.unique(idx))
-    populations = get_populations(idx, verbose=False)
+    populations = get_populations(idx)
 
     x = x.ravel()
     y = y.ravel()
@@ -1989,3 +2881,5 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
 
     if title != None: figure.suptitle(title, fontsize=font_title, **csfont)
     if save_filename != None: figure.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt

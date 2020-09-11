@@ -4,9 +4,18 @@
 Data preprocessing
 ##################
 
-``preprocess`` module can be used for performing data pre-processing
-including centering and scaling, outlier detection and removal, data clustering
-and data sampling.
+The ``preprocess`` module can be used for performing data pre-processing
+including centering and scaling, outlier detection and removal, kernel density
+weighting of data sets, data clustering and data sampling.
+
+.. note:: The format for the user-supplied input data matrix
+  :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}` common to all modules is that
+  :math:`N` observations are stored in rows and :math:`Q` variables are stored
+  in columns. The initial dimensionality of the data set is determined by the
+  number of variables :math:`Q`. Typically, :math:`N \gg Q`.
+
+  The corresponding representation of the user-supplied data set in the code
+  is ``X`` and the dimensions are denoted as ``(n_observations, n_variables)``.
 
 --------------------------------------------------------------------------------
 
@@ -16,11 +25,6 @@ Data manipulation
 
 This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.
-
-Class ``PreProcessing``
-=======================
-
-.. autoclass:: PCAfold.preprocess.PreProcessing
 
 ``center_scale``
 ==========================
@@ -37,10 +41,20 @@ Class ``PreProcessing``
 
 .. autofunction:: PCAfold.preprocess.remove_constant_vars
 
-``analyze_centers_change``
-==========================
+Class ``PreProcessing``
+=======================
 
-.. autofunction:: PCAfold.preprocess.analyze_centers_change
+.. autoclass:: PCAfold.preprocess.PreProcessing
+
+``outlier_detection``
+======================
+
+.. autofunction:: PCAfold.preprocess.outlier_detection
+
+Class ``KernelDensity``
+=======================
+
+.. autoclass:: PCAfold.preprocess.KernelDensity
 
 --------------------------------------------------------------------------------
 
@@ -55,7 +69,10 @@ local clusters and performing some basic operations on clusters :cite:`Everitt20
 Clustering functions
 ====================
 
-Each function that clusters the data set returns a vector of integers ``idx`` of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies classification of each observation from the original data set ``X`` to a local cluster.
+Each function that clusters the data set returns a vector of integers ``idx``
+of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies
+classification of each observation from the original data set
+:math:`\mathbf{X}` to a local cluster.
 
 .. image:: ../images/clustering-idx.png
   :width: 400
@@ -78,10 +95,10 @@ Each function that clusters the data set returns a vector of integers ``idx`` of
 
 .. autofunction:: PCAfold.preprocess.mixture_fraction_bins
 
-``source_bins``
----------------
+``zero_neighborhood_bins``
+--------------------------
 
-.. autofunction:: PCAfold.preprocess.source_bins
+.. autofunction:: PCAfold.preprocess.zero_neighborhood_bins
 
 Auxiliary functions
 ===================
@@ -117,8 +134,13 @@ Auxiliary functions
 Data sampling
 *************
 
-Functions for splitting data sets into train and test data for use in machine learning algorithms.
-Apart from random splitting that can be achieved with the commonly used `sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_, new methods are implemented here that allow for purposive sampling, such as drawing samples at certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
+This section includes functions for splitting data sets into train and test data for use in machine learning algorithms.
+Apart from random splitting that can be achieved with the commonly used
+`sklearn.model_selection.train_test_split <https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html>`_,
+extended methods are implemented here that allow for purposive sampling :cite:`Neyman1992`,
+such as drawing samples at certain amount from local clusters :cite:`May2010`, :cite:`Gill2004`.
+These functionalities can be specifically used to tackle *imbalanced data sets*
+:cite:`He2009`, :cite:`Rastgoo2016`.
 
 The general idea is to divide the entire data set ``X`` (or its portion) into train and test samples as presented below:
 

@@ -11,17 +11,17 @@ from matplotlib import rcParams
 csfont = {'fontname':'Charter', 'fontweight':'regular'}
 hfont = {'fontname':'Charter', 'fontweight':'bold'}
 ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
-rcParams["font.family"] = "serif"
-rcParams["font.serif"] = "Charter"
-rcParams["font.sans-serif"] = "Charter"
-rcParams["font.cursive"] = "Charter"
-rcParams["font.monospace"] = "Charter"
-rcParams['mathtext.fontset'] = 'custom'
-rcParams['mathtext.rm'] = 'Charter'
-rcParams['mathtext.it'] = 'Charter:italic'
-rcParams['mathtext.bf'] = 'Charter:bold'
-rcParams['font.size'] = 20
-rcParams["text.usetex"] = False
+# rcParams["font.family"] = "serif"
+# rcParams["font.serif"] = "Charter"
+# rcParams["font.sans-serif"] = "Charter"
+# rcParams["font.cursive"] = "Charter"
+# rcParams["font.monospace"] = "Charter"
+# rcParams['mathtext.fontset'] = 'custom'
+# rcParams['mathtext.rm'] = 'Charter'
+# rcParams['mathtext.it'] = 'Charter:italic'
+# rcParams['mathtext.bf'] = 'Charter:bold'
+# rcParams['font.size'] = 20
+# rcParams["text.usetex"] = False
 
 grid_opacity = 0.3
 
@@ -39,3 +39,7 @@ marker_scale_legend = 1
 marker_scale_legend_clustering = 10
 
 scatter_point_size = 2
+
+line_width = 1
+
+eigenvector_bar_width = 0.4

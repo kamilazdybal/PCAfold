@@ -9,8 +9,9 @@ PCAfold
 **PCAfold** is a Python software for generating, improving and analyzing
 empirical low-dimensional manifolds obtained via *Principal Component Analysis*
 (PCA). It incorporates a variety of data pre-processing tools (including data
-clustering and sampling), uses PCA as a dimensionality reduction technique and
-introduces metrics to judge the topology of the low-dimensional manifolds.
+clustering and sampling), uses PCA as a dimensionality reduction technique
+and utilizes a novel approach to assess the quality of the obtained
+low-dimensional manifolds.
 
 A general overview for using **PCAfold** modules is presented in the diagram
 below:
@@ -40,8 +41,11 @@ section for possible workflows that can be achieved with **PCAfold**.
    :maxdepth: 2
    :caption: Tutorials & Demos
 
+   tutorials/demo-data-manipulation
    tutorials/demo-clustering
    tutorials/demo-sampling
+   tutorials/demo-plotting-pca
    tutorials/demo-global-vs-local-pca
    tutorials/demo-pca-on-sampled-data-sets
+   tutorials/demo-handling-source-terms
    tutorials/demo-manifold-assessment
