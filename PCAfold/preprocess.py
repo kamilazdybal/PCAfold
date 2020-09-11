@@ -2048,10 +2048,9 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     combustion data sets as proposed in :cite:`Parente2009`.
     The vector is first split to lean and rich
     side (according to the stoichiometric mixture fraction ``Z_stoich``) and
-    then the sides get divided further into clusters. When ``k`` is even,
-    this function will always create equal number of clusters on the lean and
-    rich side. When ``k`` is odd, there will be one more cluster on the rich side
-    compared to the lean side.
+    then the sides get divided further into clusters. When ``k`` is odd,
+    there will always be one more cluster on the side with larger range in
+    mixture fraction space compared to the other side.
 
     An example of how a vector can be partitioned with this function is presented below:
 
@@ -2084,6 +2083,8 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     :raises ValueError:
         if number of clusters ``k`` is not a positive integer.
     :raises ValueError:
+        if the stoichiometric mixture fraction is not a number between 0 and 1.
+    :raises ValueError:
         if ``verbose`` is not a boolean.
 
     :return:
@@ -2096,6 +2097,9 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     # Check that the number of clusters is an integer and is non-zero:
     if not (isinstance(k, int) and k > 0):
         raise ValueError("The number of clusters must be a positive integer.")
+
+    if Z_stoich < 0 or Z_stoich > 1:
+        raise ValueError("Stoichiometric mixture fraction should be between 0 and 1.")
 
     # Number of interval borders:
     n_bins_borders = k + 1
@@ -2111,11 +2115,21 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     else:
 
-        # Z-space lower than stoichiometric mixture fraction:
-        borders_lean = np.linspace(min_Z, Z_stoich, int(np.ceil(n_bins_borders/2)))
+        if Z_stoich <= 0.5:
 
-        # Z-space higher than stoichiometric mixture fraction:
-        borders_rich = np.linspace(Z_stoich, max_Z, int(np.ceil((n_bins_borders+1)/2)))
+            # Z-space lower than stoichiometric mixture fraction:
+            borders_lean = np.linspace(min_Z, Z_stoich, int(np.ceil(n_bins_borders/2)))
+
+            # Z-space higher than stoichiometric mixture fraction:
+            borders_rich = np.linspace(Z_stoich, max_Z, int(np.ceil((n_bins_borders+1)/2)))
+
+        else:
+
+            # Z-space lower than stoichiometric mixture fraction:
+            borders_lean = np.linspace(min_Z, Z_stoich, int(np.ceil((n_bins_borders+1)/2)))
+
+            # Z-space higher than stoichiometric mixture fraction:
+            borders_rich = np.linspace(Z_stoich, max_Z, int(np.ceil(n_bins_borders/2)))
 
         # Combine the two partitions:
         borders = np.concatenate((borders_lean[0:-1], borders_rich))
