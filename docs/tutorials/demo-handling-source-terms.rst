@@ -18,4 +18,4 @@ Bibliography
 ************
 
 .. bibliography:: demo-handling-source-terms.bib
-  :labelprefix: tutorial
+  :labelprefix: T
