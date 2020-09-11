@@ -1,5 +1,5 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/regression/docs/tutorials/demo-pca-on-sampled-data-sets.ipynb>`_.
+          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/docs/tutorials/demo-pca-on-sampled-data-sets.ipynb>`_.
 
 PCA on sampled data sets
 ========================

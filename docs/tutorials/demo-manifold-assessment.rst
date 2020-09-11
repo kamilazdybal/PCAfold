@@ -1,5 +1,5 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/regression/docs/tutorials/demo-manifold-assessment.ipynb>`_.
+          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/docs/tutorials/demo-manifold-assessment.ipynb>`_.
 
 Manifold Assessment
 ===================

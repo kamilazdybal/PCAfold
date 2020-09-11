@@ -1,5 +1,5 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/regression/docs/tutorials/demo-handling-source-terms.ipynb>`_.
+          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/docs/tutorials/demo-handling-source-terms.ipynb>`_.
 
 #################################
 Handling source terms
@@ -124,9 +124,9 @@ in the previous section.
 
 --------------------------------------------------------------------------------
 
-************
+**********************
 Bibliography
-************
+**********************
 
 .. bibliography:: demo-handling-source-terms.bib
   :labelprefix: T

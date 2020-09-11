@@ -1224,7 +1224,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     of four implemented options.
 
     Reach out to the
-    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id14>`_
+    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-option-1>`_
     section of the documentation for more information on the available options.
 
     **Example:**
@@ -1758,7 +1758,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     data set :math:`\mathbf{X_r}`.
 
     Reach out to the
-    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id14>`_
+    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-option-1>`_
     section of the documentation for more information on the available options.
 
     **Example:**
@@ -1875,7 +1875,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     its sources) onto the found eigenvectors.
 
     Reach out to the
-    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#id14>`_
+    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-option-1>`_
     section of the documentation for more information on the available options.
 
     **Equilibration:**

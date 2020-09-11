@@ -17,7 +17,7 @@ Dependencies
 Build from source
 ^^^^^^^^^^^^^^^^^
 
-Clone the ``PCAfold`` repository and move into the ``PCAfold`` directory created:
+Clone the **PCAfold** repository and move into the ``PCAfold`` directory created:
 
 .. code-block:: text
 
