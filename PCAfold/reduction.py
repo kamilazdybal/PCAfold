@@ -1395,6 +1395,9 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
         if len(X_source) != 0:
 
+            # Scale sources with the current scalings D_r:
+            X_source_cs = np.divide(X_source, D_r)
+
             # Compute PC-sources:
             pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
 
