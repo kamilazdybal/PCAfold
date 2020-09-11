@@ -5,9 +5,9 @@
 Handling source terms
 #################################
 
-In this tutorial we present how source terms :cite:`Sutherland2009` of original
-state variables can be handled using **PCAfold**.
 This tutorial can be of interest to researchers working with reactive flows data sets.
+We present how source terms :cite:`Sutherland2009` of original state
+variables can be handled using **PCAfold**.
 
 
 
