@@ -4,7 +4,7 @@
 Data reduction
 ##############
 
-``reduction`` module contains functions for performing Principal Component
+The ``reduction`` module contains functions for performing Principal Component
 Analysis (PCA).
 
 .. note:: The format for the user-supplied input data matrix

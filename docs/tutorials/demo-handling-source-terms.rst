@@ -6,8 +6,12 @@ Handling source terms
 #################################
 
 This tutorial can be of interest to researchers working with reactive flows data sets.
-We present how source terms :cite:`Sutherland2009` of original state
-variables can be handled using **PCAfold**.
+We present how source terms of the original state
+variables can be handled using **PCAfold** software.
+Specifically, **PCAfold** functionalities accommodate treatment of sources
+of Principal Components which can be valuable for implementing PC-transport
+approaches such as proposed in :cite:`Sutherland2009`.
+
 
 
 

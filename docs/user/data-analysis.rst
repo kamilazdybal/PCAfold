@@ -4,7 +4,7 @@
 Manifold analysis
 #################
 
-``analysis`` module contains functions for assessing the intrinsic
+The ``analysis`` module contains functions for assessing the intrinsic
 dimensionality and quality of manifolds.
 
 .. note:: The format for the user-supplied input data matrix

@@ -4,9 +4,9 @@
 Data preprocessing
 ##################
 
-``preprocess`` module can be used for performing data pre-processing
-including centering and scaling, outlier detection and removal, data clustering
-and data sampling.
+The ``preprocess`` module can be used for performing data pre-processing
+including centering and scaling, outlier detection and removal, kernel density
+weighting of data sets, data clustering and data sampling.
 
 .. note:: The format for the user-supplied input data matrix
   :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}` common to all modules is that
