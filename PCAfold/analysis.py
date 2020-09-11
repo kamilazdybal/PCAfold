@@ -89,6 +89,32 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     logspace from ``min_bandwidth`` to ``max_bandwidth`` with ``npts_bandwidth`` number of values. If left unspecified,
     ``min_bandwidth`` and ``max_bandwidth`` will be calculated as the minimum and maximum nonzero distance between points, respectively.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+
+        # Access bandwidth values:
+        variance_data.bandwidth_values
+
+        # Access normalized variance values:
+        variance_data.normalized_variance
+
+        # Access normalized variance values for a specific variable:
+        variance_data.normalized_variance['B']
+
     :param indepvars:
         independent variable values (size: n_observations x n_independent variables)
     :param depvars:
