@@ -11,8 +11,6 @@ variables can be handled using **PCAfold**.
 
 
 
-
-
 --------------------------------------------------------------------------------
 
 ************
@@ -20,3 +18,4 @@ Bibliography
 ************
 
 .. bibliography:: demo-handling-source-terms.bib
+  :labelprefix: tutorial
