@@ -100,7 +100,7 @@ In this section we present several popular workflows that can be achieved using
 functionalities of **PCAfold**. An overview for combining **PCAfold** modules
 into a complete workflow is presented in the diagram below:
 
-.. image:: images/PCAfold-software-architecture.png
+.. image:: ../images/PCAfold-software-architecture.png
   :width: 700
   :align: center
 
