@@ -1395,6 +1395,9 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
         if len(X_source) != 0:
 
+            # Scale sources with the current scalings D_r:
+            X_source_cs = np.divide(X_source, D_r)
+
             # Compute PC-sources:
             pc_sources = X_source_cs.dot(eigenvectors[:,0:n_components])
 
@@ -1531,6 +1534,9 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     plt.xlim(0, n_variables+1.5)
     plt.grid(alpha=0.3, zorder=0)
 
+    if len(legend_label) != 0:
+        lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
+
     for i in range(0, n_variables):
 
         dy = normalized_C_r[i] - normalized_C[i]
@@ -1546,9 +1552,6 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     ax.spines["bottom"].set_visible(True)
     ax.spines["right"].set_visible(True)
     ax.spines["left"].set_visible(True)
-
-    if len(legend_label) != 0:
-        lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
 
     if save_filename != None:
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -1685,6 +1688,14 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         plt.scatter(x_range, eigenvectors[:,0], c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
         plt.scatter(x_range, eigenvectors[:,-1], c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
 
+        if len(legend_label) != 0:
+
+            lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
+
+            lgnd.legendHandles[0]._sizes = [marker_size*1.5]
+            lgnd.legendHandles[1]._sizes = [marker_size*1.5]
+            plt.setp(lgnd.texts, **csfont)
+
         for i in range(0,n_variables):
 
             dy = eigenvectors[i,-1] - eigenvectors[i,0]
@@ -1709,14 +1720,6 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         ax.spines["bottom"].set_visible(True)
         ax.spines["right"].set_visible(True)
         ax.spines["left"].set_visible(True)
-
-        if len(legend_label) != 0:
-
-            lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
-
-            lgnd.legendHandles[0]._sizes = [marker_size*1.5]
-            lgnd.legendHandles[1]._sizes = [marker_size*1.5]
-            plt.setp(lgnd.texts, **csfont)
 
     # When there are more than two versions plot the trends:
     else:
