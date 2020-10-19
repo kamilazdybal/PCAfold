@@ -10,6 +10,7 @@ __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "
 __status__ = "Production"
 
 import numpy as np
+import multiprocessing as multiproc
 from PCAfold import KReg
 from scipy.spatial import KDTree
 from scipy.optimize import minimize
@@ -69,7 +70,7 @@ class VarianceData:
 
 
 def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth=25, min_bandwidth=None,
-                                max_bandwidth=None, bandwidth_values=None, scale_unit_box=True):
+                                max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
     """
     Compute a normalized variance (and related quantities) for analyzing manifold dimensionality.
     The normalized variance is computed as
@@ -131,6 +132,8 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
         (optional) array of bandwidth values, i.e. filter widths for a Gaussian filter, to loop over
     :param scale_unit_box:
         (optional, default True) center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension
+    :param n_threads:
+        (optional, default None) number of threads to run this computation. If None, default behavior of multiprocessing.Pool is used, which is to use all available cores on the current system.
 
     :return:
         a ``VarianceData`` class
@@ -162,8 +165,15 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
 
     lvar = np.zeros((bandwidth_values.size, yi.shape[1]))
     kregmod = KReg(xi, yi)  # class for kernel regression evaluations
-    for si in range(bandwidth_values.size):
-        lvar[si, :] = np.linalg.norm(yi - kregmod.predict(xi, bandwidth_values[si]), axis=0) ** 2
+
+    # define a list of argments for kregmod_predict
+    fcnArgs = [(xi, bandwidth_values[si]) for si in range(bandwidth_values.size) ]
+
+    pool = multiproc.Pool(processes=n_threads)
+    kregmodResults = pool.starmap( kregmod.predict, fcnArgs)
+
+    for si in range(bandwidth_values.size): 
+        lvar[si, :] = np.linalg.norm(yi - kregmodResults[si], axis=0) ** 2
 
     # saving the local variance for each yi...
     local_var = dict({key: lvar[:, idx] for idx, key in enumerate(depvar_names)})
