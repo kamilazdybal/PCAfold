@@ -133,7 +133,7 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     :param scale_unit_box:
         (optional, default True) center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension
     :param n_threads:
-        (optional, default None) number of threads to run this computation. If None, the number of threads is set to the number of cores on the current system.
+        (optional, default None) number of threads to run this computation. If None, default behavior of multiprocessing.Pool is used, which is to use all available cores on the current system.
 
     :return:
         a ``VarianceData`` class
@@ -168,12 +168,9 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
 
     # define a list of argments for kregmod_predict
     fcnArgs = [(xi, bandwidth_values[si]) for si in range(bandwidth_values.size) ]
-    
-    if n_threads is None:
-        n_threads = min(multiproc.cpu_count(), len(fcnArgs))
 
-    with multiproc.Pool(n_threads) as pool:
-        kregmodResults = pool.starmap( kregmod.predict, fcnArgs)
+    pool = multiproc.Pool(processes=n_threads)
+    kregmodResults = pool.starmap( kregmod.predict, fcnArgs)
 
     for si in range(bandwidth_values.size): 
         lvar[si, :] = np.linalg.norm(yi - kregmodResults[si], axis=0) ** 2
