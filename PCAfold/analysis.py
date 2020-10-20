@@ -171,6 +171,9 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
 
     pool = multiproc.Pool(processes=n_threads)
     kregmodResults = pool.starmap( kregmod.predict, fcnArgs)
+    
+    pool.close()
+    pool.join()
 
     for si in range(bandwidth_values.size): 
         lvar[si, :] = np.linalg.norm(yi - kregmodResults[si], axis=0) ** 2
