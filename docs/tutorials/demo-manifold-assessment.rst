@@ -13,7 +13,10 @@ interest.
 
     import numpy as np
     import matplotlib.pyplot as plt
-    from PCAfold import compute_normalized_variance, PCA, logistic_fit, assess_manifolds, plot_normalized_variance, plot_normalized_variance_comparison
+    from PCAfold import compute_normalized_variance, PCA, normalized_variance_derivative,\
+    find_local_maxima, plot_normalized_variance, plot_normalized_variance_comparison,\
+    plot_normalized_variance_derivative, plot_normalized_variance_derivative_comparison, random_sampling_normalized_variance
+
 
 Here we are creating a two-dimensional manifold to assess with a
 dependent variable. Independent variables :math:`x` and :math:`y` and
@@ -102,18 +105,21 @@ the resulting normalized variance.
 
     orig2D_default  = compute_normalized_variance(indepvars, depvars, [depvar_name])
 
-    plt = plot_normalized_variance(orig2D_default, figure_size=(6,4))
+    plt = plot_normalized_variance(orig2D_default)
     plt.show()
 
+
+
+
 .. image:: ../images/output_7_0.png
+
 
 Now we will define an array for the bandwidths in order for the same
 values to be applied to our manifolds of interest.
 
 .. code:: python
 
-    depvar_name = 'depvar' # dependent variable name
-    bandwidth = np.logspace(-6,1) # array of bandwidth values
+    bandwidth = np.logspace(-6,1,100) # array of bandwidth values
 
     # one-dimensional manifold represented by x
     orig1Dx = compute_normalized_variance(indepvars[:,:1], depvars, [depvar_name], bandwidth_values=bandwidth)
@@ -127,7 +133,9 @@ The following plot shows the normalized variance calculated for the
 dependent variable on each of the three manifolds. A single smooth rise
 in the normalized variance over bandwidth values indicates a unique
 manifold. Multiple rises, as can be seen in the one-dimensional
-manifolds, indicate overlapping states. A curve that rises at larger
+manifolds, indicate multiple scales of variation. In this example, those
+smaller scales can be attributed to non-uniqueness introduced through
+the projection into one dimension. A curve that rises at larger
 bandwidth values also indicates more spread in the dependent variable
 over the manifold. Therefore the desired curve for an optimal manifold
 is one that has a single smooth rise that occurs at larger bandwidth
@@ -135,62 +143,34 @@ values.
 
 .. code:: python
 
-    plt = plot_normalized_variance_comparison((orig1Dx, orig1Dy, orig2D), ([], [], []), ('Blues', 'Reds', 'Greens'), title='Normalized variance for '+depvar_name, figure_size=(7,4))
+    plt = plot_normalized_variance_comparison((orig1Dx, orig1Dy, orig2D), ([], [], []), ('Blues', 'Reds', 'Greens'), title='Normalized variance for '+depvar_name)
     plt.legend(['orig,1D_x', 'orig,1D_y', 'orig,2D'])
     plt.show()
+
+
+
 
 .. image:: ../images/output_11_0.png
 
 
-The ``assess_manifolds`` function may be used for a clearer visual
-comparison of manifolds with multiple dependent variables. The idea
-behind this comparison is to assess how well a logistic function fits
-the normalized variance over a log scale of the bandwidth values. The
-logistic function represents the desired single smooth rise that
-indicates the uniqueness of the manifold. The shift in this logistic
-function then gives a representation of the spread in the dependent
-variable. We use the :math:`R^2` value for how well a logistic function
-represents the normalized variance as well as the shift in the logistic
-fitted function to indicate whether or not a manifold is appropriate for
-representing the dependent variables of interest. Typically, :math:`R^2`
-values less then ~0.999 indicate regions of overlap. The shift may be
-related to where the normalized variance reaches about 50% of the
-maximum, but only in the cases of a good logistic fit. Therefore, the
-shift is used as secondary criteria for a manifold assessment.
+In order to better highlight the fastest changes in the normalized
+variance, we look at a scaled derivative over the logarithmically scaled
+bandwidths which relays how fast the variance is changing as the
+bandwidth changes. Specifically we compute
+:math:`\hat{\mathcal{D}}(\sigma)`, whose equation can be found in the
+documentation. Below we show this quantity for the original
+two-dimensional manifold.
 
-In this example, we just have a single dependent variable, but with
-multiple variables, the ``assess_method`` input to ``assess_manifolds``
-specifies which logistic parameters across variables should be used to
-represent a manifold. Options include min, max, or avg.
-
-The output of ``assess_manifolds`` is a dictionary of the :math:`R^2`
-and shift parameters from the logistic fits described above for each
-manifold as well as a plot for comparing the manifolds, as shown below.
-In this plot, the manifold uniqueness parameter is the :math:`R^2` of
-the logistic fit and the manifold spread parameter is the shift in the
-logistic fit. The ``R2`` key may be used to access the :math:`R^2`
-values for all dependent variables and the ``sigma0`` key may be used to
-access the logistic shift value for all dependent variables in the
-returned dictionary.
-
-We first create a dictionary of the classes returned by
-``compute_normalized_variance``, then feed this to ``assess_manifolds``.
-The result shows that the two-dimensional representation is the best for
-our dependent variable as it has both the largest manifold uniqueness
-parameter and manifold spread parameter. The manifold uniqueness
-parameter of the one-dimensional manifolds being less than ~0.999
-indicates these representations have overlapping states.
+We see a single peak in :math:`\hat{\mathcal{D}}(\sigma)` corresponding
+to the single rise in :math:`\mathcal{N}(\sigma)` pointed out above. The
+location of this peak gives an idea of the feature sizes or length
+scales associated with variation in the dependent variable over the
+manifold.
 
 .. code:: python
 
-    variance_data_dict = {}
-    variance_data_dict['orig,1D_x'] = orig1Dx
-    variance_data_dict['orig,1D_y'] = orig1Dy
-    variance_data_dict['orig,2D'] = orig2D
-
-    assessment = assess_manifolds(variance_data_dict)
-    for key in assessment.keys():
-        print(f"manifold: {key:9}   R2: {assessment[key]['R2'][0]:1.3f}   sigma0: {assessment[key]['sigma0'][0]:1.2e}")
+    plt = plot_normalized_variance_derivative(orig2D)
+    plt.show()
 
 
 
@@ -198,60 +178,152 @@ indicates these representations have overlapping states.
 .. image:: ../images/output_13_0.png
 
 
-.. parsed-literal::
-
-    manifold: orig,1D_x   R2: 0.925   sigma0: 5.04e-03
-    manifold: orig,1D_y   R2: 0.926   sigma0: 4.98e-01
-    manifold: orig,2D     R2: 0.999   sigma0: 8.07e-01
-
-
-The plots below show more details on the logistic fitting that occurs in
-``assess_manifolds``. These call the ``logistic_fit`` function which
-returns the parameters we analyze for assessing manifolds and show the
-fit against the original data as well as the difference between the two
-when ``show_plot`` is set to True.
-
-The first plot is a one-dimensional manifold with overlap while the
-second plot is for the two-dimensional manifold.
+We can also plot a comparison of these peaks using
+``plot_normalized_variance_derivative_comparison`` for the three
+manifold representations discussed thus far. In the plot below, we can
+see that the two one-dimensional projections have two peaks in
+:math:`\hat{\mathcal{D}}(\sigma)` corresponding to the two humps in the
+normalized variance. This clearly shows that the projections are
+introducing a significant scale of variation not present on the original
+two-dimensional manifold. The locations of these peaks indicate the
+feature sizes or scales of variaiton present in the dependent variable
+on the manifolds.
 
 .. code:: python
 
-    print('Example of overlapping manifold resulting in bad logistic fit:')
-    spread, R2 = logistic_fit(orig1Dx.normalized_variance[depvar_name], orig1Dx.bandwidth_values, show_plot=True)
-    print(f'manifold spread parameter (shift in logistic fit): {spread:1.2e} \nmanifold uniqueness parameter (R-squared of logistic fit): {R2:1.3f}\n')
+    plt = plot_normalized_variance_derivative_comparison((orig1Dx, orig1Dy, orig2D), ([],[],[]), ('Blues', 'Reds','Greens'))
+    plt.legend(['orig,1D_x', 'orig,1D_y', 'orig,2D'])
+    plt.show()
 
-    print('Example of unique manifold resulting in good logistic fit:')
-    spread, R2 = logistic_fit(orig2D.normalized_variance[depvar_name], orig2D.bandwidth_values, show_plot=True)
-    print(f'manifold spread parameter (shift in logistic fit): {spread:1.2e} \nmanifold uniqueness parameter (R-squared of logistic fit): {R2:1.3f}\n')
+
+
+
+.. image:: ../images/output_15_0.png
+
+
+We can also break down the analysis of these peaks to determine the
+:math:`\sigma` where they occur. The ``normalized_variance_derivative``
+function will return a dictionary of :math:`\hat{\mathcal{D}}(\sigma)`
+for each dependent variable along with the corresponding :math:`\sigma`
+values. The ``find_local_maxima`` function can then be used to report
+the locations of the peaks in :math:`\hat{\mathcal{D}}(\sigma)` along
+with the peak values themselves. In order to properly analyze these
+peaks, we leave the ``logscaling`` parameter to its default True value.
+We can also set ``show_plot`` to True to display the peaks found. This
+is demonstrated for the one-dimensional projection onto x below.
+
+.. code:: python
+
+    orig1Dx_derivative, orig1Dx_sigma = normalized_variance_derivative(orig1Dx)
+    orig1Dx_peak_locs, orig1Dx_peak_values = find_local_maxima(orig1Dx_derivative[depvar_name], orig1Dx_sigma, show_plot=True)
+    print('peak locations:', orig1Dx_peak_locs)
+    print('peak values:', orig1Dx_peak_values)
+
+
+
+
+.. image:: ../images/output_17_0.png
+
+
+.. parsed-literal::
+
+    peak locations: [0.00086033 0.5070298 ]
+    peak values: [1.01351778 0.60217727]
+
+
+In this example, we know in the case of the one-dimensional projections
+that non-uniqueness or overlap is introduced in the dependent variable
+representation. This shows up as an additional peak in
+:math:`\hat{\mathcal{D}}(\sigma)` compared to the original
+two-dimensional manifold. In general, though, we may not know whether
+that additional scale of variation is due to non-uniqueness or is a new
+characteristic feature from sharpening gradients. We can analyze
+sensitivity to data sampling in order to distinguish between the two.
+
+As an example, we will analyze the projection onto x. We can use the
+``random_sampling_normalized_variance`` to compute the normalized
+variance for various random samplings based on the provided
+``sampling_percentages`` argument. We can also specify multiple
+realizations through the ``n_sample_iterations`` argument, which will be
+averaged for returning :math:`\hat{\mathcal{D}}(\sigma)`. We will test
+100%, 50%, and 25% specified as [1., 0.5, 0.25]. Note that specifying
+100% returns the same result as calling compute_normalized variance on
+the full dataset as we did above.
+
+.. code:: python
+
+    pctdict, pctsig, _ = random_sampling_normalized_variance([1., 0.5, 0.25],
+                                                                 indepvars[:,:1],
+                                                                 depvars,
+                                                                 [depvar_name],
+                                                                 bandwidth_values=bandwidth,
+                                                                 n_sample_iterations=5)
 
 
 
 .. parsed-literal::
 
-    Example of overlapping manifold resulting in bad logistic fit:
+    sampling 100.0 % of the data
+      iteration 1 of 5
+      iteration 2 of 5
+      iteration 3 of 5
+      iteration 4 of 5
+      iteration 5 of 5
+    sampling 50.0 % of the data
+      iteration 1 of 5
+      iteration 2 of 5
+      iteration 3 of 5
+      iteration 4 of 5
+      iteration 5 of 5
+    sampling 25.0 % of the data
+      iteration 1 of 5
+      iteration 2 of 5
+      iteration 3 of 5
+      iteration 4 of 5
+      iteration 5 of 5
 
 
+We then plot the result below and report the peak locations for the two
+dominant peaks. We can see that the peak at the larger :math:`\sigma`
+isn’t very sensitive to data sampling. It remains around 0.5. The peak
+at smaller :math:`\sigma` though experiences a shift to larger
+:math:`\sigma` as less data is included (lower percent sampling). This
+is because variation from non-uniqueness is much more sensitive to data
+spacing than characteristic feature variation. We would therefore
+conclude that the second scale of variation introduced by the projection
+onto x is due to non-uniqueness, not a characteristic feature size, and
+therefore the projection is unacceptable. This confirms what we already
+knew from the visual analysis.
 
-.. image:: ../images/output_15_1.png
+.. code:: python
+
+    peakthreshold = 0.4
+
+    for pct in pctdict.keys():
+        plt.semilogx(pctsig, pctdict[pct][depvar_name], '--', linewidth=2, label=pct)
+        peak_locs, peak_vals = find_local_maxima(pctdict[pct][depvar_name], pctsig, threshold=peakthreshold)
+        print(f'{pct*100:3.0f}% sampling peak locations ordered by height: {peak_locs[0]:.2e}, {peak_locs[1]:.2e}')
+
+    plt.grid()
+    plt.xlabel('$\sigma$')
+    plt.ylabel('$\hat{\mathcal{D}}$')
+    plt.legend()
+    plt.xlim([np.min(pctsig), np.max(pctsig)])
+    plt.ylim([0,1.02])
+    plt.title('Detecting non-uniqueness through sensitivity to sampling')
+    plt.show()
+
 
 
 .. parsed-literal::
 
-    manifold spread parameter (shift in logistic fit): 5.04e-03
-    manifold uniqueness parameter (R-squared of logistic fit): 0.925
-
-    Example of unique manifold resulting in good logistic fit:
-
+    100% sampling peak locations ordered by height: 8.60e-04, 5.07e-01
+     50% sampling peak locations ordered by height: 1.15e-03, 5.06e-01
+     25% sampling peak locations ordered by height: 3.68e-03, 4.98e-01
 
 
-.. image:: ../images/output_15_3.png
 
-
-.. parsed-literal::
-
-    manifold spread parameter (shift in logistic fit): 8.07e-01
-    manifold uniqueness parameter (R-squared of logistic fit): 0.999
-
+.. image:: ../images/output_21_1.png
 
 
 As an example of comparing multiple representations of a manifold in the
@@ -290,11 +362,11 @@ dimensions for the PCA manifolds are referred to as PC1 and PC2.
 
 
 
-.. image:: ../images/output_17_0.png
+.. image:: ../images/output_23_0.png
 
 
 
-.. image:: ../images/output_17_1.png
+.. image:: ../images/output_23_1.png
 
 
 We call ``compute_normalized_variance`` in order to assess these
@@ -311,50 +383,59 @@ representing a one-dimensional manifold.
     pca2D_pareto = compute_normalized_variance(eta_pareto,       depvars, [depvar_name],bandwidth_values=bandwidth)
 
 
-Now we add the resulting data to our dictionary containing the original
-manifold results and feed it to ``assess_manifolds`` to compare across
-all manifolds.
-
-These results show that PCA with ``std`` scaling improved our
-two-dimensional manifold compared to the original and has a better
-representation of the dependent variable of interest since it has higher
-parameters for manifold uniqueness and manifold spread. We can also see
-that PCA with ``pareto`` scaling created a similar representation to the
-original manifold, and therefore offered no additional benefit. The
-``std`` PCA manifold does a much better job at representing the data
-with one dimension than the other techniques as the manifold uniqueness
-parameter, while still indicating regions of overlap, indicates a lot
-fewer regions of overlap than the others. This can be seen in collapsing
-the ``std`` PCA figure above onto PC1 alone compared to collapsing the
-other manifolds onto one dimension.
+We then go straight to plotting :math:`\hat{\mathcal{D}}` to see if new
+peaks are introduced compared to the original two-dimensional manifold,
+indicating new scales of variation. We again find that the
+one-dimensional projections are introducing a new scale. We could
+perform a similar analysis as shown above on the projection onto x to
+conclude that these new scales are also from non-uniqueness introduced
+in the projection. We therefore continue the analysis only considering
+two-dimensional parameterizations to figure out which one may be best in
+representing f.
 
 .. code:: python
 
-    variance_data_dict['pca_std,1D'] = pca1D_std
-    variance_data_dict['pca_std,2D'] = pca2D_std
-    variance_data_dict['pca_pareto,1D'] = pca1D_pareto
-    variance_data_dict['pca_pareto,2D'] = pca2D_pareto
-
-    assessment = assess_manifolds(variance_data_dict)
-    for key in assessment.keys():
-        print(f"manifold: {key:13}   R2: {assessment[key]['R2'][0]:1.3f}   sigma0: {assessment[key]['sigma0'][0]:1.2e}")
+    plt = plot_normalized_variance_derivative_comparison((pca1D_std, pca2D_std, pca1D_pareto, pca2D_pareto, orig2D),
+                                                         ([],[],[],[],[]),
+                                                         ('Blues', 'Reds', 'Purples', 'Oranges', 'Greens'))
+    plt.legend(['pca1D_std', 'pca1D_std', 'pca1D_pareto', 'pca2D_pareto', 'orig,2D'])
+    plt.show()
 
 
 
 
-.. image:: ../images/output_21_0.png
+.. image:: ../images/output_27_0.png
+
+
+We compute the locations of the peaks in :math:`\hat{\mathcal{D}}` over
+:math:`\sigma` below.
+
+.. code:: python
+
+    pca2D_std_derivative, pca2D_std_sigma  = normalized_variance_derivative(pca2D_std)
+    pca2D_pareto_derivative, pca2D_pareto_sigma  = normalized_variance_derivative(pca2D_pareto)
+    orig2D_derivative,  orig2D_sigma  = normalized_variance_derivative(orig2D)
+
+    pca2D_std_peak_locs, _ = find_local_maxima(pca2D_std_derivative[depvar_name], pca2D_std_sigma)
+    pca2D_pareto_peak_locs, _ = find_local_maxima(pca2D_pareto_derivative[depvar_name], pca2D_pareto_sigma)
+    orig2D_peak_locs, _ = find_local_maxima(orig2D_derivative[depvar_name], orig2D_sigma)
+
+    print('peak locations:')
+    print('orig2D',orig2D_peak_locs)
+    print('pca2D_std',pca2D_std_peak_locs)
+    print('pca2D_pareto',pca2D_pareto_peak_locs)
+
 
 
 .. parsed-literal::
 
-    manifold: orig,1D_x       R2: 0.925   sigma0: 5.04e-03
-    manifold: orig,1D_y       R2: 0.926   sigma0: 4.98e-01
-    manifold: orig,2D         R2: 0.999   sigma0: 8.07e-01
-    manifold: pca_std,1D      R2: 0.975   sigma0: 7.55e-01
-    manifold: pca_std,2D      R2: 0.999   sigma0: 9.44e-01
-    manifold: pca_pareto,1D   R2: 0.886   sigma0: 9.36e-02
-    manifold: pca_pareto,2D   R2: 0.999   sigma0: 8.10e-01
+    peak locations:
+    orig2D [0.66762295]
+    pca2D_std [0.78185085]
+    pca2D_pareto [0.67063695]
 
 
-The optimal manifold out of the choices shown above would be the
-two-dimensional ``std`` PCA manifold.
+The results show that PCA with ``std`` scaling results in the largest
+feature size (largest :math:`\sigma`) and is therefore the best for
+parameterizing f. This representation should better facilitate modeling
+of f as the features are more spread out.

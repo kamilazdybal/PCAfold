@@ -15,7 +15,8 @@ from PCAfold import KReg
 from scipy.spatial import KDTree
 from scipy.optimize import minimize
 import matplotlib.pyplot as plt
-from matplotlib.cm import ScalarMappable
+import random as rnd
+from scipy.interpolate import CubicSpline
 from PCAfold.styles import *
 
 
@@ -34,14 +35,17 @@ class VarianceData:
         dictionary of the bandwidth value corresponding to a 10% rise in the normalized variance for each variable
     :param variable_names:
         list of the variable names
+    :param normalized_variance_limit:
+        dictionary of the normalized variance computed as the bandwidth approaches zero (numerically at :math:`10^{-16}`) for each variable
     """
 
-    def __init__(self, bandwidth_values, norm_var, global_var, bandwidth_10pct_rise, keys):
+    def __init__(self, bandwidth_values, norm_var, global_var, bandwidth_10pct_rise, keys, norm_var_limit):
         self._bandwidth_values = bandwidth_values.copy()
         self._normalized_variance = norm_var.copy()
         self._global_variance = global_var.copy()
         self._bandwidth_10pct_rise = bandwidth_10pct_rise.copy()
         self._variable_names = keys.copy()
+        self._normalized_variance_limit = norm_var_limit.copy()
 
     @property
     def bandwidth_values(self):
@@ -67,6 +71,13 @@ class VarianceData:
     def variable_names(self):
         """return a list of the variable names"""
         return self._variable_names.copy()
+
+    @property
+    def normalized_variance_limit(self):
+        """return a dictionary of the normalized variance computed as the
+        bandwidth approaches zero (numerically at 1.e-16) for each variable"""
+        return self._normalized_variance_limit.copy()
+
 
 
 def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth=25, min_bandwidth=None,
@@ -171,11 +182,11 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
 
     pool = multiproc.Pool(processes=n_threads)
     kregmodResults = pool.starmap( kregmod.predict, fcnArgs)
-    
+
     pool.close()
     pool.join()
 
-    for si in range(bandwidth_values.size): 
+    for si in range(bandwidth_values.size):
         lvar[si, :] = np.linalg.norm(yi - kregmodResults[si], axis=0) ** 2
 
     # saving the local variance for each yi...
@@ -192,8 +203,118 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
         else:
             bandwidth_10pct_rise[key] = bandwidth_values[bandwidth_idx[0]][0]
     norm_local_var = dict({key: local_var[key] / global_var[key] for key in depvar_names})
-    solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names)
+
+    # computing normalized variance as bandwidth approaches zero to check for non-uniqueness
+    lvar_limit = kregmod.predict(xi, 1.e-16)
+    nlvar_limit = np.linalg.norm(yi - lvar_limit, axis=0) ** 2
+    normvar_limit = dict({key: nlvar_limit[idx] for idx, key in enumerate(depvar_names)})
+
+    solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit)
     return solution_data
+
+
+def normalized_variance_derivative(variance_data):
+    """
+    Compute a scaled normalized variance derivative on a logarithmic scale, :math:`\\hat{\\mathcal{D}}(\\sigma)`, from
+
+    .. math::
+
+        \\mathcal{D}(\\sigma) = \\frac{\\mathrm{d}\\mathcal{N}(\\sigma)}{\\mathrm{d}\\log_{10}(\\sigma)} + \lim_{\\sigma \\to 0} \\mathcal{N}(\\sigma)
+
+    and
+
+    .. math::
+
+        \\hat{\\mathcal{D}}(\\sigma) = \\frac{\\mathcal{D}(\\sigma)}{\\max(\\mathcal{D}(\\sigma))}
+
+    This value relays how fast the variance is changing as the bandwidth changes and captures non-uniqueness from
+    nonzero values of :math:`\lim_{\\sigma \\to 0} \\mathcal{N}(\\sigma)`. The derivative is approximated
+    with central finite differencing and the limit is approximated by :math:`\\mathcal{N}(\\sigma=10^{-16})` using the
+    ``normalized_variance_limit`` attribute of the ``VarianceData`` object.
+
+    :param variance_data:
+        a ``VarianceData`` class returned from ``compute_normalized_variance``
+
+    :return:
+        - a dictionary of :math:`\\hat{\\mathcal{D}}(\\sigma)` for each variable in the provided ``VarianceData`` object
+        - the :math:`\\sigma` values where :math:`\\hat{\\mathcal{D}}(\\sigma)` was computed
+    """
+    x_plus = variance_data.bandwidth_values[2:]
+    x_minus = variance_data.bandwidth_values[:-2]
+    x = variance_data.bandwidth_values[1:-1]
+    derivative_dict = {}
+    for key in variance_data.variable_names:
+        y_plus = variance_data.normalized_variance[key][2:]
+        y_minus = variance_data.normalized_variance[key][:-2]
+        derivative = (y_plus-y_minus)/(np.log10(x_plus)-np.log10(x_minus)) + variance_data.normalized_variance_limit[key]
+        scaled_derivative = derivative/np.max(derivative)
+        derivative_dict[key] = scaled_derivative
+    return derivative_dict, x
+
+
+def find_local_maxima(dependent_values, independent_values, logscaling=True, threshold=1.e-2, show_plot=False):
+    """
+    Finds and returns locations and values of local maxima in a dependent variable given a set of observations.
+    The functional form of the dependent variable is approximated with a cubic spline for smoother approximations to local maxima.
+
+    :param dependent_values:
+        observations of a single dependent variable such as :math:`\\hat{\\mathcal{D}}` from ``normalized_variance_derivative`` (for a single variable).
+    :param independent_values:
+        observations of a single independent variable such as :math:`\\sigma` returned by ``normalized_variance_derivative``
+    :param logscaling:
+        (optional, default True) this logarithmically scales ``independent_values`` before finding local maxima. This is needed for scaling :math:`\\sigma` appropriately before finding peaks in :math:`\\hat{\\mathcal{D}}`.
+    :param threshold:
+        (optional, default :math:`10^{-2}`) local maxima found below this threshold will be ignored.
+    :param show_plot:
+        (optional, default False) when True, a plot of the ``dependent_values`` over ``independent_values`` (logarithmically scaled if ``logscaling`` is True) with the local maxima highlighted will be shown.
+
+    :return:
+        - the locations of local maxima in ``dependent_values``
+        - the local maxima values
+    """
+    if logscaling:
+        independent_values = np.log10(independent_values.copy())
+    zero_indices = []
+    upslope = True
+    npts = independent_values.size
+    for i in range(1, npts):
+        if upslope and dependent_values[i] - dependent_values[i - 1] <= 0:
+            if dependent_values[i] > threshold:
+                zero_indices.append(i - 1)
+            upslope = False
+        if not upslope and dependent_values[i] - dependent_values[i - 1] >= 0:
+            upslope = True
+
+    zero_locations = []
+    zero_Dvalues = []
+    for idx in zero_indices:
+        if idx < 1:
+            indices = [idx, idx + 1, idx + 2, idx + 3]
+        elif idx < 2:
+            indices = [idx - 1, idx, idx + 1, idx + 2]
+        elif idx > npts - 1:
+            indices = [idx - 3, idx - 2, idx - 1, idx]
+        else:
+            indices = [idx - 2, idx - 1, idx, idx + 1]
+        Dspl = CubicSpline(independent_values[indices], dependent_values[indices])
+        sigma_max = minimize(lambda s: -Dspl(s), independent_values[idx])
+        zero_locations.append(sigma_max.x[0])
+        zero_Dvalues.append(Dspl(sigma_max.x[0]))
+    if show_plot:
+        plt.plot(independent_values, dependent_values, 'k-')
+        plt.plot(zero_locations, zero_Dvalues, 'r*')
+        plt.xlim([np.min(independent_values),np.max(independent_values)])
+        plt.ylim([0., 1.05])
+        plt.grid()
+        if logscaling:
+            plt.xlabel('log$_{10}$(independent variable)')
+        else:
+            plt.xlabel('independent variable')
+        plt.ylabel('dependent variable')
+        plt.show()
+    if logscaling:
+        zero_locations = 10. ** np.array(zero_locations)
+    return np.array(zero_locations, dtype=float), np.array(zero_Dvalues, dtype=float)
 
 
 def r2value(observed, predicted):
@@ -213,150 +334,92 @@ def r2value(observed, predicted):
     return r2
 
 
-def logistic_fit(normalized_variance_values, bandwidth_values, show_plot=False):
+def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
+                                        n_sample_iterations=1, verbose=True, npts_bandwidth=25, min_bandwidth=None,
+                                        max_bandwidth=None,
+                                        bandwidth_values=None, scale_unit_box=True, n_threads=None):
     """
-    Calculates parameters :math:`k` and :math:`\\sigma_0` for a logistic fit,
+    Compute the normalized variance derivatives :math:`\\hat{\\mathcal{D}}(\\sigma)` for random samples of the provided
+    data specified using ``sampling_percentages``. These will be averaged over ``n_sample_iterations`` iterations. Analyzing
+    the shift in peaks of :math:`\\hat{\\mathcal{D}}(\\sigma)` due to sampling can distinguish between characteristic
+    features and non-uniqueness due to a transformation/reduction of manifold coordinates. True features should not show
+    significant sensitivity to sampling while non-uniqueness/folds in the manifold will.
 
-    .. math::
-
-        \\mathcal{N}(\\sigma) \\approx \\frac{1}{ 1+e^{ -k[ \\log(\\sigma)-\\log(\\sigma_0) ] } },
-
-    of the normalized variance for a single variable over the log scale of the bandwidth values used in the variance calculation.
-    This is used in ``assess_manifolds`` to provide metrics for a comparison of manifolds.
-
-    :param normalized_variance_values:
-        the array of normalized variance values for a single dependent variable
+    :param sampling_percentages:
+        list or 1D array of fractions (between 0 and 1) of the provided data to sample for computing the normalized variance
+    :param indepvars:
+        independent variable values (size: n_observations x n_independent variables)
+    :param depvars:
+        dependent variable values (size: n_observations x n_dependent variables)
+    :param depvar_names:
+        list of strings corresponding to the names of the dependent variables (for saving values in a dictionary)
+    :param n_sample_iterations:
+        (optional, default 1) how many iterations for each ``sampling_percentages`` to average the normalized variance derivative over
+    :param verbose:
+        (optional, default True) when True, progress statements are printed
+    :param npts_bandwidth:
+        (optional, default 25) number of points to build a logspace of bandwidth values
+    :param min_bandwidth:
+        (optional, default to minimum nonzero interpoint distance) minimum bandwidth
+    :param max_bandwidth:
+        (optional, default to estimated maximum interpoint distance) maximum bandwidth
     :param bandwidth_values:
-        the array of bandwidth values corresponding to the ``normalized_variance_values``
-    :param show_plot:
-        (optional, default False) if True, a plot of the logistic fit, ``normalized_variance_values``, and difference between the two will be shown
+        (optional) array of bandwidth values, i.e. filter widths for a Gaussian filter, to loop over
+    :param scale_unit_box:
+        (optional, default True) center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension
+    :param n_threads:
+        (optional, default None) number of threads to run this computation. If None, default behavior of multiprocessing.Pool is used, which is to use all available cores on the current system.
 
     :return:
-        the :math:`\\sigma_0` parameter of the logistic, and the :math:`R^2` value for the logistic fit
+        - a dictionary of the normalized variance derivative (:math:`\\hat{\\mathcal{D}}(\\sigma)`) for each sampling percentage in ``sampling_percentages`` averaged over ``n_sample_iterations`` iterations
+        - the :math:`\\sigma` values used for computing :math:`\\hat{\\mathcal{D}}(\\sigma)`
+        - a dictionary of the ``VarianceData`` objects for each sampling percentage and iteration in ``sampling_percentages`` and ``n_sample_iterations``
     """
-    log_bandwidth_values = np.log10(bandwidth_values)
-    L = 1.  # parameter for the logistic function
+    assert indepvars.ndim == 2, "independent variable array must be 2D: n_observations x n_variables."
+    assert depvars.ndim == 2, "dependent variable array must be 2D: n_observations x n_variables."
 
-    def findlogfit(args):
-        """function to minimize in finding logistic fit parameters"""
-        k = args[0]
-        sigma0 = args[1]
+    if isinstance(sampling_percentages, list):
+        for p in sampling_percentages:
+            assert p > 0., "sampling percentages must be between 0 and 1"
+            assert p <= 1., "sampling percentages must be between 0 and 1"
+    elif isinstance(sampling_percentages, np.ndarray):
+        assert sampling_percentages.ndim ==1, "sampling_percentages must be given as a list or 1D array"
+        for p in sampling_percentages:
+            assert p > 0., "sampling percentages must be between 0 and 1"
+            assert p <= 1., "sampling percentages must be between 0 and 1"
+    else:
+        raise ValueError("sampling_percentages must be given as a list or 1D array.")
 
-        logistic = L / (1 + np.exp(-k * (log_bandwidth_values - sigma0)))
-        return np.sum((normalized_variance_values - logistic) ** 2) / np.sum(normalized_variance_values ** 2)
+    normvar_data = {}
+    avg_der_data = {}
 
-    iguess = [1., log_bandwidth_values[
-        np.argmin(np.abs(normalized_variance_values - 0.5))]]  # initial guess for logistic parameters
+    for p in sampling_percentages:
+        if verbose:
+            print('sampling', p * 100., '% of the data')
+        nv_data = {}
+        avg_der = {}
 
-    ans = minimize(findlogfit, iguess, tol=1.e-8)
+        for it in range(n_sample_iterations):
+            if verbose:
+                print('  iteration', it + 1, 'of', n_sample_iterations)
+            rnd.seed(it)
+            idxsample = rnd.sample(list(np.arange(0, indepvars.shape[0])), int(p * indepvars.shape[0]))
+            nv_data[it] = compute_normalized_variance(indepvars[idxsample, :], depvars[idxsample, :], depvar_names,
+                                                      npts_bandwidth=npts_bandwidth, min_bandwidth=min_bandwidth,
+                                                      max_bandwidth=max_bandwidth, bandwidth_values=bandwidth_values,
+                                                      scale_unit_box=scale_unit_box, n_threads=n_threads)
 
-    logistic = L / (1 + np.exp(-ans.x[0] * (log_bandwidth_values - ans.x[1])))
-    R2 = r2value(normalized_variance_values, logistic)
+            der, xder = normalized_variance_derivative(nv_data[it])
+            for key in der.keys():
+                if it == 0:
+                    avg_der[key] = der[key] / np.float(n_sample_iterations)
+                else:
+                    avg_der[key] += der[key] / np.float(n_sample_iterations)
 
-    if show_plot:
-        diff = normalized_variance_values - logistic
-        plt.plot(log_bandwidth_values, normalized_variance_values, 'k.-', label='original')
-        plt.plot(log_bandwidth_values, logistic, 'r--', label='fit')
-        plt.plot(log_bandwidth_values, diff, 'b--', label='difference')
-        plt.xlabel('log(normalized bandwidth)')
-        plt.ylabel('normalized variance')
-        plt.grid()
-        plt.legend()
-        plt.show()
+        avg_der_data[p] = avg_der
+        normvar_data[p] = nv_data
+    return avg_der_data, xder, normvar_data
 
-    return 10 ** ans.x[1], R2
-
-
-def assess_manifolds(variancedata_dict, assess_method='min', show_plot=True):
-    """
-    Provides data for assessing the manifolds represented in the dictionary of ``VarianceData`` classes by the smoothness
-    and scales present in the normalized variance, which represent the uniqueness of the dependent variables on the
-    manifold and the scales of variation respectively. This is done by measuring how well a logistic function
-    fits the normalized variance (as a single continuous rise in the normalized variance indicates a unique manifold)
-    which is done with an R-squared value (R2). The shift of the logistic fit (sigma0) can also be taken into account as a
-    higher value indicates variation at larger scales.
-
-    :param variancedata_dict:
-        dictionary of ``VarianceData`` classes that have been created using ``compute_normalized_variance``
-    :param assess_method:
-        (optional, default 'min') method of selecting a single R2 and sigma0 value (from all the dependent variables)
-        to represent each manifold for the bar plot (min, max, or avg)
-    :param show_plot:
-        (optional, default True) bar plot for visualizing and comparing manifolds according to the R2 and sigma0 values in the function description
-
-    :return:
-        a dictionary of the R2, sigma0 data for each variable in each ``VarianceData`` class of ``variancedata_dict``
-    """
-    datadict = {}
-    for key in variancedata_dict.keys():
-        datadict[key] = {}
-        R2name = 'R2'  # dictionary key for r-squared values
-        x0name = 'sigma0'  # dictionary key for sigma0 logistic shift
-
-        datadict[key][R2name] = []
-        datadict[key][x0name] = []
-        for varname in variancedata_dict[key].variable_names:
-            x0, R2 = logistic_fit(variancedata_dict[key].normalized_variance[varname],
-                                  variancedata_dict[key].bandwidth_values)
-            datadict[key][R2name].append(R2)
-            datadict[key][x0name].append(x0)
-
-        datadict[key][R2name] = np.array(datadict[key][R2name])
-        datadict[key][x0name] = np.array(datadict[key][x0name])
-
-    if show_plot:
-        x0s = []
-        R2s = []
-
-        for key in datadict.keys():
-            if assess_method == 'min':
-                x0s.append(np.min(datadict[key][x0name]))
-                R2s.append(np.min(datadict[key][R2name]))
-            elif assess_method == 'max':
-                x0s.append(np.max(datadict[key][x0name]))
-                R2s.append(np.max(datadict[key][R2name]))
-            elif assess_method == 'avg':
-                x0s.append(np.mean(datadict[key][x0name]))
-                R2s.append(np.mean(datadict[key][R2name]))
-            else:
-                print('unsupported method')
-
-        x0s = np.array(x0s)
-        R2s = np.array(R2s)
-
-        R2sortidx = np.argsort(R2s)
-
-        sorted_labels = np.array(list(datadict.keys()))[R2sortidx]
-        data_height = R2s[R2sortidx]
-        data_color = x0s[R2sortidx]
-
-        data_color_norm = [(x - min(data_color)) / (max(data_color) - min(data_color)) for x in data_color]
-        fig, ax = plt.subplots(figsize=(6, 4))
-
-        my_cmap = plt.cm.get_cmap('Blues')
-        colors = my_cmap(data_color_norm)
-        rects = ax.barh(list(range(0, len(sorted_labels))), data_height, color=colors, edgecolor='k')
-
-        sm = ScalarMappable(cmap=my_cmap, norm=plt.Normalize(min(data_color), max(data_color)))
-        sm.set_array([])
-
-        cbar = plt.colorbar(sm)
-        cbar.set_label('manifold spread parameter', rotation=270, labelpad=25)
-
-        plt.gca().set_yticks(list(range(0, len(sorted_labels))))
-        plt.gca().set_yticklabels([*sorted_labels])
-
-        xmin = 0.8
-        xmax = 1.0
-        plt.gca().set_xticks(np.linspace(xmin,xmax,5))
-
-        plt.xlabel("manifold uniqueness parameter")
-        plt.xlim([xmin,xmax])
-        ax.set_axisbelow(True)
-        plt.grid()
-        plt.show()
-
-    return datadict
 
 ################################################################################
 #
@@ -554,6 +617,161 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
 
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
+    plt.grid(alpha=grid_opacity)
+    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
+def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title=None, save_filename=None):
+    """
+    This function plots a scaled normalized variance derivative (computed over logarithmically scaled bandwidths), :math:`\hat{\mathcal{D}(\sigma)}`,
+    over bandwith values :math:`\sigma` from an object of a ``VarianceData`` class.
+
+    *Note:* this function can accomodate plotting up to 18 variables at once.
+    You can specify which variables should be plotted using ``plot_variables`` list.
+
+    Example is similar to that found for ``plot_normalized_variance``.
+
+    :param variance_data:
+        an object of ``VarianceData`` class objects whose normalized variance derivative quantities
+        should be plotted.
+    :param plot_variables: (optional)
+        list of integers specifying indices of variables to be plotted.
+        By default, all variables are plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *Blues*.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from matplotlib import cm
+    color_map_colors = cm.get_cmap(color_map)
+
+    markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
+
+    # Extract quantities from the VarianceData class object:
+    variable_names = variance_data.variable_names
+    derivatives, bandwidth_values = normalized_variance_derivative(variance_data)
+
+    if len(plot_variables) != 0:
+        variables_to_plot = []
+        for i in plot_variables:
+            variables_to_plot.append(variable_names[i])
+    else:
+        variables_to_plot = variable_names
+
+    n_variables = len(variables_to_plot)
+
+    if n_variables == 1:
+        variable_colors = np.flipud(color_map_colors([0.8]))
+    else:
+        variable_colors = np.flipud(color_map_colors(np.linspace(0.2, 0.8, n_variables)))
+
+    figure = plt.figure(figsize=figure_size)
+
+    # Plot the normalized variance derivative:
+    for i, variable_name in enumerate(variables_to_plot):
+        plt.semilogx(bandwidth_values, derivatives[variable_name], markers_list[i], label=variable_name, color=variable_colors[i])
+
+    plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
+    plt.ylabel('$\hat{\mathcal{D}}(\sigma)$', fontsize=font_labels, **csfont)
+    plt.grid(alpha=grid_opacity)
+    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
+
+def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_variables_tuple, color_map_tuple, figure_size=(10,5), title=None, save_filename=None):
+    """
+    This function plots a comparison of scaled normalized variance derivative (computed over logarithmically scaled bandwidths), :math:`\hat{\mathcal{D}(\sigma)}`,
+    over bandwith values :math:`\sigma` from an object of a ``VarianceData`` class.
+
+    *Note:* this function can accomodate plotting up to 18 variables at once.
+    You can specify which variables should be plotted using ``plot_variables`` list.
+
+    Example is similar to that found for ``plot_normalized_variance_comparison``.
+
+    :param variance_data_tuple:
+        a tuple of ``VarianceData`` class objects whose normalized variance derivative quantities
+        should be compared on one plot. For instance: ``(variance_data_1, variance_data_2)``.
+    :param plot_variables_tuple:
+        list of integers specifying indices of variables to be plotted.
+        It should have as many elements as there are ``VarianceData`` class objects supplied.
+        For instance: ``([], [])`` will plot all variables.
+    :param color_map_tuple:
+        colormap to use as per ``matplotlib.cm``.
+        It should have as many elements as there are ``VarianceData`` class objects supplied.
+        For instance: ``('Blues', 'Reds')``.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None``
+        title will not be plotted.
+    :param save_filename: (optional)
+        plot save location/filename. If set to ``None`` plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from matplotlib import cm
+
+    markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
+
+    figure = plt.figure(figsize=figure_size)
+
+    variable_count = 0
+
+    for variance_data, plot_variables, color_map in zip(variance_data_tuple, plot_variables_tuple, color_map_tuple):
+
+        color_map_colors = cm.get_cmap(color_map)
+
+        # Extract quantities from the VarianceData class object:
+        variable_names = variance_data.variable_names
+        derivatives, bandwidth_values = normalized_variance_derivative(variance_data)
+
+        if len(plot_variables) != 0:
+            variables_to_plot = []
+            for i in plot_variables:
+                variables_to_plot.append(variable_names[i])
+        else:
+            variables_to_plot = variable_names
+
+        n_variables = len(variables_to_plot)
+
+        if n_variables == 1:
+            variable_colors = np.flipud(color_map_colors([0.8]))
+        else:
+            variable_colors = np.flipud(color_map_colors(np.linspace(0.2, 0.8, n_variables)))
+
+        # Plot the normalized variance:
+        for i, variable_name in enumerate(variables_to_plot):
+            plt.semilogx(bandwidth_values, derivatives[variable_name], markers_list[variable_count], label=variable_name, color=variable_colors[i])
+
+            variable_count = variable_count + 1
+
+    plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
+    plt.ylabel('$\hat{\mathcal{D}}(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
     plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 

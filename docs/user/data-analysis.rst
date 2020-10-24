@@ -36,20 +36,25 @@ Class ``VarianceData``
 
 .. autoclass:: PCAfold.analysis.VarianceData
 
+``normalized_variance_derivative``
+================================================
+
+.. autofunction:: PCAfold.analysis.normalized_variance_derivative
+
+``find_local_maxima``
+================================================
+
+.. autofunction:: PCAfold.analysis.find_local_maxima
+
+``random_sampling_normalized_variance``
+================================================
+
+.. autofunction:: PCAfold.analysis.random_sampling_normalized_variance
+
 ``r2value``
 ================================================
 
 .. autofunction:: PCAfold.analysis.r2value
-
-``logistic_fit``
-================================================
-
-.. autofunction:: PCAfold.analysis.logistic_fit
-
-``assess_manifolds``
-================================================
-
-.. autofunction:: PCAfold.analysis.assess_manifolds
 
 --------------------------------------------------------------------------------
 
@@ -111,6 +116,16 @@ Plotting functions
 =======================================
 
 .. autofunction:: PCAfold.analysis.plot_normalized_variance_comparison
+
+``plot_normalized_variance_derivative``
+========================================
+
+.. autofunction:: PCAfold.analysis.plot_normalized_variance_derivative
+
+``plot_normalized_variance_derivative_comparison``
+===================================================
+
+.. autofunction:: PCAfold.analysis.plot_normalized_variance_derivative_comparison
 
 --------------------------------------------------------------------------------
 
