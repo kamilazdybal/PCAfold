@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from PCAfold import compute_normalized_variance, logistic_fit, assess_manifolds, r2value
+from PCAfold import compute_normalized_variance, r2value
 from PCAfold import PCA, plot_normalized_variance, plot_normalized_variance_comparison
 
 
@@ -44,19 +44,6 @@ class TestNormalizedVariance(unittest.TestCase):
         bw = np.array([1.])
         variance_data = compute_normalized_variance(self._indepvars, self._depvars, self._names, bandwidth_values=bw)
         self.assertTrue(np.abs(variance_data.normalized_variance[self._names[0]][0] - gs_normvar) < 1.e-6)
-
-    def test_logistic_fits(self):
-        gs_sigma0 = 0.807886539
-        gs_R2 = 0.995794651
-        sigma0, R2 = logistic_fit(self._default_variance_data.normalized_variance[self._names[0]],
-                                  self._default_variance_data.bandwidth_values)
-        self.assertTrue(np.abs(R2 - gs_R2) < 1.e-6)
-        self.assertTrue(np.abs(sigma0 - gs_sigma0) < 1.e-6)
-
-        dictname = 'mydata'
-        assess_manifold_dict = assess_manifolds({dictname: self._default_variance_data}, show_plot=False)
-        self.assertTrue(np.abs(assess_manifold_dict[dictname]['R2'] - gs_R2) < 1.e-6)
-        self.assertTrue(np.abs(assess_manifold_dict[dictname]['sigma0'] - gs_sigma0) < 1.e-6)
 
     def test_r2value(self):
         obs = np.array([0., 1., 2.])
