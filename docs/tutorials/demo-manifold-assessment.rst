@@ -302,7 +302,7 @@ knew from the visual analysis.
     for pct in pctdict.keys():
         plt.semilogx(pctsig, pctdict[pct][depvar_name], '--', linewidth=2, label=pct)
         peak_locs, peak_vals = find_local_maxima(pctdict[pct][depvar_name], pctsig, threshold=peakthreshold)
-        print(f'{pct*100:3.0f}% sampling peak locations ordered by height: {peak_locs[0]:.2e}, {peak_locs[1]:.2e}')
+        print(f'{pct*100:3.0f}% sampling peak locations: {peak_locs[0]:.2e}, {peak_locs[1]:.2e}')
 
     plt.grid()
     plt.xlabel('$\sigma$')
@@ -317,9 +317,9 @@ knew from the visual analysis.
 
 .. parsed-literal::
 
-    100% sampling peak locations ordered by height: 8.60e-04, 5.07e-01
-     50% sampling peak locations ordered by height: 1.15e-03, 5.06e-01
-     25% sampling peak locations ordered by height: 3.68e-03, 4.98e-01
+    100% sampling peak locations: 8.60e-04, 5.07e-01
+     50% sampling peak locations: 1.15e-03, 5.06e-01
+     25% sampling peak locations: 3.68e-03, 4.98e-01
 
 
 
@@ -398,7 +398,7 @@ representing f.
     plt = plot_normalized_variance_derivative_comparison((pca1D_std, pca2D_std, pca1D_pareto, pca2D_pareto, orig2D),
                                                          ([],[],[],[],[]),
                                                          ('Blues', 'Reds', 'Purples', 'Oranges', 'Greens'))
-    plt.legend(['pca1D_std', 'pca1D_std', 'pca1D_pareto', 'pca2D_pareto', 'orig,2D'])
+    plt.legend(['pca1D_std', 'pca2D_std', 'pca1D_pareto', 'pca2D_pareto', 'orig,2D'])
     plt.show()
 
 
