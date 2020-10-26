@@ -336,8 +336,7 @@ def r2value(observed, predicted):
 
 def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
                                         n_sample_iterations=1, verbose=True, npts_bandwidth=25, min_bandwidth=None,
-                                        max_bandwidth=None,
-                                        bandwidth_values=None, scale_unit_box=True, n_threads=None):
+                                        max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
     """
     Compute the normalized variance derivatives :math:`\\hat{\\mathcal{D}}(\\sigma)` for random samples of the provided
     data specified using ``sampling_percentages``. These will be averaged over ``n_sample_iterations`` iterations. Analyzing

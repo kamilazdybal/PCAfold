@@ -1,7 +1,8 @@
 import unittest
 import numpy as np
-from PCAfold import compute_normalized_variance, r2value
+from PCAfold import compute_normalized_variance, r2value, normalized_variance_derivative, find_local_maxima, random_sampling_normalized_variance
 from PCAfold import PCA, plot_normalized_variance, plot_normalized_variance_comparison
+from PCAfold import plot_normalized_variance_derivative, plot_normalized_variance_derivative_comparison
 
 
 class TestNormalizedVariance(unittest.TestCase):
@@ -44,6 +45,60 @@ class TestNormalizedVariance(unittest.TestCase):
         bw = np.array([1.])
         variance_data = compute_normalized_variance(self._indepvars, self._depvars, self._names, bandwidth_values=bw)
         self.assertTrue(np.abs(variance_data.normalized_variance[self._names[0]][0] - gs_normvar) < 1.e-6)
+
+    def test_nonzero_normalized_variance_limit(self):
+        indepvars = np.array([[1., 2.], [3., 4.], [1., 2.]])
+        depvars = np.array([[2.], [5.], [8.]])
+        variance_data = compute_normalized_variance(indepvars, depvars, self._names)
+        zerotol = 1.e-16
+        self.assertTrue(variance_data.normalized_variance_limit[self._names[0]] > zerotol)
+        self.assertTrue(self._default_variance_data.normalized_variance_limit[self._names[0]] <= zerotol)
+
+    def test_normalized_variance_derivative(self):
+        tol = 1.e-8
+
+        def compute_der(normvar, sigma):
+            return (normvar[2:] - normvar[:-2]) / (np.log10(sigma[2:]) - np.log10(sigma[:-2]))
+        der, sig = normalized_variance_derivative(self._default_variance_data)
+        self.assertTrue(self._default_variance_data.bandwidth_values[1] == sig[0])
+        self.assertTrue(self._default_variance_data.bandwidth_values[-2] == sig[-1])
+        d1 = compute_der(self._default_variance_data.normalized_variance[self._names[0]], self._default_variance_data.bandwidth_values)
+        self.assertTrue(np.max(np.abs(der[self._names[0]] - d1/np.max(d1))) <= tol)
+
+        # nonzero limit...
+        indepvars = np.array([[1., 2.], [3., 4.], [1., 2.], [5., 7.]])
+        depvars = np.array([[2.], [5.], [8.], [10.]])
+        variance_data = compute_normalized_variance(indepvars, depvars, self._names)
+        der, sig = normalized_variance_derivative(variance_data)
+        d1 = compute_der(variance_data.normalized_variance[self._names[0]], variance_data.bandwidth_values)
+        self.assertFalse(np.max(np.abs(der[self._names[0]] - d1/np.max(d1))) <= tol)
+        d1 += variance_data.normalized_variance_limit[self._names[0]]
+        self.assertTrue(np.max(np.abs(der[self._names[0]] - d1/np.max(d1))) <= tol)
+
+    def test_peak_locator(self):
+        tol = 1.e-4
+        der, sig = normalized_variance_derivative(self._default_variance_data)
+        peak_locs, peak_vals = find_local_maxima(der[self._names[0]], sig)
+        self.assertTrue(peak_locs.size == 1)
+        self.assertTrue(peak_vals.size == 1)
+        self.assertTrue(np.abs(peak_locs[0] - 0.7225) < tol)
+        self.assertTrue(np.abs(peak_vals[0] - 1.0116) < tol)
+        # test with large threshold don't have peaks
+        peak_locs, peak_vals = find_local_maxima(der[self._names[0]], sig, threshold=1.1)
+        self.assertTrue(peak_locs.size == 0)
+        self.assertTrue(peak_vals.size == 0)
+
+    def test_normalized_variance_sampling(self):
+        tol = 1.e-8
+        avg_der_data, xder, _ = random_sampling_normalized_variance([1., 0.67], self._indepvars, self._depvars, self._names,
+                                                                    bandwidth_values=self._default_variance_data.bandwidth_values,
+                                                                    verbose=False)
+        pct1 = avg_der_data[1.]
+        pct2 = avg_der_data[0.67]
+        der, sig = normalized_variance_derivative(self._default_variance_data)
+        self.assertTrue(np.max(np.abs(der[self._names[0]] - pct1[self._names[0]])) <= tol)
+        self.assertFalse(np.max(np.abs(der[self._names[0]] - pct2[self._names[0]])) <= tol)
+        self.assertTrue(np.max(np.abs(sig - xder)) <= tol)
 
     def test_r2value(self):
         obs = np.array([0., 1., 2.])
@@ -118,6 +173,77 @@ class TestNormalizedVariance(unittest.TestCase):
 
         try:
             plt = plot_normalized_variance_comparison((variance_data_X, variance_data_Y, variance_data_Z), ([0], [2,3], []), ('Greys', 'Blues', 'Reds'), title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+
+    def test_plot_normalized_variance_derivative(self):
+
+        X = np.random.rand(100,5)
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+
+        try:
+            plt = plot_normalized_variance_derivative(variance_data, plot_variables=[0,1,2], color_map='Blues', figure_size=(10,5), title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = plot_normalized_variance_derivative(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title='Normalized variance', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = plot_normalized_variance_derivative(variance_data, plot_variables=[2,3,4], color_map='Blues', figure_size=(15,5), title='Normalized variance', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = plot_normalized_variance_derivative(variance_data, plot_variables=[], color_map='Reds', figure_size=(10,5), title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+    def test_plot_normalized_variance_derivative_comparison(self):
+
+        X = np.random.rand(100,5)
+        Y = np.random.rand(100,5)
+        Z = np.random.rand(100,5)
+        pca_X = PCA(X, n_components=2)
+        pca_Y = PCA(Y, n_components=2)
+        pca_Z = PCA(Y, n_components=2)
+        principal_components_X = pca_X.transform(X)
+        principal_components_Y = pca_Y.transform(Y)
+        principal_components_Z = pca_Z.transform(Z)
+        variance_data_X = compute_normalized_variance(principal_components_X, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+        variance_data_Y = compute_normalized_variance(principal_components_Y, Y, depvar_names=['F', 'G', 'H', 'I', 'J'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+        variance_data_Z = compute_normalized_variance(principal_components_Z, Z, depvar_names=['K', 'L', 'M', 'N', 'O'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+
+        try:
+            plt = plot_normalized_variance_derivative_comparison((variance_data_X, variance_data_Y), ([0,1,2], [0,1,2]), ('Blues', 'Reds'), title=None, save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = plot_normalized_variance_derivative_comparison((variance_data_X, variance_data_Y), ([0,1,2], [0,1,2]), ('Blues', 'Reds'), title='Normalized variance comparison', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = plot_normalized_variance_derivative_comparison((variance_data_X, variance_data_Y, variance_data_Z), ([0,1,2], [0,1,2], []), ('Greys', 'Blues', 'Reds'), title='Normalized variance comparison', save_filename=None)
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = plot_normalized_variance_derivative_comparison((variance_data_X, variance_data_Y, variance_data_Z), ([0], [2,3], []), ('Greys', 'Blues', 'Reds'), title=None, save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)
