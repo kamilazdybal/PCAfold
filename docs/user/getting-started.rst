@@ -114,8 +114,7 @@ The format for the user-supplied input data matrix
 in columns. The initial dimensionality of the data set is determined by the
 number of variables :math:`Q`. Typically, :math:`N \gg Q`.
 
-Below are brief descriptions of several workflows that utilize functionalities of
-the **PCAfold** software:
+Below are brief descriptions of several workflows that utilize functionalities of **PCAfold**:
 
 Data manipulation
 ^^^^^^^^^^^^^^^^^

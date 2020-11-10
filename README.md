@@ -3,15 +3,16 @@
 
 # PCAfold
 
-**PCAfold** is a Python software for generating, improving and analyzing empirical
-low-dimensional manifolds obtained via *Principal Component Analysis* (PCA).
-It incorporates a variety of data pre-processing tools (including data clustering
-and sampling), uses PCA as a dimensionality reduction technique and introduces
-metrics to judge the topology of the low-dimensional manifolds.
+**PCAfold** is an open-source Python library for generating, analyzing and improving
+empirical low-dimensional manifolds obtained via Principal Component Analysis
+(PCA). It incorporates a variety of data preprocessing tools (including data
+clustering and sampling), uses PCA as a dimensionality reduction technique
+and utilizes a novel approach to assess the quality of the obtained
+low-dimensional manifolds.
 
 ## [PCAfold documentation](https://pcafold.readthedocs.io/en/latest/) at Read the Docs
 
-Software documentation contains a thorough user guide including equations, references and example code snippets. Numerous illustrative tutorials and demos are presented as well. The corresponding Jupyter notebooks can also be found in the `docs/tutorials` directory.
+**PCAfold** documentation contains a thorough user guide including equations, references and example code snippets. Numerous illustrative tutorials and demos are presented as well. The corresponding Jupyter notebooks can be found in the `docs/tutorials` directory.
 
 ## Software architecture
 
@@ -72,4 +73,4 @@ out why, please open an issue on [GitLab](https://gitlab.multiscale.utah.edu/com
 - **Kamila Zdybał**, *Université Libre de Bruxelles*, `Kamila.Zdybal@ulb.ac.be`
 - **Elizabeth Armstrong**, *The University of Utah*, `Elizabeth.Armstrong@chemeng.utah.edu`
 - **Alessandro Parente**, *Université Libre de Bruxelles*, `Alessandro.Parente@ulb.ac.be`
-- **James C. Sutherland**, *The University of Utah*, `James.Sutherland@chemeng.utah.edu`
+- **James C. Sutherland**, *The University of Utah*, `James.Sutherland@utah.edu`
