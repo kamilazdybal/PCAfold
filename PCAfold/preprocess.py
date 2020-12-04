@@ -1915,6 +1915,7 @@ def variable_bins(var, k, verbose=False):
 
     :return:
         - **idx** - vector of cluster classifications.
+        - **borders** - list of values that define borders of the clusters.
     """
 
     # Check that the number of clusters is an integer and is non-zero:
@@ -1954,13 +1955,16 @@ def variable_bins(var, k, verbose=False):
     if verbose==True:
         __print_verbose_information_clustering(var, idx, bins_borders)
 
-    return(idx)
+    borders = bins_borders
+
+    return (idx, borders)
 
 def predefined_variable_bins(var, split_values, verbose=False):
     """
     This function does clustering by dividing a variable vector ``var`` into
-    bins such that the split is done at values specified in the ``split_values``
-    list. In general: ``split_values = [value_1, value_2, ..., value_n]``.
+    bins such that splits are done at user-specified values.
+    Split values can be specified in the ``split_values`` list.
+    In general: ``split_values = [value_1, value_2, ..., value_n]``.
 
     *Note:*
     When a split is performed at a given ``value_i``, the observation in ``var``
@@ -2000,6 +2004,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
     :return:
         - **idx** - vector of cluster classifications.
+        - **borders** - list of values that define borders of the clusters.
     """
 
     if not isinstance(verbose, bool):
@@ -2039,7 +2044,9 @@ def predefined_variable_bins(var, split_values, verbose=False):
     if verbose==True:
         __print_verbose_information_clustering(var, idx, bins_borders)
 
-    return(idx)
+    borders = bins_borders
+
+    return (idx, borders)
 
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
@@ -2089,6 +2096,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     :return:
         - **idx** - vector of cluster classifications.
+        - **borders** - list of values that define borders of the clusters.
     """
 
     if not isinstance(verbose, bool):
@@ -2155,16 +2163,12 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     if verbose==True:
         __print_verbose_information_clustering(Z, idx, borders)
 
-    return(idx)
+    return (idx, borders)
 
 def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
     This function aims to separate close-to-zero observations in a vector into one
     cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
-    It can be useful for partitioning any variable
-    that has many observations clustered around zero value and relatively few
-    observations far away from zero on either side.
-
     The offset from zero at which splits are performed is computed
     based on the input parameter ``zero_offset_percentage``:
 
@@ -2174,6 +2178,10 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
     Further clusters are found by splitting positive and negative values in a vector
     alternatingly into bins of equal lengths.
+
+    This clustering technique can be useful for partitioning any variable
+    that has many observations clustered around zero value and relatively few
+    observations far away from zero on either side.
 
     Two examples of how a vector can be partitioned with this function are presented below.
 
@@ -2187,6 +2195,9 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     This is to assure that there are at least three clusters:
     with negative values, with close to zero values, with positive values.
 
+    When ``k`` is even, there will always be one more cluster on the side with
+    larger range compared to the other side.
+
     With ``split_at_zero=True``:
 
     .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.png
@@ -2197,6 +2208,9 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     This is to assure that there are at least four clusters: with negative
     values, with negative values close to zero, with positive values close to
     zero and with positive values.
+
+    When ``k`` is odd, there will always be one more cluster on the side with
+    larger range compared to the other side.
 
     .. note::
 
@@ -2253,6 +2267,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
     :return:
         - **idx** - vector of cluster classifications.
+        - **borders** - list of values that define borders of the clusters.
     """
 
     if not isinstance(verbose, bool):
@@ -2273,10 +2288,10 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
     # Basic checks on the variable vector:
     if not (var_min <= 0):
-        raise ValueError("Source vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
+        raise ValueError("Variable vector does not have negative values. Use `predefined_variable_bins` as a clustering technique instead.")
 
     if not (var_max >= 0):
-        raise ValueError("Source vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
+        raise ValueError("Variable vector does not have positive values. Use `predefined_variable_bins` as a clustering technique instead.")
 
     if (var_min > -offset) or (var_max < offset):
         raise ValueError("Offset from zero crosses the minimum or maximum value of the variable vector. Consider lowering `zero_offset_percentage`.")
@@ -2287,11 +2302,21 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     else:
         n_bins_borders = k
 
-    # Generate cluster borders on the negative side:
-    borders_negative = np.linspace(var_min, -offset, int(np.ceil(n_bins_borders/2)))
+    if abs(var_min) > abs(var_max):
 
-    # Generate cluster borders on the positive side:
-    borders_positive = np.linspace(offset, var_max, int(np.ceil((n_bins_borders+1)/2)))
+        # Generate cluster borders on the negative side:
+        borders_negative = np.linspace(var_min, -offset, int(np.ceil((n_bins_borders+1)/2)))
+
+        # Generate cluster borders on the positive side:
+        borders_positive = np.linspace(offset, var_max, int(np.ceil(n_bins_borders/2)))
+
+    else:
+
+        # Generate cluster borders on the negative side:
+        borders_negative = np.linspace(var_min, -offset, int(np.ceil(n_bins_borders/2)))
+
+        # Generate cluster borders on the positive side:
+        borders_positive = np.linspace(offset, var_max, int(np.ceil((n_bins_borders+1)/2)))
 
     # Combine the two partitions:
     if split_at_zero:
@@ -2318,7 +2343,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     if verbose==True:
         __print_verbose_information_clustering(var, idx, borders)
 
-    return(idx)
+    return (idx, borders)
 
 def degrade_clusters(idx, verbose=False):
     """
