@@ -14,7 +14,7 @@ class TestClustering(unittest.TestCase):
     def test_variable_bins_allowed_calls(self):
 
         try:
-            idx = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 4, verbose=False)
+            (idx, borders) = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 4, verbose=False)
             self.assertTrue(True)
         except:
             self.assertTrue(False)
@@ -25,21 +25,21 @@ class TestClustering(unittest.TestCase):
     def test_variable_bins_not_allowed_calls(self):
 
         with self.assertRaises(ValueError):
-            idx = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 0, verbose=False)
+            (idx, borders) = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 0, verbose=False)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), -1, verbose=False)
+            (idx, borders) = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), -1, verbose=False)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 4, verbose=1)
+            (idx, borders) = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 4, verbose=1)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 4, verbose='True')
+            (idx, borders) = preprocess.variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), 4, verbose='True')
 
     def test_predefined_variable_bins_allowed_calls(self):
 
         try:
-            idx = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3.5, 8.5], verbose=False)
+            (idx, borders) = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3.5, 8.5], verbose=False)
             self.assertTrue(True)
         except:
             self.assertTrue(False)
@@ -50,27 +50,27 @@ class TestClustering(unittest.TestCase):
     def test_predefined_variable_bins_not_allowed_calls(self):
 
         with self.assertRaises(ValueError):
-            idx = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3, 11], verbose=False)
+            (idx, borders) = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3, 11], verbose=False)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [0, 6], verbose=False)
+            (idx, borders) = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [0, 6], verbose=False)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3, 8], verbose=1)
+            (idx, borders) = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3, 8], verbose=1)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3, 8], verbose='True')
+            (idx, borders) = preprocess.predefined_variable_bins(np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), [3, 8], verbose='True')
 
     def test_mixture_fraction_bins_allowed_calls(self):
 
         try:
-            idx = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2)
+            (idx, borders) = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2)
             self.assertTrue(True)
         except:
             self.assertTrue(False)
 
         try:
-            idx = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 1, 0.2)
+            (idx, borders) = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 1, 0.2)
             self.assertTrue(True)
         except:
             self.assertTrue(False)
@@ -81,21 +81,21 @@ class TestClustering(unittest.TestCase):
     def test_mixture_fraction_bins_not_allowed_calls(self):
 
         with self.assertRaises(ValueError):
-            idx = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 0, 0.2)
+            (idx, borders) = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 0, 0.2)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), -1, 0.2)
+            (idx, borders) = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), -1, 0.2)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2, verbose=1)
+            (idx, borders) = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2, verbose=1)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2, verbose='True')
+            (idx, borders) = preprocess.mixture_fraction_bins(np.array([0.1, 0.15, 0.2, 0.25, 0.6, 0.8, 1]), 2, 0.2, verbose='True')
 
     def test_zero_neighborhood_bins_allowed_calls(self):
 
         try:
-            idx = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=False)
+            (idx, borders) = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=False)
             self.assertTrue(True)
         except:
             self.assertTrue(False)
@@ -106,16 +106,16 @@ class TestClustering(unittest.TestCase):
     def test_zero_neighborhood_bins_not_allowed_calls(self):
 
         with self.assertRaises(ValueError):
-            idx = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=0, split_at_zero=True, verbose=False)
+            (idx, borders) = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=0, split_at_zero=True, verbose=False)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=-1, split_at_zero=True, verbose=False)
+            (idx, borders) = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=-1, split_at_zero=True, verbose=False)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=1)
+            (idx, borders) = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose=1)
 
         with self.assertRaises(ValueError):
-            idx = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose='True')
+            (idx, borders) = preprocess.zero_neighborhood_bins(np.array([-100, -20, -0.1, 0, 0.1, 1, 10, 20, 200, 300, 400]), k=4, split_at_zero=True, verbose='True')
 
 ################################################################################
 #
@@ -303,7 +303,7 @@ class TestClustering(unittest.TestCase):
         x = np.linspace(-1,1,100)
 
         try:
-            idx = preprocess.variable_bins(x, 4, verbose=False)
+            (idx, borders) = preprocess.variable_bins(x, 4, verbose=False)
             idx_populations = [25, 25, 25, 25]
             populations = preprocess.get_populations(idx)
             self.assertTrue(populations == idx_populations)
@@ -311,7 +311,7 @@ class TestClustering(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            idx = preprocess.variable_bins(x, 5, verbose=False)
+            (idx, borders) = preprocess.variable_bins(x, 5, verbose=False)
             idx_populations = [20, 20, 20, 20, 20]
             populations = preprocess.get_populations(idx)
             self.assertTrue(populations == idx_populations)
@@ -319,7 +319,7 @@ class TestClustering(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            idx = preprocess.variable_bins(x, 2, verbose=False)
+            (idx, borders) = preprocess.variable_bins(x, 2, verbose=False)
             idx_populations = [50, 50]
             populations = preprocess.get_populations(idx)
             self.assertTrue(populations == idx_populations)
@@ -327,7 +327,7 @@ class TestClustering(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            idx = preprocess.variable_bins(x, 1, verbose=False)
+            (idx, borders) = preprocess.variable_bins(x, 1, verbose=False)
             idx_populations = [100]
             populations = preprocess.get_populations(idx)
             self.assertTrue(populations == idx_populations)
