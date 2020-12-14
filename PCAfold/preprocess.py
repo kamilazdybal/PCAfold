@@ -1899,7 +1899,7 @@ def variable_bins(var, k, verbose=False):
         x = np.linspace(-1,1,100)
 
         # Create partitioning according to bins of x:
-        idx = variable_bins(x, 4, verbose=True)
+        (idx, borders) = variable_bins(x, 4, verbose=True)
 
     :param var:
         vector of variable values.
@@ -1987,7 +1987,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
         x = np.linspace(-1,1,100)
 
         # Create partitioning according to pre-defined bins of x:
-        idx = predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
+        (idx, borders) = predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
 
     :param var:
         vector of variable values.
@@ -2076,7 +2076,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         Z = np.linspace(0,1,100)
 
         # Create partitioning according to bins of mixture fraction:
-        idx = mixture_fraction_bins(Z, 4, 0.4, verbose=True)
+        (idx, borders) = mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
     :param Z:
         vector of mixture fraction values.
@@ -2232,7 +2232,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
         x = np.linspace(-100,100,1000)
 
         # Create partitioning according to bins of x:
-        idx = zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+        (idx, borders) = zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
     :param var:
         vector of variable values.

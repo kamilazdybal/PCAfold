@@ -38,7 +38,7 @@ This clustering will divide the data set based on equal bins of a variable vecto
 
 .. code:: python
 
-  (idx_variable_bins) = preprocess.variable_bins(var, 4, verbose=True)
+  (idx_variable_bins, borders_variable_bins) = preprocess.variable_bins(var, 4, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -70,7 +70,7 @@ This clustering will divide the data set into bins of a one-dimensional variable
 .. code:: python
 
   split_values = [-0.6, 0.4, 0.8]
-  (idx_predefined_variable_bins) = preprocess.predefined_variable_bins(var, split_values, verbose=True)
+  (idx_predefined_variable_bins, borders_predefined_variable_bins) = preprocess.predefined_variable_bins(var, split_values, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -108,7 +108,7 @@ Without splitting at zero ``split_at_zero=False``
 
 .. code:: python
 
-  (idx_zero_neighborhood_bins) = preprocess.zero_neighborhood_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
+  (idx_zero_neighborhood_bins, borders_zero_neighborhood_bins) = preprocess.zero_neighborhood_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -135,7 +135,7 @@ With splitting at zero ``split_at_zero=True``
 
 .. code:: python
 
-  (idx_zero_neighborhood_bins_split_at_zero) = preprocess.zero_neighborhood_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+  (idx_zero_neighborhood_bins_split_at_zero, borders_zero_neighborhood_bins_split_at_zero) = preprocess.zero_neighborhood_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -176,7 +176,7 @@ Note that the first split will be performed at ``Z_stoich`` and further splits w
 
 .. code:: python
 
-  (idx_mixture_fraction_bins) = preprocess.mixture_fraction_bins(Z, 4, 0.4, verbose=True)
+  (idx_mixture_fraction_bins, borders_mixture_fraction_bins) = preprocess.mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
