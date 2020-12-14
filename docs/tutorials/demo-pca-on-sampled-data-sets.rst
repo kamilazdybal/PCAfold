@@ -104,7 +104,7 @@ and use the first Principal Component source term as the conditioning variable:
   S_Z = pca_X.transform(state_space_sources, nocenter=True)
 
   # Cluster the data set:
-  idx = preprocess.zero_neighborhood_bins(S_Z[:,0], k=4, zero_offset_percentage=2, split_at_zero=True, verbose=True)
+  (idx, borders) = preprocess.zero_neighborhood_bins(S_Z[:,0], k=4, zero_offset_percentage=2, split_at_zero=True, verbose=True)
 
 --------------------------------------------------------------------------------
 

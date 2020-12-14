@@ -79,7 +79,7 @@ We obtain cluster classifications and centroids for each cluster:
 
 .. code:: python
 
-  idx = preprocess.predefined_variable_bins(Dataset_local[:,0], [2.5], verbose=False)
+  (idx, borders) = preprocess.predefined_variable_bins(Dataset_local[:,0], [2.5], verbose=False)
   centroids = preprocess.get_centroids(Dataset_local, idx)
 
 Local PCA function can be easily constructed using the existing features of the ``PCA`` class.
