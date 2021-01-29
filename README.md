@@ -1,7 +1,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/pcafold/badge/?version=latest)](https://pcafold.readthedocs.io/en/latest/?badge=latest)
 
-# ![Logo](PCAfold-logo.png?thumbnail)
+<p align="center">
+  <img src="https://gitlab.multiscale.utah.edu/common/PCAfold/raw/cbpca/PCAfold-logo.png" width="500">
+</p>
 
 **PCAfold** is an open-source Python library for generating, analyzing and improving
 empirical low-dimensional manifolds obtained via Principal Component Analysis
