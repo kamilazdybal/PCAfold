@@ -128,6 +128,11 @@ Auxiliary functions
 
 .. autofunction:: PCAfold.preprocess.get_populations
 
+``get_average_centroid_distance``
+---------------------------------
+
+.. autofunction:: PCAfold.preprocess.get_average_centroid_distance
+
 --------------------------------------------------------------------------------
 
 *************
