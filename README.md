@@ -5,8 +5,7 @@
   <img src="https://gitlab.multiscale.utah.edu/common/PCAfold/raw/master/PCAfold-logo.png" width="500">
 </p>
 
-**PCAfold** is an open-source Python library for generating, analyzing and improving
-empirical low-dimensional manifolds obtained via Principal Component Analysis
+**PCAfold** is an open-source Python library for generating, analyzing and improving low-dimensional manifolds obtained via Principal Component Analysis
 (PCA). It incorporates a variety of data preprocessing tools (including data
 clustering and sampling), uses PCA as a dimensionality reduction technique
 and utilizes a novel approach to assess the quality of the obtained
