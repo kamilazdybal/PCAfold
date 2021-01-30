@@ -2703,6 +2703,95 @@ def get_populations(idx):
 
     return(populations)
 
+def get_average_centroid_distance(X, idx, weighted=False):
+    """
+    This function computes the average Euclidean distance between observations
+    and the centroids of clusters to which each observation belongs.
+
+    The average can be computed as an arithmetic average from all clusters
+    (``weighted=False``) or as a weighted average (``weighted=True``). In the
+    latter, the distances are weighted by the number of
+    observations in a cluster so that the average centroid distance will approach
+    the average distance in the largest cluster.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import get_average_centroid_distance
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Generate dummy clustering of the data set:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Compute average distance from cluster centroids:
+        average_centroid_distance = get_average_centroid_distance(X, idx, weighted=False)
+
+    :param X:
+        data set to partition.
+    :param idx:
+        vector of cluster classifications.
+    :param weighted: (optional)
+        boolean specifying whether distances from centroid should be weighted
+        by the number of observations in a cluster.
+        If set to ``False``, arithmetic average will be computed.
+
+    :raises ValueError:
+        if the number of observations in the data set ``X`` does not match the
+        number of elements in the ``idx`` vector.
+
+    :return:
+        - **average_centroid_distance** - float specifying the average distance from centroids, averaged over all observations and all clusters.
+    """
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        (n_observations, ) = np.shape(X)
+
+    # Check if the number of indices in `idx` is the same as the number of observations in a data set:
+    if n_observations != len(idx):
+        raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
+
+    # Degrade clusters if needed:
+    if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+        (idx, _) = degrade_clusters(idx, verbose=False)
+
+    # Find the number of clusters:
+    n_clusters = len(np.unique(idx))
+
+    centroids = get_centroids(X, idx)
+
+    average_centroid_distances = np.zeros((n_clusters, 1))
+
+    (X_in_clusters, _) = get_partition(X, idx)
+
+    for cluster in range(0,n_clusters):
+
+        (n_observations_in_cluster, _) = np.shape(X_in_clusters[cluster])
+
+        X_in_clusters_centered = X_in_clusters[cluster] - centroids[cluster]
+
+        X_in_clusters_centered_squared = np.square(X_in_clusters_centered)
+
+        euclidean_distances = np.sqrt(np.sum(X_in_clusters_centered_squared, axis=1))
+
+        if weighted:
+            average_centroid_distances[cluster] = np.mean(euclidean_distances)*n_observations_in_cluster
+        else:
+            average_centroid_distances[cluster] = np.mean(euclidean_distances)
+
+    if weighted:
+        average_centroid_distance = np.sum(average_centroid_distances)/n_observations
+    else:
+        average_centroid_distance = np.mean(average_centroid_distances)
+
+    return average_centroid_distance
+
 ################################################################################
 #
 # Plotting functions
