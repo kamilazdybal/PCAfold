@@ -340,3 +340,33 @@ class TestClustering(unittest.TestCase):
             self.assertTrue(populations == idx_populations)
         except Exception:
             self.assertTrue(False)
+
+    def test_get_average_centroid_distance(self):
+
+        phi_1 = np.linspace(0,2*np.pi,100000)
+        r_1 = 2
+        x_1 = r_1 * np.cos(phi_1)
+        y_1 = r_1 * np.sin(phi_1)
+
+        phi_2 = np.linspace(0,2*np.pi,100)
+        r_2 = 1
+        x_2 = r_2 * np.cos(phi_2) - 5
+        y_2 = r_2 * np.sin(phi_2) - 5
+
+        X = np.hstack((np.vstack((x_1[:,None], x_2[:,None])), np.vstack((y_1[:,None], y_2[:,None]))))
+
+        (idx, _) = preprocess.predefined_variable_bins(X[:,0], [-3], verbose=False)
+
+        try:
+            average_centroid_distance = preprocess.get_average_centroid_distance(X, idx, weighted=True)
+            self.assertTrue(average_centroid_distance > 1.99)
+            self.assertTrue(average_centroid_distance < 2.01)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            average_centroid_distance = preprocess.get_average_centroid_distance(X, idx, weighted=False)
+            self.assertTrue(average_centroid_distance > 1.49)
+            self.assertTrue(average_centroid_distance < 1.51)
+        except Exception:
+            self.assertTrue(False)
