@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import random as rnd
 from scipy.interpolate import CubicSpline
 from PCAfold.styles import *
+from PCAfold import preprocess
 
 
 class VarianceData:
@@ -395,7 +396,7 @@ def stratified_r2(observed, predicted, n_bins, verbose=False):
         stratified_r2.append(r2)
 
     return (stratified_r2, bins_borders)
-    
+
 
 def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
                                         n_sample_iterations=1, verbose=True, npts_bandwidth=25, min_bandwidth=None,
