@@ -56,6 +56,11 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.r2value
 
+``stratified_r2``
+================================================
+
+.. autofunction:: PCAfold.analysis.stratified_r2
+
 --------------------------------------------------------------------------------
 
 ******************
@@ -126,6 +131,11 @@ Plotting functions
 ===================================================
 
 .. autofunction:: PCAfold.analysis.plot_normalized_variance_derivative_comparison
+
+``plot_stratified_r2``
+===================================================
+
+.. autofunction:: PCAfold.analysis.plot_stratified_r2
 
 --------------------------------------------------------------------------------
 
