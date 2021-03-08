@@ -2146,7 +2146,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
+def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorbar_label=None, figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold given two vectors
     defining the manifold.
@@ -2166,7 +2166,7 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
         principal_components = pca_X.transform(X)
 
         # Plot the manifold:
-        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', title='2D manifold', save_filename='2d-manifold.pdf')
+        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', figure_size=(5,5), title='2D manifold', save_filename='2d-manifold.pdf')
         plt.close()
 
     :param x:
@@ -2189,6 +2189,8 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
     :param colorbar_label: (optional)
         string specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         string specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -2203,7 +2205,7 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
         - **plt** - plot handle.
     """
 
-    fig, axs = plt.subplots(1, 1, figsize=(6,6))
+    fig, axs = plt.subplots(1, 1, figsize=figure_size)
 
     if len(color_variable) == 0:
         scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
