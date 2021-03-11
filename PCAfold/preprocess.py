@@ -21,7 +21,7 @@ from PCAfold.styles import *
 #
 ################################################################################
 
-_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '-1to1', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', '-1to1', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
 
 def center_scale(X, scaling, nocenter=False):
     """
@@ -44,7 +44,7 @@ def center_scale(X, scaling, nocenter=False):
 
             C_i = mean(\mathbf{X}_i)
 
-      The only exception is the *-1 to 1* scaling which introduces a different
+      The only exceptions are the *0 to 1* and *-1 to 1* scalings which introduce a different
       quantity to center each column.
 
     - Scaling is performed by dividing :math:`\mathbf{X}_i` by a scaling
@@ -75,6 +75,9 @@ def center_scale(X, scaling, nocenter=False):
     | VAST :cite:`Keun2003`      | ``'vast'``               | :math:`\sigma^2 / mean(\mathbf{X}_i)`                              |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | Range                      | ``'range'``              | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                      |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | | 0 to 1                   | | ``'0to1'``             | | :math:`d_i = max(\mathbf{X}_i) - min(\mathbf{X}_i)`              |
+    | |                          | |                        | | :math:`C_i = min(\mathbf{X}_i)`                                  |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | | -1 to 1                  | | ``'-1to1'``            | | :math:`d_i = 0.5 \cdot (max(\mathbf{X}_i) - min(\mathbf{X}_i))`  |
     | |                          | |                        | | :math:`C_i = 0.5 \cdot (max(\mathbf{X}_i) + min(\mathbf{X}_i))`  |
@@ -174,6 +177,9 @@ def center_scale(X, scaling, nocenter=False):
     elif scaling == 'VAST_4':
        X_scale = dev * dev * kurt * kurt / (np.max(X, axis=0) - np.min(X, axis=0))
     elif scaling == 'RANGE':
+       X_scale = np.max(X, axis=0) - np.min(X, axis=0)
+    elif scaling == '0TO1':
+       X_center = np.min(X, axis=0)
        X_scale = np.max(X, axis=0) - np.min(X, axis=0)
     elif scaling == '-1TO1':
        X_center = 0.5*(np.max(X, axis=0) + np.min(X, axis=0))
