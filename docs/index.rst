@@ -35,7 +35,7 @@ section for possible workflows that can be achieved with **PCAfold**.
 Citing PCAfold
 ==============
 
-**PCAfold** is published in `SoftwareX journal <https://authors.elsevier.com/sd/article/S2352711020303435>`_.
+**PCAfold** is published in the `SoftwareX journal <https://authors.elsevier.com/sd/article/S2352711020303435>`_.
 If you use **PCAfold** in a scientific publication, you can cite the software as:
 
 .. code-block:: text

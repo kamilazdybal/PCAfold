@@ -335,16 +335,30 @@ def r2value(observed, predicted):
     return r2
 
 
-def stratified_r2(observed, predicted, n_bins, verbose=False):
+def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=False):
     """
     This function calculates the stratified coefficient of determination
     :math:`R^2` values. Stratified :math:`R^2` is computed separately in each
     of the ``n_bins`` of a dependent variable.
 
+    :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
+
+    - If ``use_global_mean=True``, the mean of the entire observed variable is used as a reference:
+
+    .. math::
+
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - \mathbf{X_{rec}}_i^{j})^2}{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - mean(\mathbf{X}_i))^2}
+
+    - If ``use_global_mean=False``, separate mean of each bins is used as a reference:
+
+    .. math::
+
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - \mathbf{X_{rec}}_i^{j})^2}{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - mean(\mathbf{X}_i^{j}))^2}
+
     .. note::
 
         After running this function you can call
-        ``analysis.plot_stratified_r2(stratified_r2, bins_borders)`` on the
+        ``analysis.plot_stratified_r2(r2_in_bins, bins_borders)`` on the
         function outputs and it will visualize how :math:`R^2` changes across bins.
 
     **Example:**
@@ -364,7 +378,7 @@ def stratified_r2(observed, predicted, n_bins, verbose=False):
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (stratified_r2, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
+        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
 
     :param observed:
         observed values of a single dependent variable.
@@ -372,30 +386,51 @@ def stratified_r2(observed, predicted, n_bins, verbose=False):
         predicted values of a single dependent variable.
     :param n_bins:
         number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
+    :param use_global_mean: (optional)
+        boolean specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
     :param verbose: (optional)
         boolean for printing sizes (number of observations) and :math:`R^2` values in each bin.
 
     :return:
-        - **stratified_r2** - list of coefficients of determination :math:`R^2` in each bin.
-        - **bins_borders** - list of bins borders that were created to stratify the dependent variable. Note that there will be one more entry in this list compared to ``stratified_r2`` list.
+        - **r2_in_bins** - list of coefficients of determination :math:`R^2` in each bin.
+        - **bins_borders** - list of bins borders that were created to stratify the dependent variable. Note that there will be one more entry in this list compared to ``r2_in_bins`` list.
     """
+
+    if not isinstance(n_bins, int):
+        raise ValueError("Parameter `n_bins` has to be an integer.")
+
+    if n_bins < 1:
+        raise ValueError("Parameter `n_bins` has to be an integer larger than 0.")
+
+    if not isinstance(use_global_mean, bool):
+        raise ValueError("Parameter `use_global_mean` has to be a boolean.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
 
     (idx, bins_borders) = preprocess.variable_bins(observed, n_bins, verbose=False)
 
-    stratified_r2 = []
+    r2_in_bins = []
+
+    if use_global_mean:
+        global_mean = np.mean(observed)
 
     for cl in np.unique(idx):
 
         (idx_bin,) = np.where(idx==cl)
 
-        r2 = r2value(observed[idx_bin], predicted[idx_bin])
+        if use_global_mean:
+            r2 = 1. - np.sum((observed[idx_bin] - predicted[idx_bin]) * (observed[idx_bin] - predicted[idx_bin])) / np.sum(
+                (observed[idx_bin] - global_mean) * (observed[idx_bin] - global_mean))
+        else:
+            r2 = r2value(observed[idx_bin], predicted[idx_bin])
 
         if verbose:
             print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)))
 
-        stratified_r2.append(r2)
+        r2_in_bins.append(r2)
 
-    return (stratified_r2, bins_borders)
+    return (r2_in_bins, bins_borders)
 
 
 def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
@@ -843,7 +878,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
 
     return plt
 
-def plot_stratified_r2(stratified_r2, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
+def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
     """
     This function plots the stratified coefficient of determination :math:`R^2`
     across bins of a dependent variable.
@@ -865,13 +900,13 @@ def plot_stratified_r2(stratified_r2, bins_borders, variable_name=None, figure_s
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (stratified_r2, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
+        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
 
         # Visualize how R2 changes across bins:
-        plt = plot_stratified_r2(stratified_r2, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
+        plt = plot_stratified_r2(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
         plt.close()
 
-    :param stratified_r2:
+    :param r2_in_bins:
         list of coefficients of determination :math:`R^2` in each bin as per ``analysis.stratified_r2`` function.
     :param bins_borders:
         list of bins borders that were created to stratify the dependent variable as per ``analysis.stratified_r2`` function.
@@ -897,7 +932,7 @@ def plot_stratified_r2(stratified_r2, bins_borders, variable_name=None, figure_s
     bin_centers = bins_borders[0:-1] + bin_length/2
 
     figure = plt.figure(figsize=figure_size)
-    plt.scatter(bin_centers, stratified_r2, c='#191b27')
+    plt.scatter(bin_centers, r2_in_bins, c='#191b27')
     plt.grid(alpha=0.3)
     if variable_name != None: plt.xlabel(variable_name)
     plt.ylabel('$R^2$ [-]')
