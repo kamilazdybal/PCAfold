@@ -396,6 +396,18 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         - **bins_borders** - list of bins borders that were created to stratify the dependent variable. Note that there will be one more entry in this list compared to ``r2_in_bins`` list.
     """
 
+    if not isinstance(n_bins, int):
+        raise ValueError("Parameter `n_bins` has to be an integer.")
+
+    if n_bins < 1:
+        raise ValueError("Parameter `n_bins` has to be an integer larger than 0.")
+
+    if not isinstance(use_global_mean, bool):
+        raise ValueError("Parameter `use_global_mean` has to be a boolean.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
     (idx, bins_borders) = preprocess.variable_bins(observed, n_bins, verbose=False)
 
     r2_in_bins = []
