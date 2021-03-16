@@ -37,6 +37,11 @@ Class ``PCA``
 
 .. autofunction:: PCAfold.reduction.PCA.reconstruct
 
+``PCA.get_weights_dictionary``
+==============================
+
+.. autofunction:: PCAfold.reduction.PCA.get_weights_dictionary
+
 ``PCA.u_scores``
 ================
 
