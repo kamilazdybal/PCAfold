@@ -349,7 +349,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 
         R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - \mathbf{X_{rec}}_i^{j})^2}{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - mean(\mathbf{X}_i))^2}
 
-    - If ``use_global_mean=False``, separate mean of each bins is used as a reference:
+    - If ``use_global_mean=False``, separate mean of each bin is used as a reference:
 
     .. math::
 

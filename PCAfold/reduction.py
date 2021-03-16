@@ -466,6 +466,90 @@ class PCA:
 
         return(X_rec)
 
+    def get_weights_dictionary(self, variable_names, pc_index, n_digits=10):
+        """
+        This function creates a dictionary where keys are the names of the variables
+        in the original data set :math:`\mathbf{X}` and values are the eigenvector weights
+        corresponding to the Principal Component selected by ``pc_index``.
+        This function helps in accessing weight value for a specific variable and for a specific PC.
+
+        **Example:**
+
+        .. code:: python
+
+            from PCAfold import PCA
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,5)
+
+            # Generate dummy variables names:
+            variable_names = ['A1', 'A2', 'A3', 'A4', 'A5']
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=0, use_eigendec=True, nocenter=False)
+
+            # Create a dictionary for PC-1 weights:
+            PC1_weights_dictionary = pca_X.get_weights_dictionary(variable_names, 0, n_digits=8)
+
+        The code above will create a dictionary:
+
+        .. code-block:: text
+
+            {'A1': 0.63544443,
+             'A2': -0.39500424,
+             'A3': -0.28819465,
+             'A4': 0.57000796,
+             'A5': 0.17949037}
+
+        Eigenvector weight for a specific variable can then be accessed by:
+
+        .. code:: python
+
+            PC1_weights_dictionary['A3']
+
+        :param variable_names:
+            list of strings specifying names for all variables in the original data set :math:`\mathbf{X}`.
+        :param pc_index:
+            non-negative integer specifying the index of the PC to create the dictionary for. Set ``pc_index=0`` if you want to look at the first PC.
+        :param n_digits: (optional)
+            non-negative integer specifying how many digits should be kept in rounding the eigenvector weights.
+
+        :raises ValueError:
+            if the number of variables in ``variable_names`` is not consistent with the number of variables in the original data set :math:`\mathbf{X}`.
+
+        :raises ValueError:
+            if ``pc_index`` is not a non-negative integer.
+
+        :raises ValueError:
+            if ``pc_index`` is not consistent with the number of eigenvectors found for the original data set :math:`\mathbf{X}`.
+
+        :raises ValueError:
+            if ``n_digits`` is not a non-negative integer.
+
+        :return:
+            - **weights_dictionary** - dictionary of variable names as keys and selected eigenvector weights as values.
+        """
+
+        (n_variables, n_pcs) = np.shape(self.A)
+
+        # Check that the number of variables in `variables_names` is consistent with the number of weights:
+        if len(variable_names) != n_variables:
+            raise ValueError("The number of variables in `variable_names` has to be equal to the number of variables in the original data set.")
+
+        if not isinstance(pc_index, int) or pc_index < 0:
+            raise ValueError("Parameter `pc_index` has to be a non-negative integer.")
+
+        if pc_index > n_pcs - 1:
+            raise ValueError("Index of the selected PC (`pc_index`) exceeds the number of eigenvectors found for this data set.")
+
+        if not isinstance(n_digits, int) or n_digits < 0:
+            raise ValueError("Parameter `n_digits` has to be a non-negative integer.")
+
+        weights_dictionary = dict(zip(variable_names, [round(i,n_digits) for i in self.A[:,pc_index]]))
+
+        return weights_dictionary
+
     def calculate_r2(self, X):
         """
         This function calculates coefficient of determination :math:`R^2` values
