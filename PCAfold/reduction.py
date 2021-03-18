@@ -2230,7 +2230,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorbar_label=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold given two vectors
     defining the manifold.
@@ -2273,6 +2273,8 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
     :param colorbar_label: (optional)
         string specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
@@ -2294,7 +2296,7 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
     if len(color_variable) == 0:
         scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
     else:
-        scat = plt.scatter(x.ravel(), y.ravel(), c=color_variable, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        scat = plt.scatter(x.ravel(), y.ravel(), c=color_variable, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
@@ -2313,7 +2315,7 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
 
     return plt
 
-def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label=None, colorbar_label=None, title=None, save_filename=None):
+def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a parity plot between a variable and its reconstruction.
 
@@ -2333,7 +2335,7 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
         X_rec = pca_X.reconstruct(principal_components)
 
         # Parity plot for the reconstruction of the first variable:
-        plt = plot_parity(X[:,0], X_rec[:,0], color_variable='k', x_label='Observed $X_1$', y_label='Reconstructed $X_1$', colorbar_label=None, title='Parity plot', save_filename='parity-plot.pdf')
+        plt = plot_parity(X[:,0], X_rec[:,0], color_variable=X[:,0], x_label='Observed $X_1$', y_label='Reconstructed $X_1$', colorbar_label='X_1', color_map='inferno', figure_size=(5,5), title='Parity plot', save_filename='parity-plot.pdf')
         plt.close()
 
     :param variable:
@@ -2356,6 +2358,10 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
     :param colorbar_label: (optional)
         string specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         string specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -2372,12 +2378,12 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
 
     color_line = '#ff2f18'
 
-    fig, axs = plt.subplots(1, 1, figsize=(6,6))
+    fig, axs = plt.subplots(1, 1, figsize=figure_size)
 
     if len(color_variable) == 0:
         scat = plt.scatter(variable, variable_rec, c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
     else:
-        scat = plt.scatter(variable, variable_rec, c=color_variable, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        scat = plt.scatter(variable, variable_rec, c=color_variable, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
     plt.plot(variable, variable, c=color_line)
     plt.axis('equal')
