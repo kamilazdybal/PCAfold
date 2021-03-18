@@ -199,21 +199,35 @@ and we plot the resulting manifold:
 
 .. code::
 
-  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable='k', x_label='$\mathbf{Z_1}$', y_label='$\mathbf{Z_2}$', colorbar_label=None, title=None, save_filename=None)
+  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable='k', x_label='$Z_1$', y_label='$Z_2$', colorbar_label=None, figure_size=(10,4), save_filename=None)
+
+By setting ``color_variable=X[:,0]`` parameter, the manifold can be additionally
+colored by the first variable in the data set:
+
+.. code::
+
+  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=X[:,0], x_label='$Z_1$', y_label='$Z_2$', colorbar_label='$T$ [K]', color_map='inferno', figure_size=(10,4), save_filename=None)
+
+Note that you can select the colormap to use through ``color_map`` parameter.
 
 Plotting example
 ^^^^^^^^^^^^^^^^
 
-Example of a plot:
+Example of an uncolored plot:
 
 .. image:: ../images/plotting-pca-2d-manifold-black.png
     :width: 400
     :align: center
 
-By setting ``color_variable=X[:,0]`` parameter, the manifold can be additionally
-colored by the first variable in the data set:
+Example of using ``color_map='inferno'`` and coloring by the first variable in the data set:
 
-.. image:: ../images/plotting-pca-2d-manifold.png
+.. image:: ../images/plotting-pca-2d-manifold-inferno.png
+    :width: 500
+    :align: center
+
+Example of using ``color_map='Blues'`` and coloring by the first variable in the data set:
+
+.. image:: ../images/plotting-pca-2d-manifold-blues.png
     :width: 500
     :align: center
 
@@ -233,7 +247,7 @@ and we generate the parity plot:
 
 .. code::
 
-  plt = reduction.plot_parity(X[:,0], X_rec[:,0], x_label='Observed $T$', y_label='Reconstructed $T$', save_filename=None)
+  plt = reduction.plot_parity(X[:,0], X_rec[:,0], color_variable=X[:,0], x_label='Observed $T$', y_label='Reconstructed $T$', colorbar_label='$T$ [K]', color_map='inferno', figure_size=(7,7), save_filename=None)
 
 Plotting example
 ^^^^^^^^^^^^^^^^
@@ -243,3 +257,5 @@ Example of a plot:
 .. image:: ../images/plotting-pca-parity.png
     :width: 500
     :align: center
+
+Similarly as in ``plot_2d_manifold`` function, you can select the colormap to use.
