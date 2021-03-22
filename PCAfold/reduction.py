@@ -98,6 +98,8 @@ class PCA:
 
             * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
             * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+    :param nocenter: (optional)
+        boolean specifying whether data should be centered by mean.
 
     :raises ValueError:
         if the original data set :math:`\mathbf{X}` has more variables (columns)
@@ -1295,6 +1297,140 @@ class PCA:
         result = not (a == b)
 
         return result
+
+################################################################################
+#
+# Local Principal Component Analysis
+#
+################################################################################
+
+class LPCA:
+    """
+    This class enables performing local Principal Component Analysis (LPCA)
+    of the original data set :math:`\mathbf{X}` partitioned into clusters.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import LPCA
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Generate dummy vector of cluster classifications:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+
+        # Instantiate LPCA class object:
+        lpca_X = LPCA(X, idx, scaling='none')
+
+        # Access the local eigenvectors in the first cluster:
+        A_k1 = lpca_X.A[0]
+
+        # Access the local eigenvalues in the first cluster:
+        L_k1 = lpca_X.L[0]
+
+        # Access the local Principal Components in the first cluster:
+        Z_k1 = lpca_X.principal_components[0]
+
+    :param X:
+        original data set :math:`\mathbf{X}`.
+    :param idx:
+        vector of cluster classifications.
+    :param scaling: (optional)
+        string specifying the scaling methodology as per
+        ``preprocess.center_scale`` function.
+    :param n_components: (optional)
+        number of retained Principal Components :math:`q`. If set to 0 all PCs are retained.
+
+    :raises ValueError:
+        if the original data set :math:`\mathbf{X}` has more variables (columns)
+        then observations (rows).
+
+    :raises ValueError:
+        if the size of the ``idx`` vector is not consistent with the number of observations in the original data set :math:`\mathbf{X}`.
+
+    :raises ValueError:
+        if ``scaling`` method is not a string or is not within the available scalings.
+
+    **Attributes:**
+
+        - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
+        - **L** - (read only) list of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
+        - **principal_components** - (read only) list of matrices of local Principal Components :math:`\mathbf{Z}`. Each list element corresponds to Principal Components in a single cluster.
+    """
+
+    def __init__(self, X, idx, scaling='std'):
+
+        # Check X:
+        (n_observations, n_variables) = np.shape(X)
+
+        if (n_observations < n_variables):
+            raise ValueError('Variables should be in columns; observations in rows.\n'
+                             'Also ensure that you have more than one observation\n')
+
+        # Degrade clusters if needed:
+        if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+            (idx, _) = degrade_clusters(idx, verbose)
+
+        # Check if `idx` vector has the same number of observations as `X`:
+        if len(idx) != n_observations:
+            raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+        # Check scaling:
+        if not isinstance(scaling, str):
+            raise ValueError("Parameter `scaling` has to be a string.")
+        else:
+            if scaling.lower() not in _scalings_list:
+                raise ValueError("Unrecognized scaling method.")
+            else:
+                self.__scaling = scaling.upper()
+
+        n_clusters = len(np.unique(idx))
+
+        # Initialize the outputs:
+        eigenvectors = []
+        eigenvalues = []
+        PCs = []
+
+        for k in range(0, n_clusters):
+
+            # Extract local cluster:
+            X_k = X[idx==k,:]
+
+            # Remove constant variables from local cluster:
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X_k, maxtol=1e-12, rangetol=0.0001)
+
+            # Perform PCA in local cluster:
+            pca = PCA(X_removed, scaling=scaling, n_components=0)
+            Z = pca.transform(X_removed, nocenter=False)
+
+            # Append the local eigenvectors, eigenvalues and PCs:
+            eigenvectors.append(pca.A)
+            eigenvalues.append(pca.L)
+            PCs.append(Z)
+
+        self.__A = eigenvectors
+        self.__L = eigenvalues
+        self.__principal_components = PCs
+
+    @property
+    def scaling(self):
+        return self.__scaling
+
+    @property
+    def A(self):
+        return self.__A
+
+    @property
+    def L(self):
+        return self.__L
+
+    @property
+    def principal_components(self):
+        return self.__principal_components
 
 ################################################################################
 #
