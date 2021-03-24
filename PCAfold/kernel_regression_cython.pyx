@@ -43,6 +43,44 @@ def kreg_evaluate(np.ndarray[double, ndim=2] x_np,
             y[i, q] = sum_ky[q] / sum_k
             sum_ky[q] = 0.
 
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.cdivision(True)
+def kreg_evaluate_magnetism(np.ndarray[double, ndim=2] x_np,
+                  np.ndarray[double, ndim=2] y_np,
+                  np.ndarray[double, ndim=2] x_train_np,
+                  np.ndarray[double, ndim=2] y_train_np,
+                  np.ndarray[double, ndim=2] s_np,
+                  double beta_coeff):
+    cdef int n = x_train_np.shape[0]   # number of basis (training) points
+    cdef int d = x_train_np.shape[1]   # number of independent variable dimensions
+    cdef int m = x_np.shape[0]         # number of evaluation (testing) points
+    cdef int p = y_np.shape[1]         # number of quantities to evaluate
+    cdef double [:, :] x_train = x_train_np
+    cdef double [:, :] y_train = y_train_np
+    cdef double [:, :] s = s_np
+    cdef double [:, :] x = x_np
+    cdef double [:, :] y = y_np
+    cdef double [:] sum_ky = np.zeros(p)
+    cdef double sum_k = 0.
+    cdef double u = 0.
+    cdef double kj = 0.
+    for i in range(m):
+        sum_k = 0
+        for j in range(n):
+            u = 0
+            for l in range(d):
+                u += (x_train[j, l] - x[i, l]) * (x_train[j, l] - x[i, l]) / (s[i, l]*s[i, l])
+            kj = exp(-u)
+            sum_k += kj
+            for q in range(p):
+                sum_ky[q] += kj * (y_train[j, q] + beta_coeff * abs(y_train[j, q]) * (x_train[j, q]-x[i,q]))
+        for q in range(p):
+            y[i, q] = sum_ky[q] / sum_k
+            sum_ky[q] = 0.
+
 class KReg:
     """
     A class for building and evaluating Nadaraya-Watson kernel regression models using a Gaussian kernel.
@@ -248,4 +286,52 @@ class KReg:
 
         depvar_points = np.zeros((query_points.shape[0], self._depvars.shape[1]), dtype=self._internal_dtype)
         kreg_evaluate(query_points.astype(self._internal_dtype), depvar_points, self._indepvars, self._depvars, bandwidth_array)
+        return depvar_points
+
+
+    def predict_magnetism(self, query_points, bandwidth, beta_coeff, n_neighbors=None):
+        """
+        Calculate dependent variable predictions at ``query_points`` with additional magnetism term:
+        .. math::
+            \\mathcal{K}(u; \\sigma) = \\frac{\\sum_{i=1}^{n} \\mathcal{W}_i(u; \\sigma) ( y_i + \\beta |y_i| (x_i - u) )}{\\sum_{i=1}^{n} \\mathcal{W}_i(u; \\sigma)}
+
+        :param query_points:
+            array of independent variable points to query the model (n_points x n_independent_variables)
+        :param bandwidth:
+            value(s) to use for the bandwidth in the Gaussian kernel. Supported formats include:
+
+            - single value: constant bandwidth applied to each query point and independent variable dimension.
+
+            - 2D array shape (n_points x n_independent_variables): an array of bandwidths for each independent variable dimension of each query point.
+
+            - string "nearest_neighbors_isotropic": This option requires the argument ``n_neighbors`` to be specified for which a bandwidth will be calculated for each query point based on the Euclidean distance to the ``n_neighbors`` nearest ``indepvars`` point.
+
+            - string "nearest_neighbors_anisotropic": This option requires the argument ``n_neighbors`` to be specified for which a bandwidth will be calculated for each query point based on the distance in each (separate) independent variable dimension to the ``n_neighbors`` nearest ``indepvars`` point.
+        :param beta_coeff:
+            coefficient in front of additional magnetism term
+
+        :return: dependent variable predictions for the ``query_points``
+        """
+        assert query_points.ndim == 2, "query_points array must be 2D: n_observations x n_variables."
+        assert query_points.shape[1] == self._indepvars.shape[1], "Number of query_points independent variables inconsistent with model."
+
+        if isinstance(bandwidth,np.ndarray):
+            if bandwidth.ndim == 2:
+                assert bandwidth.shape == query_points.shape, "Shape of two-dimensional bandwidth array must match the shape of query_points."
+                bandwidth_array = bandwidth.astype(self._internal_dtype)
+            else:
+                raise ValueError("An array for bandwidth must be the same shape as query_points.")
+        elif isinstance(bandwidth,int) or isinstance(bandwidth,float):
+            bandwidth_array = self.compute_constant_bandwidth(query_points, bandwidth)
+        elif bandwidth=="nearest_neighbors_isotropic":
+            assert n_neighbors is not None, "nearest neighbors method requires n_neighbors be specified."
+            bandwidth_array = self.compute_nearest_neighbors_bandwidth_isotropic(query_points, n_neighbors)
+        elif bandwidth=="nearest_neighbors_anisotropic":
+            assert n_neighbors is not None, "nearest neighbors method requires n_neighbors be specified."
+            bandwidth_array = self.compute_nearest_neighbors_bandwidth_anisotropic(query_points, n_neighbors)
+        else:
+            raise ValueError("Unsupported bandwidth type.")
+
+        depvar_points = np.zeros((query_points.shape[0], self._depvars.shape[1]), dtype=self._internal_dtype)
+        kreg_evaluate_magnetism(query_points.astype(self._internal_dtype), depvar_points, self._indepvars, self._depvars, bandwidth_array, beta_coeff)
         return depvar_points
