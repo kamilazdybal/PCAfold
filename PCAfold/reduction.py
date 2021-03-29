@@ -1324,7 +1324,7 @@ class LPCA:
         idx[50:80] = 1
 
         # Instantiate LPCA class object:
-        lpca_X = LPCA(X, idx, scaling='none')
+        lpca_X = LPCA(X, idx, scaling='none', n_components=2)
 
         # Access the local eigenvectors in the first cluster:
         A_k1 = lpca_X.A[0]
@@ -1343,7 +1343,14 @@ class LPCA:
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param n_components: (optional)
-        number of retained Principal Components :math:`q`. If set to 0 all PCs are retained.
+        number of returned eigenvectors, eigenvalues and Principal Components :math:`q`. If set to 0 all are returned.
+    :param use_eigendec: (optional)
+        boolean specifying the method for obtaining eigenvalues and eigenvectors:
+
+            * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+            * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+    :param nocenter: (optional)
+        boolean specifying whether data should be centered by mean.
 
     :raises ValueError:
         if the original data set :math:`\mathbf{X}` has more variables (columns)
@@ -1355,6 +1362,15 @@ class LPCA:
     :raises ValueError:
         if ``scaling`` method is not a string or is not within the available scalings.
 
+    :raises ValueError:
+        if ``n_components`` is not an integer, is negative or larger than the number of variables in a data set.
+
+    :raises ValueError:
+        if ``use_eigendec`` is not a boolean.
+
+    :raises ValueError:
+        if ``nocenter`` is not a boolean.
+
     **Attributes:**
 
         - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
@@ -1362,7 +1378,7 @@ class LPCA:
         - **principal_components** - (read only) list of matrices of local Principal Components :math:`\mathbf{Z}`. Each list element corresponds to Principal Components in a single cluster.
     """
 
-    def __init__(self, X, idx, scaling='std'):
+    def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
 
         # Check X:
         (n_observations, n_variables) = np.shape(X)
@@ -1388,6 +1404,26 @@ class LPCA:
             else:
                 self.__scaling = scaling.upper()
 
+        # Check n_components:
+        if not isinstance(n_components, int) or isinstance(n_components, bool):
+            raise ValueError("Parameter `n_components` has to be an integer.")
+        else:
+            if (n_components < 0) or (n_components > n_variables):
+                raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
+            else:
+                if n_components > 0:
+                    self.__n_components = n_components
+                else:
+                    self.__n_components = n_variables
+
+        # Check use_eigendec:
+        if not isinstance(use_eigendec, bool):
+            raise ValueError("Parameter `use_eigendec` has to be a boolean.")
+
+        # Check nocenter:
+        if not isinstance(nocenter, bool):
+            raise ValueError("Parameter `nocenter` has to be a boolean.")
+
         n_clusters = len(np.unique(idx))
 
         # Initialize the outputs:
@@ -1404,21 +1440,17 @@ class LPCA:
             (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X_k, maxtol=1e-12, rangetol=0.0001)
 
             # Perform PCA in local cluster:
-            pca = PCA(X_removed, scaling=scaling, n_components=0)
+            pca = PCA(X_removed, scaling=scaling, n_components=self.__n_components, use_eigendec=use_eigendec, nocenter=nocenter)
             Z = pca.transform(X_removed, nocenter=False)
 
             # Append the local eigenvectors, eigenvalues and PCs:
-            eigenvectors.append(pca.A)
-            eigenvalues.append(pca.L)
+            eigenvectors.append(pca.A[:,0:self.__n_components])
+            eigenvalues.append(pca.L[0:self.__n_components])
             PCs.append(Z)
 
         self.__A = eigenvectors
         self.__L = eigenvalues
         self.__principal_components = PCs
-
-    @property
-    def scaling(self):
-        return self.__scaling
 
     @property
     def A(self):
