@@ -381,9 +381,9 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
 
     :param observed:
-        observed values of a single dependent variable.
+        vector of the observed values of a single dependent variable.
     :param predicted:
-        predicted values of a single dependent variable.
+        vector of the predicted values of a single dependent variable.
     :param n_bins:
         number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
     :param use_global_mean: (optional)
@@ -408,22 +408,25 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
 
-    (idx, bins_borders) = preprocess.variable_bins(observed, n_bins, verbose=False)
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    (idx, bins_borders) = preprocess.variable_bins(__observed, n_bins, verbose=False)
 
     r2_in_bins = []
 
     if use_global_mean:
-        global_mean = np.mean(observed)
+        global_mean = np.mean(__observed)
 
     for cl in np.unique(idx):
 
         (idx_bin,) = np.where(idx==cl)
 
         if use_global_mean:
-            r2 = 1. - np.sum((observed[idx_bin] - predicted[idx_bin]) * (observed[idx_bin] - predicted[idx_bin])) / np.sum(
-                (observed[idx_bin] - global_mean) * (observed[idx_bin] - global_mean))
+            r2 = 1. - np.sum((__observed[idx_bin] - __predicted[idx_bin]) * (__observed[idx_bin] - __predicted[idx_bin])) / np.sum(
+                (__observed[idx_bin] - global_mean) * (__observed[idx_bin] - global_mean))
         else:
-            r2 = r2value(observed[idx_bin], predicted[idx_bin])
+            r2 = r2value(__observed[idx_bin], __predicted[idx_bin])
 
         if verbose:
             print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)))
