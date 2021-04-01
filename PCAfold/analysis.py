@@ -349,7 +349,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 
         R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - \mathbf{X_{rec}}_i^{j})^2}{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - mean(\mathbf{X}_i))^2}
 
-    - If ``use_global_mean=False``, separate mean of each bin is used as a reference:
+    - If ``use_global_mean=False``, the mean of the considered :math:`j^{th}` bin is used as a reference:
 
     .. math::
 
@@ -365,7 +365,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 
     .. code:: python
 
-        from PCAfold import PCA, stratified_r2
+        from PCAfold import PCA, stratified_r2, plot_stratified_r2
         import numpy as np
 
         # Generate dummy data set:
@@ -380,10 +380,13 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         # Compute stratified R2 in 10 bins of the first variable in a data set:
         (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
 
+        # Plot the stratified R2 values:
+        plot_stratified_r2(r2_in_bins, bins_borders)
+
     :param observed:
-        vector of the observed values of a single dependent variable.
+        vector of the observed values of a single dependent variable. It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        vector of the predicted values of a single dependent variable.
+        vector of the predicted values of a single dependent variable. It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param n_bins:
         number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
     :param use_global_mean: (optional)
@@ -395,6 +398,33 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         - **r2_in_bins** - list of coefficients of determination :math:`R^2` in each bin.
         - **bins_borders** - list of bins borders that were created to stratify the dependent variable. Note that there will be one more entry in this list compared to ``r2_in_bins`` list.
     """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
     if not isinstance(n_bins, int):
         raise ValueError("Parameter `n_bins` has to be an integer.")

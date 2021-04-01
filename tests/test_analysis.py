@@ -278,6 +278,26 @@ class TestStratifiedR2(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+        try:
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:1], X_rec[:,0], 10)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,3], X_rec[:,3:4], 1)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:1], X_rec[:,0:1], 10, use_global_mean=True, verbose=False)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,1:2], X_rec[:,1:2], 10, use_global_mean=False, verbose=False)
+        except Exception:
+            self.assertTrue(False)
+
     def test_stratified_r2_not_allowed_calls(self):
 
         X = np.random.rand(100,10)
@@ -298,6 +318,27 @@ class TestStratifiedR2(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             (r2_in_bins, bins_borders) = stratified_r2(X[:,1], X_rec[:,1], '10', use_global_mean=False, verbose=False)
+
+        with self.assertRaises(ValueError):
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:2], X_rec[:,0], 10)
+
+        with self.assertRaises(ValueError):
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0:3], 10)
+
+        with self.assertRaises(ValueError):
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,3:5], X_rec[:,3:5], 1)
+
+        with self.assertRaises(ValueError):
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:2], X_rec[:,0:4], 10, use_global_mean=True, verbose=False)
+
+        with self.assertRaises(ValueError):
+            (r2_in_bins, bins_borders) = stratified_r2(X[0:10,0], X_rec[:,0], 10)
+
+        with self.assertRaises(ValueError):
+            (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[10:50,0], 10)
+
+        with self.assertRaises(ValueError):
+            (r2_in_bins, bins_borders) = stratified_r2([10,20,30], [1,2,3], 10)
 
     def test_plot_stratified_r2_allowed_calls(self):
 
