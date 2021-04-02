@@ -199,14 +199,14 @@ and we plot the resulting manifold:
 
 .. code::
 
-  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable='k', x_label='$Z_1$', y_label='$Z_2$', colorbar_label=None, figure_size=(10,4), save_filename=None)
+  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color='k', x_label='$Z_1$', y_label='$Z_2$', colorbar_label=None, figure_size=(10,4), save_filename=None)
 
-By setting ``color_variable=X[:,0]`` parameter, the manifold can be additionally
+By setting ``color=X[:,0]`` parameter, the manifold can be additionally
 colored by the first variable in the data set:
 
 .. code::
 
-  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=X[:,0], x_label='$Z_1$', y_label='$Z_2$', colorbar_label='$T$ [K]', color_map='inferno', figure_size=(10,4), save_filename=None)
+  plt = reduction.plot_2d_manifold(principal_components[:,0], principal_components[:,1], color=X[:,0], x_label='$Z_1$', y_label='$Z_2$', colorbar_label='$T$ [K]', color_map='inferno', figure_size=(10,4), save_filename=None)
 
 Note that you can select the colormap to use through ``color_map`` parameter.
 
@@ -247,7 +247,7 @@ and we generate the parity plot:
 
 .. code::
 
-  plt = reduction.plot_parity(X[:,0], X_rec[:,0], color_variable=X[:,0], x_label='Observed $T$', y_label='Reconstructed $T$', colorbar_label='$T$ [K]', color_map='inferno', figure_size=(7,7), save_filename=None)
+  plt = reduction.plot_parity(X[:,0], X_rec[:,0], color=X[:,0], x_label='Observed $T$', y_label='Reconstructed $T$', colorbar_label='$T$ [K]', color_map='inferno', figure_size=(7,7), save_filename=None)
 
 Plotting example
 ^^^^^^^^^^^^^^^^

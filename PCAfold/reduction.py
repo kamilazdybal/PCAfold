@@ -2398,7 +2398,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a 2-dimensional manifold given two vectors
     defining the manifold.
@@ -2418,17 +2418,20 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
         principal_components = pca_X.transform(X)
 
         # Plot the manifold:
-        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color_variable=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', figure_size=(5,5), title='2D manifold', save_filename='2d-manifold.pdf')
+        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', figure_size=(5,5), title='2D manifold', save_filename='2d-manifold.pdf')
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis.
+        variable on the :math:`x`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis.
-    :param color_variable: (optional)
-        a 1D vector or string specifying color for the manifold. If it is a
+        variable on the :math:`y`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param color: (optional)
+        vector or string specifying color for the manifold. If it is a
         vector, it has to have length consistent with the number of observations
-        in ``x`` and ``y`` vectors.
+        in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.
@@ -2459,12 +2462,60 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
         - **plt** - plot handle.
     """
 
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(x)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(x)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_y,) = np.shape(y)
+        n_var_y = 1
+    except:
+        (n_y, n_var_y) = np.shape(y)
+
+    if n_var_y != 1:
+        raise ValueError("Parameter `y` has to be a 0D or 1D vector.")
+
+    if n_x != n_y:
+        raise ValueError("Parameter `x` has different number of elements than `y`.")
+
+    if color is not None:
+        if not isinstance(color, str):
+            if not isinstance(color, np.ndarray):
+                raise ValueError("Parameter `color` has to be `None`, or of type `str` or `numpy.ndarray`.")
+
+    if isinstance(color, np.ndarray):
+
+        try:
+            (n_color,) = np.shape(color)
+            n_var_color = 1
+        except:
+            (n_color, n_var_color) = np.shape(color)
+
+        if n_var_color != 1:
+            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+
+        if n_color != n_x:
+            raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
+
     fig, axs = plt.subplots(1, 1, figsize=figure_size)
 
-    if len(color_variable) == 0:
+    if color is None:
         scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
-    else:
-        scat = plt.scatter(x.ravel(), y.ravel(), c=color_variable, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    elif isinstance(color, str):
+        scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    elif isinstance(color, np.ndarray):
+        scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
@@ -2472,8 +2523,8 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
     plt.grid(alpha=0.3)
 
-    if not isinstance(color_variable, str):
-        if len(color_variable) != 0:
+    if isinstance(color, np.ndarray):
+        if color is not None:
             cb = fig.colorbar(scat)
             cb.ax.tick_params(labelsize=font_colorbar_axes)
             if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
@@ -2483,7 +2534,7 @@ def plot_2d_manifold(x, y, color_variable=[], x_label=None, y_label=None, colorb
 
     return plt
 
-def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a parity plot between a variable and its reconstruction.
 
@@ -2503,17 +2554,20 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
         X_rec = pca_X.reconstruct(principal_components)
 
         # Parity plot for the reconstruction of the first variable:
-        plt = plot_parity(X[:,0], X_rec[:,0], color_variable=X[:,0], x_label='Observed $X_1$', y_label='Reconstructed $X_1$', colorbar_label='X_1', color_map='inferno', figure_size=(5,5), title='Parity plot', save_filename='parity-plot.pdf')
+        plt = plot_parity(X[:,0], X_rec[:,0], color=X[:,0], x_label='Observed $X_1$', y_label='Reconstructed $X_1$', colorbar_label='X_1', color_map='inferno', figure_size=(5,5), title='Parity plot', save_filename='parity-plot.pdf')
         plt.close()
 
     :param variable:
-        vector specifying the original variable.
+        vector specifying the original variable. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
     :param variable_rec:
-        vector specifying the reconstruction of the original variable
-    :param color_variable: (optional)
-        a 1D vector or string specifying color for the manifold. If it is a
+        vector specifying the reconstruction of the original variable. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param color: (optional)
+        vector or string specifying color for the manifold. If it is a
         vector, it has to have length consistent with the number of observations
-        in ``variable`` vector.
+        in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.
@@ -2544,14 +2598,62 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
         - **plt** - plot handle.
     """
 
+    if not isinstance(variable, np.ndarray):
+        raise ValueError("Parameter `variable` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(variable)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(variable)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `variable` has to be a 0D or 1D vector.")
+
+    if not isinstance(variable_rec, np.ndarray):
+        raise ValueError("Parameter `variable_rec` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_y,) = np.shape(variable_rec)
+        n_var_y = 1
+    except:
+        (n_y, n_var_y) = np.shape(variable_rec)
+
+    if n_var_y != 1:
+        raise ValueError("Parameter `variable_rec` has to be a 0D or 1D vector.")
+
+    if n_x != n_y:
+        raise ValueError("Parameter `variable` has different number of elements than `variable_rec`.")
+
+    if color is not None:
+        if not isinstance(color, str):
+            if not isinstance(color, np.ndarray):
+                raise ValueError("Parameter `color` has to be `None`, or of type `str` or `numpy.ndarray`.")
+
+    if isinstance(color, np.ndarray):
+
+        try:
+            (n_color,) = np.shape(color)
+            n_var_color = 1
+        except:
+            (n_color, n_var_color) = np.shape(color)
+
+        if n_var_color != 1:
+            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+
+        if n_color != n_x:
+            raise ValueError("Parameter `color` has different number of elements than `variable` and `variable_rec`.")
+
     color_line = '#ff2f18'
 
     fig, axs = plt.subplots(1, 1, figsize=figure_size)
 
-    if len(color_variable) == 0:
-        scat = plt.scatter(variable, variable_rec, c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
-    else:
-        scat = plt.scatter(variable, variable_rec, c=color_variable, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    if color is None:
+        scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    elif isinstance(color, str):
+        scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    elif isinstance(color, np.ndarray):
+        scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
     plt.plot(variable, variable, c=color_line)
     plt.axis('equal')
@@ -2561,8 +2663,8 @@ def plot_parity(variable, variable_rec, color_variable=[], x_label=None, y_label
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
     plt.grid(alpha=0.3)
 
-    if not isinstance(color_variable, str):
-        if len(color_variable) != 0:
+    if not isinstance(color, str):
+        if color is not None:
             cb = fig.colorbar(scat)
             cb.ax.tick_params(labelsize=font_colorbar_axes)
             if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')

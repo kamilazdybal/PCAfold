@@ -13,8 +13,6 @@ We need to import the ``PCA`` and ``LPCA`` classes:
   from PCAfold import preprocess
   from PCAfold import reduction
   from PCAfold import PCA, LPCA
-  import matplotlib.pyplot as plt
-  from matplotlib import gridspec
   import numpy as np
 
 We generate a synthetic data set on which the global PCA will be performed:
