@@ -629,6 +629,9 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
 
     n_variables = len(variables_to_plot)
 
+    if n_variables > 18:
+        raise ValueError("Only 18 variables can be plotted at once. Consider pre-selecting the variables to plot using `plot_variables` parameter.")
+
     if n_variables == 1:
         variable_colors = np.flipud(color_map_colors([0.8]))
     else:
@@ -643,7 +646,11 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if n_variables <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -749,7 +756,11 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if variable_count <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -807,6 +818,9 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
 
     n_variables = len(variables_to_plot)
 
+    if n_variables > 18:
+        raise ValueError("Only 18 variables can be plotted at once. Consider pre-selecting the variables to plot using `plot_variables` parameter.")
+
     if n_variables == 1:
         variable_colors = np.flipud(color_map_colors([0.8]))
     else:
@@ -821,7 +835,11 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$\hat{\mathcal{D}}(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if n_variables <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -904,7 +922,11 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$\hat{\mathcal{D}}(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if variable_count <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
