@@ -2821,7 +2821,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         y = -x**2 + 1
 
         # Generate dummy clustering of the data set:
-        idx = variable_bins(x, 4, verbose=False)
+        (idx, _) = variable_bins(x, 4, verbose=False)
 
         # Plot the clustering result:
         plt = plot_2d_clustering(x, y, idx, x_label='$x$', y_label='$y$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(10,6), title='x-y data set', save_filename='clustering.pdf')
@@ -2888,6 +2888,163 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     if grid_on: plt.grid(alpha=grid_opacity)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
+def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', first_cluster_index_zero=True, figure_size=(7,7), title=None, save_filename=None):
+    """
+    This function plots a 3-dimensional manifold divided into clusters.
+    Number of observations in each cluster will be plotted in the legend.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import variable_bins, plot_3d_clustering
+        import numpy as np
+
+        # Generate dummy data set:
+        x = np.linspace(-1,1,100)
+        y = -x**2 + 1
+        z = x + 10
+
+        # Generate dummy clustering of the data set:
+        (idx, _) = variable_bins(x, 4, verbose=False)
+
+        # Plot the clustering result:
+        plt = plot_3d_clustering(x, y, z, idx, x_label='$x$', y_label='$y$', z_label='$z$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(10,6), title='x-y-z data set', save_filename='clustering.pdf')
+        plt.close()
+
+    :param x:
+        variable on the :math:`x`-axis.
+    :param y:
+        variable on the :math:`y`-axis.
+    :param z:
+        variable on the :math:`z`-axis.
+    :param idx:
+        vector of cluster classifications.
+    :param elev: (optional)
+        elevation angle.
+    :param azim: (optional)
+        azimuth angle.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param z_label: (optional)
+        string specifying :math:`z`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+    :param first_cluster_index_zero: (optional)
+        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        If set to ``False`` the first cluster will be indexed ``1``.
+    :param figure_size:
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from matplotlib import cm
+    from mpl_toolkits.mplot3d import Axes3D
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(x)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(x)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_y,) = np.shape(y)
+        n_var_y = 1
+    except:
+        (n_y, n_var_y) = np.shape(y)
+
+    if n_var_y != 1:
+        raise ValueError("Parameter `y` has to be a 0D or 1D vector.")
+
+    if not isinstance(z, np.ndarray):
+        raise ValueError("Parameter `z` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_z,) = np.shape(z)
+        n_var_z = 1
+    except:
+        (n_z, n_var_z) = np.shape(z)
+
+    if n_var_z != 1:
+        raise ValueError("Parameter `z` has to be a 0D or 1D vector.")
+
+    if n_x != n_y or n_y != n_z:
+        raise ValueError("Parameters `x`, `y` and `z` have to have the same number of elements.")
+
+    if n_x != len(idx):
+        raise ValueError("Parameter `idx` has to have the same number of elements as `x`, `y` and `z`.")
+
+    n_clusters = len(np.unique(idx))
+    populations = get_populations(idx)
+
+    x = x.ravel()
+    y = y.ravel()
+    z = z.ravel()
+
+    color_map_colors = cm.get_cmap(color_map, n_clusters)
+    cluster_colors = color_map_colors(np.linspace(0, 1, n_clusters))
+
+    fig = plt.figure(figsize=figure_size)
+    ax = fig.add_subplot(111, projection='3d')
+
+    for k in range(0,n_clusters):
+        if first_cluster_index_zero:
+            ax.scatter(x[np.where(idx==k)], y[np.where(idx==k)], z[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k) + '}$ - ' + str(populations[k]))
+        else:
+            ax.scatter(x[np.where(idx==k)], y[np.where(idx==k)], z[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
+
+    plt.legend(bbox_to_anchor=(1.3, 1), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
+
+    if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if z_label != None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+
+    ax.tick_params(pad=5)
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.pane.set_edgecolor('w')
+    ax.view_init(elev=elev, azim=azim)
+    ax.grid(alpha=grid_opacity)
+    
+    for label in (ax.get_xticklabels()):
+        label.set_fontsize(font_axes)
+    for label in (ax.get_yticklabels()):
+        label.set_fontsize(font_axes)
+    for label in (ax.get_zticklabels()):
+        label.set_fontsize(font_axes)
+
+    if title != None: ax.set_title(title, **csfont, fontsize=font_title)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt

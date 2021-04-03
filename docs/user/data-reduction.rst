@@ -249,6 +249,11 @@ Plotting functions
 
 .. autofunction:: PCAfold.reduction.plot_2d_manifold
 
+``plot_3d_manifold``
+====================
+
+.. autofunction:: PCAfold.reduction.plot_3d_manifold
+
 ``plot_parity``
 ===============
 

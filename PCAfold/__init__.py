@@ -28,6 +28,7 @@ from .preprocess import get_partition
 from .preprocess import get_populations
 from .preprocess import get_average_centroid_distance
 from .preprocess import plot_2d_clustering
+from .preprocess import plot_3d_clustering
 from .preprocess import plot_2d_train_test_samples
 
 # Module: `reduction`
@@ -39,6 +40,7 @@ from .reduction import analyze_eigenvector_weights_change
 from .reduction import analyze_eigenvalue_distribution
 from .reduction import equilibrate_cluster_populations
 from .reduction import plot_2d_manifold
+from .reduction import plot_3d_manifold
 from .reduction import plot_parity
 from .reduction import plot_eigenvectors
 from .reduction import plot_eigenvectors_comparison
@@ -54,6 +56,7 @@ from .analysis import find_local_maxima
 from .analysis import r2value
 from .analysis import stratified_r2
 from .analysis import random_sampling_normalized_variance
+from .analysis import plot_3d_regression
 from .analysis import plot_normalized_variance
 from .analysis import plot_normalized_variance_comparison
 from .analysis import plot_normalized_variance_derivative

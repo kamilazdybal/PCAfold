@@ -558,6 +558,169 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 #
 ################################################################################
 
+def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, figure_size=(7,7), title=None, save_filename=None):
+    """
+    This function plots the result of regression of a dependent variable on top
+    of a two-dimensional manifold defined by ``x`` and ``y``.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_3d_regression
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Obtain 3-dimensional manifold from PCA:
+        pca_X = PCA(X)
+        PCs = pca_X.transform(X)
+        X_rec = pca_X.reconstruct(PCs)
+
+        # Plot the manifold:
+        plt = plot_3d_regression(X[:,0], X[:,1], X[:,0], X_rec[:,0], elev=45, azim=-45, x_label='$x$', y_label='$y$', z_label='$z$', figure_size=(10,10), title='3D regression', save_filename='3d-regression.pdf')
+        plt.close()
+
+    :param x:
+        variable on the :math:`x`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param y:
+        variable on the :math:`y`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param observed:
+        vector of the observed values of a single dependent variable.
+        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        vector of the predicted values of a single dependent variable.
+        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param elev: (optional)
+        elevation angle.
+    :param azim: (optional)
+        azimuth angle.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param z_label: (optional)
+        string specifying :math:`z`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from mpl_toolkits.mplot3d import Axes3D
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(x)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(x)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_y,) = np.shape(y)
+        n_var_y = 1
+    except:
+        (n_y, n_var_y) = np.shape(y)
+
+    if n_var_y != 1:
+        raise ValueError("Parameter `y` has to be a 0D or 1D vector.")
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if n_x != n_observed:
+        raise ValueError("Parameter `observed` has different number of elements than `x`, `y` and `z`.")
+
+    if n_x != n_predicted:
+        raise ValueError("Parameter `predicted` has different number of elements than `x`, `y` and `z`.")
+
+    color_observed = '#191b27'
+    color_predicted = '#ff928b'
+
+    fig = plt.figure(figsize=figure_size)
+    ax = fig.add_subplot(111, projection='3d')
+
+    scat = ax.scatter(x.ravel(), y.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=1)
+    scat = ax.scatter(x.ravel(), y.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=1)
+
+    if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if z_label != None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+
+    ax.tick_params(pad=5)
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.pane.set_edgecolor('w')
+    ax.view_init(elev=elev, azim=azim)
+    ax.grid(alpha=grid_opacity)
+
+    for label in (ax.get_xticklabels()):
+        label.set_fontsize(font_axes)
+    for label in (ax.get_yticklabels()):
+        label.set_fontsize(font_axes)
+    for label in (ax.get_zticklabels()):
+        label.set_fontsize(font_axes)
+
+    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, bbox_to_anchor=(1,1), loc="upper left")
+    lgnd.legendHandles[0]._sizes = [marker_size*5]
+    lgnd.legendHandles[1]._sizes = [marker_size*5]
+
+    if title != None: ax.set_title(title, **csfont, fontsize=font_title)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
 def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title=None, save_filename=None):
     """
     This function plots normalized variance :math:`\mathcal{N}(\sigma)` over
@@ -629,6 +792,9 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
 
     n_variables = len(variables_to_plot)
 
+    if n_variables > 18:
+        raise ValueError("Only 18 variables can be plotted at once. Consider pre-selecting the variables to plot using `plot_variables` parameter.")
+
     if n_variables == 1:
         variable_colors = np.flipud(color_map_colors([0.8]))
     else:
@@ -643,7 +809,11 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if n_variables <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -749,7 +919,11 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if variable_count <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -807,6 +981,9 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
 
     n_variables = len(variables_to_plot)
 
+    if n_variables > 18:
+        raise ValueError("Only 18 variables can be plotted at once. Consider pre-selecting the variables to plot using `plot_variables` parameter.")
+
     if n_variables == 1:
         variable_colors = np.flipud(color_map_colors([0.8]))
     else:
@@ -821,7 +998,11 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$\hat{\mathcal{D}}(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if n_variables <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
@@ -904,7 +1085,11 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
     plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
     plt.ylabel('$\hat{\mathcal{D}}(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
-    plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+
+    if variable_count <=5:
+        plt.legend(loc='best', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
+    else:
+        plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend_clustering/8)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
