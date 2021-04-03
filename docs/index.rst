@@ -1,4 +1,4 @@
-.. image:: ../PCAfold-logo.png
+.. image:: images/PCAfold-logo.png
   :width: 500
 
 *Low-dimensional PCA-derived manifolds and everything in between!*
