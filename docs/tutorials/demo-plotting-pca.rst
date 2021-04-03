@@ -27,9 +27,9 @@ We generate three PCA objects corresponding to three scaling criteria:
 
 .. code:: python
 
-  pca_X_Auto = PCA(X, scaling='auto', n_components=2)
-  pca_X_Range = PCA(X, scaling='range', n_components=2)
-  pca_X_Vast = PCA(X, scaling='vast', n_components=2)
+  pca_X_Auto = PCA(X, scaling='auto', n_components=3)
+  pca_X_Range = PCA(X, scaling='range', n_components=3)
+  pca_X_Vast = PCA(X, scaling='vast', n_components=3)
 
 and we will plot PCA results from the generated objects.
 
@@ -228,6 +228,23 @@ Example of using ``color_map='inferno'`` and coloring by the first variable in t
 Example of using ``color_map='Blues'`` and coloring by the first variable in the data set:
 
 .. image:: ../images/plotting-pca-2d-manifold-blues.png
+    :width: 500
+    :align: center
+
+**************************
+Three-dimensional manifold
+**************************
+
+Similarly, a three-dimensional manifold can be plotted:
+
+.. code::
+
+  plt = reduction.plot_3d_manifold(principal_components[:,0], principal_components[:,1], principal_components[:,2], elev=30, azim=-20, color=X[:,0], x_label='$Z_1$', y_label='$Z_2$', z_label='$Z_3$', colorbar_label='$T$ [K]', color_map='inferno', figure_size=(15,8), save_filename=None)
+
+Plotting example
+^^^^^^^^^^^^^^^^
+
+.. image:: ../images/plotting-pca-3d-manifold.png
     :width: 500
     :align: center
 

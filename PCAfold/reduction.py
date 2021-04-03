@@ -1784,7 +1784,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     plt.ylabel('Normalized center [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_variables+1.5)
-    plt.grid(alpha=0.3, zorder=0)
+    plt.grid(alpha=grid_opacity, zorder=0)
 
     if len(legend_label) != 0:
         lgnd = plt.legend(legend_label, fontsize=font_legend, markerscale=marker_scale_legend, loc="upper right")
@@ -1963,7 +1963,7 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
 
         plt.ylim(-0.05,1.05)
         plt.xlim(-1, n_variables)
-        plt.grid(alpha=0.3, zorder=0)
+        plt.grid(alpha=grid_opacity, zorder=0)
 
         if title != None:
             plt.title(title, fontsize=font_title, **csfont)
@@ -1994,7 +1994,7 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
 
         plt.ylim(-0.05,1.05)
         plt.xlim(-1, n_variables)
-        plt.grid(alpha=0.3)
+        plt.grid(alpha=grid_opacity)
 
         if title != None:
             plt.title(title, fontsize=font_title, **csfont)
@@ -2103,7 +2103,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     plt.ylabel('Normalized eigenvalue [-]', fontsize=font_labels, **csfont)
     plt.ylim(-0.05,1.05)
     plt.xlim(0, n_variables+1)
-    plt.grid(alpha=0.3, zorder=0)
+    plt.grid(alpha=grid_opacity, zorder=0)
 
     ax.spines["top"].set_visible(True)
     ax.spines["bottom"].set_visible(True)
@@ -2521,7 +2521,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
     plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
-    plt.grid(alpha=0.3)
+    plt.grid(alpha=grid_opacity)
 
     if isinstance(color, np.ndarray):
         if color is not None:
@@ -2690,7 +2690,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
     ax.yaxis.pane.set_edgecolor('w')
     ax.zaxis.pane.set_edgecolor('w')
     ax.view_init(elev=elev, azim=azim)
-    ax.grid(alpha=0.3)
+    ax.grid(alpha=grid_opacity)
 
     for label in (ax.get_xticklabels()):
         label.set_fontsize(font_axes)
@@ -2837,7 +2837,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
     plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
-    plt.grid(alpha=0.3)
+    plt.grid(alpha=grid_opacity)
 
     if not isinstance(color, str):
         if color is not None:
@@ -2940,7 +2940,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         else:
             plt.ylabel('PC-' + str(eigenvectors_indices[n_pc] + 1) + ' weight [-]', fontsize=font_labels, **csfont)
 
-        plt.grid(alpha=0.3, zorder=0)
+        plt.grid(alpha=grid_opacity, zorder=0)
         plt.xlim(0, n_variables+1)
         if plot_absolute == True:
             plt.ylim(-0.05,1.05)
@@ -3056,7 +3056,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=n_sets, fontsize=font_legend, markerscale=marker_scale_legend)
 
-    plt.grid(alpha=0.3, zorder=0)
+    plt.grid(alpha=grid_opacity, zorder=0)
     plt.xlim(0, n_variables+1)
     if plot_absolute == True:
         plt.ylim(-0.05,1.05)
@@ -3136,7 +3136,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
     plt.xticks(x_range, fontsize=font_axes, **csfont)
     plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
     plt.xlim(0, n_eigenvalues+1)
-    plt.grid(alpha=0.3, zorder=0)
+    plt.grid(alpha=grid_opacity, zorder=0)
 
     ax.spines["top"].set_visible(True)
     ax.spines["bottom"].set_visible(True)
@@ -3230,7 +3230,7 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
     plt.xticks(x_range, fontsize=font_axes, **csfont)
     plt.xlabel('$q$ [-]', fontsize=font_labels, **csfont)
     plt.xlim(0, n_eigenvalues+1)
-    plt.grid(alpha=0.3, zorder=0)
+    plt.grid(alpha=grid_opacity, zorder=0)
 
     ax.spines["top"].set_visible(True)
     ax.spines["bottom"].set_visible(True)
@@ -3306,7 +3306,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
     ax1.bar(x_range, eigenvalues[0:n_retained], color=bar_color, edgecolor=bar_color, align='center', zorder=2, label='Eigenvalue')
     ax1.set_ylabel('Eigenvalue [-]', fontsize=font_labels, **csfont)
     ax1.set_ylim(0,1.05)
-    ax1.grid(alpha=0.3, zorder=0)
+    ax1.grid(alpha=grid_opacity, zorder=0)
     ax1.set_xlabel('$q$ [-]', fontsize=font_labels, **csfont)
 
     ax2 = ax1.twinx()

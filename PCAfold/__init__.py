@@ -28,6 +28,7 @@ from .preprocess import get_partition
 from .preprocess import get_populations
 from .preprocess import get_average_centroid_distance
 from .preprocess import plot_2d_clustering
+from .preprocess import plot_3d_clustering
 from .preprocess import plot_2d_train_test_samples
 
 # Module: `reduction`
