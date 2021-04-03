@@ -2534,6 +2534,182 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
     return plt
 
+def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+    """
+    This function plots a 3-dimensional manifold given three vectors
+    defining the manifold.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_3d_manifold
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Obtain 3-dimensional manifold from PCA:
+        pca_X = PCA(X)
+        PCs = pca_X.transform(X)
+
+        # Plot the manifold:
+        plt = plot_3d_manifold(PCs[:,0], PCs[:,1], PCs[:,2], color=X[:,0], elev=30, azim=-60, x_label='PC-1', y_label='PC-2', z_label='PC-3', colorbar_label='$X_1$', figure_size=(15,7), title='3D manifold', save_filename='3d-manifold.png')
+        plt.close()
+
+    :param x:
+        variable on the :math:`x`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param y:
+        variable on the :math:`y`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param z:
+        variable on the :math:`z`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param color: (optional)
+        vector or string specifying color for the manifold. If it is a
+        vector, it has to have length consistent with the number of observations
+        in ``x``, ``y`` and ``z`` vectors. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+        It can also be set to a string specifying the color directly, for
+        instance ``'r'`` or ``'#006778'``.
+        If not specified, manifold will be plotted in black.
+    :param elev: (optional)
+        elevation angle.
+    :param azim: (optional)
+        azimuth angle.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param z_label: (optional)
+        string specifying :math:`z`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param colorbar_label: (optional)
+        string specifying colorbar label annotation.
+        If set to ``None``, colorbar label will not be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    from mpl_toolkits.mplot3d import Axes3D
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(x)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(x)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_y,) = np.shape(y)
+        n_var_y = 1
+    except:
+        (n_y, n_var_y) = np.shape(y)
+
+    if n_var_y != 1:
+        raise ValueError("Parameter `y` has to be a 0D or 1D vector.")
+
+    if not isinstance(z, np.ndarray):
+        raise ValueError("Parameter `z` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_z,) = np.shape(z)
+        n_var_z = 1
+    except:
+        (n_z, n_var_z) = np.shape(z)
+
+    if n_var_z != 1:
+        raise ValueError("Parameter `z` has to be a 0D or 1D vector.")
+
+    if n_x != n_y or n_y != n_z:
+        raise ValueError("Parameters `x`, `y` and `z` have to have the same number of elements.")
+
+    if color is not None:
+        if not isinstance(color, str):
+            if not isinstance(color, np.ndarray):
+                raise ValueError("Parameter `color` has to be `None`, or of type `str` or `numpy.ndarray`.")
+
+    if isinstance(color, np.ndarray):
+
+        try:
+            (n_color,) = np.shape(color)
+            n_var_color = 1
+        except:
+            (n_color, n_var_color) = np.shape(color)
+
+        if n_var_color != 1:
+            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+
+        if n_color != n_x:
+            raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
+
+    fig = plt.figure(figsize=figure_size)
+    ax = fig.add_subplot(111, projection='3d')
+
+    if color is None:
+        scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=scatter_point_size, alpha=1)
+    elif isinstance(color, str):
+        scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
+    elif isinstance(color, np.ndarray):
+        scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
+
+    if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if z_label != None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+
+    ax.tick_params(pad=5)
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.pane.set_edgecolor('w')
+    ax.view_init(elev=elev, azim=azim)
+    ax.grid(alpha=0.3)
+
+    for label in (ax.get_xticklabels()):
+        label.set_fontsize(font_axes)
+    for label in (ax.get_yticklabels()):
+        label.set_fontsize(font_axes)
+    for label in (ax.get_zticklabels()):
+        label.set_fontsize(font_axes)
+
+    if isinstance(color, np.ndarray):
+        if color is not None:
+            cb = fig.colorbar(scat, shrink=0.6)
+            cb.ax.tick_params(labelsize=font_colorbar_axes)
+            if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+
+    if title != None: ax.set_title(title, **csfont, fontsize=font_title)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
 def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a parity plot between a variable and its reconstruction.
@@ -2564,13 +2740,13 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
         vector specifying the reconstruction of the original variable. It should be of type ``numpy.ndarray`` and size
         ``(n_observations,)`` or ``(n_observations,1)``.
     :param color: (optional)
-        vector or string specifying color for the manifold. If it is a
+        vector or string specifying color for the parity plot. If it is a
         vector, it has to have length consistent with the number of observations
         in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
         ``(n_observations,)`` or ``(n_observations,1)``.
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
-        If not specified, manifold will be plotted in black.
+        If not specified, parity plot will be plotted in black.
     :param x_label: (optional)
         string specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
