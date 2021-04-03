@@ -358,3 +358,41 @@ class TestStratifiedR2(unittest.TestCase):
             plt.close()
         except Exception:
             self.assertTrue(False)
+
+    def plot_3d_regression_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+        pca_X = PCA(X, scaling='auto', n_components=2)
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        try:
+            plt = plot_3d_regression(X[:,0], X[:,1], X[:,0], X_rec[:,0], elev=45, azim=-45, x_label='$x$', y_label='$y$', z_label='$z$', figure_size=(7,7), title='3D regression')
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = plot_3d_regression(X[:,0:1], X[:,1:2], X[:,2:3], X_rec[:,0:1], elev=45, azim=-45, x_label='$x$', y_label='$y$', z_label='$z$', figure_size=(7,7), title='3D regression')
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+    def plot_3d_regression_not_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        with self.assertRaises(ValueError):
+            plt = plot_3d_regression(X[:,0:2], X[:,1], X[:,2], X[:,0])
+            plt.close()
+
+        with self.assertRaises(ValueError):
+            plt = plot_3d_regression(X[:,0], X[:,1:3], X[:,2], X[:,0])
+            plt.close()
+
+        with self.assertRaises(ValueError):
+            plt = plot_3d_regression(X[:,0], X[:,1], X[:,2:4], X[:,0])
+            plt.close()
+
+        with self.assertRaises(ValueError):
+            plt = plot_3d_regression(X[:,0], X[:,1], X[:,2], X[:,0:2])
+            plt.close()
