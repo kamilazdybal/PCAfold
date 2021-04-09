@@ -12,6 +12,7 @@ __status__ = "Production"
 import numpy as np
 import random
 import copy
+import operator
 import matplotlib.pyplot as plt
 from PCAfold.styles import *
 
@@ -398,6 +399,87 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     idx_retained = idx_retained[::-1]
 
     return(X_removed, idx_removed, idx_retained)
+
+def order_variables(X, method='mean', descending=True):
+    """
+    This function orders variables in the data set using a selected method.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import order_variables
+        import numpy as np
+
+        # Generate a dummy data set:
+        X = np.array([[100, 1, 10],
+                      [200, 2, 20],
+                      [300, 3, 30]])
+
+        # Order variables by the mean value in the descending order:
+        (X_ordered, idx) = order_variables(X, method='mean', descending=True)
+
+    The code above should return an ordered data set:
+
+    .. code-block:: text
+
+        array([[100,  10,   1],
+               [200,  20,   2],
+               [300,  30,   3]])
+
+    and the list of ordered variable indices:
+
+    .. code-block:: text
+
+        [1, 2, 0]
+
+    :param X:
+        original data set :math:`\mathbf{X}`.
+    :param method: (optional)
+        string specifying the ordering method. Can be ``'mean'``, ``'min'``, ``'max'`` or ``'std'``.
+    :param descending: (optional)
+        boolean specifying whether variables should be ordered in the descending order.
+        If set to ``False``, variables will be ordered in the ascending order.
+
+    :return:
+        - **X_ordered** - original data set with ordered variables.
+        - **idx** - list of indices of the ordered variables.
+    """
+
+    __method = ['mean', 'min', 'max', 'std']
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+
+    if not isinstance(method, str):
+        raise ValueError("Parameter `method` has to be a string.")
+
+    if method not in __method:
+        raise ValueError("Parameter `method` has to be a 'mean', 'min', 'max' or 'std'.")
+
+    if not isinstance(descending, bool):
+        raise ValueError("Parameter `descending` has to be a boolean.")
+
+    if method == 'mean':
+        criterion = np.mean(X, axis=0)
+    elif method == 'min':
+        criterion = np.min(X, axis=0)
+    elif method == 'max':
+        criterion = np.max(X, axis=0)
+    elif method == 'std':
+        criterion = np.std(X, axis=0)
+
+    sorted_pairs = sorted(enumerate(criterion), key=operator.itemgetter(1))
+    sorted_indices = [index for index, element in sorted_pairs]
+
+    if descending:
+        idx = sorted_indices[::-1]
+    else:
+        idx = sorted_indices
+
+    X_ordered = X[:,idx]
+
+    return (X_ordered, idx)
 
 def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
     """
@@ -3036,7 +3118,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
     ax.zaxis.pane.set_edgecolor('w')
     ax.view_init(elev=elev, azim=azim)
     ax.grid(alpha=grid_opacity)
-    
+
     for label in (ax.get_xticklabels()):
         label.set_fontsize(font_axes)
     for label in (ax.get_yticklabels()):

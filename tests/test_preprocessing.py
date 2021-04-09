@@ -7,7 +7,7 @@ class TestPreprocessing(unittest.TestCase):
 
 ################################################################################
 #
-# Test plotting functionalities of the `reduction` module
+# Test plotting functionalities of the `preprocess` module
 #
 ################################################################################
 

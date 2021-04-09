@@ -13,6 +13,7 @@ __status__ = "Production"
 from .preprocess import center_scale
 from .preprocess import invert_center_scale
 from .preprocess import remove_constant_vars
+from .preprocess import order_variables
 from .preprocess import PreProcessing
 from .preprocess import outlier_detection
 from .preprocess import KernelDensity

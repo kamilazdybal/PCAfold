@@ -41,6 +41,11 @@ as centering and scaling and outlier detection and removal.
 
 .. autofunction:: PCAfold.preprocess.remove_constant_vars
 
+``order_variables``
+==========================
+
+.. autofunction:: PCAfold.preprocess.order_variables
+
 Class ``PreProcessing``
 =======================
 
