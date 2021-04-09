@@ -436,7 +436,7 @@ def order_variables(X, method='mean', descending=True):
     :param X:
         original data set :math:`\mathbf{X}`.
     :param method: (optional)
-        string specifying the ordering method. Can be ``'mean'``, ``'min'``, ``'max'`` or ``'std'``.
+        string specifying the ordering method. Can be ``'mean'``, ``'min'``, ``'max'``, ``'std'`` or ``'var'``.
     :param descending: (optional)
         boolean specifying whether variables should be ordered in the descending order.
         If set to ``False``, variables will be ordered in the ascending order.
@@ -446,7 +446,7 @@ def order_variables(X, method='mean', descending=True):
         - **idx** - list of indices of the ordered variables.
     """
 
-    __method = ['mean', 'min', 'max', 'std']
+    __method = ['mean', 'min', 'max', 'std', 'var']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
@@ -455,7 +455,7 @@ def order_variables(X, method='mean', descending=True):
         raise ValueError("Parameter `method` has to be a string.")
 
     if method not in __method:
-        raise ValueError("Parameter `method` has to be a 'mean', 'min', 'max' or 'std'.")
+        raise ValueError("Parameter `method` has to be a 'mean', 'min', 'max', 'std' or 'var'.")
 
     if not isinstance(descending, bool):
         raise ValueError("Parameter `descending` has to be a boolean.")
@@ -468,6 +468,8 @@ def order_variables(X, method='mean', descending=True):
         criterion = np.max(X, axis=0)
     elif method == 'std':
         criterion = np.std(X, axis=0)
+    elif method == 'var':
+        criterion = np.var(X, axis=0)
 
     sorted_pairs = sorted(enumerate(criterion), key=operator.itemgetter(1))
     sorted_indices = [index for index, element in sorted_pairs]
