@@ -79,7 +79,7 @@ of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies
 classification of each observation from the original data set
 :math:`\mathbf{X}` to a local cluster.
 
-.. image:: ../images/clustering-idx.png
+.. image:: ../images/clustering-idx.svg
   :width: 400
   :align: center
 
@@ -154,7 +154,7 @@ These functionalities can be specifically used to tackle *imbalanced data sets*
 
 The general idea is to divide the entire data set ``X`` (or its portion) into train and test samples as presented below:
 
-.. image:: ../images/tts-train-test-select.png
+.. image:: ../images/tts-train-test-select.svg
   :width: 700
   :align: center
 

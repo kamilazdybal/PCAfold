@@ -1282,7 +1282,7 @@ class DataSampler:
 
         The scheme below presents graphically how train and test data can be selected using ``test_selection_option`` parameter:
 
-        .. image:: ../images/sampling-test-selection-option-number.png
+        .. image:: ../images/sampling-test-selection-option-number.svg
           :width: 700
           :align: center
 
@@ -1446,7 +1446,7 @@ class DataSampler:
         The scheme below presents graphically how train and test data can be
         selected using ``test_selection_option`` parameter:
 
-        .. image:: ../images/sampling-test-selection-option-percentage.png
+        .. image:: ../images/sampling-test-selection-option-percentage.svg
           :width: 700
           :align: center
 
@@ -1599,7 +1599,7 @@ class DataSampler:
         The scheme below presents graphically how train and test data can be
         selected using ``test_selection_option`` parameter:
 
-        .. image:: ../images/sampling-test-selection-option-manual.png
+        .. image:: ../images/sampling-test-selection-option-manual.svg
           :width: 700
           :align: center
 
@@ -1858,7 +1858,7 @@ class DataSampler:
         The scheme below presents graphically how train and test data can be
         selected using ``test_selection_option`` parameter:
 
-        .. image:: ../images/sampling-test-selection-option-random.png
+        .. image:: ../images/sampling-test-selection-option-random.svg
           :width: 700
           :align: center
 
@@ -1974,7 +1974,7 @@ def variable_bins(var, k, verbose=False):
 
     An example of how a vector can be partitioned with this function is presented below:
 
-    .. image:: ../images/clustering-variable-bins.png
+    .. image:: ../images/clustering-variable-bins.svg
       :width: 600
       :align: center
 
@@ -2062,7 +2062,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
     An example of how a vector can be partitioned with this function is presented below:
 
-    .. image:: ../images/clustering-predefined-variable-bins.png
+    .. image:: ../images/clustering-predefined-variable-bins.svg
       :width: 600
       :align: center
 
@@ -2151,7 +2151,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     An example of how a vector can be partitioned with this function is presented below:
 
-    .. image:: ../images/clustering-mixture-fraction-bins.png
+    .. image:: ../images/clustering-mixture-fraction-bins.svg
       :width: 600
       :align: center
 
@@ -2277,7 +2277,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
     With ``split_at_zero=False``:
 
-    .. image:: ../images/clustering-zero-neighborhood-bins.png
+    .. image:: ../images/clustering-zero-neighborhood-bins.svg
       :width: 700
       :align: center
 
@@ -2290,7 +2290,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
     With ``split_at_zero=True``:
 
-    .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.png
+    .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.svg
       :width: 700
       :align: center
 

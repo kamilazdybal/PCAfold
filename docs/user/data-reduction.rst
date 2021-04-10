@@ -163,7 +163,7 @@ The steps of PCA in this option:
 
 These steps are presented graphically below:
 
-.. image:: ../images/biasing-option-1.png
+.. image:: ../images/biasing-option-1.svg
     :width: 700
     :align: center
 
@@ -187,7 +187,7 @@ The steps of PCA in this option:
 
 These steps are presented graphically below:
 
-.. image:: ../images/biasing-option-2.png
+.. image:: ../images/biasing-option-2.svg
     :width: 700
     :align: center
 
@@ -211,7 +211,7 @@ The steps of PCA in this option:
 
 These steps are presented graphically below:
 
-.. image:: ../images/biasing-option-3.png
+.. image:: ../images/biasing-option-3.svg
     :width: 700
     :align: center
 
@@ -234,7 +234,7 @@ The steps of PCA in this option:
 
 These steps are presented graphically below:
 
-.. image:: ../images/biasing-option-4.png
+.. image:: ../images/biasing-option-4.svg
     :width: 700
     :align: center
 

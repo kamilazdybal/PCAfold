@@ -2147,7 +2147,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     :math:`N_s` is the number of observations in the smallest
     cluster. This is further illustrated on synthetic data set below:
 
-    .. image:: ../images/cluster-equilibration-scheme.png
+    .. image:: ../images/cluster-equilibration-scheme.svg
         :width: 700
         :align: center
 
@@ -2159,7 +2159,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     This function returns 3D arrays ``eigenvectors``, ``pc_scores`` and
     ``pc_sources`` that have the following structure:
 
-    .. image:: ../images/cbpca-equlibrate-outputs.png
+    .. image:: ../images/cbpca-equlibrate-outputs.svg
         :width: 700
         :align: center
 
