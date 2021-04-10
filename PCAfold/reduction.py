@@ -2159,7 +2159,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     This function returns 3D arrays ``eigenvectors``, ``pc_scores`` and
     ``pc_sources`` that have the following structure:
 
-    .. image:: ../images/cbpca-equlibrate-outputs.svg
+    .. image:: ../images/cbpca-equilibrate-outputs.svg
         :width: 700
         :align: center
 
