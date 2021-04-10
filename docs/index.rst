@@ -1,4 +1,4 @@
-.. image:: images/PCAfold-logo.png
+.. image:: images/PCAfold-logo.svg
   :width: 500
 
 *Low-dimensional PCA-derived manifolds and everything in between!*
@@ -19,7 +19,7 @@ low-dimensional manifolds.
 A general overview for using **PCAfold** modules is presented in the diagram
 below:
 
-.. image:: images/PCAfold-diagram.png
+.. image:: images/PCAfold-diagram.svg
   :width: 700
   :align: center
 
@@ -27,8 +27,8 @@ Each module's functionalities can also be used as a standalone tool for
 performing a specific task and can easily combine with techniques outside of
 this software, such as K-Means algorithm or Artificial Neural Networks.
 
-Reach out to the `Getting started <https://pcafold.readthedocs.io/en/latest/user/getting-started.html#workflows>`_
-section for possible workflows that can be achieved with **PCAfold**.
+Reach out to the `Getting started <https://pcafold.readthedocs.io/en/latest/user/getting-started.html>`_
+section for more information on installing the software and for possible workflows that can be achieved with **PCAfold**.
 
 --------------------------------------------------------------------------------
 

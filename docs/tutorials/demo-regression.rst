@@ -47,7 +47,7 @@ Generate a dependent variable :math:`\phi` as a linear function of :math:`x`:
 
   for observation, x_value in enumerate(x):
 
-  phi[observation] = x_value
+      phi[observation] = x_value
 
 Visualize the generated data set:
 

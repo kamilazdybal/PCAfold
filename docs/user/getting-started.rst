@@ -100,7 +100,7 @@ In this section we present several popular workflows that can be achieved using
 functionalities of **PCAfold**. An overview for combining **PCAfold** modules
 into a complete workflow is presented in the diagram below:
 
-.. image:: ../images/PCAfold-software-architecture.png
+.. image:: ../images/PCAfold-software-architecture.svg
   :width: 700
   :align: center
 
@@ -129,6 +129,8 @@ Data clustering
 Data clustering can be achieved using the ``preprocess`` module. This functionality can be
 useful for data analysis or feature detection and can also be the first
 step for applying data reduction techniques locally (on local portions of the data).
+It is also worth pointing out that clustering algorithms from outside of
+**PCAfold** software can be brought into the workflow.
 
 Data sampling
 ^^^^^^^^^^^^^
@@ -146,13 +148,7 @@ Global PCA can be performed using ``PCA`` class available in the ``reduction`` m
 Local PCA
 ^^^^^^^^^
 
-Local PCA can be performed by combining clustering techniques, for instance
-the ones available in the ``preprocess`` module, with ``PCA`` class
-available in the ``reduction`` module.
-In particular, local eigenvectors and Principal Components can be obtained by passing an
-extracted cluster instead of a full data set as an input for ``PCA`` class.
-It is also worth pointing out that clustering algorithms from outside of
-**PCAfold** software can be brought into the workflow.
+Local PCA can be performed using ``LPCA`` class available in the ``reduction`` module.
 
 PCA on sampled data sets
 ^^^^^^^^^^^^^^^^^^^^^^^^
