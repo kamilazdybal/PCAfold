@@ -75,3 +75,4 @@ If you use **PCAfold** in a scientific publication, you can cite the software as
    tutorials/demo-pca-on-sampled-data-sets
    tutorials/demo-handling-source-terms
    tutorials/demo-manifold-assessment
+   tutorials/demo-regression
