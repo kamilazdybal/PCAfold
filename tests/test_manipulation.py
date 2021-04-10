@@ -835,6 +835,14 @@ class TestManipulation(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+        try:
+            (X_ordered, idx) = preprocess.order_variables(X, method='min', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='max', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='std', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='var', descending=False)
+        except Exception:
+            self.assertTrue(False)
+
     def test_order_variables_not_allowed_calls(self):
 
         X = np.array([[100, 1, 10, 0.1],
