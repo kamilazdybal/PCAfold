@@ -1,5 +1,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/pcafold/badge/?version=latest)](https://pcafold.readthedocs.io/en/latest/?badge=latest)
+[[!GitLab](https://img.shields.io/badge/GitLab-PCAfold-blue.svg)](https://gitlab.multiscale.utah.edu/common/PCAfold)
 
 <p align="center">
   <img src="https://gitlab.multiscale.utah.edu/common/PCAfold/raw/master/docs/images/PCAfold-logo.svg" width="400">
