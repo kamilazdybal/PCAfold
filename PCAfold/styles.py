@@ -20,12 +20,12 @@ rcParams['mathtext.fontset'] = 'custom'
 rcParams['mathtext.rm'] = 'Charter'
 rcParams['mathtext.it'] = 'Charter:italic'
 rcParams['mathtext.bf'] = 'Charter:bold'
-rcParams['font.size'] = 20
+rcParams['font.size'] = 16
 rcParams["text.usetex"] = False
 
 grid_opacity = 0.3
 
-font_axes = 20
+font_axes = 16
 font_labels = 24
 font_annotations = 20
 font_title = 18
