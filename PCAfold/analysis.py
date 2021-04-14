@@ -378,7 +378,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
+        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
 
         # Plot the stratified R2 values:
         plot_stratified_r2(r2_in_bins, bins_borders)
@@ -1118,7 +1118,7 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, verbose=True)
+        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
 
         # Visualize how R2 changes across bins:
         plt = plot_stratified_r2(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
