@@ -373,10 +373,10 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         but become more and more sparse in the direction of increasing :math:`\\phi`
         due to an increasing gradient of :math:`\\phi`.
         If bins are narrow enough (``n_bins`` is high enough), a single bin
-        can contain only one of those lines for high value of :math:`\\phi`
-        (like the one marked by the red dashed lines). :math:`R^2` will then be computed
+        (like the bin bounded by the red dashed lines) can contain only one of
+        those lines of points for high value of :math:`\\phi`. :math:`R^2` will then be computed
         for constant, or almost constant observations, even though globally those
-        observations lie in a location of a large slope of the observed variable!
+        observations lie in a location of a large gradient of the observed variable!
 
         .. image:: ../images/stratified-r2.png
             :width: 500
