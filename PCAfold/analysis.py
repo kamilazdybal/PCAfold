@@ -19,6 +19,7 @@ import random as rnd
 from scipy.interpolate import CubicSpline
 from PCAfold.styles import *
 from PCAfold import preprocess
+from termcolor import colored
 
 
 class VarianceData:
@@ -337,9 +338,9 @@ def r2value(observed, predicted):
 
 def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=False):
     """
-    This function calculates the stratified coefficient of determination
+    This function computes the stratified coefficient of determination
     :math:`R^2` values. Stratified :math:`R^2` is computed separately in each
-    of the ``n_bins`` of a dependent variable.
+    of the ``n_bins`` of an observed dependent variable, :math:`\phi`.
 
     :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
 
@@ -347,19 +348,38 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 
     .. math::
 
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - \mathbf{X_{rec}}_i^{j})^2}{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - mean(\mathbf{X}_i))^2}
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_i^{j} - \\hat{\\phi}_{i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_i^{j} - mean(\\phi))^2}
 
     - If ``use_global_mean=False``, the mean of the considered :math:`j^{th}` bin is used as a reference:
 
     .. math::
 
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - \mathbf{X_{rec}}_i^{j})^2}{\\sum_{i=1}^{N_j} (\mathbf{X}_i^{j} - mean(\mathbf{X}_i^{j}))^2}
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_i^{j} - \\hat{\\phi}_{i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_i^{j} - mean(\\phi^{j}))^2}
+
+    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin and
+    :math:`\hat{\phi}` is the predicted dependent variable.
 
     .. note::
 
         After running this function you can call
         ``analysis.plot_stratified_r2(r2_in_bins, bins_borders)`` on the
-        function outputs and it will visualize how :math:`R^2` changes across bins.
+        function outputs and it will visualize how stratified :math:`R^2` changes across bins.
+
+    .. warning::
+
+        The stratified :math:`R^2` metric can be misleading if there are large
+        variations in point density in an observed variable. For instance, below is a data set
+        composed of lines of points that have uniform spacing on the :math:`x` axis
+        but become more and more sparse in the direction of increasing :math:`\phi`.
+        If bins are narrow enough (``n_bins`` is high enough), a single bin
+        can contain only one of those lines for high value of :math:`\phi`
+        (like the one marked by the red dashed lines). :math:`R^2` will then be computed
+        for constant, or almost constant observations, even though globally those
+        observations lie in a location of a large slope of the observed variable!
+
+        .. image:: ../images/stratified-r2.png
+            :width: 500
+            :align: center
 
     **Example:**
 
@@ -458,8 +478,14 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         else:
             r2 = r2value(__observed[idx_bin], __predicted[idx_bin])
 
+        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
+        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
+
         if verbose:
-            print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)))
+            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+            else:
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)))
 
         r2_in_bins.append(r2)
 
