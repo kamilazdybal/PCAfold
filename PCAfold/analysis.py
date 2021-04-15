@@ -370,7 +370,8 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         The stratified :math:`R^2` metric can be misleading if there are large
         variations in point density in an observed variable. For instance, below is a data set
         composed of lines of points that have uniform spacing on the :math:`x` axis
-        but become more and more sparse in the direction of increasing :math:`\\phi`.
+        but become more and more sparse in the direction of increasing :math:`\\phi`
+        due to an increasing gradient of :math:`\\phi`.
         If bins are narrow enough (``n_bins`` is high enough), a single bin
         can contain only one of those lines for high value of :math:`\\phi`
         (like the one marked by the red dashed lines). :math:`R^2` will then be computed
