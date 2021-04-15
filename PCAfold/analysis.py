@@ -340,7 +340,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
     """
     This function computes the stratified coefficient of determination
     :math:`R^2` values. Stratified :math:`R^2` is computed separately in each
-    of the ``n_bins`` of an observed dependent variable, :math:`\phi`.
+    of the ``n_bins`` of an observed dependent variable, :math:`\\phi`.
 
     :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
 
@@ -357,7 +357,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_i^{j} - \\hat{\\phi}_{i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_i^{j} - mean(\\phi^{j}))^2}
 
     where :math:`N_j` is the number of observations in the :math:`j^{th}` bin and
-    :math:`\hat{\phi}` is the predicted dependent variable.
+    :math:`\\hat{\\phi}` is the predicted dependent variable.
 
     .. note::
 
@@ -370,9 +370,9 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         The stratified :math:`R^2` metric can be misleading if there are large
         variations in point density in an observed variable. For instance, below is a data set
         composed of lines of points that have uniform spacing on the :math:`x` axis
-        but become more and more sparse in the direction of increasing :math:`\phi`.
+        but become more and more sparse in the direction of increasing :math:`\\phi`.
         If bins are narrow enough (``n_bins`` is high enough), a single bin
-        can contain only one of those lines for high value of :math:`\phi`
+        can contain only one of those lines for high value of :math:`\\phi`
         (like the one marked by the red dashed lines). :math:`R^2` will then be computed
         for constant, or almost constant observations, even though globally those
         observations lie in a location of a large slope of the observed variable!
