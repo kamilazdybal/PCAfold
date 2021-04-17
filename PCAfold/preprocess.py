@@ -116,7 +116,7 @@ def center_scale(X, scaling, nocenter=False):
         (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
@@ -133,6 +133,11 @@ def center_scale(X, scaling, nocenter=False):
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
 
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
     if not isinstance(scaling, str):
         raise ValueError("Parameter `scaling` has to be a string.")
     else:
@@ -141,13 +146,6 @@ def center_scale(X, scaling, nocenter=False):
 
     if not isinstance(nocenter, bool):
         raise ValueError("Parameter `nocenter` has to be a boolean.")
-
-    try:
-        (n_observations, n_variables) = np.shape(X)
-    except:
-        (n_observations,) = np.shape(X)
-        X = X[:,None]
-        n_variables = 1
 
     X_cs = np.zeros_like(X, dtype=float)
     X_center = X.mean(axis=0)
@@ -235,20 +233,45 @@ def invert_center_scale(X_cs, X_center, X_scale):
         X = invert_center_scale(X_cs, X_center, X_scale)
 
     :param X_cs:
-        centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
     :param X_center:
-        vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     :param X_scale:
-        vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
 
     :return:
-        - **X** - original data set :math:`\mathbf{X}`.
+        - **X** - ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It has size ``(n_observations,n_variables)``.
     """
 
+    if not isinstance(X_cs, np.ndarray):
+        raise ValueError("Parameter `X_cs` has to be of type `numpy.ndarray`.")
+
     try:
-        (_, n_variables) = np.shape(X_cs)
+        (n_observations, n_variables) = np.shape(X_cs)
     except:
-        n_variables = 1
+        raise ValueError("Parameter `X_cs` has to have size `(n_observations,n_variables)`.")
+
+    if not isinstance(X_center, np.ndarray):
+        raise ValueError("Parameter `X_center` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_variables_centers,) = np.shape(X_center)
+    except:
+        raise ValueError("Parameter `X_center` has to have size `(n_variables,)`.")
+
+    if not isinstance(X_scale, np.ndarray):
+        raise ValueError("Parameter `X_scale` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_variables_scales,) = np.shape(X_scale)
+    except:
+        raise ValueError("Parameter `X_scale` has to have size `(n_variables,)`.")
+
+    if n_variables != n_variables_centers:
+        raise ValueError("Parameter `X_center` has different number of variables than parameter `X_cs`.")
+
+    if n_variables != n_variables_scales:
+        raise ValueError("Parameter `X_scale` has different number of variables than parameter `X_cs`.")
 
     if n_variables == 1:
         X = X_cs * X_scale + X_center
