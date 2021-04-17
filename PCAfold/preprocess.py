@@ -116,23 +116,22 @@ def center_scale(X, scaling, nocenter=False):
         (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
     :param scaling:
-        string specifying the scaling methodology.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param nocenter: (optional)
-        boolean specifying whether data should be centered by mean.
-
-    :raises ValueError:
-        if ``scaling`` method is not a string or is not within the available scalings.
-
-    :raises ValueError:
-        if ``nocenter`` is not a boolean.
+        ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
     :return:
-        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_cs** - ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`. It has size ``(n_observations,n_variables)``.
+        - **X_center** - ``numpy.ndarray`` specifying the centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
+        - **X_scale** - ``numpy.ndarray`` specifying the scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
     """
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
 
     if not isinstance(scaling, str):
         raise ValueError("Parameter `scaling` has to be a string.")
@@ -146,8 +145,9 @@ def center_scale(X, scaling, nocenter=False):
     try:
         (n_observations, n_variables) = np.shape(X)
     except:
-        X = X[:,np.newaxis]
-        (n_observations, n_variables) = np.shape(X)
+        (n_observations,) = np.shape(X)
+        X = X[:,None]
+        n_variables = 1
 
     X_cs = np.zeros_like(X, dtype=float)
     X_center = X.mean(axis=0)

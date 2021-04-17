@@ -9,6 +9,19 @@ from PCAfold import KernelDensity
 
 class TestManipulation(unittest.TestCase):
 
+    def test_center_scale_not_allowed_calls(self):
+
+        X = np.random.rand(100,20)
+
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'none', nocenter=1)
+
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale([1,2,3], 'none')
+
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 1)
+
     def test_center_scale_all_possible_C_and_D(self):
 
         test_data_set = np.random.rand(100,20)
@@ -258,6 +271,57 @@ class TestManipulation(unittest.TestCase):
             comparison = X_scale == ones
             self.assertTrue(comparison.all())
         except Exception:
+            self.assertTrue(False)
+
+        test_data_set = np.random.rand(100,)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            (n_observations, n_variables) = X_cs.shape
+            (n_centers,) = X_center.shape
+            (n_scales,) = X_scale.shape
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==1)
+            self.assertTrue(n_centers==1)
+            self.assertTrue(n_scales==1)
+            self.assertTrue(isinstance(X_cs, np.ndarray))
+            self.assertTrue(isinstance(X_center, np.ndarray))
+            self.assertTrue(isinstance(X_scale, np.ndarray))
+        except:
+            self.assertTrue(False)
+
+        test_data_set = np.random.rand(100,1)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            (n_observations, n_variables) = X_cs.shape
+            (n_centers,) = X_center.shape
+            (n_scales,) = X_scale.shape
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==1)
+            self.assertTrue(n_centers==1)
+            self.assertTrue(n_scales==1)
+            self.assertTrue(isinstance(X_cs, np.ndarray))
+            self.assertTrue(isinstance(X_center, np.ndarray))
+            self.assertTrue(isinstance(X_scale, np.ndarray))
+        except:
+            self.assertTrue(False)
+
+        test_data_set = np.random.rand(100,2)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            (n_observations, n_variables) = X_cs.shape
+            (n_centers,) = X_center.shape
+            (n_scales,) = X_scale.shape
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==2)
+            self.assertTrue(n_centers==2)
+            self.assertTrue(n_scales==2)
+            self.assertTrue(isinstance(X_cs, np.ndarray))
+            self.assertTrue(isinstance(X_center, np.ndarray))
+            self.assertTrue(isinstance(X_scale, np.ndarray))
+        except:
             self.assertTrue(False)
 
     def test_invert_center_scale(self):
