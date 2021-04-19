@@ -26,7 +26,7 @@ _scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', 
 
 def center_scale(X, scaling, nocenter=False):
     """
-    This function centers and scales the data set.
+    Centers and scales the data set.
 
     In the discussion below we understand that :math:`\mathbf{X}_i` is the :math:`i^{th}` column
     of :math:`\mathbf{X}`.
@@ -209,8 +209,7 @@ def center_scale(X, scaling, nocenter=False):
 
 def invert_center_scale(X_cs, X_center, X_scale):
     """
-    This function inverts whatever centering and scaling was done by
-    ``center_scale`` function:
+    Inverts whatever centering and scaling was done by the ``center_scale`` function:
 
     .. math::
 
@@ -284,7 +283,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
 class PreProcessing:
     """
-    This class performs a composition of data manipulation done by ``remove_constant_vars``
+    Performs a composition of data manipulation done by ``remove_constant_vars``
     and ``center_scale`` functions on the original data set
     :math:`\mathbf{X}`. It can be used to store the result of that manipulation.
     Specifically, it:
@@ -307,12 +306,13 @@ class PreProcessing:
         preprocessed = PreProcessing(X, 'range', nocenter=False)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param nocenter: (optional)
-        boolean specifying whether data should be centered by mean.
+        ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
     **Attributes:**
 
@@ -355,7 +355,7 @@ class PreProcessing:
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
-    This function removes any constant columns in the data set :math:`\mathbf{X}`.
+    Removes any constant columns in the data set :math:`\mathbf{X}`.
     The :math:`i^{th}` column :math:`\mathbf{X}_i` is considered constant if either of the following is true:
 
     - the maximum of an absolute value of a column :math:`\mathbf{X}_i` is less than ``maxtol``:
@@ -388,19 +388,31 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
         (X_removed, idx_removed, idx_retained) = remove_constant_vars(X)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param maxtol:
-        tolerance for :math:`max(|\mathbf{X}_i|)`.
+        ``float`` specifying the tolerance for :math:`max(|\mathbf{X}_i|)`.
     :param rangetol:
-        tolerance for :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)` over :math:`max(|\mathbf{X}_i|)`.
+        ``float`` specifying the tolerance for :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)` over :math:`max(|\mathbf{X}_i|)`.
 
     :return:
-        - **X_removed** - original data set :math:`\mathbf{X}` with any constant columns removed.
-        - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
-        - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
+        - **X_removed** - ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}` with any constant columns removed. It has size ``(n_observations,n_variables)``.
+        - **idx_removed** - ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
+        - **idx_retained** - ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
     """
 
-    (n_observations, n_variables) = np.shape(X)
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+    if not isinstance(maxtol, float):
+        raise ValueError("Parameter `maxtol` has to be a `float`.")
+
+    if not isinstance(rangetol, float):
+        raise ValueError("Parameter `rangetol` has to be a `float`.")
 
     idx_removed = []
     idx_retained = []
@@ -425,7 +437,7 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
 
 def order_variables(X, method='mean', descending=True):
     """
-    This function orders variables in the data set using a selected method.
+    Orders variables in the data set using a selected method.
 
     **Example:**
 
@@ -457,22 +469,28 @@ def order_variables(X, method='mean', descending=True):
         [1, 2, 0]
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param method: (optional)
-        string specifying the ordering method. Can be ``'mean'``, ``'min'``, ``'max'``, ``'std'`` or ``'var'``.
+        ``str`` specifying the ordering method. It can be one of the following:
+        ``'mean'``, ``'min'``, ``'max'``, ``'std'`` or ``'var'``.
     :param descending: (optional)
-        boolean specifying whether variables should be ordered in the descending order.
+        ``bool`` specifying whether variables should be ordered in the descending order.
         If set to ``False``, variables will be ordered in the ascending order.
 
     :return:
-        - **X_ordered** - original data set with ordered variables.
-        - **idx** - list of indices of the ordered variables.
+        - **X_ordered** - ``numpy.ndarray`` specifying the original data set with ordered variables. It has size ``(n_observations,n_variables)``.
+        - **idx** - ``list`` specifying the indices of the ordered variables. It has length ``n_variables``.
     """
 
     __method = ['mean', 'min', 'max', 'std', 'var']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
 
     if not isinstance(method, str):
         raise ValueError("Parameter `method` has to be a string.")

@@ -699,6 +699,40 @@ class TestManipulation(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+    def test_remove_constant_vars_allowed_calls(self):
+
+        X = np.random.rand(100,20)
+
+        try:
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X)
+        except Exception:
+            self.assertTrue(False)
+
+        X = np.random.rand(100,1)
+
+        try:
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_remove_constant_vars_not_allowed_calls(self):
+
+        X = np.random.rand(100,)
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X)
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars([1,2,3,4,5])
+
+        X = np.random.rand(100,20)
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X, maxtol='none')
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X, rangetol='none')
+
     def test_order_variables_allowed_calls(self):
 
         X = np.array([[100, 1, 10, 0.1],
@@ -739,6 +773,17 @@ class TestManipulation(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+        X = np.ones((10,1))
+
+        try:
+            (X_ordered, idx) = preprocess.order_variables(X, method='mean', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='min', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='max', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='std', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='var', descending=False)
+        except Exception:
+            self.assertTrue(False)
+
     def test_order_variables_not_allowed_calls(self):
 
         X = np.array([[100, 1, 10, 0.1],
@@ -756,6 +801,11 @@ class TestManipulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             (X_ordered, idx) = preprocess.order_variables([1,2,3], method='mean', descending=True)
+
+        X = np.array([1,10,100])
+
+        with self.assertRaises(ValueError):
+            (X_ordered, idx) = preprocess.order_variables(X, method='mean', descending=True)
 
     def test_PreProcessing(self):
 
