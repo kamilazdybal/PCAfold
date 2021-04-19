@@ -844,7 +844,7 @@ class TestManipulation(unittest.TestCase):
         with self.assertRaises(AttributeError):
             pp.idx_retained = 1
 
-    def test_outliers_detection_allowed_calls(self):
+    def test_outlier_detection_allowed_calls(self):
 
         X = np.random.rand(100,10)
 
@@ -891,13 +891,13 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0.0)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1.0)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
@@ -921,23 +921,29 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0, quantile_threshold=0.5)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0.0, quantile_threshold=0.5)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1, quantile_threshold=0.9)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1.0, quantile_threshold=0.9)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
-    def test_outliers_detection_not_allowed_calls(self):
+    def test_outlier_detection_not_allowed_calls(self):
 
         X = np.random.rand(100,10)
 
         with self.assertRaises(ValueError):
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='scaling')
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', trimming_threshold=1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', quantile_threshold=1)
 
         with self.assertRaises(ValueError):
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='method')
@@ -965,6 +971,14 @@ class TestManipulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0.9, quantile_threshold=-1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection([1,2,3], scaling='auto')
+
+        X = np.random.rand(100,)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto')
 
     def test_KernelDensity_allowed_calls(self):
 

@@ -316,12 +316,12 @@ class PreProcessing:
 
     **Attributes:**
 
-        - **X_removed** - (read only) data set with removed constant columns.
-        - **idx_removed** - (read only) the indices of columns removed from :math:`\mathbf{X}`.
-        - **idx_retained** - (read only) the indices of columns retained in :math:`\mathbf{X}`.
-        - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_removed** - (read only) ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}` with any constant columns removed. It has size ``(n_observations,n_variables)``.
+        - **idx_removed** - (read only) ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
+        - **idx_retained** - (read only) ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
+        - **X_cs** - (read only) ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
+        - **X_center** - (read only) ``numpy.ndarray`` specifying the centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+        - **X_scale** - (read only) ``numpy.ndarray`` specifying the scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     """
 
     def __init__(self, X, scaling='none', nocenter=False):
@@ -389,9 +389,9 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
 
     :param X:
         ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
-    :param maxtol:
+    :param maxtol: (optional)
         ``float`` specifying the tolerance for :math:`max(|\mathbf{X}_i|)`.
-    :param rangetol:
+    :param rangetol: (optional)
         ``float`` specifying the tolerance for :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)` over :math:`max(|\mathbf{X}_i|)`.
 
     :return:
@@ -526,7 +526,7 @@ def order_variables(X, method='mean', descending=True):
 
 def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
     """
-    This function finds outliers in a data set :math:`\mathbf{X}` and returns
+    Finds outliers in a data set :math:`\mathbf{X}` and returns
     indices of observations without outliers as well as indices of the outliers
     themselves.
 
@@ -606,39 +606,37 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
         X_outliers = X[idx_outliers,:]
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param method: (optional)
-        string specifying the outlier detection method to use. It should be
+        ``str`` specifying the outlier detection method to use. It should be
         ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
     :param trimming_threshold: (optional)
-        trimming threshold to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
+        ``float`` specifying the trimming threshold to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
     :param quantile_threshold: (optional)
-        quantile threshold to use in combination with ``'PC CLASSIFIER'`` method.
+        ``float`` specifying the quantile threshold to use in combination with ``'PC CLASSIFIER'`` method.
     :param verbose: (optional)
-        boolean for printing outlier detection details.
-
-    :raises ValueError:
-        if ``scaling`` is not a string or is not consistent with scalings available in the ``preprocess.center_scale`` function.
-    :raises ValueError:
-        if ``method`` is not ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
-    :raises ValueError:
-        if ``trimming_threshold`` is not between 0-1.
-    :raises ValueError:
-        if ``quantile_threshold`` is not between 0-1.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx_outliers_removed** - indices of observations without outliers.
-        - **idx_outliers** - indices of observations that were classified as outliers.
+        - **idx_outliers_removed** - ``list`` specifying the indices of observations without outliers.
+        - **idx_outliers** - ``list`` specifying the indices of observations that were classified as outliers.
     """
+
+    from PCAfold import PCA
 
     _detection_methods = ['MULTIVARIATE TRIMMING', 'PC CLASSIFIER']
 
-    from PCAfold import PCA
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
 
     if not isinstance(scaling, str):
         raise ValueError("Parameter `scaling` has to be a string.")
@@ -654,6 +652,12 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 
     if trimming_threshold < 0 or trimming_threshold > 1:
         raise ValueError("Parameter `trimming_threshold` has to be between 0 and 1.")
+
+    if not isinstance(trimming_threshold, float):
+        raise ValueError("Parameter `trimming_threshold` has to be a `float`.")
+
+    if not isinstance(quantile_threshold, float):
+        raise ValueError("Parameter `quantile_threshold` has to be a `float`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
