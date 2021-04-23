@@ -1112,7 +1112,7 @@ class DataSampler:
       selection = DataSampler(idx, idx_test=[5,9], random_seed=100, verbose=True)
 
     :param idx:
-        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx_test: (optional)
         ``numpy.ndarray`` or ``list`` of user-provided indices for test data. If specified, train
         data will be selected ignoring the indices in ``idx_test`` and the test
@@ -1241,7 +1241,7 @@ class DataSampler:
         ``verbose=True``.
 
         :param idx:
-            ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
+            ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
         :param idx_train:
             indices of the train data.
         :param idx_test:
@@ -1329,15 +1329,15 @@ class DataSampler:
             percentage of data to be selected as training data from the entire data set.
             For instance, set ``perc=20`` if you want to select 20%.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -1481,26 +1481,15 @@ class DataSampler:
             percentage of data to be selected as training data from each cluster.
             For instance, set ``perc=20`` if you want to select 20%.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
-        :raises ValueError:
-            if ``perc`` is not a number between 0-100.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the perecentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -1638,49 +1627,23 @@ class DataSampler:
             sampling_dictionary = {0:n_1, 1:n_2, 2:n_3}
 
         :param sampling_dictionary:
-            dictionary specifying manual sampling. Keys are cluster classifications and
+            ``dict`` specifying manual sampling. Keys are cluster classifications and
             values are either ``percentage`` or ``number`` of samples to be taken from
             that cluster. Keys should match the cluster classifications as per ``idx``.
         :param sampling_type: (optional)
-            string specifying whether percentage or number is given in the
+            ``str`` specifying whether percentage or number is given in the
             ``sampling_dictionary``. Available options: ``percentage`` or ``number``.
             The default is ``percentage``.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
-        :raises ValueError:
-            if ``sampling_type`` is not ``'percentage'`` or ``'number'``.
-
-        :raises ValueError:
-            if the number of entries in ``sampling_dictionary`` does not match the
-            number of clusters specified in ``idx``.
-
-        :raises ValueError:
-            if any ``value`` in ``sampling_dictionary`` is not a number between 0-100 when ``sampling_type='percentage'``.
-
-        :raises ValueError:
-            if any ``value`` in ``sampling_dictionary`` is not a non-negative integer when ``sampling_type='number'``.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the perecentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
-        :raises ValueError:
-            if the number specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
         """
 
         # Check that sampling_type is passed correctly:
@@ -1893,26 +1856,15 @@ class DataSampler:
             percentage of data to be selected as training data from each cluster.
             Set ``perc=20`` if you want 20%.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
-        :raises ValueError:
-            if ``perc`` is not a number between 0-100.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the perecentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -2025,7 +1977,7 @@ def variable_bins(var, k, verbose=False):
 
     :return:
         - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
-        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
 
     if not isinstance(var, np.ndarray):
@@ -2119,7 +2071,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
     :return:
         - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
-        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
 
     if not isinstance(var, np.ndarray):
@@ -2216,7 +2168,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
     :return:
         - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
-        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
 
     if not isinstance(Z, np.ndarray):
@@ -2382,7 +2334,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
     :return:
         - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
-        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
 
     if not isinstance(var, np.ndarray):
@@ -3096,7 +3048,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
     :param z:
         variable on the :math:`z`-axis.
     :param idx:
-        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param elev: (optional)
         elevation angle.
     :param azim: (optional)
@@ -3255,7 +3207,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     :param y:
         variable on the :math:`y`-axis.
     :param idx:
-        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx_train:
         indices of the train data.
     :param idx_test:
