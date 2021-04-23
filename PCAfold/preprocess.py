@@ -1096,7 +1096,7 @@ class KernelDensity:
 
 class DataSampler:
     """
-    This class enables selecting train and test data samples.
+    Enables selecting train and test data samples.
 
     **Example:**
 
@@ -1112,9 +1112,9 @@ class DataSampler:
       selection = DataSampler(idx, idx_test=[5,9], random_seed=100, verbose=True)
 
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
     :param idx_test: (optional)
-        vector or list of user-provided indices for test data. If specified, train
+        ``numpy.ndarray`` or ``list`` of user-provided indices for test data. If specified, train
         data will be selected ignoring the indices in ``idx_test`` and the test
         data will be returned the same as the user-provided ``idx_test``.
         If not specified, test samples will be selected according to the
@@ -1122,18 +1122,9 @@ class DataSampler:
         Setting fixed ``idx_test`` parameter may be useful if training a machine
         learning model on specific test samples is desired.
     :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
+        ``int`` specifying random seed for random sample selection.
     :param verbose: (optional)
-        boolean for printing sampling details.
-
-    :raises ValueError:
-        if ``idx`` vector has length zero, is not a list or ``numpy.ndarray``.
-    :raises ValueError:
-        if ``idx_test`` vector has more unique observations than ``idx``, is not a list or ``numpy.ndarray``.
-    :raises ValueError:
-        if ``random_seed`` is not an integer or ``None``.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
     """
 
     def __init__(self, idx, idx_test=[], random_seed=None, verbose=False):
@@ -1250,7 +1241,7 @@ class DataSampler:
         ``verbose=True``.
 
         :param idx:
-            vector of cluster classifications.
+            ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
         :param idx_train:
             indices of the train data.
         :param idx_test:
@@ -1343,17 +1334,6 @@ class DataSampler:
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
-
-        :raises ValueError:
-            if ``perc`` is not a number between 0-100.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the percentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
 
         :return:
             - **idx_train** - indices of the train data.
@@ -2014,7 +1994,7 @@ def __print_verbose_information_clustering(var, idx, bins_borders):
 
 def variable_bins(var, k, verbose=False):
     """
-    This function does clustering by dividing a variable vector ``var`` into
+    Clusters the data by dividing a variable vector ``var`` into
     bins of equal lengths.
 
     An example of how a vector can be partitioned with this function is presented below:
@@ -2037,25 +2017,31 @@ def variable_bins(var, k, verbose=False):
         (idx, borders) = variable_bins(x, 4, verbose=True)
 
     :param var:
-        vector of variable values.
+        ``numpy.ndarray`` specifying the variable values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param k:
-        number of clusters to partition the data.
+        ``int`` specifying the number of clusters to create. It has to be a positive number.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if number of clusters ``k`` is not a positive integer.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
     """
 
-    # Check that the number of clusters is an integer and is non-zero:
+    if not isinstance(var, np.ndarray):
+        raise ValueError("Parameter `var` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(var)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(var)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `var` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
     if not (isinstance(k, int) and k > 0):
-        raise ValueError("The number of clusters must be a positive integer.")
+        raise ValueError("Parameter `k` has to be a positive `int`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
@@ -2081,11 +2067,11 @@ def variable_bins(var, k, verbose=False):
                 if (val >= bins_borders[cl]) and (val < bins_borders[cl+1]):
                     idx.append(cl)
 
+    idx = np.asarray(idx)
+
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
         (idx, _) = degrade_clusters(idx, verbose)
-
-    idx = np.asarray(idx)
 
     if verbose==True:
         __print_verbose_information_clustering(var, idx, bins_borders)
@@ -2096,7 +2082,7 @@ def variable_bins(var, k, verbose=False):
 
 def predefined_variable_bins(var, split_values, verbose=False):
     """
-    This function does clustering by dividing a variable vector ``var`` into
+    Clusters the data by dividing a variable vector ``var`` into
     bins such that splits are done at user-specified values.
     Split values can be specified in the ``split_values`` list.
     In general: ``split_values = [value_1, value_2, ..., value_n]``.
@@ -2125,22 +2111,28 @@ def predefined_variable_bins(var, split_values, verbose=False):
         (idx, borders) = predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
 
     :param var:
-        vector of variable values.
+        ``numpy.ndarray`` specifying the variable values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param split_values:
-        list containing values at which the split to bins should be performed.
+        ``list`` specifying values at which splits should be performed.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if any value within ``split_values`` is not within the range of
-        vector ``var`` values.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
     """
+
+    if not isinstance(var, np.ndarray):
+        raise ValueError("Parameter `var` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(var)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(var)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `var` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
@@ -2170,11 +2162,11 @@ def predefined_variable_bins(var, split_values, verbose=False):
                 if (val >= bins_borders[cl]) and (val < bins_borders[cl+1]):
                     idx.append(cl)
 
+    idx = np.asarray(idx)
+
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
         (idx, _) = degrade_clusters(idx, verbose)
-
-    idx = np.asarray(idx)
 
     if verbose==True:
         __print_verbose_information_clustering(var, idx, bins_borders)
@@ -2185,7 +2177,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
-    This function does clustering by dividing a mixture fraction vector
+    Clusters the data by dividing a mixture fraction vector
     ``Z`` into bins of equal lengths. This technique can be used to partition
     combustion data sets as proposed in :cite:`Parente2009`.
     The vector is first split to lean and rich
@@ -2214,35 +2206,39 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         (idx, borders) = mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
     :param Z:
-        vector of mixture fraction values.
+        ``numpy.ndarray`` specifying the mixture fraction values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param k:
-        number of clusters to partition the data.
+        ``int`` specifying the number of clusters to create. It has to be a positive number.
     :param Z_stoich:
-        stoichiometric mixture fraction.
+        ``float`` specifying the stoichiometric mixture fraction. It has to be between 0 and 1.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if number of clusters ``k`` is not a positive integer.
-    :raises ValueError:
-        if the stoichiometric mixture fraction is not a number between 0 and 1.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
     """
+
+    if not isinstance(Z, np.ndarray):
+        raise ValueError("Parameter `Z` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(Z)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(Z)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `Z` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not (isinstance(k, int) and k > 0):
+        raise ValueError("Parameter `k` has to be a positive `int`.")
+
+    if Z_stoich <= 0 or Z_stoich >= 1:
+        raise ValueError("Parameter `Z_stoich` should be between 0 and 1.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    # Check that the number of clusters is an integer and is non-zero:
-    if not (isinstance(k, int) and k > 0):
-        raise ValueError("The number of clusters must be a positive integer.")
-
-    if Z_stoich < 0 or Z_stoich > 1:
-        raise ValueError("Stoichiometric mixture fraction should be between 0 and 1.")
 
     # Number of interval borders:
     n_bins_borders = k + 1
@@ -2287,7 +2283,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         idx_clust.append(np.where((Z >= borders[bin]) & (Z <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
-    idx = [int(i) for i in idx]
+    idx = np.asarray([int(i) for i in idx])
 
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
@@ -2302,7 +2298,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
 def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
-    This function aims to separate close-to-zero observations in a vector into one
+    Clusters the data by separating close-to-zero observations in a vector into one
     cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
     The offset from zero at which splits are performed is computed
     based on the input parameter ``zero_offset_percentage``:
@@ -2318,9 +2314,9 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     that has many observations clustered around zero value and relatively few
     observations far away from zero on either side.
 
-    Two examples of how a vector can be partitioned with this function are presented below.
+    Two examples of how a vector can be partitioned with this function are presented below:
 
-    With ``split_at_zero=False``:
+    - With ``split_at_zero=False``:
 
     .. image:: ../images/clustering-zero-neighborhood-bins.svg
       :width: 700
@@ -2333,7 +2329,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     When ``k`` is even, there will always be one more cluster on the side with
     larger range compared to the other side.
 
-    With ``split_at_zero=True``:
+    - With ``split_at_zero=True``:
 
     .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.svg
       :width: 700
@@ -2350,11 +2346,11 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     .. note::
 
         This clustering technique is well suited for partitioning chemical
-        source terms :math:`\mathbf{S_X}` or sources of Principal Components
-        :math:`\mathbf{S_Z}` (as per :cite:`Sutherland2009`) since it relies on
+        source terms, :math:`\mathbf{S_X}`, or sources of Principal Components,
+        :math:`\mathbf{S_Z}`, (as per :cite:`Sutherland2009`) since it relies on
         unbalanced vectors that have many observations numerically close to zero.
         Using ``split_at_zero=True`` it can further differentiate between
-        negative and positive sources which have different physical effect.
+        negative and positive sources.
 
     **Example:**
 
@@ -2370,51 +2366,51 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
         (idx, borders) = zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
     :param var:
-        vector of variable values.
+        ``numpy.ndarray`` specifying the variable values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param k:
-        number of clusters to partition the data.
-        Cannot be smaller than 3 if ``split_at_zero=False`` or smaller
+        ``int`` specifying the number of clusters to create. It has to be a positive number.
+        It cannot be smaller than 3 if ``split_at_zero=False`` or smaller
         than 4 if ``split_at_zero=True``.
     :param zero_offset_percentage: (optional)
         percentage of :math:`max(\\verb|var|) - min(\\verb|var|)` range
         to take as the offset from zero value. For instance, set
         ``zero_offset_percentage=10`` if you want 10% as offset.
     :param split_at_zero: (optional)
-        boolean specifying whether partitioning should be done at ``var=0``.
+        ``bool`` specifying whether partitioning should be done at ``var=0``.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if number of clusters ``k`` is not an integer or smaller than 3 when
-        ``split_at_zero=False`` or smaller than 4 when ``split_at_zero=True``.
-
-    :raises ValueError:
-        if the vector ``var`` has only non-negative or only
-        non-positive values. For such vectors it is recommended to use
-        ``predefined_variable_bins`` function instead.
-
-    :raises ValueError:
-        if the requested offset from zero crosses the minimum or maximum value
-        of the variable vector ``var``. If that is the case, it is
-        recommended to lower the ``zero_offset_percentage`` value.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders of the clusters. It has length ``k+1``.
     """
+
+    if not isinstance(var, np.ndarray):
+        raise ValueError("Parameter `var` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(var)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(var)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `var` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if zero_offset_percentage < 0 or zero_offset_percentage > 100:
+        raise ValueError("Parameter `zero_offset_percentage` has to be between 0 and 100.")
+
+    if not (isinstance(k, int) and k > 0):
+        raise ValueError("Parameter `k` has to be a positive `int`.")
+
+    if (not split_at_zero) and (not (isinstance(k, int) and k > 2)):
+        raise ValueError("Parameter `k` must be an integer not smaller than 3 when not splitting at zero.")
+
+    if split_at_zero and (not (isinstance(k, int) and k > 3)):
+        raise ValueError("Parameter `k` must be an integer not smaller than 4 when splitting at zero.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    # Check that the number of clusters is an integer and is larger than 2:
-    if (not split_at_zero) and (not (isinstance(k, int) and k > 2)):
-        raise ValueError("The number of clusters must be an integer not smaller than 3 when not splitting at zero.")
-
-    # Check that the number of clusters is an integer and is larger than 2:
-    if split_at_zero and (not (isinstance(k, int) and k > 3)):
-        raise ValueError("The number of clusters must be an integer not smaller than 4 when splitting at zero.")
 
     var_min = np.min(var)
     var_max = np.max(var)
@@ -2482,11 +2478,11 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
 def degrade_clusters(idx, verbose=False):
     """
-    This function renumerates clusters if either of these two cases is true:
+    Re-numerates clusters if either of these two cases is true:
 
     - ``idx`` is composed of non-consecutive integers, or
 
-    - the smallest cluster number in ``idx`` is not equal to ``0``.
+    - the smallest cluster index in ``idx`` is not equal to ``0``.
 
     **Example:**
 
@@ -2527,31 +2523,32 @@ def degrade_clusters(idx, verbose=False):
         array([0, 0, 1, 1, 2, 2])
 
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx_degraded** degraded vector of cluster classifications. The first cluster has index 0.
-        - **k_update** - the updated number of clusters.
+        - **idx_degraded** - ``numpy.ndarray`` of degraded cluster classifications. It has size ``(n_observations,)``.
+        - **k_update** - ``int`` specifying the updated number of clusters.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    if isinstance(idx, list):
-        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
-    elif isinstance(idx, np.ndarray):
-        if not all(isinstance(i, np.integer) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
-    else:
-        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
 
     index = 0
     dictionary = {}
@@ -2579,7 +2576,7 @@ def degrade_clusters(idx, verbose=False):
 
 def flip_clusters(idx, dictionary):
     """
-    This function flips cluster labelling according to instructions provided
+    Flips cluster labelling according to instructions provided
     in the dictionary. For a ``dictionary = {key : value}``, a cluster with a
     number ``key`` will get a number ``value``.
 
@@ -2603,31 +2600,31 @@ def flip_clusters(idx, dictionary):
         array([0, 0, 0, 2, 2, 2, 2, 1, 1])
 
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param dictionary:
-        dictionary specifying instructions for cluster label flipping.
-
-    :raises ValueError:
-        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
-
-    :raises ValueError:
-        if any ``key`` or ``value`` is not an integer.
-
-    :raises ValueError:
-        if any ``key`` is not found within ``idx``.
+        ``dict`` specifying instructions for cluster label flipping.
 
     :return:
-        - **flipped_idx** - re-labelled vector of cluster classifications.
+        - **flipped_idx** - ``numpy.ndarray`` specifying the re-labelled cluster classifications.
     """
 
-    if isinstance(idx, list):
-        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
-    elif isinstance(idx, np.ndarray):
+    if isinstance(idx, np.ndarray):
         if not all(isinstance(i, np.integer) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
+            raise ValueError("Parameter `idx` can only contain integers.")
     else:
-        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(dictionary, dict):
+        raise ValueError("Parameter `dictionary` has to be of type `dict`.")
 
     # Check that keys and values are properly defined:
     for key, value in dictionary.items():
@@ -2656,7 +2653,7 @@ def flip_clusters(idx, dictionary):
 
 def get_centroids(X, idx):
     """
-    This function computes the centroids for each cluster specified in the
+    Computes the centroids for each cluster specified in the
     ``idx`` vector. Centroids :math:`c_i` of cluster :math:`k_i` are computed as:
 
     .. math::
@@ -2685,17 +2682,28 @@ def get_centroids(X, idx):
         centroids = get_centroids(X, idx)
 
     :param X:
-        data set :math:`\mathbf{X}` for computing the cluster centroids.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
-        vector of cluster classifications.
-
-    :raises ValueError:
-        if the number of observations in the data set ``X`` does not match the
-        number of elements in the ``idx`` vector.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
     :return:
-        - **centroids** - matrix of centroids of all :math:`k` clusters. It has size :math:`k` times number of variables.
+        - **centroids** - ``numpy.ndarray`` of centroids of all :math:`k` clusters. It has size ``(k,n_variables)``.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
@@ -2722,7 +2730,7 @@ def get_centroids(X, idx):
 
 def get_partition(X, idx):
     """
-    This function partitions the observations from the original data
+    Partitions the observations from the original data
     set :math:`\mathbf{X}` into :math:`k` clusters according to ``idx`` provided.
 
     **Example:**
@@ -2743,18 +2751,29 @@ def get_partition(X, idx):
         (X_in_clusters, idx_in_clusters) = get_partition(X, idx)
 
     :param X:
-        data set to partition.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
-        vector of cluster classifications.
-
-    :raises ValueError:
-        if the number of observations in the data set ``X`` does not match the
-        number of elements in the ``idx`` vector.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
     :return:
-        - **X_in_clusters** - list of :math:`k` arrays that contains original data set observations partitioned to :math:`k` clusters.
-        - **idx_in_clusters** - list of :math:`k` arrays that contains indices of the original data set observations partitioned to :math:`k` clusters.
+        - **X_in_clusters** - ``list`` of :math:`k` ``numpy.ndarray`` that contains original data set observations partitioned to :math:`k` clusters. It has length ``k``.
+        - **idx_in_clusters** - ``list`` of :math:`k` ``numpy.ndarray`` that contains indices of the original data set observations partitioned to :math:`k` clusters. It has length ``k``.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     try:
         (n_observations, n_variables) = np.shape(X)
@@ -2763,7 +2782,7 @@ def get_partition(X, idx):
         n_variables = 1
 
     # Check if the number of indices in `idx` is the same as the number of observations in a data set:
-    if n_observations != len(idx):
+    if n_observations != n_observations_idx:
         raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
 
     # Degrade clusters if needed:
@@ -2789,7 +2808,7 @@ def get_partition(X, idx):
 
 def get_populations(idx):
     """
-    This function computes populations (number of observations) in clusters
+    Computes populations (number of observations) in clusters
     specified in the ``idx`` vector. As an example, if there are 100
     observations in the first cluster and 500 observations in the second cluster
     this function will return a list: ``[100, 500]``.
@@ -2816,12 +2835,26 @@ def get_populations(idx):
         [25, 25, 25, 25]
 
     :param idx:
-        vector of cluster classifications.
-        The first cluster has index 0.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
     :return:
-        - **populations** - list of cluster populations. Each entry referes to one cluster ordered according to ``idx``.
+        - **populations** - ``list`` of cluster populations. Each entry referes to one cluster ordered according to ``idx``. It has length ``k``.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     populations = []
 
@@ -2840,7 +2873,7 @@ def get_populations(idx):
 
 def get_average_centroid_distance(X, idx, weighted=False):
     """
-    This function computes the average Euclidean distance between observations
+    Computes the average Euclidean distance between observations
     and the centroids of clusters to which each observation belongs.
 
     The average can be computed as an arithmetic average from all clusters
@@ -2867,21 +2900,32 @@ def get_average_centroid_distance(X, idx, weighted=False):
         average_centroid_distance = get_average_centroid_distance(X, idx, weighted=False)
 
     :param X:
-        data set to partition.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param weighted: (optional)
-        boolean specifying whether distances from centroid should be weighted
+        ``bool`` specifying whether distances from centroid should be weighted
         by the number of observations in a cluster.
         If set to ``False``, arithmetic average will be computed.
 
-    :raises ValueError:
-        if the number of observations in the data set ``X`` does not match the
-        number of elements in the ``idx`` vector.
-
     :return:
-        - **average_centroid_distance** - float specifying the average distance from centroids, averaged over all observations and all clusters.
+        - **average_centroid_distance** - ``float`` specifying the average distance from centroids, averaged over all observations and all clusters.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     try:
         (n_observations, n_variables) = np.shape(X)
@@ -2889,7 +2933,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
         (n_observations, ) = np.shape(X)
 
     # Check if the number of indices in `idx` is the same as the number of observations in a data set:
-    if n_observations != len(idx):
+    if n_observations != n_observations_idx:
         raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
 
     # Degrade clusters if needed:
@@ -2961,7 +3005,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     :param y:
         variable on the :math:`y`-axis.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param x_label: (optional)
         string specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -3052,7 +3096,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
     :param z:
         variable on the :math:`z`-axis.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
     :param elev: (optional)
         elevation angle.
     :param azim: (optional)
@@ -3211,7 +3255,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     :param y:
         variable on the :math:`y`-axis.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)``.
     :param idx_train:
         indices of the train data.
     :param idx_test:
