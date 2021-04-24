@@ -2955,7 +2955,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
 
 def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots a 2-dimensional manifold divided into clusters.
+    Plots a 2-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
 
     **Example:**
@@ -3116,7 +3116,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
 def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', first_cluster_index_zero=True, figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots a 3-dimensional manifold divided into clusters.
+    Plots a 3-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
 
     **Example:**
@@ -3359,7 +3359,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
 
 def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
     """
-    This function plots a 2-dimensional manifold divided into train and test
+    Plots a 2-dimensional manifold divided into train and test
     samples. Number of observations in train and test data respectively will be
     plotted in the legend.
 

@@ -15,7 +15,7 @@ L 482.943995 347.04
 L 482.943995 -0 
 L 0 -0 
 z
-" style="fill:#ffffff;"/>
+" style="fill:none;"/>
   </g>
   <g id="axes_1">
    <g id="patch_2">
@@ -24,12 +24,12 @@ L 475.743995 339.84
 L 475.743995 7.2 
 L 140.943995 7.2 
 z
-" style="fill:#ffffff;"/>
+" style="fill:none;"/>
    </g>
    <g id="matplotlib.axis_1"/>
    <g id="matplotlib.axis_2"/>
    <g id="line2d_1">
-    <path clip-path="url(#pdcbfa0ba81)" d="M 331.521168 147.769517 
+    <path clip-path="url(#pe2a2725a29)" d="M 331.521168 147.769517 
 L 330.611076 146.142534 
 L 329.569897 150.946608 
 L 337.109203 147.997417 
@@ -342,7 +342,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pdcbfa0ba81">
+  <clipPath id="pe2a2725a29">
    <rect height="332.64" width="334.8" x="140.943995" y="7.2"/>
   </clipPath>
  </defs>
