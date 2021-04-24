@@ -126,32 +126,32 @@ class TestClustering(unittest.TestCase):
     def test_degrade_clusters_allowed_calls(self):
 
         try:
-            idx_undegraded = [1, 1, 2, 2, 3, 3]
-            idx_degraded = [0, 0, 1, 1, 2, 2]
+            idx_undegraded = np.array([1, 1, 2, 2, 3, 3])
+            idx_degraded = np.array([0, 0, 1, 1, 2, 2])
             (idx, k) = preprocess.degrade_clusters(idx_undegraded, verbose=False)
             self.assertTrue(np.min(idx) == 0)
             self.assertTrue(k == 3)
-            self.assertTrue(list(idx) == idx_degraded)
+            self.assertTrue(np.array_equal(idx, idx_degraded))
         except:
             self.assertTrue(False)
 
         try:
-            idx_undegraded = [-1, -1, 1, 1, 2, 2, 3, 3]
-            idx_degraded = [0, 0, 1, 1, 2, 2, 3, 3]
+            idx_undegraded = np.array([-1, -1, 1, 1, 2, 2, 3, 3])
+            idx_degraded = np.array([0, 0, 1, 1, 2, 2, 3, 3])
             (idx, k) = preprocess.degrade_clusters(idx_undegraded, verbose=False)
             self.assertTrue(np.min(idx) == 0)
             self.assertTrue(k == 4)
-            self.assertTrue(list(idx) == idx_degraded)
+            self.assertTrue(np.array_equal(idx, idx_degraded))
         except:
             self.assertTrue(False)
 
         try:
-            idx_undegraded = [-1, 1, 3, -1, 1, 1, 2, 2, 3, 3]
-            idx_degraded = [0, 1, 3, 0, 1, 1, 2, 2, 3, 3]
+            idx_undegraded = np.array([-1, 1, 3, -1, 1, 1, 2, 2, 3, 3])
+            idx_degraded = np.array([0, 1, 3, 0, 1, 1, 2, 2, 3, 3])
             (idx, k) = preprocess.degrade_clusters(idx_undegraded, verbose=False)
             self.assertTrue(np.min(idx) == 0)
             self.assertTrue(k == 4)
-            self.assertTrue(list(idx) == idx_degraded)
+            self.assertTrue(np.array_equal(idx, idx_degraded))
         except:
             self.assertTrue(False)
 
@@ -165,7 +165,11 @@ class TestClustering(unittest.TestCase):
 
     def test_degrade_clusters_not_allowed_calls(self):
 
-        idx_test = [0,0,0,1,1,1,True,2,2,2]
+        idx_test = np.array([0,0,0,1,1,1,-0.1,2,2,2])
+        with self.assertRaises(ValueError):
+            (idx, k) = preprocess.degrade_clusters(idx_test, verbose=False)
+
+        idx_test = np.array([0,0,0,1,1,1,5.1,2,2,2])
         with self.assertRaises(ValueError):
             (idx, k) = preprocess.degrade_clusters(idx_test, verbose=False)
 

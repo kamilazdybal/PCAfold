@@ -675,6 +675,8 @@ class TestRandomSeed(unittest.TestCase):
         idx = np.zeros((1000,))
         idx[500:800] = 1
 
+        idx = idx.astype(int)
+
         try:
             sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)
             (idx_train, idx_test) = sampling.percentage(40, test_selection_option=1)
@@ -744,6 +746,8 @@ class TestRandomSeed(unittest.TestCase):
 
         idx = np.zeros((1000,))
         idx[500:800] = 1
+
+        idx = idx.astype(int)
 
         sampling_dictionary_number = {0:300, 1:150}
 
@@ -817,6 +821,8 @@ class TestRandomSeed(unittest.TestCase):
         idx = np.zeros((1000,))
         idx[500:800] = 1
 
+        idx = idx.astype(int)
+
         sampling_dictionary_number = {0:30, 1:15}
 
         try:
@@ -888,6 +894,8 @@ class TestRandomSeed(unittest.TestCase):
 
         idx = np.zeros((1000,))
         idx[500:800] = 1
+
+        idx = idx.astype(int)
 
         try:
             sampling = DataSampler(idx, idx_test=[], random_seed=123, verbose=False)

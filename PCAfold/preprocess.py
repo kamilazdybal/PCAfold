@@ -26,35 +26,33 @@ _scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', 
 
 def center_scale(X, scaling, nocenter=False):
     """
-    This function centers and scales the data set.
-
-    In the discussion below we understand that :math:`\mathbf{X}_i` is the :math:`i^{th}` column
+    Centers and scales the data set.
+    In the discussion below, we understand that :math:`X_j` is the :math:`j^{th}` column
     of :math:`\mathbf{X}`.
 
-    - Centering is performed by subtracting a center :math:`C_i` from
-      :math:`\mathbf{X}_i`, where centers for all columns are stored
-      in a vector :math:`\mathbf{C}`:
+    - **Centering** is performed by subtracting the center, :math:`c_j`, from\
+    :math:`X_j`, where centers for all columns are stored in the matrix :math:`\mathbf{C}`:
 
-        .. math::
+    .. math::
 
-            \mathbf{X_c} = \mathbf{X} - \mathbf{C}
+        \mathbf{X_c} = \mathbf{X} - \mathbf{C}
 
-      Centers for each column are computed as:
+    Centers for each column are computed as:
 
-        .. math::
+    .. math::
 
-            C_i = mean(\mathbf{X}_i)
+        c_j = mean(X_j)
 
-      The only exceptions are the *0 to 1* and *-1 to 1* scalings which introduce a different
-      quantity to center each column.
+    with the only exceptions of ``'0to1'`` and ``'-1to1'`` scalings, which introduce a different
+    quantity to center each column.
 
-    - Scaling is performed by dividing :math:`\mathbf{X}_i` by a scaling
-      factor :math:`d_i`, where scaling factors
-      for all columns are stored in a vector :math:`\mathbf{D}`:
+    - **Scaling** is performed by dividing :math:`X_j` by the scaling\
+    factor, :math:`d_j`, where scaling factors\
+    for all columns are stored in the diagonal matrix :math:`\mathbf{D}`:
 
-      .. math::
+    .. math::
 
-          \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
+        \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
 
     If both centering and scaling is applied:
 
@@ -65,7 +63,7 @@ def center_scale(X, scaling, nocenter=False):
     Several scaling options are implemented here:
 
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Scaling method             | ``scaling``              | Scaling factor :math:`d_i`                                         |
+    | Scaling method             | ``scaling``              | Scaling factor :math:`d_j`                                         |
     +============================+==========================+====================================================================+
     | None                       | ``'none'``               | 1                                                                  |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
@@ -73,33 +71,33 @@ def center_scale(X, scaling, nocenter=False):
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | Pareto :cite:`Noda2008`    | ``'pareto'``             | :math:`\sqrt{\sigma}`                                              |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | VAST :cite:`Keun2003`      | ``'vast'``               | :math:`\sigma^2 / mean(\mathbf{X}_i)`                              |
+    | VAST :cite:`Keun2003`      | ``'vast'``               | :math:`\sigma^2 / mean(X_j)`                                       |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Range                      | ``'range'``              | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                      |
+    | Range                      | ``'range'``              | :math:`max(X_j) - min(X_j)`                                        |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | | 0 to 1                   | | ``'0to1'``             | | :math:`d_i = max(\mathbf{X}_i) - min(\mathbf{X}_i)`              |
-    | |                          | |                        | | :math:`C_i = min(\mathbf{X}_i)`                                  |
+    | | 0 to 1                   | | ``'0to1'``             | | :math:`d_j = max(X_j) - min(X_j)`                                |
+    | |                          | |                        | | :math:`c_j = min(X_j)`                                           |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | | -1 to 1                  | | ``'-1to1'``            | | :math:`d_i = 0.5 \cdot (max(\mathbf{X}_i) - min(\mathbf{X}_i))`  |
-    | |                          | |                        | | :math:`C_i = 0.5 \cdot (max(\mathbf{X}_i) + min(\mathbf{X}_i))`  |
+    | | -1 to 1                  | | ``'-1to1'``            | | :math:`d_j = 0.5 \cdot (max(X_j) - min(X_j))`                    |
+    | |                          | |                        | | :math:`c_j = 0.5 \cdot (max(X_j) + min(X_j))`                    |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Level                      | ``'level'``              | :math:`mean(\mathbf{X}_i)`                                         |
+    | Level                      | ``'level'``              | :math:`mean(X_j)`                                                  |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Max                        | ``'max'``                | :math:`max(\mathbf{X}_i)`                                          |
+    | Max                        | ``'max'``                | :math:`max(X_j)`                                                   |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Poisson :cite:`Keenan2004` |``'poisson'``             | :math:`\sqrt{mean(\mathbf{X}_i)}`                                  |
+    | Poisson :cite:`Keenan2004` |``'poisson'``             | :math:`\sqrt{mean(X_j)}`                                           |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-2                     | ``'vast_2'``             | :math:`\sigma^2 k^2 / mean(\mathbf{X}_i)`                          |
+    | Vast-2                     | ``'vast_2'``             | :math:`\sigma^2 k^2 / mean(X_j)`                                   |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-3                     | ``'vast_3'``             | :math:`\sigma^2 k^2 / max(\mathbf{X}_i)`                           |
+    | Vast-3                     | ``'vast_3'``             | :math:`\sigma^2 k^2 / max(X_j)`                                    |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-4                     | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(\mathbf{X}_i) - min(\mathbf{X}_i))`     |
+    | Vast-4                     | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(X_j) - min(X_j))`                       |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
 
-    where :math:`\sigma` is the standard deviation of :math:`\mathbf{X}_i`
-    and :math:`k` is the kurtosis of :math:`\mathbf{X}_i`.
+    where :math:`\sigma` is the standard deviation of :math:`X_j`
+    and :math:`k` is the kurtosis of :math:`X_j`.
 
-    The effect of data pre-processing (including scaling) on low-dimensional manifolds was studied
+    The effect of data preprocessing (including scaling) on low-dimensional manifolds was studied
     in :cite:`Parente2013`.
 
     **Example:**
@@ -116,23 +114,27 @@ def center_scale(X, scaling, nocenter=False):
         (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
-        string specifying the scaling methodology.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param nocenter: (optional)
-        boolean specifying whether data should be centered by mean.
-
-    :raises ValueError:
-        if ``scaling`` method is not a string or is not within the available scalings.
-
-    :raises ValueError:
-        if ``nocenter`` is not a boolean.
+        ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
     :return:
-        - **X_cs** - centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        - **X_cs** - ``numpy.ndarray`` specifying the centered and scaled data set, :math:`\mathbf{X_{cs}}`. It has size ``(n_observations,n_variables)``.
+        - **X_center** - ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
+        - **X_scale** - ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
     """
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
 
     if not isinstance(scaling, str):
         raise ValueError("Parameter `scaling` has to be a string.")
@@ -142,12 +144,6 @@ def center_scale(X, scaling, nocenter=False):
 
     if not isinstance(nocenter, bool):
         raise ValueError("Parameter `nocenter` has to be a boolean.")
-
-    try:
-        (n_observations, n_variables) = np.shape(X)
-    except:
-        X = X[:,np.newaxis]
-        (n_observations, n_variables) = np.shape(X)
 
     X_cs = np.zeros_like(X, dtype=float)
     X_center = X.mean(axis=0)
@@ -211,8 +207,7 @@ def center_scale(X, scaling, nocenter=False):
 
 def invert_center_scale(X_cs, X_center, X_scale):
     """
-    This function inverts whatever centering and scaling was done by
-    ``center_scale`` function:
+    Inverts whatever centering and scaling was done by the ``center_scale`` function:
 
     .. math::
 
@@ -235,20 +230,45 @@ def invert_center_scale(X_cs, X_center, X_scale):
         X = invert_center_scale(X_cs, X_center, X_scale)
 
     :param X_cs:
-        centered and scaled data set :math:`\mathbf{X_{cs}}`.
+        ``numpy.ndarray`` specifying the centered and scaled data set, :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
     :param X_center:
-        vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     :param X_scale:
-        vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
 
     :return:
-        - **X** - original data set :math:`\mathbf{X}`.
+        - **X** - ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It has size ``(n_observations,n_variables)``.
     """
 
+    if not isinstance(X_cs, np.ndarray):
+        raise ValueError("Parameter `X_cs` has to be of type `numpy.ndarray`.")
+
     try:
-        (_, n_variables) = np.shape(X_cs)
+        (n_observations, n_variables) = np.shape(X_cs)
     except:
-        n_variables = 1
+        raise ValueError("Parameter `X_cs` has to have size `(n_observations,n_variables)`.")
+
+    if not isinstance(X_center, np.ndarray):
+        raise ValueError("Parameter `X_center` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_variables_centers,) = np.shape(X_center)
+    except:
+        raise ValueError("Parameter `X_center` has to have size `(n_variables,)`.")
+
+    if not isinstance(X_scale, np.ndarray):
+        raise ValueError("Parameter `X_scale` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_variables_scales,) = np.shape(X_scale)
+    except:
+        raise ValueError("Parameter `X_scale` has to have size `(n_variables,)`.")
+
+    if n_variables != n_variables_centers:
+        raise ValueError("Parameter `X_center` has different number of variables than parameter `X_cs`.")
+
+    if n_variables != n_variables_scales:
+        raise ValueError("Parameter `X_scale` has different number of variables than parameter `X_cs`.")
 
     if n_variables == 1:
         X = X_cs * X_scale + X_center
@@ -261,7 +281,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
 class PreProcessing:
     """
-    This class performs a composition of data manipulation done by ``remove_constant_vars``
+    Performs a composition of data manipulation done by ``remove_constant_vars``
     and ``center_scale`` functions on the original data set
     :math:`\mathbf{X}`. It can be used to store the result of that manipulation.
     Specifically, it:
@@ -284,21 +304,22 @@ class PreProcessing:
         preprocessed = PreProcessing(X, 'range', nocenter=False)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param nocenter: (optional)
-        boolean specifying whether data should be centered by mean.
+        ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
     **Attributes:**
 
-        - **X_removed** - (read only) data set with removed constant columns.
-        - **idx_removed** - (read only) the indices of columns removed from :math:`\mathbf{X}`.
-        - **idx_retained** - (read only) the indices of columns retained in :math:`\mathbf{X}`.
-        - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+    - **X_removed** - (read only) ``numpy.ndarray`` specifying the original data set with any constant columns removed. It has size ``(n_observations,n_variables)``.
+    - **idx_removed** - (read only) ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
+    - **idx_retained** - (read only) ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
+    - **X_cs** - (read only) ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
+    - **X_center** - (read only) ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+    - **X_scale** - (read only) ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     """
 
     def __init__(self, X, scaling='none', nocenter=False):
@@ -332,22 +353,22 @@ class PreProcessing:
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
-    This function removes any constant columns in the data set :math:`\mathbf{X}`.
-    The :math:`i^{th}` column :math:`\mathbf{X}_i` is considered constant if either of the following is true:
+    Removes any constant columns in the data set :math:`\mathbf{X}`.
+    The :math:`j^{th}` column :math:`X_j` is considered constant if either of the following is true:
 
-    - the maximum of an absolute value of a column :math:`\mathbf{X}_i` is less than ``maxtol``:
-
-    .. math::
-
-        max(|\mathbf{X}_i|) < \\verb|maxtol|
-
-    - the ratio of the range of values in a column :math:`\mathbf{X}_i` to :math:`max(|\mathbf{X}_i|)` is less than ``rangetol``:
+    - The maximum of an absolute value of a column :math:`X_j` is less than ``maxtol``:
 
     .. math::
 
-        \\frac{max(\mathbf{X}_i) - min(\mathbf{X}_i)}{max(|\mathbf{X}_i|)} < \\verb|rangetol|
+        max(|X_j|) < \\verb|maxtol|
 
-    Specifically, it can be used as pre-processing for PCA so the eigenvalue
+    - The ratio of the range of values in a column :math:`X_j` to :math:`max(|X_j|)` is less than ``rangetol``:
+
+    .. math::
+
+        \\frac{max(X_j) - min(X_j)}{max(|X_j|)} < \\verb|rangetol|
+
+    Specifically, it can be used as preprocessing for PCA so the eigenvalue
     calculation doesn't break.
 
     **Example:**
@@ -365,19 +386,31 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
         (X_removed, idx_removed, idx_retained) = remove_constant_vars(X)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
-    :param maxtol:
-        tolerance for :math:`max(|\mathbf{X}_i|)`.
-    :param rangetol:
-        tolerance for :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)` over :math:`max(|\mathbf{X}_i|)`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param maxtol: (optional)
+        ``float`` specifying the tolerance for :math:`max(|X_j|)`.
+    :param rangetol: (optional)
+        ``float`` specifying the tolerance for :math:`max(X_j) - min(X_j)` over :math:`max(|X_j|)`.
 
     :return:
-        - **X_removed** - original data set :math:`\mathbf{X}` with any constant columns removed.
-        - **idx_removed** - the indices of columns removed from :math:`\mathbf{X}`.
-        - **idx_retained** - the indices of columns retained in :math:`\mathbf{X}`.
+        - **X_removed** - ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}` with any constant columns removed. It has size ``(n_observations,n_variables)``.
+        - **idx_removed** - ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
+        - **idx_retained** - ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
     """
 
-    (n_observations, n_variables) = np.shape(X)
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+    if not isinstance(maxtol, float):
+        raise ValueError("Parameter `maxtol` has to be a `float`.")
+
+    if not isinstance(rangetol, float):
+        raise ValueError("Parameter `rangetol` has to be a `float`.")
 
     idx_removed = []
     idx_retained = []
@@ -402,7 +435,7 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
 
 def order_variables(X, method='mean', descending=True):
     """
-    This function orders variables in the data set using a selected method.
+    Orders variables in the data set using a selected method.
 
     **Example:**
 
@@ -434,22 +467,28 @@ def order_variables(X, method='mean', descending=True):
         [1, 2, 0]
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param method: (optional)
-        string specifying the ordering method. Can be ``'mean'``, ``'min'``, ``'max'``, ``'std'`` or ``'var'``.
+        ``str`` specifying the ordering method. It can be one of the following:
+        ``'mean'``, ``'min'``, ``'max'``, ``'std'`` or ``'var'``.
     :param descending: (optional)
-        boolean specifying whether variables should be ordered in the descending order.
+        ``bool`` specifying whether variables should be ordered in the descending order.
         If set to ``False``, variables will be ordered in the ascending order.
 
     :return:
-        - **X_ordered** - original data set with ordered variables.
-        - **idx** - list of indices of the ordered variables.
+        - **X_ordered** - ``numpy.ndarray`` specifying the original data set with ordered variables. It has size ``(n_observations,n_variables)``.
+        - **idx** - ``list`` specifying the indices of the ordered variables. It has length ``n_variables``.
     """
 
     __method = ['mean', 'min', 'max', 'std', 'var']
 
     if not isinstance(X, np.ndarray):
-        raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
 
     if not isinstance(method, str):
         raise ValueError("Parameter `method` has to be a string.")
@@ -485,65 +524,63 @@ def order_variables(X, method='mean', descending=True):
 
 def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
     """
-    This function finds outliers in a data set :math:`\mathbf{X}` and returns
+    Finds outliers in a data set :math:`\mathbf{X}` and returns
     indices of observations without outliers as well as indices of the outliers
-    themselves.
-
-    Two options are implemented here:
+    themselves. Two options are implemented here:
 
     - ``'MULTIVARIATE TRIMMING'``
 
-        Outliers are detected based on multivariate Mahalanobis distance :math:`D_M`:
+    Outliers are detected based on multivariate Mahalanobis distance :math:`D_M`:
 
-        .. math::
+    .. math::
 
-            D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
+        D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
 
-        where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
-        storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
-        :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
-        Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
-        Since Mahalanobis distance takes into account covariance between variables,
-        observations with sufficiently large :math:`D_M` can be considered as outliers.
-        For more detailed information on Mahalanobis distance the user is referred
-        to :cite:`Bishop2006` or :cite:`DeMaesschalck2000`.
+    where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
+    storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
+    :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
+    Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
+    Since Mahalanobis distance takes into account covariance between variables,
+    observations with sufficiently large :math:`D_M` can be considered as outliers.
+    For more detailed information on Mahalanobis distance the user is referred
+    to :cite:`Bishop2006` or :cite:`DeMaesschalck2000`.
 
-        The threshold above which observations will be classified as outliers
-        can be specified using ``trimming_threshold`` parameter. Specifically,
-        the :math:`i^{th}` observation is classified as an outlier if:
+    The threshold above which observations will be classified as outliers
+    can be specified using ``trimming_threshold`` parameter. Specifically,
+    the :math:`i^{th}` observation is classified as an outlier if:
 
-        .. math::
+    .. math::
 
-            D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
+        D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
 
     - ``'PC CLASSIFIER'``
 
-        Outliers are detected based on major and minor Principal Components (PCs).
-        The method of Principal Component classifier (PCC) was first proposed in
-        :cite:`Shyu2003`. The application of this technique to combustion data sets
-        was studied in :cite:`Parente2013`. Specifically,
-        the :math:`i^{th}` observation is classified as an outlier
-        if the *first PC classifier* based on :math:`q`-first (major) PCs:
+    Outliers are detected based on major and minor Principal Components (PCs).
+    The method of Principal Component classifier (PCC) was first proposed in
+    :cite:`Shyu2003`. The application of this technique to combustion data sets
+    was studied in :cite:`Parente2013`. Specifically,
+    the :math:`i^{th}` observation is classified as an outlier
+    if the *first PC classifier* based on :math:`q`-first (major) PCs:
 
-        .. math::
+    .. math::
 
-            \sum_{j=1}^{q} \\frac{z_{ij}^2}{L_j} > c_1
+        \sum_{j=1}^{q} \\frac{z_{ij}^2}{L_j} > c_1
 
-        or if the *second PC classifier* based on :math:`(Q-k+1)`-last (minor) PCs:
+    or if the *second PC classifier* based on :math:`(Q-k+1)`-last (minor) PCs:
 
-        .. math::
+    .. math::
 
-            \sum_{j=k}^{Q} \\frac{z_{ij}^2}{L_j} > c_2
+        \sum_{j=k}^{Q} \\frac{z_{ij}^2}{L_j} > c_2
 
-        where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the Principal
-        Components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
-        eigenvalue from :math:`\mathbf{L}` (as per ``PCA`` class).
-        Major PCs are selected such that the total variance explained is 50%.
-        Minor PCs are selected such that the remaining variance they explain is 20%.
+    where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the Principal
+    Components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
+    eigenvalue from :math:`\mathbf{L}` (as per ``PCA`` class).
+    Major PCs are selected such that the total variance explained is 50%.
+    Minor PCs are selected such that the remaining variance they explain is 20%.
 
-        Coefficients :math:`c_1` and :math:`c_2` are found such that they
-        represent the ``quantile_threshold`` (by default 98.99%) quantile of the
-        empirical distributions of the first and second PC classifier respectively.
+    Coefficients :math:`c_1` and :math:`c_2` are found such that they
+    represent the ``quantile_threshold`` (by default 98.99%) quantile of the
+    empirical distributions of the first and second PC classifier respectively.
 
     **Example:**
 
@@ -565,39 +602,37 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
         X_outliers = X[idx_outliers,:]
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param method: (optional)
-        string specifying the outlier detection method to use. It should be
+        ``str`` specifying the outlier detection method to use. It should be
         ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
     :param trimming_threshold: (optional)
-        trimming threshold to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
+        ``float`` specifying the trimming threshold to use in combination with ``'MULTIVARIATE TRIMMING'`` method.
     :param quantile_threshold: (optional)
-        quantile threshold to use in combination with ``'PC CLASSIFIER'`` method.
+        ``float`` specifying the quantile threshold to use in combination with ``'PC CLASSIFIER'`` method.
     :param verbose: (optional)
-        boolean for printing outlier detection details.
-
-    :raises ValueError:
-        if ``scaling`` is not a string or is not consistent with scalings available in the ``preprocess.center_scale`` function.
-    :raises ValueError:
-        if ``method`` is not ``'MULTIVARIATE TRIMMING'`` or ``'PC CLASSIFIER'``.
-    :raises ValueError:
-        if ``trimming_threshold`` is not between 0-1.
-    :raises ValueError:
-        if ``quantile_threshold`` is not between 0-1.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx_outliers_removed** - indices of observations without outliers.
-        - **idx_outliers** - indices of observations that were classified as outliers.
+        - **idx_outliers_removed** - ``list`` specifying the indices of observations without outliers.
+        - **idx_outliers** - ``list`` specifying the indices of observations that were classified as outliers.
     """
+
+    from PCAfold import PCA
 
     _detection_methods = ['MULTIVARIATE TRIMMING', 'PC CLASSIFIER']
 
-    from PCAfold import PCA
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
 
     if not isinstance(scaling, str):
         raise ValueError("Parameter `scaling` has to be a string.")
@@ -613,6 +648,12 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 
     if trimming_threshold < 0 or trimming_threshold > 1:
         raise ValueError("Parameter `trimming_threshold` has to be between 0 and 1.")
+
+    if not isinstance(trimming_threshold, float):
+        raise ValueError("Parameter `trimming_threshold` has to be a `float`.")
+
+    if not isinstance(quantile_threshold, float):
+        raise ValueError("Parameter `quantile_threshold` has to be a `float`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
@@ -719,7 +760,7 @@ class KernelDensity:
         Kernel density weighting technique is usually very expensive, even
         on data sets with relatively small number of observations.
         Since the *single-variable* case is a cheaper option than the *multi-variable*
-        case, it is recommended that this technique is tried first on larger data
+        case, it is recommended that this technique is tried first for larger data
         sets.
 
     Gaussian kernel is used in both approaches:
@@ -800,25 +841,31 @@ class KernelDensity:
         weights = kerneld.weights
 
     :param X:
-        data set :math:`\mathbf{X}` that should be weighted.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param conditioning_variable:
-        either a single variable or multiple variables to be used as a
+        ``numpy.ndarray`` specifying either a single variable or multiple variables to be used as a
         conditioning variable for kernel weighting procedure. Note that it can also
         be passed as the data set :math:`\mathbf{X}`.
 
-    :raises ValueError:
-        if the number of observations in ``X`` is different than the number of observations in ``conditioning_variable``.
-
     **Attributes:**
 
-        - **weights** - vector of computed weights :math:`\mathbf{W_c}`.
-        - **X_weighted** - weighted data set (each observation in\
-        :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`).
+        - **weights** - ``numpy.ndarray`` specifying the computed weights, :math:`\mathbf{W_c}`. It has size ``(n_observations,1)``.
+        - **X_weighted** - ``numpy.ndarray`` specifying the weighted data set (each observation in\
+        :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`). It has size ``(n_observations,n_variables)``.
     """
 
     def __init__(self, X, conditioning_variable, verbose=False):
 
-        (n_observations_X, n_variables_X) = np.shape(X)
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations_X, n_variables_X) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        if not isinstance(conditioning_variable, np.ndarray):
+            raise ValueError("Parameter `conditioning_variable` has to be of type `numpy.ndarray`.")
 
         try:
             (n_observations, n_variables) = np.shape(conditioning_variable)
@@ -1051,7 +1098,7 @@ class KernelDensity:
 
 class DataSampler:
     """
-    This class enables selecting train and test data samples.
+    Enables selecting train and test data samples.
 
     **Example:**
 
@@ -1067,9 +1114,9 @@ class DataSampler:
       selection = DataSampler(idx, idx_test=[5,9], random_seed=100, verbose=True)
 
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx_test: (optional)
-        vector or list of user-provided indices for test data. If specified, train
+        ``numpy.ndarray`` or ``list`` of user-provided indices for test data. If specified, train
         data will be selected ignoring the indices in ``idx_test`` and the test
         data will be returned the same as the user-provided ``idx_test``.
         If not specified, test samples will be selected according to the
@@ -1077,18 +1124,9 @@ class DataSampler:
         Setting fixed ``idx_test`` parameter may be useful if training a machine
         learning model on specific test samples is desired.
     :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
+        ``int`` specifying random seed for random sample selection.
     :param verbose: (optional)
-        boolean for printing sampling details.
-
-    :raises ValueError:
-        if ``idx`` vector has length zero, is not a list or ``numpy.ndarray``.
-    :raises ValueError:
-        if ``idx_test`` vector has more unique observations than ``idx``, is not a list or ``numpy.ndarray``.
-    :raises ValueError:
-        if ``random_seed`` is not an integer or ``None``.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
     """
 
     def __init__(self, idx, idx_test=[], random_seed=None, verbose=False):
@@ -1205,7 +1243,7 @@ class DataSampler:
         ``verbose=True``.
 
         :param idx:
-            vector of cluster classifications.
+            ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
         :param idx_train:
             indices of the train data.
         :param idx_test:
@@ -1293,26 +1331,15 @@ class DataSampler:
             percentage of data to be selected as training data from the entire data set.
             For instance, set ``perc=20`` if you want to select 20%.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
-        :raises ValueError:
-            if ``perc`` is not a number between 0-100.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the percentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -1456,26 +1483,15 @@ class DataSampler:
             percentage of data to be selected as training data from each cluster.
             For instance, set ``perc=20`` if you want to select 20%.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
-        :raises ValueError:
-            if ``perc`` is not a number between 0-100.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the perecentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -1613,49 +1629,23 @@ class DataSampler:
             sampling_dictionary = {0:n_1, 1:n_2, 2:n_3}
 
         :param sampling_dictionary:
-            dictionary specifying manual sampling. Keys are cluster classifications and
+            ``dict`` specifying manual sampling. Keys are cluster classifications and
             values are either ``percentage`` or ``number`` of samples to be taken from
             that cluster. Keys should match the cluster classifications as per ``idx``.
         :param sampling_type: (optional)
-            string specifying whether percentage or number is given in the
+            ``str`` specifying whether percentage or number is given in the
             ``sampling_dictionary``. Available options: ``percentage`` or ``number``.
             The default is ``percentage``.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
-        :raises ValueError:
-            if ``sampling_type`` is not ``'percentage'`` or ``'number'``.
-
-        :raises ValueError:
-            if the number of entries in ``sampling_dictionary`` does not match the
-            number of clusters specified in ``idx``.
-
-        :raises ValueError:
-            if any ``value`` in ``sampling_dictionary`` is not a number between 0-100 when ``sampling_type='percentage'``.
-
-        :raises ValueError:
-            if any ``value`` in ``sampling_dictionary`` is not a non-negative integer when ``sampling_type='number'``.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the perecentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
-        :raises ValueError:
-            if the number specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check that sampling_type is passed correctly:
@@ -1868,26 +1858,15 @@ class DataSampler:
             percentage of data to be selected as training data from each cluster.
             Set ``perc=20`` if you want 20%.
         :param test_selection_option: (optional)
-            option for how the test data is selected.
+            ``int`` specifying the option for how the test data is selected.
             Select ``test_selection_option=1`` if you want all remaining samples
             to become test data.
             Select ``test_selection_option=2`` if you want to select a subset
             of the remaining samples as test data.
 
-        :raises ValueError:
-            if ``perc`` is not a number between 0-100.
-
-        :raises ValueError:
-            if ``test_selection_option`` is not equal to 1 or 2.
-
-        :raises ValueError:
-            if the perecentage specified is too high in combination with the
-            user-provided ``idx_test`` vector and there aren't enough samples to
-            select as train data.
-
         :return:
-            - **idx_train** - indices of the train data.
-            - **idx_test** - indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -1969,7 +1948,7 @@ def __print_verbose_information_clustering(var, idx, bins_borders):
 
 def variable_bins(var, k, verbose=False):
     """
-    This function does clustering by dividing a variable vector ``var`` into
+    Clusters the data by dividing a variable vector ``var`` into
     bins of equal lengths.
 
     An example of how a vector can be partitioned with this function is presented below:
@@ -1992,25 +1971,31 @@ def variable_bins(var, k, verbose=False):
         (idx, borders) = variable_bins(x, 4, verbose=True)
 
     :param var:
-        vector of variable values.
+        ``numpy.ndarray`` specifying the variable values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param k:
-        number of clusters to partition the data.
+        ``int`` specifying the number of clusters to create. It has to be a positive number.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if number of clusters ``k`` is not a positive integer.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
 
-    # Check that the number of clusters is an integer and is non-zero:
+    if not isinstance(var, np.ndarray):
+        raise ValueError("Parameter `var` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(var)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(var)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `var` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
     if not (isinstance(k, int) and k > 0):
-        raise ValueError("The number of clusters must be a positive integer.")
+        raise ValueError("Parameter `k` has to be a positive `int`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
@@ -2036,11 +2021,11 @@ def variable_bins(var, k, verbose=False):
                 if (val >= bins_borders[cl]) and (val < bins_borders[cl+1]):
                     idx.append(cl)
 
+    idx = np.asarray(idx)
+
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
         (idx, _) = degrade_clusters(idx, verbose)
-
-    idx = np.asarray(idx)
 
     if verbose==True:
         __print_verbose_information_clustering(var, idx, bins_borders)
@@ -2051,7 +2036,7 @@ def variable_bins(var, k, verbose=False):
 
 def predefined_variable_bins(var, split_values, verbose=False):
     """
-    This function does clustering by dividing a variable vector ``var`` into
+    Clusters the data by dividing a variable vector ``var`` into
     bins such that splits are done at user-specified values.
     Split values can be specified in the ``split_values`` list.
     In general: ``split_values = [value_1, value_2, ..., value_n]``.
@@ -2080,22 +2065,28 @@ def predefined_variable_bins(var, split_values, verbose=False):
         (idx, borders) = predefined_variable_bins(x, [-0.6, 0.4, 0.8], verbose=True)
 
     :param var:
-        vector of variable values.
+        ``numpy.ndarray`` specifying the variable values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param split_values:
-        list containing values at which the split to bins should be performed.
+        ``list`` specifying values at which splits should be performed.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if any value within ``split_values`` is not within the range of
-        vector ``var`` values.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
+
+    if not isinstance(var, np.ndarray):
+        raise ValueError("Parameter `var` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(var)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(var)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `var` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
@@ -2125,11 +2116,11 @@ def predefined_variable_bins(var, split_values, verbose=False):
                 if (val >= bins_borders[cl]) and (val < bins_borders[cl+1]):
                     idx.append(cl)
 
+    idx = np.asarray(idx)
+
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
         (idx, _) = degrade_clusters(idx, verbose)
-
-    idx = np.asarray(idx)
 
     if verbose==True:
         __print_verbose_information_clustering(var, idx, bins_borders)
@@ -2140,7 +2131,7 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
-    This function does clustering by dividing a mixture fraction vector
+    Clusters the data by dividing a mixture fraction vector
     ``Z`` into bins of equal lengths. This technique can be used to partition
     combustion data sets as proposed in :cite:`Parente2009`.
     The vector is first split to lean and rich
@@ -2169,35 +2160,39 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         (idx, borders) = mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
     :param Z:
-        vector of mixture fraction values.
+        ``numpy.ndarray`` specifying the mixture fraction values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param k:
-        number of clusters to partition the data.
+        ``int`` specifying the number of clusters to create. It has to be a positive number.
     :param Z_stoich:
-        stoichiometric mixture fraction.
+        ``float`` specifying the stoichiometric mixture fraction. It has to be between 0 and 1.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if number of clusters ``k`` is not a positive integer.
-    :raises ValueError:
-        if the stoichiometric mixture fraction is not a number between 0 and 1.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
+
+    if not isinstance(Z, np.ndarray):
+        raise ValueError("Parameter `Z` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(Z)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(Z)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `Z` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not (isinstance(k, int) and k > 0):
+        raise ValueError("Parameter `k` has to be a positive `int`.")
+
+    if Z_stoich <= 0 or Z_stoich >= 1:
+        raise ValueError("Parameter `Z_stoich` should be between 0 and 1.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    # Check that the number of clusters is an integer and is non-zero:
-    if not (isinstance(k, int) and k > 0):
-        raise ValueError("The number of clusters must be a positive integer.")
-
-    if Z_stoich < 0 or Z_stoich > 1:
-        raise ValueError("Stoichiometric mixture fraction should be between 0 and 1.")
 
     # Number of interval borders:
     n_bins_borders = k + 1
@@ -2242,7 +2237,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         idx_clust.append(np.where((Z >= borders[bin]) & (Z <= borders[bin+1])))
         idx[idx_clust[bin]] = bin+1
 
-    idx = [int(i) for i in idx]
+    idx = np.asarray([int(i) for i in idx])
 
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
@@ -2257,7 +2252,7 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
 def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
-    This function aims to separate close-to-zero observations in a vector into one
+    Clusters the data by separating close-to-zero observations in a vector into one
     cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
     The offset from zero at which splits are performed is computed
     based on the input parameter ``zero_offset_percentage``:
@@ -2273,9 +2268,9 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     that has many observations clustered around zero value and relatively few
     observations far away from zero on either side.
 
-    Two examples of how a vector can be partitioned with this function are presented below.
+    Two examples of how a vector can be partitioned with this function are presented below:
 
-    With ``split_at_zero=False``:
+    - With ``split_at_zero=False``:
 
     .. image:: ../images/clustering-zero-neighborhood-bins.svg
       :width: 700
@@ -2288,7 +2283,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     When ``k`` is even, there will always be one more cluster on the side with
     larger range compared to the other side.
 
-    With ``split_at_zero=True``:
+    - With ``split_at_zero=True``:
 
     .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.svg
       :width: 700
@@ -2305,11 +2300,11 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     .. note::
 
         This clustering technique is well suited for partitioning chemical
-        source terms :math:`\mathbf{S_X}` or sources of Principal Components
-        :math:`\mathbf{S_Z}` (as per :cite:`Sutherland2009`) since it relies on
+        source terms, :math:`\mathbf{S_X}`, or sources of Principal Components,
+        :math:`\mathbf{S_Z}`, (as per :cite:`Sutherland2009`) since it relies on
         unbalanced vectors that have many observations numerically close to zero.
         Using ``split_at_zero=True`` it can further differentiate between
-        negative and positive sources which have different physical effect.
+        negative and positive sources.
 
     **Example:**
 
@@ -2325,51 +2320,51 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
         (idx, borders) = zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
     :param var:
-        vector of variable values.
+        ``numpy.ndarray`` specifying the variable values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param k:
-        number of clusters to partition the data.
-        Cannot be smaller than 3 if ``split_at_zero=False`` or smaller
+        ``int`` specifying the number of clusters to create. It has to be a positive number.
+        It cannot be smaller than 3 if ``split_at_zero=False`` or smaller
         than 4 if ``split_at_zero=True``.
     :param zero_offset_percentage: (optional)
         percentage of :math:`max(\\verb|var|) - min(\\verb|var|)` range
         to take as the offset from zero value. For instance, set
         ``zero_offset_percentage=10`` if you want 10% as offset.
     :param split_at_zero: (optional)
-        boolean specifying whether partitioning should be done at ``var=0``.
+        ``bool`` specifying whether partitioning should be done at ``var=0``.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if number of clusters ``k`` is not an integer or smaller than 3 when
-        ``split_at_zero=False`` or smaller than 4 when ``split_at_zero=True``.
-
-    :raises ValueError:
-        if the vector ``var`` has only non-negative or only
-        non-positive values. For such vectors it is recommended to use
-        ``predefined_variable_bins`` function instead.
-
-    :raises ValueError:
-        if the requested offset from zero crosses the minimum or maximum value
-        of the variable vector ``var``. If that is the case, it is
-        recommended to lower the ``zero_offset_percentage`` value.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx** - vector of cluster classifications.
-        - **borders** - list of values that define borders of the clusters.
+        - **idx** - ``numpy.ndarray`` of cluster classifications. It has size ``(n_observations,)``.
+        - **borders** - ``list`` of values that define borders for the clusters. It has length ``k+1``.
     """
+
+    if not isinstance(var, np.ndarray):
+        raise ValueError("Parameter `var` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(var)
+        n_variables = 1
+    except:
+        (n_observations, n_variables) = np.shape(var)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `var` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if zero_offset_percentage < 0 or zero_offset_percentage > 100:
+        raise ValueError("Parameter `zero_offset_percentage` has to be between 0 and 100.")
+
+    if not (isinstance(k, int) and k > 0):
+        raise ValueError("Parameter `k` has to be a positive `int`.")
+
+    if (not split_at_zero) and (not (isinstance(k, int) and k > 2)):
+        raise ValueError("Parameter `k` must be an integer not smaller than 3 when not splitting at zero.")
+
+    if split_at_zero and (not (isinstance(k, int) and k > 3)):
+        raise ValueError("Parameter `k` must be an integer not smaller than 4 when splitting at zero.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    # Check that the number of clusters is an integer and is larger than 2:
-    if (not split_at_zero) and (not (isinstance(k, int) and k > 2)):
-        raise ValueError("The number of clusters must be an integer not smaller than 3 when not splitting at zero.")
-
-    # Check that the number of clusters is an integer and is larger than 2:
-    if split_at_zero and (not (isinstance(k, int) and k > 3)):
-        raise ValueError("The number of clusters must be an integer not smaller than 4 when splitting at zero.")
 
     var_min = np.min(var)
     var_max = np.max(var)
@@ -2437,11 +2432,11 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
 def degrade_clusters(idx, verbose=False):
     """
-    This function renumerates clusters if either of these two cases is true:
+    Re-numerates clusters if either of these two cases is true:
 
     - ``idx`` is composed of non-consecutive integers, or
 
-    - the smallest cluster number in ``idx`` is not equal to ``0``.
+    - the smallest cluster index in ``idx`` is not equal to ``0``.
 
     **Example:**
 
@@ -2450,7 +2445,7 @@ def degrade_clusters(idx, verbose=False):
         from PCAfold import degrade_clusters
 
         # Generate dummy idx vector:
-        idx = [0, 0, 2, 0, 5, 10]
+        idx = np.array([0, 0, 2, 0, 5, 10])
 
         # Degrade clusters:
         (idx_degraded, k_update) = degrade_clusters(idx)
@@ -2469,7 +2464,7 @@ def degrade_clusters(idx, verbose=False):
         from PCAfold import degrade_clusters
 
         # Generate dummy idx vector:
-        idx = [1, 1, 2, 2, 3, 3]
+        idx = np.array([1, 1, 2, 2, 3, 3])
 
         # Degrade clusters:
         (idx_degraded, k_update) = degrade_clusters(idx)
@@ -2482,31 +2477,32 @@ def degrade_clusters(idx, verbose=False):
         array([0, 0, 1, 1, 2, 2])
 
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param verbose: (optional)
-        boolean for printing clustering details.
-
-    :raises ValueError:
-        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
-    :raises ValueError:
-        if ``verbose`` is not a boolean.
+        ``bool`` for printing verbose details.
 
     :return:
-        - **idx_degraded** degraded vector of cluster classifications. The first cluster has index 0.
-        - **k_update** - the updated number of clusters.
+        - **idx_degraded** - ``numpy.ndarray`` of degraded cluster classifications. It has size ``(n_observations,)``.
+        - **k_update** - ``int`` specifying the updated number of clusters.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    if isinstance(idx, list):
-        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
-    elif isinstance(idx, np.ndarray):
-        if not all(isinstance(i, np.integer) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
-    else:
-        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
 
     index = 0
     dictionary = {}
@@ -2528,14 +2524,14 @@ def degrade_clusters(idx, verbose=False):
 
     if verbose == True:
         print('Clusters have been degraded.')
-        print('The number of clusters have been reduced from ' + str(k_init) + ' to ' + str(k_update) + '.')
+        print('The true number of clusters is ' + str(k_update) + '.')
 
     return (np.asarray(idx_degraded), k_update)
 
 def flip_clusters(idx, dictionary):
     """
-    This function flips cluster labelling according to instructions provided
-    in the dictionary. For a ``dictionary = {key : value}``, a cluster with a
+    Flips cluster labelling according to instructions provided
+    in a dictionary. For a ``dictionary = {key : value}``, a cluster with a
     number ``key`` will get a number ``value``.
 
     **Example:**
@@ -2545,7 +2541,7 @@ def flip_clusters(idx, dictionary):
         from PCAfold import flip_clusters
 
         # Generate dummy idx vector:
-        idx = [0,0,0,1,1,1,1,2,2]
+        idx = np.array([0,0,0,1,1,1,1,2,2])
 
         # Swap cluster number 1 with cluster number 2:
         flipped_idx = flip_clusters(idx, {1:2, 2:1})
@@ -2557,32 +2553,50 @@ def flip_clusters(idx, dictionary):
         >>> flipped_idx
         array([0, 0, 0, 2, 2, 2, 2, 1, 1])
 
+    .. note::
+
+        This function can also be used to merge clusters. Using the ``idx`` from the example above,
+        if we call:
+
+        .. code:: python
+
+            flipped_idx = flip_clusters(idx, {2:1})
+
+        the result will be:
+
+        .. code-block:: text
+
+            >>> flipped_idx
+            array([0,0,0,1,1,1,1,1,1])
+
+        where clusters ``1`` and ``2`` have been merged into one cluster numbered ``1``.
+
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param dictionary:
-        dictionary specifying instructions for cluster label flipping.
-
-    :raises ValueError:
-        if ``idx`` vector contains entries other than integers, is not a list or ``numpy.ndarray``.
-
-    :raises ValueError:
-        if any ``key`` or ``value`` is not an integer.
-
-    :raises ValueError:
-        if any ``key`` is not found within ``idx``.
+        ``dict`` specifying instructions for cluster label flipping.
 
     :return:
-        - **flipped_idx** - re-labelled vector of cluster classifications.
+        - **flipped_idx** - ``numpy.ndarray`` specifying the re-labelled cluster classifications. It has size ``(n_observations,)``.
     """
 
-    if isinstance(idx, list):
-        if not all(isinstance(i, int) for i in idx) or any(isinstance(i, bool) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
-    elif isinstance(idx, np.ndarray):
+    if isinstance(idx, np.ndarray):
         if not all(isinstance(i, np.integer) for i in idx):
-            raise ValueError("Vector of cluster classifications can only contain integers.")
+            raise ValueError("Parameter `idx` can only contain integers.")
     else:
-        raise ValueError("Vector of cluster classifications should be a list or numpy.ndarray.")
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(dictionary, dict):
+        raise ValueError("Parameter `dictionary` has to be of type `dict`.")
 
     # Check that keys and values are properly defined:
     for key, value in dictionary.items():
@@ -2611,16 +2625,27 @@ def flip_clusters(idx, dictionary):
 
 def get_centroids(X, idx):
     """
-    This function computes the centroids for each cluster specified in the
-    ``idx`` vector. Centroids :math:`c_i` of cluster :math:`k_i` are computed as:
+    Computes the centroids for all variables in the original data set,
+    :math:`\\mathbf{X}`, and for each cluster specified in the
+    ``idx`` vector. The centroid :math:`c_{n, j}` for variable :math:`X_j` in
+    the :math:`n^{th}` cluster, is computed as:
 
     .. math::
 
-        c_i = mean(\mathbf{x}_i)
+        c_{n, j} = mean(X_j), \\,\\,\\,\\, \\text{for} \\,\\, X_j \\in \\text{cluster} \\,\\, n
 
-    where :math:`\mathbf{x}_i` are the observations belonging to cluster :math:`k_i`
-    of all variables in the data set :math:`\mathbf{X}`. Centroids of all variables
-    from all clusters are then stored in the matrix :math:`\mathbf{c}` returned.
+    Centroids for all variables from all clusters are stored in the matrix
+    :math:`\\mathbf{c} \\in \\mathbb{R}^{k \\times Q}` returned:
+
+    .. math::
+
+        \\mathbf{c} =
+        \\begin{bmatrix}
+        c_{1, 1} & c_{1, 2} & \\dots & c_{1, Q} \\\\
+        c_{2, 1} & c_{2, 2} & \\dots & c_{2, Q} \\\\
+        \\vdots & \\vdots & \\vdots & \\vdots \\\\
+        c_{k, 1} & c_{k, 2} & \\dots & c_{k, Q} \\\\
+        \\end{bmatrix}
 
     **Example:**
 
@@ -2640,17 +2665,28 @@ def get_centroids(X, idx):
         centroids = get_centroids(X, idx)
 
     :param X:
-        data set :math:`\mathbf{X}` for computing the cluster centroids.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
-        vector of cluster classifications.
-
-    :raises ValueError:
-        if the number of observations in the data set ``X`` does not match the
-        number of elements in the ``idx`` vector.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
     :return:
-        - **centroids** - matrix of centroids of all :math:`k` clusters. It has size :math:`k` times number of variables.
+        - **centroids** - ``numpy.ndarray`` specifying the centroids matrix, :math:`\mathbf{c}`, for all clusters and for all variables. It has size ``(k,n_variables)``.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     # Degrade clusters if needed:
     if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
@@ -2677,7 +2713,7 @@ def get_centroids(X, idx):
 
 def get_partition(X, idx):
     """
-    This function partitions the observations from the original data
+    Partitions the observations from the original data
     set :math:`\mathbf{X}` into :math:`k` clusters according to ``idx`` provided.
 
     **Example:**
@@ -2698,18 +2734,29 @@ def get_partition(X, idx):
         (X_in_clusters, idx_in_clusters) = get_partition(X, idx)
 
     :param X:
-        data set to partition.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
-        vector of cluster classifications.
-
-    :raises ValueError:
-        if the number of observations in the data set ``X`` does not match the
-        number of elements in the ``idx`` vector.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
     :return:
-        - **X_in_clusters** - list of :math:`k` arrays that contains original data set observations partitioned to :math:`k` clusters.
-        - **idx_in_clusters** - list of :math:`k` arrays that contains indices of the original data set observations partitioned to :math:`k` clusters.
+        - **X_in_clusters** - ``list`` of :math:`k` ``numpy.ndarray`` that contains original data set observations partitioned to :math:`k` clusters. It has length ``k``.
+        - **idx_in_clusters** - ``list`` of :math:`k` ``numpy.ndarray`` that contains indices of the original data set observations partitioned to :math:`k` clusters. It has length ``k``.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     try:
         (n_observations, n_variables) = np.shape(X)
@@ -2718,7 +2765,7 @@ def get_partition(X, idx):
         n_variables = 1
 
     # Check if the number of indices in `idx` is the same as the number of observations in a data set:
-    if n_observations != len(idx):
+    if n_observations != n_observations_idx:
         raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
 
     # Degrade clusters if needed:
@@ -2744,7 +2791,7 @@ def get_partition(X, idx):
 
 def get_populations(idx):
     """
-    This function computes populations (number of observations) in clusters
+    Computes populations (number of observations) in clusters
     specified in the ``idx`` vector. As an example, if there are 100
     observations in the first cluster and 500 observations in the second cluster
     this function will return a list: ``[100, 500]``.
@@ -2771,12 +2818,26 @@ def get_populations(idx):
         [25, 25, 25, 25]
 
     :param idx:
-        vector of cluster classifications.
-        The first cluster has index 0.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
     :return:
-        - **populations** - list of cluster populations. Each entry referes to one cluster ordered according to ``idx``.
+        - **populations** - ``list`` of cluster populations. Each entry referes to one cluster ordered according to ``idx``. It has length ``k``.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     populations = []
 
@@ -2795,7 +2856,7 @@ def get_populations(idx):
 
 def get_average_centroid_distance(X, idx, weighted=False):
     """
-    This function computes the average Euclidean distance between observations
+    Computes the average Euclidean distance between observations
     and the centroids of clusters to which each observation belongs.
 
     The average can be computed as an arithmetic average from all clusters
@@ -2822,21 +2883,32 @@ def get_average_centroid_distance(X, idx, weighted=False):
         average_centroid_distance = get_average_centroid_distance(X, idx, weighted=False)
 
     :param X:
-        data set to partition.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param weighted: (optional)
-        boolean specifying whether distances from centroid should be weighted
+        ``bool`` specifying whether distances from centroid should be weighted
         by the number of observations in a cluster.
         If set to ``False``, arithmetic average will be computed.
 
-    :raises ValueError:
-        if the number of observations in the data set ``X`` does not match the
-        number of elements in the ``idx`` vector.
-
     :return:
-        - **average_centroid_distance** - float specifying the average distance from centroids, averaged over all observations and all clusters.
+        - **average_centroid_distance** - ``float`` specifying the average distance from centroids, averaged over all observations and all clusters.
     """
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     try:
         (n_observations, n_variables) = np.shape(X)
@@ -2844,7 +2916,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
         (n_observations, ) = np.shape(X)
 
     # Check if the number of indices in `idx` is the same as the number of observations in a data set:
-    if n_observations != len(idx):
+    if n_observations != n_observations_idx:
         raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx` vector.")
 
     # Degrade clusters if needed:
@@ -2890,7 +2962,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
 
 def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots a 2-dimensional manifold divided into clusters.
+    Plots a two-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
 
     **Example:**
@@ -2912,38 +2984,111 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
-        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
     :param grid_on:
-        boolean specifying whether grid should be plotted.
+        ``bool`` specifying whether grid should be plotted.
     :param figure_size:
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
+        ``str`` specifying plot save location/filename. If set to ``None``
         plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_x, ) = np.shape(x)
+        n_variables = 1
+    except:
+        (n_observations_x, n_variables) = np.shape(x)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `x` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_y, ) = np.shape(y)
+        n_variables = 1
+    except:
+        (n_observations_y, n_variables) = np.shape(y)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `y` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_y:
+        raise ValueError("Parameter `x` has different number of observations than parameter `y`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_variables = 1
+    except:
+        (n_observations_idx, n_variables) = np.shape(idx)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_idx:
+        raise ValueError("Parameter `idx` has different number of observations than parameters `x` and `y`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        raise ValueError("Parameter `color_map` has to be of type `str`.")
+
+    if not isinstance(first_cluster_index_zero, bool):
+        raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
+
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
@@ -2978,7 +3123,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
 def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', first_cluster_index_zero=True, figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots a 3-dimensional manifold divided into clusters.
+    Plots a three-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
 
     **Example:**
@@ -3001,45 +3146,131 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param z:
-        variable on the :math:`z`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`z`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param elev: (optional)
         elevation angle.
     :param azim: (optional)
         azimuth angle.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param z_label: (optional)
-        string specifying :math:`z`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`z`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
-        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
     :param figure_size:
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
+        ``str`` specifying plot save location/filename. If set to ``None``
         plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_x, ) = np.shape(x)
+        n_variables = 1
+    except:
+        (n_observations_x, n_variables) = np.shape(x)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `x` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_y, ) = np.shape(y)
+        n_variables = 1
+    except:
+        (n_observations_y, n_variables) = np.shape(y)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `y` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(z, np.ndarray):
+        raise ValueError("Parameter `z` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_z, ) = np.shape(z)
+        n_variables = 1
+    except:
+        (n_observations_z, n_variables) = np.shape(z)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `z` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if (n_observations_x != n_observations_y) or (n_observations_x != n_observations_z):
+        raise ValueError("Parameters `x`, `y` and `z` have different number of observations.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_variables = 1
+    except:
+        (n_observations_idx, n_variables) = np.shape(idx)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_idx:
+        raise ValueError("Parameter `idx` has different number of observations than parameters `x`, `y` and `z`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if z_label is not None:
+        if not isinstance(z_label, str):
+            raise ValueError("Parameter `z_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        raise ValueError("Parameter `color_map` has to be of type `str`.")
+
+    if not isinstance(first_cluster_index_zero, bool):
+        raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
     from mpl_toolkits.mplot3d import Axes3D
@@ -3135,7 +3366,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
 
 def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
     """
-    This function plots a 2-dimensional manifold divided into train and test
+    Plots a 2-dimensional manifold divided into train and test
     samples. Number of observations in train and test data respectively will be
     plotted in the legend.
 
@@ -3162,42 +3393,121 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx_train:
-        indices of the train data.
+        ``numpy.ndarray`` specifying the indices of the train data. It should be of size ``(n_train,)`` or ``(n_train,1)``.
     :param idx_test:
-        indices of the test data.
+        ``numpy.ndarray`` specifying the indices of the test data. It should be of size ``(n_test,)`` or ``(n_test,1)``.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
-        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
     :param grid_on:
-        boolean specifying whether grid should be plotted.
+        ``bool`` specifying whether grid should be plotted.
     :param figure_size:
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
+        ``str`` specifying plot save location/filename. If set to ``None``
         plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_x, ) = np.shape(x)
+        n_variables = 1
+    except:
+        (n_observations_x, n_variables) = np.shape(x)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `x` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_y, ) = np.shape(y)
+        n_variables = 1
+    except:
+        (n_observations_y, n_variables) = np.shape(y)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `y` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_y:
+        raise ValueError("Parameter `x` has different number of observations than parameter `y`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_variables = 1
+    except:
+        (n_observations_idx, n_variables) = np.shape(idx)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_idx:
+        raise ValueError("Parameter `idx` has different number of observations than parameters `x` and `y`.")
+
+    if not isinstance(idx_train, np.ndarray):
+        raise ValueError("Parameter `idx_train` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(idx_test, np.ndarray):
+        raise ValueError("Parameter `idx_test` has to be of type `numpy.ndarray`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        raise ValueError("Parameter `color_map` has to be of type `str`.")
+
+    if not isinstance(first_cluster_index_zero, bool):
+        raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
+
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 

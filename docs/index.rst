@@ -1,3 +1,10 @@
+.. image:: images/PCAfold-logo.svg
+  :width: 500
+
+*Low-dimensional PCA-derived manifolds and everything in between!*
+
+--------------------------------------------------------------------------------
+
 .. image:: https://img.shields.io/badge/GitLab-PCAfold-blue.svg?style=flat
     :target: https://gitlab.multiscale.utah.edu/common/PCAfold
 .. image:: http://img.shields.io/badge/license-MIT-blue.svg?style=flat
@@ -5,12 +12,6 @@
 .. image:: https://readthedocs.org/projects/pcafold/badge/?version=latest
     :target: https://pcafold.readthedocs.io/en/latest/?badge=latest
 
-.. image:: images/PCAfold-logo.svg
-  :width: 500
-
-*Low-dimensional PCA-derived manifolds and everything in between!*
-
---------------------------------------------------------------------------------
 
 #####
 Intro

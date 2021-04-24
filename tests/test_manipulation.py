@@ -9,6 +9,24 @@ from PCAfold import KernelDensity
 
 class TestManipulation(unittest.TestCase):
 
+    def test_center_scale_not_allowed_calls(self):
+
+        X = np.random.rand(100,20)
+
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'none', nocenter=1)
+
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale([1,2,3], 'none')
+
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 1)
+
+        X = np.random.rand(100,)
+
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'none')
+
     def test_center_scale_all_possible_C_and_D(self):
 
         test_data_set = np.random.rand(100,20)
@@ -44,44 +62,6 @@ class TestManipulation(unittest.TestCase):
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=True)
-        except Exception:
-            self.assertTrue(False)
-
-    def test_center_scale_on_0D_variable(self):
-
-        test_0D_variable = np.random.rand(100,)
-
-        # Instantiations that should work:
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'none', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'auto', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'std', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'pareto', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'range', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, '0to1', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, '-1to1', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'level', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'max', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'poisson', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_2', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_3', nocenter=False)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_4', nocenter=False)
-
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'none', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'auto', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'std', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'pareto', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'range', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, '0to1', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, '-1to1', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'level', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'max', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'poisson', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_2', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_3', nocenter=True)
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_0D_variable, 'vast_4', nocenter=True)
         except Exception:
             self.assertTrue(False)
 
@@ -136,7 +116,7 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            test_data_set = np.random.rand(1000,)
+            test_data_set = np.random.rand(1000,1)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '0to1', nocenter=False)
             for i in range(0,1):
                 self.assertTrue((np.min(X_cs[:,i]) > (- tolerance)) and (np.min(X_cs[:,i]) < tolerance))
@@ -160,7 +140,7 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            test_data_set = np.random.rand(1000,)
+            test_data_set = np.random.rand(1000,1)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '0to1', nocenter=False)
             for i in range(0,1):
                 self.assertTrue((np.max(X_cs[:,i]) > (1 - tolerance)) and (np.max(X_cs[:,i]) < (1 + tolerance)))
@@ -188,7 +168,7 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            test_data_set = np.random.rand(1000,)
+            test_data_set = np.random.rand(1000,1)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
             for i in range(0,1):
                 self.assertTrue((np.min(X_cs[:,i]) > (-1 - tolerance)) and (np.min(X_cs[:,i]) < -1 + tolerance))
@@ -212,7 +192,7 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            test_data_set = np.random.rand(1000,)
+            test_data_set = np.random.rand(1000,1)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
             for i in range(0,1):
                 self.assertTrue((np.max(X_cs[:,i]) > (1 - tolerance)) and (np.max(X_cs[:,i]) < (1 + tolerance)))
@@ -258,6 +238,40 @@ class TestManipulation(unittest.TestCase):
             comparison = X_scale == ones
             self.assertTrue(comparison.all())
         except Exception:
+            self.assertTrue(False)
+
+        test_data_set = np.random.rand(100,1)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            (n_observations, n_variables) = X_cs.shape
+            (n_centers,) = X_center.shape
+            (n_scales,) = X_scale.shape
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==1)
+            self.assertTrue(n_centers==1)
+            self.assertTrue(n_scales==1)
+            self.assertTrue(isinstance(X_cs, np.ndarray))
+            self.assertTrue(isinstance(X_center, np.ndarray))
+            self.assertTrue(isinstance(X_scale, np.ndarray))
+        except:
+            self.assertTrue(False)
+
+        test_data_set = np.random.rand(100,2)
+
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
+            (n_observations, n_variables) = X_cs.shape
+            (n_centers,) = X_center.shape
+            (n_scales,) = X_scale.shape
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==2)
+            self.assertTrue(n_centers==2)
+            self.assertTrue(n_scales==2)
+            self.assertTrue(isinstance(X_cs, np.ndarray))
+            self.assertTrue(isinstance(X_center, np.ndarray))
+            self.assertTrue(isinstance(X_scale, np.ndarray))
+        except:
             self.assertTrue(False)
 
     def test_invert_center_scale(self):
@@ -412,157 +426,39 @@ class TestManipulation(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
-    def test_invert_center_scale_on_0D_variable(self):
-        # This function tests all possible inversions of center_scale function:
-        test_data_set = np.random.rand(200,)
+    def test_invert_center_scale_not_allowed_calls(self):
 
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '0to1', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=False)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-        except Exception:
-            self.assertTrue(False)
+        X_cs = np.random.rand(100,)
+        X_center = np.array([0])
+        X_scale = np.array([1])
 
-        try:
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'none', nocenter=True)
+        with self.assertRaises(ValueError):
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'auto', nocenter=True)
+
+        with self.assertRaises(ValueError):
+            X = preprocess.invert_center_scale([1,2,3], X_center, X_scale)
+
+        X_cs = np.random.rand(100,2)
+
+        with self.assertRaises(ValueError):
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'std', nocenter=True)
+
+        X_scale = np.array([1,2])
+
+        with self.assertRaises(ValueError):
+            X = preprocess.invert_center_scale(X_cs, [0,0], X_scale)
+
+        X_center = np.array([1,2])
+
+        with self.assertRaises(ValueError):
+            X = preprocess.invert_center_scale(X_cs, X_center, [1,1])
+
+        X_cs = np.random.rand(100,10)
+        X_center = np.array([0,0,0,0])
+        X_scale = np.array([1,1,2,2])
+
+        with self.assertRaises(ValueError):
             X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'pareto', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'range', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '0to1', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_4', nocenter=True)
-            X = preprocess.invert_center_scale(X_cs, X_center, X_scale)
-            difference = abs(X.ravel() - test_data_set)
-            comparison = difference < 10**(-14)
-            self.assertTrue(comparison.all())
-        except Exception:
-            self.assertTrue(False)
 
     def test_invert_center_scale_on_1D_variable(self):
         # This function tests all possible inversions of center_scale function:
@@ -719,18 +615,9 @@ class TestManipulation(unittest.TestCase):
     def test_invert_center_scale_single_variable(self):
 
         try:
-            test_data_set = np.ones((200,))
-            X_result = 2*np.ones((200,))
-            X = preprocess.invert_center_scale(test_data_set, 0, 2)
-            comparison = X == X_result
-            self.assertTrue(comparison.all())
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            test_data_set = np.ones((200,))
-            X_result = 3*np.ones((200,))
-            X = preprocess.invert_center_scale(test_data_set, 1, 2)
+            test_data_set = np.ones((200,1))
+            X_result = 2*np.ones((200,1))
+            X = preprocess.invert_center_scale(test_data_set, np.array([0]), np.array([2]))
             comparison = X == X_result
             self.assertTrue(comparison.all())
         except Exception:
@@ -738,8 +625,8 @@ class TestManipulation(unittest.TestCase):
 
         try:
             test_data_set = np.ones((200,1))
-            X_result = 2*np.ones((200,))
-            X = preprocess.invert_center_scale(test_data_set, 0, 2)
+            X_result = 3*np.ones((200,1))
+            X = preprocess.invert_center_scale(test_data_set, np.array([1]), np.array([2]))
             comparison = X == X_result
             self.assertTrue(comparison.all())
         except Exception:
@@ -747,8 +634,17 @@ class TestManipulation(unittest.TestCase):
 
         try:
             test_data_set = np.ones((200,1))
-            X_result = 3*np.ones((200,))
-            X = preprocess.invert_center_scale(test_data_set, 1, 2)
+            X_result = 2*np.ones((200,1))
+            X = preprocess.invert_center_scale(test_data_set, np.array([0]), np.array([2]))
+            comparison = X == X_result
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            test_data_set = np.ones((200,1))
+            X_result = 3*np.ones((200,1))
+            X = preprocess.invert_center_scale(test_data_set, np.array([1]), np.array([2]))
             comparison = X == X_result
             self.assertTrue(comparison.all())
         except Exception:
@@ -803,6 +699,40 @@ class TestManipulation(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+    def test_remove_constant_vars_allowed_calls(self):
+
+        X = np.random.rand(100,20)
+
+        try:
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X)
+        except Exception:
+            self.assertTrue(False)
+
+        X = np.random.rand(100,1)
+
+        try:
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_remove_constant_vars_not_allowed_calls(self):
+
+        X = np.random.rand(100,)
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X)
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars([1,2,3,4,5])
+
+        X = np.random.rand(100,20)
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X, maxtol='none')
+
+        with self.assertRaises(ValueError):
+            (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X, rangetol='none')
+
     def test_order_variables_allowed_calls(self):
 
         X = np.array([[100, 1, 10, 0.1],
@@ -843,6 +773,17 @@ class TestManipulation(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+        X = np.ones((10,1))
+
+        try:
+            (X_ordered, idx) = preprocess.order_variables(X, method='mean', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='min', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='max', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='std', descending=False)
+            (X_ordered, idx) = preprocess.order_variables(X, method='var', descending=False)
+        except Exception:
+            self.assertTrue(False)
+
     def test_order_variables_not_allowed_calls(self):
 
         X = np.array([[100, 1, 10, 0.1],
@@ -860,6 +801,11 @@ class TestManipulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             (X_ordered, idx) = preprocess.order_variables([1,2,3], method='mean', descending=True)
+
+        X = np.array([1,10,100])
+
+        with self.assertRaises(ValueError):
+            (X_ordered, idx) = preprocess.order_variables(X, method='mean', descending=True)
 
     def test_PreProcessing(self):
 
@@ -898,7 +844,7 @@ class TestManipulation(unittest.TestCase):
         with self.assertRaises(AttributeError):
             pp.idx_retained = 1
 
-    def test_outliers_detection_allowed_calls(self):
+    def test_outlier_detection_allowed_calls(self):
 
         X = np.random.rand(100,10)
 
@@ -945,13 +891,13 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0.0)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1.0)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
@@ -975,23 +921,29 @@ class TestManipulation(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0, quantile_threshold=0.5)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0.0, quantile_threshold=0.5)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
         try:
-            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1, quantile_threshold=0.9)
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=1.0, quantile_threshold=0.9)
             self.assertTrue(not np.any(np.in1d(idx_outliers_removed, idx_outliers)))
         except Exception:
             self.assertTrue(False)
 
-    def test_outliers_detection_not_allowed_calls(self):
+    def test_outlier_detection_not_allowed_calls(self):
 
         X = np.random.rand(100,10)
 
         with self.assertRaises(ValueError):
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='scaling')
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', trimming_threshold=1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto', quantile_threshold=1)
 
         with self.assertRaises(ValueError):
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='method')
@@ -1019,6 +971,14 @@ class TestManipulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='none', method='PC CLASSIFIER', trimming_threshold=0.9, quantile_threshold=-1)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection([1,2,3], scaling='auto')
+
+        X = np.random.rand(100,)
+
+        with self.assertRaises(ValueError):
+            (idx_outliers_removed, idx_outliers) = preprocess.outlier_detection(X, scaling='auto')
 
     def test_KernelDensity_allowed_calls(self):
 

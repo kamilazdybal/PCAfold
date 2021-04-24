@@ -17,9 +17,9 @@ sys.path.insert(0, os.path.abspath('../PCAfold/'))
 # -- Project information -----------------------------------------------------
 
 project = 'PCAfold'
-copyright = '2020, Elizabeth Armstrong, Kamila Zdybal'
-author = 'Elizabeth Armstrong, Kamila Zdybal'
-release = '1.0.0'
+copyright = '2020, Elizabeth Armstrong, Kamila Zdybał'
+author = 'Elizabeth Armstrong, Kamila Zdybał'
+release = '1.0'
 
 # -- General configuration ---------------------------------------------------
 
@@ -80,7 +80,6 @@ pygments_style = 'sphinx'
 # documentation.
 #
 # html_theme_options = {}
-html_theme = 'alabaster'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -96,8 +95,49 @@ html_static_path = []
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
-import sphinx_rtd_theme
+# import sphinx_rtd_theme
+#
+# html_theme = "sphinx_rtd_theme"
+#
+# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-html_theme = "sphinx_rtd_theme"
+html_theme = "furo"
 
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_logo = "images/PCAfold-logo.svg"
+
+html_theme_options = {
+    "dark_css_variables": {
+        "color-problematic": "#b30000",
+        "color-foreground-primary": "black",
+        "color-foreground-secondary": "#5a5c63",
+        "color-foreground-muted": "#72747e",
+        "color-foreground-border": "#878787",
+        "color-background-primary": "white",
+        "color-background-secondary": "#f8f9fb",
+        "color-background-hover": "#efeff4ff",
+        "color-background-hover--transparent": "#efeff400",
+        "color-background-border": "#eeebee",
+        "color-inline-code-background": "#f2f2f2",
+
+        # Announcements
+        "color-announcement-background": "#000000dd",
+        "color-announcement-text": "#eeebee",
+
+        # Brand colors
+        "color-brand-primary": "#2962ff",
+        "color-brand-content": "#2a5adf",
+
+        # Highlighted text (search)
+        "color-highlighted-background": "#ddeeff",
+
+        # GUI Labels
+        "color-guilabel-background": "#ddeeff80",
+        "color-guilabel-border": "#bedaf580",
+
+        # API documentation
+        "color-api-highlight-on-target": "#ffffcc",
+
+        # Admonitions
+        "color-admonition-background": "transparent",
+    },
+}

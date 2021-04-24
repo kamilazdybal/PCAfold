@@ -1253,6 +1253,8 @@ class TestReduction(unittest.TestCase):
         idx[20:60,] = 1
         idx[150:190] = 2
 
+        idx = idx.astype(int)
+
         try:
             (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 1, X_source=[], n_iterations=10, stop_iter=0, random_seed=None, verbose=False)
             (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 2, X_source=[], n_iterations=10, stop_iter=0, random_seed=None, verbose=False)
@@ -1302,6 +1304,8 @@ class TestReduction(unittest.TestCase):
         idx = np.zeros((200,))
         idx[20:60,] = 1
         idx[150:190] = 2
+
+        idx = idx.astype(int)
 
         try:
             (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 20, 1, X_source=[], n_iterations=20, stop_iter=0, random_seed=None, verbose=False)

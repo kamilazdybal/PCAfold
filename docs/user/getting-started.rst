@@ -109,10 +109,19 @@ performing a specific task and can easily combine with techniques from outside o
 this software, such as K-Means algorithm or Artificial Neural Networks.
 
 The format for the user-supplied input data matrix
-:math:`\mathbf{X} \in \mathbb{R}^{N \times Q}` common to all modules is that
+:math:`\mathbf{X} \in \mathbb{R}^{N \times Q}`, common to all modules, is that
 :math:`N` observations are stored in rows and :math:`Q` variables are stored
-in columns. The initial dimensionality of the data set is determined by the
-number of variables :math:`Q`. Typically, :math:`N \gg Q`.
+in columns. Since typically :math:`N \gg Q`, the initial dimensionality of the
+data set is determined by the number of variables, :math:`Q`.
+
+.. math::
+
+  \mathbf{X} =
+  \begin{bmatrix}
+  \vdots & \vdots & & \vdots \\
+  X_1 & X_2 & \dots & X_{Q} \\
+  \vdots & \vdots & & \vdots \\
+  \end{bmatrix}
 
 Below are brief descriptions of several workflows that utilize functionalities of **PCAfold**:
 
