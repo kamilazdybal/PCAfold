@@ -8,13 +8,22 @@ The ``reduction`` module contains functions for performing Principal Component
 Analysis (PCA).
 
 .. note:: The format for the user-supplied input data matrix
-  :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}` common to all modules is that
+  :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}`, common to all modules, is that
   :math:`N` observations are stored in rows and :math:`Q` variables are stored
   in columns. Since typically :math:`N \gg Q`, the initial dimensionality of the
-  data set is determined by the number of variables :math:`Q`.
+  data set is determined by the number of variables, :math:`Q`.
 
-  The representation of the user-supplied data matrix in PCAfold
-  is the input parameter **X**, which should be of type ``numpy.ndarray``
+  .. math::
+
+    \mathbf{X} =
+    \begin{bmatrix}
+    \vdots & \vdots & & \vdots \\
+    X_1 & X_2 & \dots & X_{Q} \\
+    \vdots & \vdots & & \vdots \\
+    \end{bmatrix}
+
+  The representation of the user-supplied data matrix in **PCAfold**
+  is the input parameter ``X``, which should be of type ``numpy.ndarray``
   and of size ``(n_observations,n_variables)``.
 
 --------------------------------------------------------------------------------

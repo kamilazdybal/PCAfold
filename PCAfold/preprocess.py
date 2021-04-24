@@ -401,7 +401,7 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
 
     if not isinstance(X, np.ndarray):
-        raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
 
     try:
         (n_observations, n_variables) = np.shape(X)
@@ -485,7 +485,7 @@ def order_variables(X, method='mean', descending=True):
     __method = ['mean', 'min', 'max', 'std', 'var']
 
     if not isinstance(X, np.ndarray):
-        raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
 
     try:
         (n_observations, n_variables) = np.shape(X)
@@ -631,7 +631,7 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
     _detection_methods = ['MULTIVARIATE TRIMMING', 'PC CLASSIFIER']
 
     if not isinstance(X, np.ndarray):
-        raise ValueError("Parameter `X` has to be a `numpy.ndarray`.")
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
 
     try:
         (n_observations, n_variables) = np.shape(X)
@@ -845,25 +845,31 @@ class KernelDensity:
         weights = kerneld.weights
 
     :param X:
-        data set :math:`\mathbf{X}` that should be weighted.
+        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param conditioning_variable:
-        either a single variable or multiple variables to be used as a
+        ``numpy.ndarray`` specifying either a single variable or multiple variables to be used as a
         conditioning variable for kernel weighting procedure. Note that it can also
         be passed as the data set :math:`\mathbf{X}`.
 
-    :raises ValueError:
-        if the number of observations in ``X`` is different than the number of observations in ``conditioning_variable``.
-
     **Attributes:**
 
-        - **weights** - vector of computed weights :math:`\mathbf{W_c}`.
-        - **X_weighted** - weighted data set (each observation in\
-        :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`).
+        - **weights** - ``numpy.ndarray`` specifying the computed weights, :math:`\mathbf{W_c}`. It has size ``(n_observations,1)``.
+        - **X_weighted** - ``numpy.ndarray`` specifying the weighted data set (each observation in\
+        :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`). It has size ``(n_observations,n_variables)``.
     """
 
     def __init__(self, X, conditioning_variable, verbose=False):
 
-        (n_observations_X, n_variables_X) = np.shape(X)
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations_X, n_variables_X) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        if not isinstance(conditioning_variable, np.ndarray):
+            raise ValueError("Parameter `conditioning_variable` has to be of type `numpy.ndarray`.")
 
         try:
             (n_observations, n_variables) = np.shape(conditioning_variable)
@@ -1336,8 +1342,8 @@ class DataSampler:
             of the remaining samples as test data.
 
         :return:
-            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
-            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -1488,8 +1494,8 @@ class DataSampler:
             of the remaining samples as test data.
 
         :return:
-            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
-            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -1642,8 +1648,8 @@ class DataSampler:
             of the remaining samples as test data.
 
         :return:
-            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
-            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check that sampling_type is passed correctly:
@@ -1863,8 +1869,8 @@ class DataSampler:
             of the remaining samples as test data.
 
         :return:
-            - **idx_train** - ``numpy.ndarray`` of indices of the train data.
-            - **idx_test** - ``numpy.ndarray`` of indices of the test data.
+            - **idx_train** - ``numpy.ndarray`` of indices of the train data. It has size ``(n_train,)``.
+            - **idx_test** - ``numpy.ndarray`` of indices of the test data. It has size ``(n_test,)``.
         """
 
         # Check if `perc` parameter was passed correctly:
@@ -2443,7 +2449,7 @@ def degrade_clusters(idx, verbose=False):
         from PCAfold import degrade_clusters
 
         # Generate dummy idx vector:
-        idx = [0, 0, 2, 0, 5, 10]
+        idx = np.array([0, 0, 2, 0, 5, 10])
 
         # Degrade clusters:
         (idx_degraded, k_update) = degrade_clusters(idx)
@@ -2462,7 +2468,7 @@ def degrade_clusters(idx, verbose=False):
         from PCAfold import degrade_clusters
 
         # Generate dummy idx vector:
-        idx = [1, 1, 2, 2, 3, 3]
+        idx = np.array([1, 1, 2, 2, 3, 3])
 
         # Degrade clusters:
         (idx_degraded, k_update) = degrade_clusters(idx)
@@ -2522,14 +2528,14 @@ def degrade_clusters(idx, verbose=False):
 
     if verbose == True:
         print('Clusters have been degraded.')
-        print('The number of clusters have been reduced from ' + str(k_init) + ' to ' + str(k_update) + '.')
+        print('The true number of clusters is ' + str(k_update) + '.')
 
     return (np.asarray(idx_degraded), k_update)
 
 def flip_clusters(idx, dictionary):
     """
     Flips cluster labelling according to instructions provided
-    in the dictionary. For a ``dictionary = {key : value}``, a cluster with a
+    in a dictionary. For a ``dictionary = {key : value}``, a cluster with a
     number ``key`` will get a number ``value``.
 
     **Example:**
@@ -2539,7 +2545,7 @@ def flip_clusters(idx, dictionary):
         from PCAfold import flip_clusters
 
         # Generate dummy idx vector:
-        idx = [0,0,0,1,1,1,1,2,2]
+        idx = np.array([0,0,0,1,1,1,1,2,2])
 
         # Swap cluster number 1 with cluster number 2:
         flipped_idx = flip_clusters(idx, {1:2, 2:1})
@@ -2551,13 +2557,31 @@ def flip_clusters(idx, dictionary):
         >>> flipped_idx
         array([0, 0, 0, 2, 2, 2, 2, 1, 1])
 
+    .. note::
+
+        This function can also be used to merge clusters. Using the ``idx`` from the example above,
+        if we called:
+
+        .. code:: python
+
+            flipped_idx = flip_clusters(idx, {2:1})
+
+        the result will be:
+
+        .. code-block:: text
+
+            >>> flipped_idx
+            array([0,0,0,1,1,1,1,1,1])
+
+        where clusters ``1`` and ``2`` have been merged into one cluster numbered ``1``.
+
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param dictionary:
         ``dict`` specifying instructions for cluster label flipping.
 
     :return:
-        - **flipped_idx** - ``numpy.ndarray`` specifying the re-labelled cluster classifications.
+        - **flipped_idx** - ``numpy.ndarray`` specifying the re-labelled cluster classifications. It has size ``(n_observations,)``.
     """
 
     if isinstance(idx, np.ndarray):
@@ -2953,38 +2977,111 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
-        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
     :param grid_on:
-        boolean specifying whether grid should be plotted.
+        ``bool`` specifying whether grid should be plotted.
     :param figure_size:
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
+        ``str`` specifying plot save location/filename. If set to ``None``
         plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_x, ) = np.shape(x)
+        n_variables = 1
+    except:
+        (n_observations_x, n_variables) = np.shape(x)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `x` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_y, ) = np.shape(y)
+        n_variables = 1
+    except:
+        (n_observations_y, n_variables) = np.shape(y)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `y` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_y:
+        raise ValueError("Parameter `x` has different number of observations than parameter `y`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_variables = 1
+    except:
+        (n_observations_idx, n_variables) = np.shape(idx)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_idx:
+        raise ValueError("Parameter `idx` has different number of observations than parameters `x` and `y`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        raise ValueError("Parameter `color_map` has to be of type `str`.")
+
+    if not isinstance(first_cluster_index_zero, bool):
+        raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
+
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
@@ -3042,11 +3139,11 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param z:
-        variable on the :math:`z`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`z`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param elev: (optional)
@@ -3054,33 +3151,119 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
     :param azim: (optional)
         azimuth angle.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param z_label: (optional)
-        string specifying :math:`z`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`z`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
-        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
     :param figure_size:
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
+        ``str`` specifying plot save location/filename. If set to ``None``
         plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_x, ) = np.shape(x)
+        n_variables = 1
+    except:
+        (n_observations_x, n_variables) = np.shape(x)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `x` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_y, ) = np.shape(y)
+        n_variables = 1
+    except:
+        (n_observations_y, n_variables) = np.shape(y)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `y` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(z, np.ndarray):
+        raise ValueError("Parameter `z` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_z, ) = np.shape(z)
+        n_variables = 1
+    except:
+        (n_observations_z, n_variables) = np.shape(z)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `z` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if (n_observations_x != n_observations_y) or (n_observations_x != n_observations_z):
+        raise ValueError("Parameters `x`, `y` and `z` have different number of observations.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_variables = 1
+    except:
+        (n_observations_idx, n_variables) = np.shape(idx)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_idx:
+        raise ValueError("Parameter `idx` has different number of observations than parameters `x`, `y` and `z`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if z_label is not None:
+        if not isinstance(z_label, str):
+            raise ValueError("Parameter `z_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        raise ValueError("Parameter `color_map` has to be of type `str`.")
+
+    if not isinstance(first_cluster_index_zero, bool):
+        raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
     from mpl_toolkits.mplot3d import Axes3D
@@ -3203,42 +3386,121 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx_train:
-        indices of the train data.
+        ``numpy.ndarray`` specifying the indices of the train data. It should be of size ``(n_train,)`` or ``(n_train,1)``.
     :param idx_test:
-        indices of the test data.
+        ``numpy.ndarray`` specifying the indices of the test data. It should be of size ``(n_test,)`` or ``(n_test,1)``.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
-        boolean specifying if the first cluster should be indexed ``0`` on the plot.
+        ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
     :param grid_on:
-        boolean specifying whether grid should be plotted.
+        ``bool`` specifying whether grid should be plotted.
     :param figure_size:
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
+        ``str`` specifying plot save location/filename. If set to ``None``
         plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_x, ) = np.shape(x)
+        n_variables = 1
+    except:
+        (n_observations_x, n_variables) = np.shape(x)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `x` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_y, ) = np.shape(y)
+        n_variables = 1
+    except:
+        (n_observations_y, n_variables) = np.shape(y)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `y` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_y:
+        raise ValueError("Parameter `x` has different number of observations than parameter `y`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_variables = 1
+    except:
+        (n_observations_idx, n_variables) = np.shape(idx)
+
+    if n_variables != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_x != n_observations_idx:
+        raise ValueError("Parameter `idx` has different number of observations than parameters `x` and `y`.")
+
+    if not isinstance(idx_train, np.ndarray):
+        raise ValueError("Parameter `idx_train` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(idx_test, np.ndarray):
+        raise ValueError("Parameter `idx_test` has to be of type `numpy.ndarray`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        raise ValueError("Parameter `color_map` has to be of type `str`.")
+
+    if not isinstance(first_cluster_index_zero, bool):
+        raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
+
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
