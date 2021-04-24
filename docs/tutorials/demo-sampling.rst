@@ -16,8 +16,8 @@ First, we generate a synthetic data set that is composed of four distinct
 clusters that have imbalanced number of observations (100, 250, 400 and 500
 which amounts to 1250 total number of observations):
 
-.. image:: ../images/tutorial-train-test-select-original-data-set.png
-  :width: 350
+.. image:: ../images/tutorial-train-test-select-original-data-set.svg
+  :width: 500
   :align: center
 
 The only information about the original data set that will be needed is
@@ -96,7 +96,7 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-fixed-number-1.png
+.. image:: ../images/tutorial-train-test-select-fixed-number-1.svg
   :width: 700
   :align: center
 
@@ -130,7 +130,7 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-fixed-number-2.png
+.. image:: ../images/tutorial-train-test-select-fixed-number-2.svg
   :width: 700
   :align: center
 
@@ -172,7 +172,7 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-fixed-percentage-1.png
+.. image:: ../images/tutorial-train-test-select-fixed-percentage-1.svg
   :width: 700
   :align: center
 
@@ -206,7 +206,7 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-fixed-percentage-2.png
+.. image:: ../images/tutorial-train-test-select-fixed-percentage-2.svg
   :width: 700
   :align: center
 
@@ -253,7 +253,7 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-manually-1.png
+.. image:: ../images/tutorial-train-test-select-manually-1.svg
   :width: 700
   :align: center
 
@@ -290,7 +290,7 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-manually-2.png
+.. image:: ../images/tutorial-train-test-select-manually-2.svg
   :width: 700
   :align: center
 
@@ -325,21 +325,21 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 .. code-block:: text
 
-  Cluster 0: taking 5 train samples out of 100 observations (5.0%).
-  Cluster 1: taking 29 train samples out of 250 observations (11.6%).
-  Cluster 2: taking 35 train samples out of 400 observations (8.8%).
-  Cluster 3: taking 56 train samples out of 500 observations (11.2%).
+  Cluster 0: taking 14 train samples out of 100 observations (14.0%).
+  Cluster 1: taking 28 train samples out of 250 observations (11.2%).
+  Cluster 2: taking 42 train samples out of 400 observations (10.5%).
+  Cluster 3: taking 41 train samples out of 500 observations (8.2%).
 
-  Cluster 0: taking 95 test samples out of 95 remaining observations (100.0%).
-  Cluster 1: taking 221 test samples out of 221 remaining observations (100.0%).
-  Cluster 2: taking 365 test samples out of 365 remaining observations (100.0%).
-  Cluster 3: taking 444 test samples out of 444 remaining observations (100.0%).
+  Cluster 0: taking 86 test samples out of 86 remaining observations (100.0%).
+  Cluster 1: taking 222 test samples out of 222 remaining observations (100.0%).
+  Cluster 2: taking 358 test samples out of 358 remaining observations (100.0%).
+  Cluster 3: taking 459 test samples out of 459 remaining observations (100.0%).
 
   Selected 125 train samples (10.0%) and 1125 test samples (90.0%).
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-random-doc-1.png
+.. image:: ../images/tutorial-train-test-select-random-doc-1.svg
   :width: 700
   :align: center
 
@@ -359,21 +359,21 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 .. code-block:: text
 
-  Cluster 0: taking 8 train samples out of 100 observations (8.0%).
-  Cluster 1: taking 20 train samples out of 250 observations (8.0%).
+  Cluster 0: taking 14 train samples out of 100 observations (14.0%).
+  Cluster 1: taking 28 train samples out of 250 observations (11.2%).
   Cluster 2: taking 42 train samples out of 400 observations (10.5%).
-  Cluster 3: taking 55 train samples out of 500 observations (11.0%).
+  Cluster 3: taking 41 train samples out of 500 observations (8.2%).
 
-  Cluster 0: taking 13 test samples out of 92 remaining observations (14.1%).
-  Cluster 1: taking 22 test samples out of 230 remaining observations (9.6%).
-  Cluster 2: taking 37 test samples out of 358 remaining observations (10.3%).
-  Cluster 3: taking 53 test samples out of 445 remaining observations (11.9%).
+  Cluster 0: taking 8 test samples out of 86 remaining observations (9.3%).
+  Cluster 1: taking 25 test samples out of 222 remaining observations (11.3%).
+  Cluster 2: taking 29 test samples out of 358 remaining observations (8.1%).
+  Cluster 3: taking 63 test samples out of 459 remaining observations (13.7%).
 
   Selected 125 train samples (10.0%) and 125 test samples (10.0%).
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-random-doc-2.png
+.. image:: ../images/tutorial-train-test-select-random-doc-2.svg
   :width: 700
   :align: center
 
@@ -393,8 +393,8 @@ We simulate this situation by appending additional samples to the previously
 defined data set. We add 20 samples in each cluster - those can be seen in the
 figure below as smaller clouds next to each cluster:
 
-.. image:: ../images/tutorial-train-test-select-original-data-set-appended-doc.png
-  :width: 350
+.. image:: ../images/tutorial-train-test-select-original-data-set-appended-doc.svg
+  :width: 500
   :align: center
 
 If we know the indices of points that represent the appended clouds, stored in
@@ -419,21 +419,21 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 .. code-block:: text
 
-  Cluster 0: taking 76 train samples out of 120 observations (63.3%).
-  Cluster 1: taking 212 train samples out of 270 observations (78.5%).
-  Cluster 2: taking 337 train samples out of 420 observations (80.2%).
-  Cluster 3: taking 439 train samples out of 520 observations (84.4%).
+  Cluster 0: taking 86 train samples out of 120 observations (71.7%).
+  Cluster 1: taking 211 train samples out of 270 observations (78.1%).
+  Cluster 2: taking 347 train samples out of 420 observations (82.6%).
+  Cluster 3: taking 420 train samples out of 520 observations (80.8%).
 
-  Cluster 0: taking 20 test samples out of 44 remaining observations (45.5%).
-  Cluster 1: taking 20 test samples out of 58 remaining observations (34.5%).
-  Cluster 2: taking 20 test samples out of 83 remaining observations (24.1%).
-  Cluster 3: taking 20 test samples out of 81 remaining observations (24.7%).
+  Cluster 0: taking 20 test samples out of 34 remaining observations (58.8%).
+  Cluster 1: taking 20 test samples out of 59 remaining observations (33.9%).
+  Cluster 2: taking 20 test samples out of 73 remaining observations (27.4%).
+  Cluster 3: taking 20 test samples out of 100 remaining observations (20.0%).
 
   Selected 1064 train samples (80.0%) and 80 test samples (6.0%).
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-random-with-idx-test-doc.png
+.. image:: ../images/tutorial-train-test-select-random-with-idx-test-doc.svg
   :width: 700
   :align: center
 
@@ -489,7 +489,7 @@ With ``verbose=True`` we will see some detailed information on sampling:
 
 The visual result of this sampling can be seen below:
 
-.. image:: ../images/tutorial-train-test-select-chaining-functions.png
+.. image:: ../images/tutorial-train-test-select-chaining-functions.svg
   :width: 700
   :align: center
 

@@ -5,29 +5,31 @@ Clustering
 ==========
 
 In this tutorial we present the clustering functionalities of the ``preprocess``
-module. To import the module:
+module.
+
+We import the necessary modules:
 
 .. code:: python
 
   from PCAfold import preprocess
+  from PCAfold import reduction
+  import numpy as np
 
 First, we generate a synthetic two-dimensional data set:
 
 .. code:: python
 
-  import numpy as np
-
-  var = np.linspace(-1,1,100)
-  y = -var**2 + 1
+  x = np.linspace(-1,1,100)
+  y = -x**2 + 1
 
 Which can be seen below:
 
-.. image:: ../images/tutorial-clustering-original-data-set.png
-  :width: 350
+.. image:: ../images/tutorial-clustering-original-data-set.svg
+  :width: 400
   :align: center
 
 Let's start with clustering the data set according to bins of a single vector.
-This clustering will be performed based on ``var``.
+This clustering will be performed based on ``x``.
 
 --------------------------------------------------------------------------------
 
@@ -38,7 +40,7 @@ This clustering will divide the data set based on equal bins of a variable vecto
 
 .. code:: python
 
-  (idx_variable_bins, borders_variable_bins) = preprocess.variable_bins(var, 4, verbose=True)
+  (idx_variable_bins, borders_variable_bins) = preprocess.variable_bins(x, 4, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -58,8 +60,8 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 The visual result of this clustering can be seen below:
 
-.. image:: ../images/tutorial-clustering-variable-bins-k4.png
-  :width: 350
+.. image:: ../images/tutorial-clustering-variable-bins-k4.svg
+  :width: 500
   :align: center
 
 Cluster into pre-defined variable bins
@@ -70,7 +72,7 @@ This clustering will divide the data set into bins of a one-dimensional variable
 .. code:: python
 
   split_values = [-0.6, 0.4, 0.8]
-  (idx_predefined_variable_bins, borders_predefined_variable_bins) = preprocess.predefined_variable_bins(var, split_values, verbose=True)
+  (idx_predefined_variable_bins, borders_predefined_variable_bins) = preprocess.predefined_variable_bins(x, split_values, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -90,8 +92,8 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 The visual result of this clustering can be seen below:
 
-.. image:: ../images/tutorial-clustering-predefined-variable-bins-k4.png
-  :width: 350
+.. image:: ../images/tutorial-clustering-predefined-variable-bins-k4.svg
+  :width: 500
   :align: center
 
 Cluster into zero-neighborhood variable bins
@@ -108,7 +110,7 @@ Without splitting at zero ``split_at_zero=False``
 
 .. code:: python
 
-  (idx_zero_neighborhood_bins, borders_zero_neighborhood_bins) = preprocess.zero_neighborhood_bins(var, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
+  (idx_zero_neighborhood_bins, borders_zero_neighborhood_bins) = preprocess.zero_neighborhood_bins(x, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -126,8 +128,8 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 The visual result of this clustering can be seen below:
 
-.. image:: ../images/tutorial-clustering-zero-neighborhood-bins-k3.png
-  :width: 350
+.. image:: ../images/tutorial-clustering-zero-neighborhood-bins-k3.svg
+  :width: 500
   :align: center
 
 With splitting at zero ``split_at_zero=True``
@@ -135,7 +137,7 @@ With splitting at zero ``split_at_zero=True``
 
 .. code:: python
 
-  (idx_zero_neighborhood_bins_split_at_zero, borders_zero_neighborhood_bins_split_at_zero) = preprocess.zero_neighborhood_bins(var, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+  (idx_zero_neighborhood_bins_split_at_zero, borders_zero_neighborhood_bins_split_at_zero) = preprocess.zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -155,9 +157,11 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 The visual result of this clustering can be seen below:
 
-.. image:: ../images/tutorial-clustering-zero-neighborhood-bins-split-at-zero-k4.png
-  :width: 350
+.. image:: ../images/tutorial-clustering-zero-neighborhood-bins-split-at-zero-k4.svg
+  :width: 500
   :align: center
+
+--------------------------------------------------------------------------------
 
 Cluster into bins of mixture fraction vector
 --------------------------------------------
@@ -196,6 +200,6 @@ With ``verbose=True`` we will see some detailed information on clustering:
 
 The visual result of this clustering can be seen below:
 
-.. image:: ../images/tutorial-clustering-mixture-fraction-bins-k4.png
-  :width: 350
+.. image:: ../images/tutorial-clustering-mixture-fraction-bins-k4.svg
+  :width: 500
   :align: center

@@ -62,13 +62,13 @@ Two weight normalizations are available:
 
 - No normalization. To use this variant set ``plot_absolute=False``. Example can be seen below:
 
-.. image:: ../images/eigenvector-1-plotting-pca.png
+.. image:: ../images/eigenvector-1-plotting-pca.svg
     :width: 500
     :align: center
 
 - Absolute values. To use this variant set ``plot_absolute=True``. Example can be seen below:
 
-.. image:: ../images/eigenvector-1-plotting-pca-absolute.png
+.. image:: ../images/eigenvector-1-plotting-pca-absolute.svg
     :width: 500
     :align: center
 
@@ -90,13 +90,13 @@ Two weight normalizations are available:
 
 - No normalization. To use this variant set ``plot_absolute=False``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-eigenvectors-comparison.png
+.. image:: ../images/plotting-pca-eigenvectors-comparison.svg
     :width: 500
     :align: center
 
 - Absolute values. To use this variant set ``plot_absolute=True``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-eigenvectors-comparison-absolute.png
+.. image:: ../images/plotting-pca-eigenvectors-comparison-absolute.svg
     :width: 500
     :align: center
 
@@ -117,13 +117,13 @@ Two eigenvalue normalizations are available:
 
 - No normalization. To use this variant set ``normalized=False``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-eigenvalue-distribution.png
+.. image:: ../images/plotting-pca-eigenvalue-distribution.svg
     :width: 500
     :align: center
 
 - Normalized to 1. To use this variant set ``normalized=True``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-eigenvalue-distribution-normalized.png
+.. image:: ../images/plotting-pca-eigenvalue-distribution-normalized.svg
     :width: 500
     :align: center
 
@@ -145,13 +145,13 @@ Two eigenvalue normalizations are available:
 
 - No normalization. To use this variant set ``normalized=False``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-eigenvalue-distribution-comparison.png
+.. image:: ../images/plotting-pca-eigenvalue-distribution-comparison.svg
     :width: 500
     :align: center
 
 - Normalized to 1. To use this variant set ``normalized=True``. Example can be seen below:
 
-.. image:: ../images/plotting-pca-eigenvalue-distribution-comparison-normalized.png
+.. image:: ../images/plotting-pca-eigenvalue-distribution-comparison-normalized.svg
     :width: 500
     :align: center
 
@@ -171,7 +171,7 @@ Plotting example
 
 Example of a plot:
 
-.. image:: ../images/cumulative-variance.png
+.. image:: ../images/cumulative-variance.svg
     :width: 500
     :align: center
 
@@ -179,7 +179,7 @@ The number of eigenvalues to look at can also be truncated by setting
 ``n_components`` input parameter accordingly. Example of a plot when
 ``n_components=5`` in this case:
 
-.. image:: ../images/cumulative-variance-truncated.png
+.. image:: ../images/cumulative-variance-truncated.svg
     :width: 300
     :align: center
 
@@ -215,19 +215,19 @@ Plotting example
 
 Example of an uncolored plot:
 
-.. image:: ../images/plotting-pca-2d-manifold-black.png
+.. image:: ../images/plotting-pca-2d-manifold-black.svg
     :width: 400
     :align: center
 
 Example of using ``color_map='inferno'`` and coloring by the first variable in the data set:
 
-.. image:: ../images/plotting-pca-2d-manifold-inferno.png
+.. image:: ../images/plotting-pca-2d-manifold-inferno.svg
     :width: 500
     :align: center
 
 Example of using ``color_map='Blues'`` and coloring by the first variable in the data set:
 
-.. image:: ../images/plotting-pca-2d-manifold-blues.png
+.. image:: ../images/plotting-pca-2d-manifold-blues.svg
     :width: 500
     :align: center
 
@@ -244,7 +244,7 @@ Similarly, a three-dimensional manifold can be plotted:
 Plotting example
 ^^^^^^^^^^^^^^^^
 
-.. image:: ../images/plotting-pca-3d-manifold.png
+.. image:: ../images/plotting-pca-3d-manifold.svg
     :width: 500
     :align: center
 
@@ -271,7 +271,7 @@ Plotting example
 
 Example of a plot:
 
-.. image:: ../images/plotting-pca-parity.png
+.. image:: ../images/plotting-pca-parity.svg
     :width: 500
     :align: center
 
