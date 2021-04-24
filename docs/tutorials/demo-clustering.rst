@@ -1,10 +1,10 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
           accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/docs/tutorials/demo-clustering.ipynb>`_.
 
-Clustering
-==========
+Data clustering
+====================
 
-In this tutorial we present the clustering functionalities of the ``preprocess``
+In this tutorial, we present the clustering functionalities of the ``preprocess``
 module.
 
 We import the necessary modules:
@@ -14,6 +14,19 @@ We import the necessary modules:
   from PCAfold import preprocess
   from PCAfold import reduction
   import numpy as np
+  from matplotlib.colors import ListedColormap
+  from sklearn.preprocessing import StandardScaler
+  from sklearn.cluster import KMeans
+
+We set some initial parameters:
+
+.. code:: python
+
+  x_label = '$x$'
+  y_label = '$y$'
+  z_label = '$z$'
+  figure_size = (6,3)
+  color_map = ListedColormap(['#0e7da7', '#ceca70', '#b45050', '#2d2d54'])
 
 First, we generate a synthetic two-dimensional data set:
 
@@ -22,7 +35,11 @@ First, we generate a synthetic two-dimensional data set:
   x = np.linspace(-1,1,100)
   y = -x**2 + 1
 
-Which can be seen below:
+The data set can be visualized using the function from the ``reduction`` module:
+
+.. code:: python
+
+  plt = reduction.plot_2d_manifold(x, y, x_label=x_label, y_label=y_label, figure_size=figure_size, save_filename=None)
 
 .. image:: ../images/tutorial-clustering-original-data-set.svg
   :width: 400
@@ -57,6 +74,12 @@ With ``verbose=True`` we will see some detailed information on clustering:
   	0.0101, 0.4949
   Bounds for cluster 3:
   	0.5152, 1.0
+
+The result of clustering can be plotted in 2D:
+
+.. code:: python
+
+  plt = preprocess.plot_2d_clusteringplt = preprocess.plot_2d_clustering(x, y, idx_variable_bins, x_label=x_label, y_label=y_label, color_map=color_map, first_cluster_index_zero=False, grid_on=True, figure_size=figure_size, save_filename=None)
 
 The visual result of this clustering can be seen below:
 
@@ -202,4 +225,70 @@ The visual result of this clustering can be seen below:
 
 .. image:: ../images/tutorial-clustering-mixture-fraction-bins-k4.svg
   :width: 500
+  :align: center
+
+--------------------------------------------------------------------------------
+
+Visualize the clustering result in 3D
+--------------------------------------------
+
+Clustering result can also be visualized in a three-dimensional space. In this
+example, we generate a synthetic 3D data set composed of three connected planes:
+
+.. code:: python
+
+  n_observations = 200
+
+  x = np.tile(np.linspace(0,50,n_observations), n_observations)
+  y = np.zeros((n_observations,1))
+  z = np.zeros((n_observations*n_observations,1))
+
+  for i in range(1,n_observations):
+      y = np.vstack((y, np.ones((n_observations,1))*i))
+  y = y.ravel()
+
+  for observation, x_value in enumerate(x):
+
+      y_value = y[observation]
+
+      if x_value <= 10:
+          z[observation] = 2 * x_value + y_value
+      elif x_value > 10 and x_value <= 35:
+          z[observation] = 10 * x_value + y_value - 80
+      elif x_value > 35:
+          z[observation] = 5 * x_value + y_value + 95
+
+  (x, _, _) = preprocess.center_scale(x[:,None], scaling='0to1')
+  (y, _, _) = preprocess.center_scale(y[:,None], scaling='0to1')
+  (z, _, _) = preprocess.center_scale(z, scaling='0to1')
+
+The original data set can be visualized using the function from the ``reduction`` module:
+
+.. code:: python
+
+  plt = reduction.plot_3d_manifold(x, y, z, elev=30, azim=-100, x_label=x_label, y_label=y_label, z_label=z_label, figure_size=(12,8), save_filename=None)
+
+.. image:: ../images/tutorial-clustering-3d-data-set.svg
+  :width: 500
+  :align: center
+
+and divide it into four clusters using the K-Means algorithm:
+
+.. code:: python
+
+  from sklearn.preprocessing import StandardScaler
+  from sklearn.cluster import KMeans
+
+  scaler = StandardScaler()
+  conditioning_var = scaler.fit_transform(data_set_3d)
+  idx_kmeans = KMeans(n_clusters=3).fit(conditioning_var).labels_
+
+The result of the K-Means clustering can be plotted in 3D:
+
+.. code:: python
+
+  plt = preprocess.plot_3d_clustering(x, y, z, idx_kmeans, elev=30, azim=-100, x_label=x_label, y_label=y_label, z_label=z_label, color_map=color_map, first_cluster_index_zero=False, figure_size=(12,8), save_filename=None)
+
+.. image:: ../images/tutorial-clustering-3d-data-set-kmeans.svg
+  :width: 650
   :align: center
