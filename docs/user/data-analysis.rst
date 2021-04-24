@@ -22,6 +22,9 @@ dimensionality and quality of manifolds.
     \vdots & \vdots & & \vdots \\
     \end{bmatrix}
 
+  The general agreement throughout this documentation is that :math:`i` will
+  index observations and :math:`j` will index variables.
+
   The representation of the user-supplied data matrix in **PCAfold**
   is the input parameter ``X``, which should be of type ``numpy.ndarray``
   and of size ``(n_observations,n_variables)``.

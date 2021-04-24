@@ -27,34 +27,32 @@ _scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', 
 def center_scale(X, scaling, nocenter=False):
     """
     Centers and scales the data set.
-
-    In the discussion below we understand that :math:`\mathbf{X}_i` is the :math:`i^{th}` column
+    In the discussion below, we understand that :math:`X_j` is the :math:`j^{th}` column
     of :math:`\mathbf{X}`.
 
-    - Centering is performed by subtracting a center :math:`C_i` from
-      :math:`\mathbf{X}_i`, where centers for all columns are stored
-      in a vector :math:`\mathbf{C}`:
+    - **Centering** is performed by subtracting the center, :math:`c_j`, from\
+    :math:`X_j`, where centers for all columns are stored in the matrix :math:`\mathbf{C}`:
 
-        .. math::
+    .. math::
 
-            \mathbf{X_c} = \mathbf{X} - \mathbf{C}
+        \mathbf{X_c} = \mathbf{X} - \mathbf{C}
 
-      Centers for each column are computed as:
+    Centers for each column are computed as:
 
-        .. math::
+    .. math::
 
-            C_i = mean(\mathbf{X}_i)
+        c_j = mean(X_j)
 
-      The only exceptions are the *0 to 1* and *-1 to 1* scalings which introduce a different
-      quantity to center each column.
+    with the only exceptions of ``'0to1'`` and ``'-1to1'`` scalings, which introduce a different
+    quantity to center each column.
 
-    - Scaling is performed by dividing :math:`\mathbf{X}_i` by a scaling
-      factor :math:`d_i`, where scaling factors
-      for all columns are stored in a vector :math:`\mathbf{D}`:
+    - **Scaling** is performed by dividing :math:`X_j` by the scaling\
+    factor, :math:`d_j`, where scaling factors\
+    for all columns are stored in the diagonal matrix :math:`\mathbf{D}`:
 
-      .. math::
+    .. math::
 
-          \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
+        \mathbf{X_s} = \mathbf{X} \\cdot \mathbf{D}^{-1}
 
     If both centering and scaling is applied:
 
@@ -65,7 +63,7 @@ def center_scale(X, scaling, nocenter=False):
     Several scaling options are implemented here:
 
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Scaling method             | ``scaling``              | Scaling factor :math:`d_i`                                         |
+    | Scaling method             | ``scaling``              | Scaling factor :math:`d_j`                                         |
     +============================+==========================+====================================================================+
     | None                       | ``'none'``               | 1                                                                  |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
@@ -73,33 +71,33 @@ def center_scale(X, scaling, nocenter=False):
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | Pareto :cite:`Noda2008`    | ``'pareto'``             | :math:`\sqrt{\sigma}`                                              |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | VAST :cite:`Keun2003`      | ``'vast'``               | :math:`\sigma^2 / mean(\mathbf{X}_i)`                              |
+    | VAST :cite:`Keun2003`      | ``'vast'``               | :math:`\sigma^2 / mean(X_j)`                                       |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Range                      | ``'range'``              | :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)`                      |
+    | Range                      | ``'range'``              | :math:`max(X_j) - min(X_j)`                                        |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | | 0 to 1                   | | ``'0to1'``             | | :math:`d_i = max(\mathbf{X}_i) - min(\mathbf{X}_i)`              |
-    | |                          | |                        | | :math:`C_i = min(\mathbf{X}_i)`                                  |
+    | | 0 to 1                   | | ``'0to1'``             | | :math:`d_j = max(X_j) - min(X_j)`                                |
+    | |                          | |                        | | :math:`c_j = min(X_j)`                                           |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | | -1 to 1                  | | ``'-1to1'``            | | :math:`d_i = 0.5 \cdot (max(\mathbf{X}_i) - min(\mathbf{X}_i))`  |
-    | |                          | |                        | | :math:`C_i = 0.5 \cdot (max(\mathbf{X}_i) + min(\mathbf{X}_i))`  |
+    | | -1 to 1                  | | ``'-1to1'``            | | :math:`d_j = 0.5 \cdot (max(X_j) - min(X_j))`                    |
+    | |                          | |                        | | :math:`c_j = 0.5 \cdot (max(X_j) + min(X_j))`                    |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Level                      | ``'level'``              | :math:`mean(\mathbf{X}_i)`                                         |
+    | Level                      | ``'level'``              | :math:`mean(X_j)`                                                  |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Max                        | ``'max'``                | :math:`max(\mathbf{X}_i)`                                          |
+    | Max                        | ``'max'``                | :math:`max(X_j)`                                                   |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Poisson :cite:`Keenan2004` |``'poisson'``             | :math:`\sqrt{mean(\mathbf{X}_i)}`                                  |
+    | Poisson :cite:`Keenan2004` |``'poisson'``             | :math:`\sqrt{mean(X_j)}`                                           |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-2                     | ``'vast_2'``             | :math:`\sigma^2 k^2 / mean(\mathbf{X}_i)`                          |
+    | Vast-2                     | ``'vast_2'``             | :math:`\sigma^2 k^2 / mean(X_j)`                                   |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-3                     | ``'vast_3'``             | :math:`\sigma^2 k^2 / max(\mathbf{X}_i)`                           |
+    | Vast-3                     | ``'vast_3'``             | :math:`\sigma^2 k^2 / max(X_j)`                                    |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-4                     | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(\mathbf{X}_i) - min(\mathbf{X}_i))`     |
+    | Vast-4                     | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(X_j) - min(X_j))`                       |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
 
-    where :math:`\sigma` is the standard deviation of :math:`\mathbf{X}_i`
-    and :math:`k` is the kurtosis of :math:`\mathbf{X}_i`.
+    where :math:`\sigma` is the standard deviation of :math:`X_j`
+    and :math:`k` is the kurtosis of :math:`X_j`.
 
-    The effect of data pre-processing (including scaling) on low-dimensional manifolds was studied
+    The effect of data preprocessing (including scaling) on low-dimensional manifolds was studied
     in :cite:`Parente2013`.
 
     **Example:**
@@ -116,7 +114,7 @@ def center_scale(X, scaling, nocenter=False):
         (X_cs, X_center, X_scale) = center_scale(X, 'range', nocenter=False)
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
@@ -125,9 +123,9 @@ def center_scale(X, scaling, nocenter=False):
         ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
     :return:
-        - **X_cs** - ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`. It has size ``(n_observations,n_variables)``.
-        - **X_center** - ``numpy.ndarray`` specifying the centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
-        - **X_scale** - ``numpy.ndarray`` specifying the scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
+        - **X_cs** - ``numpy.ndarray`` specifying the centered and scaled data set, :math:`\mathbf{X_{cs}}`. It has size ``(n_observations,n_variables)``.
+        - **X_center** - ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
+        - **X_scale** - ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It has size ``(n_variables,)``.
     """
 
     if not isinstance(X, np.ndarray):
@@ -232,14 +230,14 @@ def invert_center_scale(X_cs, X_center, X_scale):
         X = invert_center_scale(X_cs, X_center, X_scale)
 
     :param X_cs:
-        ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the centered and scaled data set, :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
     :param X_center:
-        ``numpy.ndarray`` specifying the centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+        ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     :param X_scale:
-        ``numpy.ndarray`` specifying the scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+        ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
 
     :return:
-        - **X** - ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It has size ``(n_observations,n_variables)``.
+        - **X** - ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It has size ``(n_observations,n_variables)``.
     """
 
     if not isinstance(X_cs, np.ndarray):
@@ -306,7 +304,7 @@ class PreProcessing:
         preprocessed = PreProcessing(X, 'range', nocenter=False)
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
@@ -316,12 +314,12 @@ class PreProcessing:
 
     **Attributes:**
 
-        - **X_removed** - (read only) ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}` with any constant columns removed. It has size ``(n_observations,n_variables)``.
-        - **idx_removed** - (read only) ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
-        - **idx_retained** - (read only) ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
-        - **X_cs** - (read only) ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
-        - **X_center** - (read only) ``numpy.ndarray`` specifying the centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
-        - **X_scale** - (read only) ``numpy.ndarray`` specifying the scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+    - **X_removed** - (read only) ``numpy.ndarray`` specifying the original data set with any constant columns removed. It has size ``(n_observations,n_variables)``.
+    - **idx_removed** - (read only) ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
+    - **idx_retained** - (read only) ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
+    - **X_cs** - (read only) ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
+    - **X_center** - (read only) ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+    - **X_scale** - (read only) ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     """
 
     def __init__(self, X, scaling='none', nocenter=False):
@@ -356,21 +354,21 @@ class PreProcessing:
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
     Removes any constant columns in the data set :math:`\mathbf{X}`.
-    The :math:`i^{th}` column :math:`\mathbf{X}_i` is considered constant if either of the following is true:
+    The :math:`j^{th}` column :math:`X_j` is considered constant if either of the following is true:
 
-    - the maximum of an absolute value of a column :math:`\mathbf{X}_i` is less than ``maxtol``:
-
-    .. math::
-
-        max(|\mathbf{X}_i|) < \\verb|maxtol|
-
-    - the ratio of the range of values in a column :math:`\mathbf{X}_i` to :math:`max(|\mathbf{X}_i|)` is less than ``rangetol``:
+    - The maximum of an absolute value of a column :math:`X_j` is less than ``maxtol``:
 
     .. math::
 
-        \\frac{max(\mathbf{X}_i) - min(\mathbf{X}_i)}{max(|\mathbf{X}_i|)} < \\verb|rangetol|
+        max(|X_j|) < \\verb|maxtol|
 
-    Specifically, it can be used as pre-processing for PCA so the eigenvalue
+    - The ratio of the range of values in a column :math:`X_j` to :math:`max(|X_j|)` is less than ``rangetol``:
+
+    .. math::
+
+        \\frac{max(X_j) - min(X_j)}{max(|X_j|)} < \\verb|rangetol|
+
+    Specifically, it can be used as preprocessing for PCA so the eigenvalue
     calculation doesn't break.
 
     **Example:**
@@ -388,14 +386,14 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
         (X_removed, idx_removed, idx_retained) = remove_constant_vars(X)
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param maxtol: (optional)
-        ``float`` specifying the tolerance for :math:`max(|\mathbf{X}_i|)`.
+        ``float`` specifying the tolerance for :math:`max(|X_j|)`.
     :param rangetol: (optional)
-        ``float`` specifying the tolerance for :math:`max(\mathbf{X}_i) - min(\mathbf{X}_i)` over :math:`max(|\mathbf{X}_i|)`.
+        ``float`` specifying the tolerance for :math:`max(X_j) - min(X_j)` over :math:`max(|X_j|)`.
 
     :return:
-        - **X_removed** - ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}` with any constant columns removed. It has size ``(n_observations,n_variables)``.
+        - **X_removed** - ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}` with any constant columns removed. It has size ``(n_observations,n_variables)``.
         - **idx_removed** - ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
         - **idx_retained** - ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
     """
@@ -469,7 +467,7 @@ def order_variables(X, method='mean', descending=True):
         [1, 2, 0]
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param method: (optional)
         ``str`` specifying the ordering method. It can be one of the following:
         ``'mean'``, ``'min'``, ``'max'``, ``'std'`` or ``'var'``.
@@ -528,63 +526,61 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
     """
     Finds outliers in a data set :math:`\mathbf{X}` and returns
     indices of observations without outliers as well as indices of the outliers
-    themselves.
-
-    Two options are implemented here:
+    themselves. Two options are implemented here:
 
     - ``'MULTIVARIATE TRIMMING'``
 
-        Outliers are detected based on multivariate Mahalanobis distance :math:`D_M`:
+    Outliers are detected based on multivariate Mahalanobis distance :math:`D_M`:
 
-        .. math::
+    .. math::
 
-            D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
+        D_M = \\sqrt{(\mathbf{X} - \mathbf{\\bar{X}})^T \mathbf{S}^{-1} (\mathbf{X} - \mathbf{\\bar{X}})}
 
-        where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
-        storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
-        :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
-        Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
-        Since Mahalanobis distance takes into account covariance between variables,
-        observations with sufficiently large :math:`D_M` can be considered as outliers.
-        For more detailed information on Mahalanobis distance the user is referred
-        to :cite:`Bishop2006` or :cite:`DeMaesschalck2000`.
+    where :math:`\mathbf{\\bar{X}}` is a matrix of the same size as :math:`\mathbf{X}`
+    storing in each column a copy of the average value of the same column in :math:`\mathbf{X}`.
+    :math:`\mathbf{S}` is the covariance matrix computed as per ``PCA`` class.
+    Note that the scaling option selected will affect the covariance matrix :math:`\mathbf{S}`.
+    Since Mahalanobis distance takes into account covariance between variables,
+    observations with sufficiently large :math:`D_M` can be considered as outliers.
+    For more detailed information on Mahalanobis distance the user is referred
+    to :cite:`Bishop2006` or :cite:`DeMaesschalck2000`.
 
-        The threshold above which observations will be classified as outliers
-        can be specified using ``trimming_threshold`` parameter. Specifically,
-        the :math:`i^{th}` observation is classified as an outlier if:
+    The threshold above which observations will be classified as outliers
+    can be specified using ``trimming_threshold`` parameter. Specifically,
+    the :math:`i^{th}` observation is classified as an outlier if:
 
-        .. math::
+    .. math::
 
-            D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
+        D_{M, i} > \\verb|trimming_threshold| \\cdot max(D_M)
 
     - ``'PC CLASSIFIER'``
 
-        Outliers are detected based on major and minor Principal Components (PCs).
-        The method of Principal Component classifier (PCC) was first proposed in
-        :cite:`Shyu2003`. The application of this technique to combustion data sets
-        was studied in :cite:`Parente2013`. Specifically,
-        the :math:`i^{th}` observation is classified as an outlier
-        if the *first PC classifier* based on :math:`q`-first (major) PCs:
+    Outliers are detected based on major and minor Principal Components (PCs).
+    The method of Principal Component classifier (PCC) was first proposed in
+    :cite:`Shyu2003`. The application of this technique to combustion data sets
+    was studied in :cite:`Parente2013`. Specifically,
+    the :math:`i^{th}` observation is classified as an outlier
+    if the *first PC classifier* based on :math:`q`-first (major) PCs:
 
-        .. math::
+    .. math::
 
-            \sum_{j=1}^{q} \\frac{z_{ij}^2}{L_j} > c_1
+        \sum_{j=1}^{q} \\frac{z_{ij}^2}{L_j} > c_1
 
-        or if the *second PC classifier* based on :math:`(Q-k+1)`-last (minor) PCs:
+    or if the *second PC classifier* based on :math:`(Q-k+1)`-last (minor) PCs:
 
-        .. math::
+    .. math::
 
-            \sum_{j=k}^{Q} \\frac{z_{ij}^2}{L_j} > c_2
+        \sum_{j=k}^{Q} \\frac{z_{ij}^2}{L_j} > c_2
 
-        where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the Principal
-        Components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
-        eigenvalue from :math:`\mathbf{L}` (as per ``PCA`` class).
-        Major PCs are selected such that the total variance explained is 50%.
-        Minor PCs are selected such that the remaining variance they explain is 20%.
+    where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the Principal
+    Components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
+    eigenvalue from :math:`\mathbf{L}` (as per ``PCA`` class).
+    Major PCs are selected such that the total variance explained is 50%.
+    Minor PCs are selected such that the remaining variance they explain is 20%.
 
-        Coefficients :math:`c_1` and :math:`c_2` are found such that they
-        represent the ``quantile_threshold`` (by default 98.99%) quantile of the
-        empirical distributions of the first and second PC classifier respectively.
+    Coefficients :math:`c_1` and :math:`c_2` are found such that they
+    represent the ``quantile_threshold`` (by default 98.99%) quantile of the
+    empirical distributions of the first and second PC classifier respectively.
 
     **Example:**
 
@@ -606,7 +602,7 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
         X_outliers = X[idx_outliers,:]
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
@@ -764,7 +760,7 @@ class KernelDensity:
         Kernel density weighting technique is usually very expensive, even
         on data sets with relatively small number of observations.
         Since the *single-variable* case is a cheaper option than the *multi-variable*
-        case, it is recommended that this technique is tried first on larger data
+        case, it is recommended that this technique is tried first for larger data
         sets.
 
     Gaussian kernel is used in both approaches:
@@ -845,7 +841,7 @@ class KernelDensity:
         weights = kerneld.weights
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param conditioning_variable:
         ``numpy.ndarray`` specifying either a single variable or multiple variables to be used as a
         conditioning variable for kernel weighting procedure. Note that it can also
@@ -2560,7 +2556,7 @@ def flip_clusters(idx, dictionary):
     .. note::
 
         This function can also be used to merge clusters. Using the ``idx`` from the example above,
-        if we called:
+        if we call:
 
         .. code:: python
 
@@ -2629,16 +2625,27 @@ def flip_clusters(idx, dictionary):
 
 def get_centroids(X, idx):
     """
-    Computes the centroids for each cluster specified in the
-    ``idx`` vector. Centroids :math:`c_i` of cluster :math:`k_i` are computed as:
+    Computes the centroids for all variables in the original data set,
+    :math:`\\mathbf{X}`, and for each cluster specified in the
+    ``idx`` vector. The centroid :math:`c_{n, j}` for variable :math:`X_j` in
+    the :math:`n^{th}` cluster, is computed as:
 
     .. math::
 
-        c_i = mean(\mathbf{x}_i)
+        c_{n, j} = mean(X_j), \\,\\,\\,\\, \\text{for} \\,\\, X_j \\in \\text{cluster} \\,\\, n
 
-    where :math:`\mathbf{x}_i` are the observations belonging to cluster :math:`k_i`
-    of all variables in the data set :math:`\mathbf{X}`. Centroids of all variables
-    from all clusters are then stored in the matrix :math:`\mathbf{c}` returned.
+    Centroids for all variables from all clusters are stored in the matrix
+    :math:`\\mathbf{c} \\in \\mathbb{R}^{k \\times Q}` returned:
+
+    .. math::
+
+        \\mathbf{c} =
+        \\begin{bmatrix}
+        c_{1, 1} & c_{1, 2} & \\dots & c_{1, Q} \\\\
+        c_{2, 1} & c_{2, 2} & \\dots & c_{2, Q} \\\\
+        \\vdots & \\vdots & \\vdots & \\vdots \\\\
+        c_{k, 1} & c_{k, 2} & \\dots & c_{k, Q} \\\\
+        \\end{bmatrix}
 
     **Example:**
 
@@ -2658,12 +2665,12 @@ def get_centroids(X, idx):
         centroids = get_centroids(X, idx)
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
     :return:
-        - **centroids** - ``numpy.ndarray`` of centroids of all :math:`k` clusters. It has size ``(k,n_variables)``.
+        - **centroids** - ``numpy.ndarray`` specifying the centroids matrix, :math:`\mathbf{c}`, for all clusters and for all variables. It has size ``(k,n_variables)``.
     """
 
     if isinstance(idx, np.ndarray):
@@ -2727,7 +2734,7 @@ def get_partition(X, idx):
         (X_in_clusters, idx_in_clusters) = get_partition(X, idx)
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
 
@@ -2876,7 +2883,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
         average_centroid_distance = get_average_centroid_distance(X, idx, weighted=False)
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param weighted: (optional)
@@ -2955,7 +2962,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
 
 def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(7,7), title=None, save_filename=None):
     """
-    Plots a 2-dimensional manifold divided into clusters.
+    Plots a two-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
 
     **Example:**
@@ -3116,7 +3123,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
 def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', first_cluster_index_zero=True, figure_size=(7,7), title=None, save_filename=None):
     """
-    Plots a 3-dimensional manifold divided into clusters.
+    Plots a three-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
 
     **Example:**

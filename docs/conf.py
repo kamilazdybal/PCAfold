@@ -17,9 +17,9 @@ sys.path.insert(0, os.path.abspath('../PCAfold/'))
 # -- Project information -----------------------------------------------------
 
 project = 'PCAfold'
-copyright = '2020, Elizabeth Armstrong, Kamila Zdybal'
-author = 'Elizabeth Armstrong, Kamila Zdybal'
-release = '1.0.0'
+copyright = '2020, Elizabeth Armstrong, Kamila Zdybał'
+author = 'Elizabeth Armstrong, Kamila Zdybał'
+release = '1.0'
 
 # -- General configuration ---------------------------------------------------
 
@@ -80,7 +80,6 @@ pygments_style = 'sphinx'
 # documentation.
 #
 # html_theme_options = {}
-# html_theme = 'alabaster'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -118,7 +117,7 @@ html_theme_options = {
         "color-background-hover": "#efeff4ff",
         "color-background-hover--transparent": "#efeff400",
         "color-background-border": "#eeebee",
-        "color-inline-code-background": "#f8f9fb",
+        "color-inline-code-background": "#f2f2f2",
 
         # Announcements
         "color-announcement-background": "#000000dd",
