@@ -516,4 +516,4 @@ The visual result of this sampling can be seen below:
 
 Notice that we have achieved what we wanted to: we generated a desired test
 data set with 10, 20, 10 and 50 samples, and we also have an equal number of
-train samples selected from each cluster.
+train samples selected from each cluster - in this case 60 samples.

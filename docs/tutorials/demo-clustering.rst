@@ -4,7 +4,7 @@
 Data clustering
 ====================
 
-In this tutorial, we present the clustering functionalities of the ``preprocess``
+In this tutorial, we present the clustering functionalities from the ``preprocess``
 module.
 
 We import the necessary modules:
@@ -186,20 +186,39 @@ The visual result of this clustering can be seen below:
 
 --------------------------------------------------------------------------------
 
-Cluster into bins of mixture fraction vector
---------------------------------------------
+Clustering combustion data sets
+----------------------------------
 
-In this example, we partition the data set according to bins of mixture fraction vector.
-We generate a new synthetic data set based on a mixture fraction vector which attains values between 0 and 1.
+In this section, we present functions that are specifically aimed to cluster
+reactive flows data sets. We will use a data set representing combustion of syngas in air generated from steady laminar
+flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical
+mechanism by Hawkes et al. :cite:`Hawkes2007`.
+
+We import the flamelet data set:
 
 .. code:: python
 
-  Z = np.linspace(0,1,100)
-  y_Z = (-25/9)*Z**2 + (20/9)*Z + (5/9)
+  # Original variables:
+  X = np.genfromtxt('data-state-space.csv', delimiter=',')
 
-The partitioning function will also require specifying the value for stoichiometric mixture fraction ``Z_stoich``.
-For this example let's take ``Z_stoich=0.4``.
-Note that the first split will be performed at ``Z_stoich`` and further splits will be performed automatically on lean and rich sides.
+  # Mixture fraction:
+  mixture_fraction = np.genfromtxt('data-mixture-fraction.csv', delimiter=',')
+
+Cluster into bins of mixture fraction vector
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In this example, we partition the data set into five bins of the mixture fraction vector.
+This is a feasible clustering strategy for non-premixed flames.
+The partitioning function will also require specifying the value for
+the stoichiometric mixture fraction ``Z_stoich``.
+
+.. code:: python
+
+  Z_stoich = 0.273
+  (idx_mixture_fraction_bins, borders_mixture_fraction_bins) = preprocess.mixture_fraction_bins(mixture_fraction, 5, Z_stoich, verbose=True)
+
+Note that the first split is performed at ``Z_stoich`` and further splits are
+performed automatically on lean and rich sides.
 
 .. code:: python
 
@@ -210,21 +229,106 @@ With ``verbose=True`` we will see some detailed information on clustering:
 .. code-block:: text
 
   Border values for bins:
-  [0.  0.2 0.4 0.7 1. ]
+  [0.         0.1365     0.273      0.51533333 0.75766667 1.        ]
 
   Bounds for cluster 0:
-  	0.0, 0.1919
+  	0.0, 0.1313
   Bounds for cluster 1:
-  	0.202, 0.3939
+  	0.1414, 0.2727
   Bounds for cluster 2:
-  	0.404, 0.697
+  	0.2828, 0.5152
   Bounds for cluster 3:
-  	0.7071, 1.0
+  	0.5253, 0.7576
+  Bounds for cluster 4:
+  	0.7677, 1.0
 
 The visual result of this clustering can be seen below:
 
 .. image:: ../images/tutorial-clustering-mixture-fraction-bins-k4.svg
-  :width: 500
+  :width: 550
+  :align: center
+
+Separating close-to-zero Principal Component source terms
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The function ``zero_neighborhood_bins`` can be used to separate close-to-zero
+source terms of the original variables (or source terms of the Principal Components (PCs)).
+The close-to-zero source terms correspond to the steady-state.
+
+In this example,
+
+
+.. code:: python
+
+  # Source terms of the original variables:
+  S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
+
+We compute the source terms of the Principal Components:
+
+.. code:: python
+
+  pca_X = reduction.PCA(X, scaling='auto', n_components=2)
+  S_Z = pca_X.transform(S_X, nocenter=True)
+
+
+and we use the first PC source term, :math:`S_{Z,1}`, as the conditioning variable
+for the clustering function.
+
+.. code:: python
+
+  (idx_close_to_zero_source_terms, borders_close_to_zero_source_terms) = preprocess.zero_neighborhood_bins(S_Z[:,0], 4, zero_offset_percentage=5, split_at_zero=True, verbose=True)
+
+
+With ``verbose=True`` we will see some detailed information on clustering:
+
+.. code-block:: text
+
+  Border values for bins:
+  [-87229.83051401  -5718.91469641      0.           5718.91469641
+    27148.46341416]
+
+  Bounds for cluster 0:
+  	-87229.8305, -5722.1432
+  Bounds for cluster 1:
+  	-5717.5228, -0.0
+  Bounds for cluster 2:
+  	0.0, 5705.7159
+  Bounds for cluster 3:
+  	5719.0347, 27148.4634
+
+From the verbose information, we can see that the first cluster (:math:`k_1`) contains observations
+corresponding to the highly negative values of :math:`S_{Z,1}`, the second cluster (:math:`k_2`)
+to the close-to-zero negative values of :math:`S_{Z,1}`, the third cluster (:math:`k_3`) to the
+close-to-zero positive values of :math:`S_{Z,1}` and the fourth cluster (:math:`k_4`) to the
+highly positive values of :math:`S_{Z,1}`.
+
+The visual result of this clustering can be seen below:
+
+.. image:: ../images/tutorial-clustering-close-to-zero-source-terms-k4.svg
+  :width: 550
+  :align: center
+
+We can further merge the two clusters that contain observations corresponding to the high magnitudes
+of :math:`S_{Z, 1}` into one cluster. This can be achieved using the function
+``flip_clusters``. We change the label of the fourth cluster to ``0`` and thus all
+observations from the fourth cluster are now assigned to the first cluster.
+
+.. code:: python
+
+  idx_merged = preprocess.flip_clusters(idx_close_to_zero_source_terms, {3:0})
+
+The visual result of this merged clustering can be seen below:
+
+.. image:: ../images/tutorial-clustering-close-to-zero-source-terms-merged-k4.svg
+  :width: 550
+  :align: center
+
+If we further plot the two-dimensional flamelet manifold, colored by :math:`S_{Z, 1}`,
+we can check that the clustering technique correctly identified the regions on the manifold
+where :math:`S_{Z, 1} \approx 0` as well as the regions where :math:`S_{Z, 1}` has high magnitudes.
+
+.. image:: ../images/tutorial-clustering-close-to-zero-source-terms-manifold.svg
+  :width: 590
   :align: center
 
 --------------------------------------------------------------------------------
@@ -237,7 +341,7 @@ example, we generate a synthetic 3D data set composed of three connected planes:
 
 .. code:: python
 
-  n_observations = 200
+  n_observations = 50
 
   x = np.tile(np.linspace(0,50,n_observations), n_observations)
   y = np.zeros((n_observations,1))
@@ -272,16 +376,14 @@ The original data set can be visualized using the function from the ``reduction`
   :width: 500
   :align: center
 
-and divide it into four clusters using the K-Means algorithm:
+We divide the data into four clusters using the K-Means algorithm:
 
 .. code:: python
 
   from sklearn.preprocessing import StandardScaler
   from sklearn.cluster import KMeans
 
-  scaler = StandardScaler()
-  conditioning_var = scaler.fit_transform(data_set_3d)
-  idx_kmeans = KMeans(n_clusters=3).fit(conditioning_var).labels_
+  idx_kmeans = KMeans(n_clusters=4).fit(np.hstack((x, y, z))).labels_
 
 The result of the K-Means clustering can be plotted in 3D:
 
@@ -290,5 +392,14 @@ The result of the K-Means clustering can be plotted in 3D:
   plt = preprocess.plot_3d_clustering(x, y, z, idx_kmeans, elev=30, azim=-100, x_label=x_label, y_label=y_label, z_label=z_label, color_map=color_map, first_cluster_index_zero=False, figure_size=(12,8), save_filename=None)
 
 .. image:: ../images/tutorial-clustering-3d-data-set-kmeans.svg
-  :width: 650
+  :width: 630
   :align: center
+
+--------------------------------------------------------------------------------
+
+**********************
+Bibliography
+**********************
+
+.. bibliography:: demo-clustering.bib
+  :labelprefix: T
