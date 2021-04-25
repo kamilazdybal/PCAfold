@@ -190,7 +190,8 @@ Clustering combustion data sets
 ----------------------------------
 
 In this section, we present functions that are specifically aimed to cluster
-reactive flows data sets. We will use a data set representing combustion of syngas in air generated from steady laminar
+reactive flows data sets. We will use a data set representing combustion of
+syngas in air generated from the steady laminar
 flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical
 mechanism by Hawkes et al. :cite:`Hawkes2007`.
 
