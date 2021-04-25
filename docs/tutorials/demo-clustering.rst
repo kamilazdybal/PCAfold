@@ -1,8 +1,9 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
           accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/docs/tutorials/demo-clustering.ipynb>`_.
 
+##################
 Data clustering
-====================
+##################
 
 In this tutorial, we present the clustering functionalities from the ``preprocess``
 module.
@@ -15,7 +16,6 @@ We import the necessary modules:
   from PCAfold import reduction
   import numpy as np
   from matplotlib.colors import ListedColormap
-  from sklearn.preprocessing import StandardScaler
   from sklearn.cluster import KMeans
 
 We set some initial parameters:
@@ -27,6 +27,146 @@ We set some initial parameters:
   z_label = '$z$'
   figure_size = (6,3)
   color_map = ListedColormap(['#0e7da7', '#ceca70', '#b45050', '#2d2d54'])
+  save_filename = None
+  random_seed = 200
+
+--------------------------------------------------------------------------------
+
+******************************************************
+Visualize the clustering result in 2D
+******************************************************
+
+We begin by demonstrating how the result of clustering can be visualized using the
+plotting functionalities from the ``preprocess`` module.
+
+We generate a synthetic 2D data set composed of two distinct clouds:
+
+.. code:: python
+
+  np.random.seed(seed=random_seed)
+
+  n_observations = 1000
+
+  mean_1 = [0,1]
+  mean_2 = [6,4]
+  covariance_1 = [[2, 0.5], [0.5, 0.5]]
+  covariance_2 = [[3, 0.3], [0.3, 0.5]]
+
+  x_1, y_1 = np.random.multivariate_normal(mean_1, covariance_1, n_observations).T
+  x_2, y_2 = np.random.multivariate_normal(mean_2, covariance_2, n_observations).T
+  x = np.concatenate([x_1, x_2])
+  y = np.concatenate([y_1, y_2])
+
+The original data set can be visualized using the function from the ``reduction`` module:
+
+.. code:: python
+
+  plt = reduction.plot_2d_manifold(x, y, x_label=x_label, y_label=y_label, figure_size=figure_size, save_filename=None)
+
+.. image:: ../images/tutorial-clustering-cloud-2d-data-set.svg
+  :width: 450
+  :align: center
+
+We divide the data into two clusters using the K-Means algorithm:
+
+.. code:: python
+
+  idx_kmeans = KMeans(n_clusters=2).fit(np.hstack((x, y))).labels_
+
+As soon as the ``idx`` vector of cluster classification is known for the data set,
+the result of clustering can be visualized using the ``plot_2d_clustering`` function.
+
+We plot the result of the K-Means clustering in 2D:
+
+.. code:: python
+
+  plt = preprocess.plot_2d_clustering(x, y, idx_kmeans, x_label=x_label, y_label=y_label, color_map=color_map, first_cluster_index_zero=False, figure_size=figure_size, save_filename=None)
+
+.. image:: ../images/tutorial-clustering-cloud-2d-data-set-kmeans.svg
+  :width: 600
+  :align: center
+
+Note that the numbers in the legend, next to each cluster number, represent the number of samples
+(population) in a particular cluster. The populations of each cluster can also be
+computed and printed, for instance through:
+
+.. code:: python
+
+  print(preprocess.get_populations(idx_kmeans))
+
+which should print:
+
+.. code-block:: text
+
+  [991, 1009]
+
+--------------------------------------------------------------------------------
+
+******************************************************
+Visualize the clustering result in 3D
+******************************************************
+
+Clustering result can also be visualized in a three-dimensional space. In this
+example, we generate a synthetic 3D data set composed of three connected planes:
+
+.. code:: python
+
+  n_observations = 50
+
+  x = np.tile(np.linspace(0,50,n_observations), n_observations)
+  y = np.zeros((n_observations,1))
+  z = np.zeros((n_observations*n_observations,1))
+
+  for i in range(1,n_observations):
+      y = np.vstack((y, np.ones((n_observations,1))*i))
+  y = y.ravel()
+
+  for observation, x_value in enumerate(x):
+
+      y_value = y[observation]
+
+      if x_value <= 10:
+          z[observation] = 2 * x_value + y_value
+      elif x_value > 10 and x_value <= 35:
+          z[observation] = 10 * x_value + y_value - 80
+      elif x_value > 35:
+          z[observation] = 5 * x_value + y_value + 95
+
+  (x, _, _) = preprocess.center_scale(x[:,None], scaling='0to1')
+  (y, _, _) = preprocess.center_scale(y[:,None], scaling='0to1')
+  (z, _, _) = preprocess.center_scale(z, scaling='0to1')
+
+The original data set can be visualized using the function from the ``reduction`` module:
+
+.. code:: python
+
+  plt = reduction.plot_3d_manifold(x, y, z, elev=30, azim=-100, x_label=x_label, y_label=y_label, z_label=z_label, figure_size=(12,8), save_filename=None)
+
+.. image:: ../images/tutorial-clustering-3d-data-set.svg
+  :width: 500
+  :align: center
+
+We divide the data into four clusters using the K-Means algorithm:
+
+.. code:: python
+
+  idx_kmeans = KMeans(n_clusters=4).fit(np.hstack((x, y, z))).labels_
+
+The result of the K-Means clustering can be plotted in 3D:
+
+.. code:: python
+
+  plt = preprocess.plot_3d_clustering(x, y, z, idx_kmeans, elev=30, azim=-100, x_label=x_label, y_label=y_label, z_label=z_label, color_map=color_map, first_cluster_index_zero=False, figure_size=(12,8), save_filename=None)
+
+.. image:: ../images/tutorial-clustering-3d-data-set-kmeans.svg
+  :width: 630
+  :align: center
+
+--------------------------------------------------------------------------------
+
+******************************************************
+Clustering based on binning a single variable
+******************************************************
 
 First, we generate a synthetic two-dimensional data set:
 
@@ -48,10 +188,8 @@ The data set can be visualized using the function from the ``reduction`` module:
 Let's start with clustering the data set according to bins of a single vector.
 This clustering will be performed based on ``x``.
 
---------------------------------------------------------------------------------
-
-Cluster into variable bins
---------------------------
+Cluster into equal variable bins
+=================================
 
 This clustering will divide the data set based on equal bins of a variable vector.
 
@@ -88,7 +226,7 @@ The visual result of this clustering can be seen below:
   :align: center
 
 Cluster into pre-defined variable bins
---------------------------------------
+======================================
 
 This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user. Let's specify the split values as ``split_values = [-0.6, 0.4, 0.8]``
 
@@ -120,7 +258,7 @@ The visual result of this clustering can be seen below:
   :align: center
 
 Cluster into zero-neighborhood variable bins
---------------------------------------------
+============================================
 
 This partitioning relies on unbalanced variable vector which, in principle,
 is assumed to have a lot of observations whose values are close to zero and
@@ -129,7 +267,7 @@ This function can be used to separate close-to-zero observations into one
 cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
 
 Without splitting at zero ``split_at_zero=False``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------
 
 .. code:: python
 
@@ -156,7 +294,7 @@ The visual result of this clustering can be seen below:
   :align: center
 
 With splitting at zero ``split_at_zero=True``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------
 
 .. code:: python
 
@@ -186,10 +324,11 @@ The visual result of this clustering can be seen below:
 
 --------------------------------------------------------------------------------
 
+******************************************************
 Clustering combustion data sets
-----------------------------------
+******************************************************
 
-In this section, we present functions that are specifically aimed to cluster
+In this section, we present functions that are specifically aimed for clustering
 reactive flows data sets. We will use a data set representing combustion of
 syngas in air generated from the steady laminar
 flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical
@@ -206,7 +345,7 @@ We import the flamelet data set:
   mixture_fraction = np.genfromtxt('data-mixture-fraction.csv', delimiter=',')
 
 Cluster into bins of mixture fraction vector
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================================
 
 In this example, we partition the data set into five bins of the mixture fraction vector.
 This is a feasible clustering strategy for non-premixed flames.
@@ -250,7 +389,7 @@ The visual result of this clustering can be seen below:
   :align: center
 
 Separating close-to-zero Principal Component source terms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=========================================================
 
 The function ``zero_neighborhood_bins`` can be used to separate close-to-zero
 source terms of the original variables (or source terms of the Principal Components (PCs)).
@@ -334,73 +473,9 @@ where :math:`S_{Z, 1} \approx 0` as well as the regions where :math:`S_{Z, 1}` h
 
 --------------------------------------------------------------------------------
 
-Visualize the clustering result in 3D
---------------------------------------------
-
-Clustering result can also be visualized in a three-dimensional space. In this
-example, we generate a synthetic 3D data set composed of three connected planes:
-
-.. code:: python
-
-  n_observations = 50
-
-  x = np.tile(np.linspace(0,50,n_observations), n_observations)
-  y = np.zeros((n_observations,1))
-  z = np.zeros((n_observations*n_observations,1))
-
-  for i in range(1,n_observations):
-      y = np.vstack((y, np.ones((n_observations,1))*i))
-  y = y.ravel()
-
-  for observation, x_value in enumerate(x):
-
-      y_value = y[observation]
-
-      if x_value <= 10:
-          z[observation] = 2 * x_value + y_value
-      elif x_value > 10 and x_value <= 35:
-          z[observation] = 10 * x_value + y_value - 80
-      elif x_value > 35:
-          z[observation] = 5 * x_value + y_value + 95
-
-  (x, _, _) = preprocess.center_scale(x[:,None], scaling='0to1')
-  (y, _, _) = preprocess.center_scale(y[:,None], scaling='0to1')
-  (z, _, _) = preprocess.center_scale(z, scaling='0to1')
-
-The original data set can be visualized using the function from the ``reduction`` module:
-
-.. code:: python
-
-  plt = reduction.plot_3d_manifold(x, y, z, elev=30, azim=-100, x_label=x_label, y_label=y_label, z_label=z_label, figure_size=(12,8), save_filename=None)
-
-.. image:: ../images/tutorial-clustering-3d-data-set.svg
-  :width: 500
-  :align: center
-
-We divide the data into four clusters using the K-Means algorithm:
-
-.. code:: python
-
-  from sklearn.preprocessing import StandardScaler
-  from sklearn.cluster import KMeans
-
-  idx_kmeans = KMeans(n_clusters=4).fit(np.hstack((x, y, z))).labels_
-
-The result of the K-Means clustering can be plotted in 3D:
-
-.. code:: python
-
-  plt = preprocess.plot_3d_clustering(x, y, z, idx_kmeans, elev=30, azim=-100, x_label=x_label, y_label=y_label, z_label=z_label, color_map=color_map, first_cluster_index_zero=False, figure_size=(12,8), save_filename=None)
-
-.. image:: ../images/tutorial-clustering-3d-data-set-kmeans.svg
-  :width: 630
-  :align: center
-
---------------------------------------------------------------------------------
-
 **********************
 Bibliography
 **********************
 
 .. bibliography:: demo-clustering.bib
-  :labelprefix: T
+  :labelprefix: C
