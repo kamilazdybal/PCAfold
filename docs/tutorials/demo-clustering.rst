@@ -363,9 +363,9 @@ In this example, we partition the data set into five bins of the mixture fractio
 This is a feasible clustering strategy for non-premixed flames which takes advantage
 of the physics-based (supervised) partitioning of the data set based on local stoichiometry.
 The partitioning function requires specifying the value for
-the stoichiometric mixture fraction ``Z_stoich``. Note that the first split in the data set is
-performed at ``Z_stoich`` and further splits are performed automatically on
-fuel-lean and fuel-rich branches.
+the stoichiometric mixture fraction, :math:`Z_{st}` (``Z_stoich``). Note that the first split in the data set is
+performed at :math:`Z_{st}` and further splits are performed automatically on
+the fuel-lean and the fuel-rich branch.
 
 .. code:: python
 
@@ -397,12 +397,12 @@ The visual result of this clustering can be seen below:
   :align: center
 
 It can be seen that the data set is divided at the stoichiometric value of
-mixture fraction, :math:`Z_{st} \approx 0.273`. The fuel-lean side
+mixture fraction, in this case :math:`Z_{st} \approx 0.273`. The fuel-lean branch
 (the part of the flamelet to the left of :math:`Z_{st}`)
-is divided into two clusters (:math:`k_1` and :math:`k_2`) and the fuel-rich side
+is divided into two clusters (:math:`k_1` and :math:`k_2`) and the fuel-rich branch
 (the part of the flamelet to the right of :math:`Z_{st}`) is divided
 into three clusters (:math:`k_3`, :math:`k_4` and :math:`k_5`),
-since this part has a larger range in the mixture fraction space.
+since this branch has a longer range in the mixture fraction space.
 
 Separating close-to-zero principal component source terms
 =========================================================
@@ -411,7 +411,8 @@ The function ``zero_neighborhood_bins`` can be used to separate close-to-zero
 source terms of the original variables (or close-to-zero source terms of the principal components (PCs)).
 The zero source terms physically correspond to the steady-state.
 
-We first compute the source terms of the principal components:
+We first compute the source terms of the principal components by transforming the
+source terms of the original variables to the new PC-basis:
 
 .. code:: python
 
@@ -419,7 +420,7 @@ We first compute the source terms of the principal components:
   S_Z = pca_X.transform(S_X, nocenter=True)
 
 and we use the first PC source term, :math:`S_{Z,1}`, as the conditioning variable
-for the clustering function.
+for the clustering function:
 
 .. code:: python
 
