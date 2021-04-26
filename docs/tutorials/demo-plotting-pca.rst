@@ -189,7 +189,7 @@ Two-dimensional manifold
 
 Two-dimensional manifold resulting from performing PCA transformation can be
 plotted using ``reduction.plot_2d_manifold`` function. We first calculate
-the Principal Components by transforming the original data set to the new basis:
+the principal components by transforming the original data set to the new basis:
 
 .. code::
 
@@ -254,7 +254,7 @@ Parity plot
 
 Parity plots of reconstructed variables can be visualized using
 ``reduction.plot_parity`` function. We approximate the data set using the previously
-obtained two Principal Components:
+obtained two principal components:
 
 .. code::
 

@@ -197,7 +197,7 @@ This data set can be seen below:
   :width: 350
   :align: center
 
-We perform PCA on the data set and approximate it with a single Principal Component:
+We perform PCA on the data set and approximate it with a single principal component:
 
 .. code:: python
 

@@ -75,7 +75,7 @@ plotting functions:
   # Select number of clusters to partition the data set:
   n_clusters = 4
 
-  # Select number of Principal Components that will be returned:
+  # Select number of principal components that will be returned:
   n_components = 2
 
   # Set random seed for clustering and sampling techniques:
@@ -93,7 +93,7 @@ plotting functions:
 We start with clustering the data set that will result in an `idx` vector.
 Clustering can be performed with any technique of choice. Here we will use one
 of the available functions from the `preprocess` module ``preprocess.zero_neighborhood_bins``
-and use the first Principal Component source term as the conditioning variable:
+and use the first principal component source term as the conditioning variable:
 
 .. code:: python
 

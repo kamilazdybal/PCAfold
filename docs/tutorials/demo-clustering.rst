@@ -18,7 +18,7 @@ We import the necessary modules:
   from matplotlib.colors import ListedColormap
   from sklearn.cluster import KMeans
 
-We set some initial parameters:
+and we set some initial parameters:
 
 .. code:: python
 
@@ -76,7 +76,7 @@ We divide the data into two clusters using the K-Means algorithm:
 As soon as the ``idx`` vector of cluster classification is known for the data set,
 the result of clustering can be visualized using the ``plot_2d_clustering`` function.
 
-We plot the result of the K-Means clustering in 2D:
+We plot the result of K-Means clustering on the 2D data set:
 
 .. code:: python
 
@@ -86,15 +86,15 @@ We plot the result of the K-Means clustering in 2D:
   :width: 600
   :align: center
 
-Note that the numbers in the legend, next to each cluster number, represent the number of samples
-(population) in a particular cluster. The populations of each cluster can also be
+Note, that the numbers in the legend, next to each cluster number, represent the
+number of samples in a particular cluster. The populations of each cluster can also be
 computed and printed, for instance through:
 
 .. code:: python
 
   print(preprocess.get_populations(idx_kmeans))
 
-which should print:
+which in this case will print:
 
 .. code-block:: text
 
@@ -152,7 +152,7 @@ We divide the data into four clusters using the K-Means algorithm:
 
   idx_kmeans = KMeans(n_clusters=4).fit(np.hstack((x, y, z))).labels_
 
-The result of the K-Means clustering can be plotted in 3D:
+The result of K-Means clustering can then be plotted in 3D:
 
 .. code:: python
 
@@ -167,6 +167,9 @@ The result of the K-Means clustering can be plotted in 3D:
 ******************************************************
 Clustering based on binning a single variable
 ******************************************************
+
+In this section, we demonstrate a few clustering functions that are implemented
+in **PCAfold**. All of them cluster data sets based on binning a single variable.
 
 First, we generate a synthetic two-dimensional data set:
 
@@ -185,8 +188,7 @@ The data set can be visualized using the function from the ``reduction`` module:
   :width: 400
   :align: center
 
-Let's start with clustering the data set according to bins of a single vector.
-This clustering will be performed based on ``x``.
+We will now cluster the 2D data set according to bins of a single variable, :math:`x`.
 
 Cluster into equal variable bins
 =================================
@@ -225,6 +227,10 @@ The visual result of this clustering can be seen below:
   :width: 500
   :align: center
 
+Note that this clustering function created four equal bins in the space of :math:`x`.
+In this case, since :math:`x` ranges from -1 to 1, the bins are created as
+intervals of length 0.5 in the :math:`x`-space.
+
 Cluster into pre-defined variable bins
 ======================================
 
@@ -256,6 +262,9 @@ The visual result of this clustering can be seen below:
 .. image:: ../images/tutorial-clustering-predefined-variable-bins-k4.svg
   :width: 500
   :align: center
+
+This clustering function created four bins in the space of :math:`x`, where
+the splits in the :math:`x`-space are located at :math:`x=-0.6`, :math:`x=0.4` and :math:`x=0.8`.
 
 Cluster into zero-neighborhood variable bins
 ============================================
@@ -293,6 +302,8 @@ The visual result of this clustering can be seen below:
   :width: 500
   :align: center
 
+We note that the observations corresponding to :math:`x \approx 0` have been classified into one cluster (:math:`k_2`).
+
 With splitting at zero ``split_at_zero=True``
 ------------------------------------------------------
 
@@ -322,6 +333,9 @@ The visual result of this clustering can be seen below:
   :width: 500
   :align: center
 
+We note that the observations corresponding to :math:`x \approx 0^{-}` have been classified into one cluster (:math:`k_2`)
+and the observations corresponding to :math:`x \approx 0^{+}` have been classified into another cluster (:math:`k_3`).
+
 --------------------------------------------------------------------------------
 
 ******************************************************
@@ -330,7 +344,7 @@ Clustering combustion data sets
 
 In this section, we present functions that are specifically aimed for clustering
 reactive flows data sets. We will use a data set representing combustion of
-syngas in air generated from the steady laminar
+syngas in air, generated from the steady laminar
 flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical
 mechanism by Hawkes et al. :cite:`Hawkes2007`.
 
@@ -338,31 +352,25 @@ We import the flamelet data set:
 
 .. code:: python
 
-  # Original variables:
   X = np.genfromtxt('data-state-space.csv', delimiter=',')
-
-  # Mixture fraction:
+  S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
   mixture_fraction = np.genfromtxt('data-mixture-fraction.csv', delimiter=',')
 
 Cluster into bins of mixture fraction vector
 ================================================
 
 In this example, we partition the data set into five bins of the mixture fraction vector.
-This is a feasible clustering strategy for non-premixed flames.
-The partitioning function will also require specifying the value for
-the stoichiometric mixture fraction ``Z_stoich``.
+This is a feasible clustering strategy for non-premixed flames which takes advantage
+of the physics-based (supervised) partitioning of the data set based on local stoichiometry.
+The partitioning function requires specifying the value for
+the stoichiometric mixture fraction ``Z_stoich``. Note that the first split in the data set is
+performed at ``Z_stoich`` and further splits are performed automatically on
+fuel-lean and fuel-rich branches.
 
 .. code:: python
 
   Z_stoich = 0.273
   (idx_mixture_fraction_bins, borders_mixture_fraction_bins) = preprocess.mixture_fraction_bins(mixture_fraction, 5, Z_stoich, verbose=True)
-
-Note that the first split is performed at ``Z_stoich`` and further splits are
-performed automatically on lean and rich sides.
-
-.. code:: python
-
-  (idx_mixture_fraction_bins, borders_mixture_fraction_bins) = preprocess.mixture_fraction_bins(Z, 4, 0.4, verbose=True)
 
 With ``verbose=True`` we will see some detailed information on clustering:
 
@@ -388,28 +396,27 @@ The visual result of this clustering can be seen below:
   :width: 550
   :align: center
 
-Separating close-to-zero Principal Component source terms
+It can be seen that the data set is divided at the stoichiometric value of
+mixture fraction, :math:`Z_{st} \approx 0.273`. The fuel-lean side
+(the part of the flamelet to the left of :math:`Z_{st}`)
+is divided into two clusters (:math:`k_1` and :math:`k_2`) and the fuel-rich side
+(the part of the flamelet to the right of :math:`Z_{st}`) is divided
+into three clusters (:math:`k_3`, :math:`k_4` and :math:`k_5`),
+since this part has a larger range in the mixture fraction space.
+
+Separating close-to-zero principal component source terms
 =========================================================
 
 The function ``zero_neighborhood_bins`` can be used to separate close-to-zero
-source terms of the original variables (or source terms of the Principal Components (PCs)).
-The close-to-zero source terms correspond to the steady-state.
+source terms of the original variables (or close-to-zero source terms of the principal components (PCs)).
+The zero source terms physically correspond to the steady-state.
 
-In this example,
-
-
-.. code:: python
-
-  # Source terms of the original variables:
-  S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
-
-We compute the source terms of the Principal Components:
+We first compute the source terms of the principal components:
 
 .. code:: python
 
   pca_X = reduction.PCA(X, scaling='auto', n_components=2)
   S_Z = pca_X.transform(S_X, nocenter=True)
-
 
 and we use the first PC source term, :math:`S_{Z,1}`, as the conditioning variable
 for the clustering function.
@@ -436,17 +443,17 @@ With ``verbose=True`` we will see some detailed information on clustering:
   Bounds for cluster 3:
   	5719.0347, 27148.4634
 
-From the verbose information, we can see that the first cluster (:math:`k_1`) contains observations
-corresponding to the highly negative values of :math:`S_{Z,1}`, the second cluster (:math:`k_2`)
-to the close-to-zero negative values of :math:`S_{Z,1}`, the third cluster (:math:`k_3`) to the
-close-to-zero positive values of :math:`S_{Z,1}` and the fourth cluster (:math:`k_4`) to the
-highly positive values of :math:`S_{Z,1}`.
-
 The visual result of this clustering can be seen below:
 
 .. image:: ../images/tutorial-clustering-close-to-zero-source-terms-k4.svg
   :width: 550
   :align: center
+
+From the verbose information, we can see that the first cluster (:math:`k_1`) contains observations
+corresponding to the highly negative values of :math:`S_{Z,1}`, the second cluster (:math:`k_2`)
+to the close-to-zero but negative values of :math:`S_{Z,1}`, the third cluster (:math:`k_3`) to the
+close-to-zero but positive values of :math:`S_{Z,1}` and the fourth cluster (:math:`k_4`) to the
+highly positive values of :math:`S_{Z,1}`.
 
 We can further merge the two clusters that contain observations corresponding to the high magnitudes
 of :math:`S_{Z, 1}` into one cluster. This can be achieved using the function
@@ -465,7 +472,8 @@ The visual result of this merged clustering can be seen below:
 
 If we further plot the two-dimensional flamelet manifold, colored by :math:`S_{Z, 1}`,
 we can check that the clustering technique correctly identified the regions on the manifold
-where :math:`S_{Z, 1} \approx 0` as well as the regions where :math:`S_{Z, 1}` has high magnitudes.
+where :math:`S_{Z, 1} \approx 0` as well as the regions where :math:`S_{Z, 1}` has high
+positive or high negative magnitudes.
 
 .. image:: ../images/tutorial-clustering-close-to-zero-source-terms-manifold.svg
   :width: 590

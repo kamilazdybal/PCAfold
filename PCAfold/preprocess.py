@@ -556,8 +556,8 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 
     - ``'PC CLASSIFIER'``
 
-    Outliers are detected based on major and minor Principal Components (PCs).
-    The method of Principal Component classifier (PCC) was first proposed in
+    Outliers are detected based on major and minor principal components (PCs).
+    The method of principal component classifier (PCC) was first proposed in
     :cite:`Shyu2003`. The application of this technique to combustion data sets
     was studied in :cite:`Parente2013`. Specifically,
     the :math:`i^{th}` observation is classified as an outlier
@@ -2301,7 +2301,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     .. note::
 
         This clustering technique is well suited for partitioning chemical
-        source terms, :math:`\mathbf{S_X}`, or sources of Principal Components,
+        source terms, :math:`\mathbf{S_X}`, or sources of principal components,
         :math:`\mathbf{S_Z}`, (as per :cite:`Sutherland2009`) since it relies on
         unbalanced vectors that have many observations numerically close to zero.
         Using ``split_at_zero=True`` it can further differentiate between
