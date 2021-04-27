@@ -12,16 +12,47 @@ samples will always be some subset of the entire data set ``X``:
   :width: 700
   :align: center
 
-We begin by importing the ``preprocess`` module and the ``DataSampler`` class:
+We import the necessary modules:
 
 .. code:: python
 
-  from PCAfold import preprocess
-  from PCAfold import DataSampler
+    from PCAfold import DataSampler
+    from PCAfold import preprocess
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import ListedColormap
+    import numpy as np
+
+and we set some initial parameters:
+
+.. code:: python
+
+    save_filename = None
+    color_map = ListedColormap(['#0e7da7', '#ceca70', '#b45050', '#2d2d54'])
+    first_cluster = False
+    figure_size = (5,5)
+    random_seed = 200
+    np.random.seed(seed=random_seed)
 
 We generate a synthetic data set that is composed of four distinct
 clusters that have an imbalanced number of observations (100, 250, 400 and 500
 - 1250 total number of observations):
+
+.. code:: python
+
+    N_1, N_2, N_3, N_4 = 100, 250, 400, 500
+    n_observations = N_1 + N_2 + N_3 + N_4
+    mean_k1, mean_k2, mean_k3, mean_k4 = [-3, 3], [3, 3], [-3, -3], [3, -3] 
+    covariance = [[1, 0.2], [0.2, 1]]
+    x_k1, y_k1 = np.random.multivariate_normal(mean_k1, covariance, N_1).T
+    x_k2, y_k2 = np.random.multivariate_normal(mean_k2, covariance, N_2).T
+    x_k3, y_k3 = np.random.multivariate_normal(mean_k3, covariance, N_3).T
+    x_k4, y_k4 = np.random.multivariate_normal(mean_k4, covariance, N_4).T
+    x = np.vstack((x_k1[:,np.newaxis], x_k2[:,np.newaxis], x_k3[:,np.newaxis], x_k4[:,np.newaxis]))
+    y = np.vstack((y_k1[:,np.newaxis], y_k2[:,np.newaxis], y_k3[:,np.newaxis], y_k4[:,np.newaxis]))
+    idx = np.vstack((np.zeros((N_1, 1)), np.ones((N_2, 1)), 2*np.ones((N_3, 1)), 3*np.ones((N_4, 1)))).astype(int).ravel()
+    populations = preprocess.get_populations(idx)
+
+We visualize the original data set:
 
 .. image:: ../images/tutorial-train-test-select-original-data-set.svg
   :width: 500
@@ -72,19 +103,22 @@ sampling.
 
 .. code:: python
 
-  random_seed = 200
   sample = DataSampler(idx, idx_test=[], random_seed=random_seed, verbose=True)
 
 --------------------------------------------------------------------------------
 
-Select fixed number
--------------------
+Sample a fixed number
+----------------------
 
 We first select a fixed number of samples using the ``DataSampler.number``
 function. Let's request 15% of the total data to be the train data. The function
 calculates that it needs to select 46 samples from each cluster, which
 amounts to 14.7% of the total number of samples in the data set. Whenever the exact percentage
 requested by the user cannot be achieved, the function always under-samples.
+
+.. image:: ../images/sampling-test-selection-option-number.svg
+  :width: 700
+  :align: center
 
 Select test data with ``test_selection_option=1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -120,7 +154,6 @@ and ``idx_test`` vectors. Note that a custom colormap can be specified by the us
 
 .. code:: python
 
-  color_map = ListedColormap(['#0e7da7', '#ceca70', '#b45050', '#2d2d54'])
   plt = preprocess.plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, color_map=color_map, first_cluster_index_zero=False, figure_size=(10,5), save_filename=None)
 
 The visual result of this sampling can be seen below:
@@ -164,13 +197,17 @@ The visual result of this sampling can be seen below:
 
 --------------------------------------------------------------------------------
 
-Select fixed percentage
------------------------
+Sample a fixed percentage
+--------------------------
 
 Next, we select a percentage of samples from each cluster using the
 ``DataSampler.percentage`` function. Let's request 10% of the total data to be the train
 data - the function selects 10% of samples from each cluster.
 
+.. image:: ../images/sampling-test-selection-option-percentage.svg
+  :width: 700
+  :align: center
+  
 Select test data with ``test_selection_option=1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -238,11 +275,15 @@ The visual result of this sampling can be seen below:
 
 --------------------------------------------------------------------------------
 
-Select manually
+Sample manually
 ---------------
 
 We select samples manually from each cluster using the ``DataSampler.manual``
 function.
+
+.. image:: ../images/sampling-test-selection-option-manual.svg
+  :width: 700
+  :align: center
 
 Select test data with ``test_selection_option=1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -320,11 +361,15 @@ The visual result of this sampling can be seen below:
 
 --------------------------------------------------------------------------------
 
-Select at random
+Sample at random
 ----------------
 
 Finally, we select random samples using the ``DataSampler.random`` function.
 Let's request 10% of the total data to be the train data.
+
+.. image:: ../images/sampling-test-selection-option-random.svg
+  :width: 700
+  :align: center
 
 .. note::
 
@@ -401,8 +446,8 @@ The visual result of this sampling can be seen below:
 
 --------------------------------------------------------------------------------
 
-Maintaining a fixed test data
-------------------------------
+Maintaining a fixed test data set
+---------------------------------
 
 In this example, we further illustrate how maintaining a fixed test data set
 functionality can be utilized.

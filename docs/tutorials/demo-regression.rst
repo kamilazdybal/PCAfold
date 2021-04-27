@@ -5,8 +5,9 @@
 Nonlinear regression
 ########################################
 
-In this tutorial we present the nonlinear regression utilities from the ``analysis`` module.
-We'll require all **PCAfold** modules:
+In this tutorial, we present the nonlinear regression utilities from the ``analysis`` module.
+
+We import the necessary modules:
 
 .. code:: python
 

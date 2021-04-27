@@ -78,6 +78,13 @@ and :math:`\mathbf{S_{Z}} = \frac{\mathbf{S_X}}{\mathbf{D}}\mathbf{A}`.
 Code implementation
 **********************
 
+We import the necessary modules:
+
+.. code::
+
+    from PCAfold import PCA
+    import numpy as np
+
 A data set representing combustion of syngas in air generated from steady laminar
 flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical
 mechanism by Hawkes et al. :cite:`Hawkes2007` is used as a demo data set.
@@ -87,13 +94,7 @@ We begin by importing the data set composed of the original state space variable
 
 .. code::
 
-  from PCAfold import PCA
-  import numpy as np
-
-  # Original variables:
   X = np.genfromtxt('data-state-space.csv', delimiter=',')
-
-  # Corresponding source terms of the original variables:
   S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
 
 We perform PCA on the original data:

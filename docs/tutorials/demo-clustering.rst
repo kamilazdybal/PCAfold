@@ -193,6 +193,10 @@ We will now cluster the 2D data set according to bins of a single variable, :mat
 Cluster into equal variable bins
 =================================
 
+.. image:: ../images/clustering-variable-bins.svg
+  :width: 600
+  :align: center
+
 This clustering will divide the data set based on equal bins of a variable vector.
 
 .. code:: python
@@ -234,6 +238,10 @@ intervals of length 0.5 in the :math:`x`-space.
 Cluster into pre-defined variable bins
 ======================================
 
+.. image:: ../images/clustering-predefined-variable-bins.svg
+  :width: 600
+  :align: center
+  
 This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user. Let's specify the split values as ``split_values = [-0.6, 0.4, 0.8]``:
 
 .. code:: python
@@ -278,6 +286,10 @@ cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
 Without splitting at zero, ``split_at_zero=False``
 ------------------------------------------------------
 
+.. image:: ../images/clustering-zero-neighborhood-bins.svg
+  :width: 700
+  :align: center
+
 .. code:: python
 
   (idx_zero_neighborhood_bins, borders_zero_neighborhood_bins) = preprocess.zero_neighborhood_bins(x, 3, zero_offset_percentage=10, split_at_zero=False, verbose=True)
@@ -307,6 +319,10 @@ We note that the observations corresponding to :math:`x \approx 0` have been cla
 With splitting at zero, ``split_at_zero=True``
 ------------------------------------------------------
 
+.. image:: ../images/clustering-zero-neighborhood-bins-zero-split.svg
+  :width: 700
+  :align: center
+  
 .. code:: python
 
   (idx_zero_neighborhood_bins_split_at_zero, borders_zero_neighborhood_bins_split_at_zero) = preprocess.zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
@@ -358,6 +374,10 @@ We import the flamelet data set:
 
 Cluster into bins of the mixture fraction vector
 ================================================
+
+.. image:: ../images/clustering-mixture-fraction-bins.svg
+  :width: 600
+  :align: center
 
 In this example, we partition the data set into five bins of the mixture fraction vector.
 This is a feasible clustering strategy for non-premixed flames which takes advantage
