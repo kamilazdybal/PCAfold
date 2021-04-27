@@ -1,5 +1,5 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/docs/tutorials/demo-clustering.ipynb>`_.
+          accessed `here <https://mybinder.org/v2/git/https%3A%2F%2Fgitlab.multiscale.utah.edu%2Fcommon%2FPCAfold/master?filepath=docs%2Ftutorials%2Fdemo-clustering.ipynb>`_.
 
 ##################
 Data clustering
@@ -241,7 +241,7 @@ Cluster into pre-defined variable bins
 .. image:: ../images/clustering-predefined-variable-bins.svg
   :width: 600
   :align: center
-  
+
 This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user. Let's specify the split values as ``split_values = [-0.6, 0.4, 0.8]``:
 
 .. code:: python
@@ -322,7 +322,7 @@ With splitting at zero, ``split_at_zero=True``
 .. image:: ../images/clustering-zero-neighborhood-bins-zero-split.svg
   :width: 700
   :align: center
-  
+
 .. code:: python
 
   (idx_zero_neighborhood_bins_split_at_zero, borders_zero_neighborhood_bins_split_at_zero) = preprocess.zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
