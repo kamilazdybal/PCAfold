@@ -4,6 +4,5 @@ numpy
 scipy
 sklearn
 termcolor
-copy
 operator
 pandas
