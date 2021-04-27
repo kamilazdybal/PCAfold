@@ -411,3 +411,4 @@ Bibliography
 ************
 
 .. bibliography:: demo-pca-on-sampled-data-sets.bib
+  :labelprefix: S

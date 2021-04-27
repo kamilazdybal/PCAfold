@@ -162,3 +162,4 @@ Bibliography
 ************
 
 .. bibliography:: data-analysis.bib
+  :labelprefix: A
