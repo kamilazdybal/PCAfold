@@ -1,5 +1,5 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/docs/tutorials/demo-sampling.ipynb>`_.
+          accessed `here <https://mybinder.org/v2/git/https%3A%2F%2Fgitlab.multiscale.utah.edu%2Fcommon%2FPCAfold/master?filepath=docs%2Ftutorials%2Fdemo-sampling.ipynb>`_.
 
 Data sampling
 ================
@@ -41,7 +41,7 @@ clusters that have an imbalanced number of observations (100, 250, 400 and 500
 
     N_1, N_2, N_3, N_4 = 100, 250, 400, 500
     n_observations = N_1 + N_2 + N_3 + N_4
-    mean_k1, mean_k2, mean_k3, mean_k4 = [-3, 3], [3, 3], [-3, -3], [3, -3] 
+    mean_k1, mean_k2, mean_k3, mean_k4 = [-3, 3], [3, 3], [-3, -3], [3, -3]
     covariance = [[1, 0.2], [0.2, 1]]
     x_k1, y_k1 = np.random.multivariate_normal(mean_k1, covariance, N_1).T
     x_k2, y_k2 = np.random.multivariate_normal(mean_k2, covariance, N_2).T
@@ -207,7 +207,7 @@ data - the function selects 10% of samples from each cluster.
 .. image:: ../images/sampling-test-selection-option-percentage.svg
   :width: 700
   :align: center
-  
+
 Select test data with ``test_selection_option=1``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
