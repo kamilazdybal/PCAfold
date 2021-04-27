@@ -3,3 +3,9 @@ matplotlib
 numpy
 scipy
 sklearn
+termcolor
+random
+multiprocessing
+copy
+operator
+pandas
