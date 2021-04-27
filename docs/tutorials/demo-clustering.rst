@@ -234,7 +234,7 @@ intervals of length 0.5 in the :math:`x`-space.
 Cluster into pre-defined variable bins
 ======================================
 
-This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user. Let's specify the split values as ``split_values = [-0.6, 0.4, 0.8]``
+This clustering will divide the data set into bins of a one-dimensional variable vector whose borders are specified by the user. Let's specify the split values as ``split_values = [-0.6, 0.4, 0.8]``:
 
 .. code:: python
 
@@ -275,7 +275,7 @@ relatively few observations with values away from zero.
 This function can be used to separate close-to-zero observations into one
 cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
 
-Without splitting at zero ``split_at_zero=False``
+Without splitting at zero, ``split_at_zero=False``
 ------------------------------------------------------
 
 .. code:: python
@@ -304,7 +304,7 @@ The visual result of this clustering can be seen below:
 
 We note that the observations corresponding to :math:`x \approx 0` have been classified into one cluster (:math:`k_2`).
 
-With splitting at zero ``split_at_zero=True``
+With splitting at zero, ``split_at_zero=True``
 ------------------------------------------------------
 
 .. code:: python
@@ -356,7 +356,7 @@ We import the flamelet data set:
   S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
   mixture_fraction = np.genfromtxt('data-mixture-fraction.csv', delimiter=',')
 
-Cluster into bins of mixture fraction vector
+Cluster into bins of the mixture fraction vector
 ================================================
 
 In this example, we partition the data set into five bins of the mixture fraction vector.
