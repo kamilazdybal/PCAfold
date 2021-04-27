@@ -32,7 +32,7 @@ We generate a synthetic data set on which the global PCA will be performed:
 
 This data set can be seen below:
 
-.. image:: ../images/tutorial-pca-data-set-for-global-pca.png
+.. image:: ../images/tutorial-pca-data-set-for-global-pca.svg
   :width: 350
   :align: center
 
@@ -67,7 +67,7 @@ Similarly, we generate another synthetic data set that is composed of two distin
 
 This data set can be seen below:
 
-.. image:: ../images/tutorial-pca-data-set-for-local-pca.png
+.. image:: ../images/tutorial-pca-data-set-for-local-pca.svg
   :width: 350
   :align: center
 
@@ -92,6 +92,6 @@ We perform local PCA to obtain local PC-scores, eigenvectors and eigenvalues:
 Finally, we plot the identified global and local eigenvectors on top of the synthetic data sets.
 The visual result of performing PCA globally and locally can be seen below:
 
-.. image:: ../images/tutorial-pca-global-local-pca.png
+.. image:: ../images/tutorial-pca-global-local-pca.svg
   :width: 700
   :align: center

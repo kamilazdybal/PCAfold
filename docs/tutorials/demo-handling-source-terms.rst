@@ -9,7 +9,7 @@ This tutorial can be of interest to researchers working with reactive flows data
 We present how source terms of the original state
 variables can be handled using **PCAfold** software.
 Specifically, **PCAfold** functionalities accommodate treatment of sources
-of Principal Components which can be valuable for implementing PC-transport
+of principal components which can be valuable for implementing PC-transport
 approaches such as proposed in :cite:`Sutherland2009`.
 
 *********
@@ -46,7 +46,7 @@ For a 0D-system we can write the evolution equation as:
 
   \frac{d \mathbf{X}}{dt} = \mathbf{S_X}
 
-This equation can be instead written in the space of Principal Components by applying
+This equation can be instead written in the space of principal components by applying
 a linear operator :math:`\mathbf{A}` identified by PCA. We can also account for
 centering and scaling the original data set :math:`\mathbf{X}` using centers
 :math:`\mathbf{C}` and scales :math:`\mathbf{D}`:
@@ -65,7 +65,7 @@ the corresponding source terms should only be scaled and not centered, since:
 for constant :math:`\mathbf{C}`, :math:`\mathbf{D}` and :math:`\mathbf{A}`.
 
 We finally obtain the 0D PC-transport equation where the evolved variables
-are Principal Components instead of the original state-space variables:
+are principal components instead of the original state-space variables:
 
 .. math::
 
@@ -78,6 +78,13 @@ and :math:`\mathbf{S_{Z}} = \frac{\mathbf{S_X}}{\mathbf{D}}\mathbf{A}`.
 Code implementation
 **********************
 
+We import the necessary modules:
+
+.. code::
+
+    from PCAfold import PCA
+    import numpy as np
+
 A data set representing combustion of syngas in air generated from steady laminar
 flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical
 mechanism by Hawkes et al. :cite:`Hawkes2007` is used as a demo data set.
@@ -87,13 +94,7 @@ We begin by importing the data set composed of the original state space variable
 
 .. code::
 
-  from PCAfold import PCA
-  import numpy as np
-
-  # Original variables:
   X = np.genfromtxt('data-state-space.csv', delimiter=',')
-
-  # Corresponding source terms of the original variables:
   S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
 
 We perform PCA on the original data:
@@ -103,14 +104,14 @@ We perform PCA on the original data:
   pca_X = PCA(X, scaling='auto', n_components=2)
 
 We transform the original data set  to the newly identified basis and
-compute the Principal Components (PCs) :math:`\mathbf{Z}`:
+compute the principal components (PCs) :math:`\mathbf{Z}`:
 
 .. code::
 
   Z = pca_X.transform(X, nocenter=False)
 
 Transform the source terms to the newly identified basis and compute the sources
-of Principal Components :math:`\mathbf{S_Z}`:
+of principal components :math:`\mathbf{S_Z}`:
 
 .. code::
 

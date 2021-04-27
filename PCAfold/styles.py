@@ -30,15 +30,15 @@ font_labels = 24
 font_annotations = 20
 font_title = 18
 font_text = 16
-font_legend = 20
+font_legend = 16
 font_colorbar = 24
 font_colorbar_axes = 18
 
 marker_size = 50
 marker_scale_legend = 1
-marker_scale_legend_clustering = 10
+marker_scale_legend_clustering = 5
 
-scatter_point_size = 2
+scatter_point_size = 5
 
 line_width = 1
 

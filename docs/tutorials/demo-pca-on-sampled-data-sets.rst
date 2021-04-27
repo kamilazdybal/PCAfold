@@ -75,7 +75,7 @@ plotting functions:
   # Select number of clusters to partition the data set:
   n_clusters = 4
 
-  # Select number of Principal Components that will be returned:
+  # Select number of principal components that will be returned:
   n_components = 2
 
   # Set random seed for clustering and sampling techniques:
@@ -93,7 +93,7 @@ plotting functions:
 We start with clustering the data set that will result in an `idx` vector.
 Clustering can be performed with any technique of choice. Here we will use one
 of the available functions from the `preprocess` module ``preprocess.zero_neighborhood_bins``
-and use the first Principal Component source term as the conditioning variable:
+and use the first principal component source term as the conditioning variable:
 
 .. code:: python
 
@@ -124,7 +124,7 @@ finally PCA is performed at the *equilibrated* data set.
 
 A schematic representation of this procedure is presented in the figure below:
 
-.. image:: ../images/cluster-biased-PCA-equilibration.png
+.. image:: ../images/cluster-equilibration-scheme.svg
     :width: 700
     :align: center
 
@@ -191,7 +191,7 @@ This function will produce a plot that shows the normalized centers and a
 percentage by which the new centers have moved with respect to the original
 ones. Example of a plot:
 
-.. image:: ../images/centers-change.png
+.. image:: ../images/centers-change.svg
     :width: 500
     :align: center
 
@@ -199,7 +199,7 @@ If you do not wish to plot all variables present in a data set, use the
 ``plot_variables`` list as an input parameter to select indices of variables to
 plot:
 
-.. image:: ../images/centers-change-selected-variables.png
+.. image:: ../images/centers-change-selected-variables.svg
     :width: 260
     :align: center
 
@@ -238,7 +238,7 @@ Three weight normalization variants are available:
 - No normalization, the absolute values of the eigenvector weights are plotted. \
   To use this variant set ``normalize=False``. Example can be seen below:
 
-.. image:: ../images/eigenvector-weights-movement-non-normalized.png
+.. image:: ../images/eigenvector-weights-movement-non-normalized.svg
     :width: 500
     :align: center
 
@@ -247,7 +247,7 @@ Three weight normalization variants are available:
   To use this variant set ``normalize=True`` and ``zero_norm=False``. \
   Example can be seen below:
 
-.. image:: ../images/eigenvector-weights-movement-normalized.png
+.. image:: ../images/eigenvector-weights-movement-normalized.svg
     :width: 500
     :align: center
 
@@ -256,7 +256,7 @@ Three weight normalization variants are available:
   range 0-1. To use this variant set ``normalize=True`` and ``zero_norm=True``. \
   Example can be seen below:
 
-.. image:: ../images/eigenvector-weights-movement-normalized-to-zero.png
+.. image:: ../images/eigenvector-weights-movement-normalized-to-zero.svg
     :width: 500
     :align: center
 
@@ -264,7 +264,7 @@ If you do not wish to plot all variables present in a data set, use the
 ``plot_variables`` list as an input parameter to select indices of variables to
 plot:
 
-.. image:: ../images/eigenvector-weights-movement-selected-variables.png
+.. image:: ../images/eigenvector-weights-movement-selected-variables.svg
     :width: 280
     :align: center
 
@@ -274,14 +274,14 @@ change between the original data set :math:`\mathbf{X}` and the sampled data set
 contain these two sets of weights.
 The function will then understand that only these two should be compared:
 
-.. image:: ../images/eigenvector-weights-movement-X-Xr.png
+.. image:: ../images/eigenvector-weights-movement-X-Xr.svg
     :width: 500
     :align: center
 
 Such plot can be done as well for pre-selected variables using the
 ``plot_variables`` list:
 
-.. image:: ../images/eigenvector-weights-movement-X-Xr-selected-variables.png
+.. image:: ../images/eigenvector-weights-movement-X-Xr-selected-variables.svg
     :width: 280
     :align: center
 
@@ -301,7 +301,7 @@ data set :math:`\mathbf{X_r}`.
 
 Example of a plot:
 
-.. image:: ../images/eigenvalue-distribution.png
+.. image:: ../images/eigenvalue-distribution.svg
     :width: 500
     :align: center
 
@@ -322,7 +322,7 @@ the sampled data set.
 
 Example of a plot:
 
-.. image:: ../images/biased-manifold.png
+.. image:: ../images/biased-manifold.svg
     :width: 500
     :align: center
 
@@ -400,7 +400,7 @@ current manual sampling:
 
   plt = reduction.plot_2d_manifold(pc_scores[:,0], pc_scores[:,1], color_variable=state_space[:,0], x_label='$Z_{r, 1}$', y_label='$Z_{r, 2}$', colorbar_label='$T$ [K]', save_filename=save_filename)
 
-.. image:: ../images/generalize-sampling-biased-manifold.png
+.. image:: ../images/generalize-sampling-biased-manifold.svg
     :width: 500
     :align: center
 
@@ -411,3 +411,4 @@ Bibliography
 ************
 
 .. bibliography:: demo-pca-on-sampled-data-sets.bib
+  :labelprefix: S

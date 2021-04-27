@@ -304,3 +304,4 @@ Bibliography
 ************
 
 .. bibliography:: data-reduction.bib
+  :labelprefix: R

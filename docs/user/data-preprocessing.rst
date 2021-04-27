@@ -248,3 +248,4 @@ Bibliography
 ************
 
 .. bibliography:: data-preprocessing.bib
+  :labelprefix: P

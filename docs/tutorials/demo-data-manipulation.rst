@@ -83,7 +83,7 @@ Multivariate outlier detection
 We first generate a synthetic data set with artificially appended outliers.
 This data set, with outliers visible as a cloud in the top right corner, can be seen below:
 
-.. image:: ../images/data-manipulation-initial-data.png
+.. image:: ../images/data-manipulation-initial-data.svg
   :width: 350
   :align: center
 
@@ -120,8 +120,8 @@ where ``n_observations`` is the total number of observations in the data set.
 
 The result of this detection can be seen below:
 
-.. image:: ../images/data-manipulation-outliers-multivariate-trimming-60.png
-  :width: 350
+.. image:: ../images/data-manipulation-outliers-multivariate-trimming-60.svg
+  :width: 450
   :align: center
 
 We then set the ``trimming_threshold=0.3`` which will capture outliers earlier (at smaller
@@ -139,8 +139,8 @@ With ``verbose=True`` we will see some more information on outliers detected:
 
 The result of this detection can be seen below:
 
-.. image:: ../images/data-manipulation-outliers-multivariate-trimming-30.png
-  :width: 350
+.. image:: ../images/data-manipulation-outliers-multivariate-trimming-30.svg
+  :width: 450
   :align: center
 
 It can be seen that the algorithm started to pick up outlier observations at the perimeter of
@@ -193,11 +193,11 @@ observations and an intermediate region with few observations:
 
 This data set can be seen below:
 
-.. image:: ../images/kernel-density-original-data.png
+.. image:: ../images/kernel-density-original-data.svg
   :width: 350
   :align: center
 
-We perform PCA on the data set and approximate it with a single Principal Component:
+We perform PCA on the data set and approximate it with a single principal component:
 
 .. code:: python
 
@@ -207,11 +207,11 @@ We perform PCA on the data set and approximate it with a single Principal Compon
 
 Using the ``reduction.plot_parity`` function we can visualize how each variable is reconstructed:
 
-.. image:: ../images/kernel-density-original-x1.png
+.. image:: ../images/kernel-density-original-x1.svg
   :width: 350
   :align: center
 
-.. image:: ../images/kernel-density-original-x2.png
+.. image:: ../images/kernel-density-original-x2.svg
   :width: 350
   :align: center
 
@@ -270,11 +270,11 @@ Reconstruction of that data set can be obtained:
 
 We can now use ``reduction.plot_parity`` function to visualize the new reconstruction:
 
-.. image:: ../images/kernel-density-single-x1.png
+.. image:: ../images/kernel-density-single-x1.svg
   :width: 350
   :align: center
 
-.. image:: ../images/kernel-density-single-x2.png
+.. image:: ../images/kernel-density-single-x2.svg
   :width: 350
   :align: center
 
@@ -305,10 +305,10 @@ We then perform analogous steps to obtain the new reconstruction:
 
 The result of this reconstruction can be seen below:
 
-.. image:: ../images/kernel-density-multi-x1.png
+.. image:: ../images/kernel-density-multi-x1.svg
   :width: 350
   :align: center
 
-.. image:: ../images/kernel-density-multi-x2.png
+.. image:: ../images/kernel-density-multi-x2.svg
   :width: 350
   :align: center

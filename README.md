@@ -3,7 +3,7 @@
 [![GitLab](https://img.shields.io/badge/GitLab-PCAfold-blue.svg)](https://gitlab.multiscale.utah.edu/common/PCAfold)
 
 <p align="center">
-  <img src="https://gitlab.multiscale.utah.edu/common/PCAfold/raw/master/docs/images/PCAfold-logo.svg" width="400">
+  <img src="https://gitlab.multiscale.utah.edu/common/PCAfold/raw/master/docs/images/PCAfold-logo-rectangle.svg" width="400">
 </p>
 
 **PCAfold** is an open-source Python library for generating, analyzing and improving low-dimensional manifolds obtained via Principal Component Analysis

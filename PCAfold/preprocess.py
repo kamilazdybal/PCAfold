@@ -14,6 +14,7 @@ import random
 import copy
 import operator
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 from PCAfold.styles import *
 
 ################################################################################
@@ -555,8 +556,8 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 
     - ``'PC CLASSIFIER'``
 
-    Outliers are detected based on major and minor Principal Components (PCs).
-    The method of Principal Component classifier (PCC) was first proposed in
+    Outliers are detected based on major and minor principal components (PCs).
+    The method of principal component classifier (PCC) was first proposed in
     :cite:`Shyu2003`. The application of this technique to combustion data sets
     was studied in :cite:`Parente2013`. Specifically,
     the :math:`i^{th}` observation is classified as an outlier
@@ -2300,7 +2301,7 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
     .. note::
 
         This clustering technique is well suited for partitioning chemical
-        source terms, :math:`\mathbf{S_X}`, or sources of Principal Components,
+        source terms, :math:`\mathbf{S_X}`, or sources of principal components,
         :math:`\mathbf{S_Z}`, (as per :cite:`Sutherland2009`) since it relies on
         unbalanced vectors that have many observations numerically close to zero.
         Using ``split_at_zero=True`` it can further differentiate between
@@ -2996,7 +2997,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
         ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
@@ -3071,7 +3072,8 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
             raise ValueError("Parameter `y_label` has to be of type `str`.")
 
     if not isinstance(color_map, str):
-        raise ValueError("Parameter `color_map` has to be of type `str`.")
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
     if not isinstance(first_cluster_index_zero, bool):
         raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
@@ -3109,7 +3111,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         else:
             plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
 
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=4, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
+    plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
 
     plt.xticks(fontsize=font_axes, **csfont), plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
@@ -3167,7 +3169,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         ``str`` specifying :math:`z`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
         ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
@@ -3256,7 +3258,8 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
             raise ValueError("Parameter `z_label` has to be of type `str`.")
 
     if not isinstance(color_map, str):
-        raise ValueError("Parameter `color_map` has to be of type `str`.")
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
     if not isinstance(first_cluster_index_zero, bool):
         raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
@@ -3409,7 +3412,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param color_map: (optional)
-        ``str`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param first_cluster_index_zero: (optional)
         ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
@@ -3490,7 +3493,8 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
             raise ValueError("Parameter `y_label` has to be of type `str`.")
 
     if not isinstance(color_map, str):
-        raise ValueError("Parameter `color_map` has to be of type `str`.")
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
     if not isinstance(first_cluster_index_zero, bool):
         raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")

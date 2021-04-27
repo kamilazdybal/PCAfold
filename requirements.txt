@@ -1,0 +1,7 @@
+Cython
+matplotlib
+numpy
+scipy
+sklearn
+termcolor
+pandas
