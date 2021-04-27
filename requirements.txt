@@ -4,5 +4,4 @@ numpy
 scipy
 sklearn
 termcolor
-operator
 pandas
