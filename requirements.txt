@@ -4,7 +4,6 @@ numpy
 scipy
 sklearn
 termcolor
-random
 multiprocessing
 copy
 operator
