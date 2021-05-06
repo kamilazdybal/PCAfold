@@ -11,6 +11,8 @@
     :target: https://gitlab.multiscale.utah.edu/common/PCAfold/-/blob/master/LICENSE.txt
 .. image:: https://readthedocs.org/projects/pcafold/badge/?version=latest
     :target: https://pcafold.readthedocs.io/en/latest/?badge=latest
+.. image:: https://mybinder.org/badge_logo.svg
+    :target: https://mybinder.org/v2/git/https%3A%2F%2Fgitlab.multiscale.utah.edu%2Fcommon%2FPCAfold/master?filepath=docs%2Ftutorials%2F
 
 
 #####
