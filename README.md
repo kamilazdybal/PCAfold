@@ -38,6 +38,7 @@ this software, such as K-Means algorithm or Artificial Neural Networks.
 - `matplotlib`
 - `numpy`
 - `scipy`
+- `termcolor`
 
 ### Build from source
 

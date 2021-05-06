@@ -13,6 +13,7 @@ Dependencies
 - ``matplotlib``
 - ``numpy``
 - ``scipy``
+- ``termcolor``
 
 Build from source
 ^^^^^^^^^^^^^^^^^
