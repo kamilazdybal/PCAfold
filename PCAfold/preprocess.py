@@ -25,6 +25,8 @@ from PCAfold.styles import *
 
 _scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', '-1to1', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
 
+# ------------------------------------------------------------------------------
+
 def center_scale(X, scaling, nocenter=False):
     """
     Centers and scales the data set.
@@ -206,6 +208,8 @@ def center_scale(X, scaling, nocenter=False):
 
     return(X_cs, X_center, X_scale)
 
+# ------------------------------------------------------------------------------
+
 def invert_center_scale(X_cs, X_center, X_scale):
     """
     Inverts whatever centering and scaling was done by the ``center_scale`` function:
@@ -280,6 +284,8 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
     return(X)
 
+# ------------------------------------------------------------------------------
+
 class PreProcessing:
     """
     Performs a composition of data manipulation done by ``remove_constant_vars``
@@ -351,6 +357,8 @@ class PreProcessing:
     @property
     def X_scale(self):
         return self.__X_scale
+
+# ------------------------------------------------------------------------------
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
@@ -433,6 +441,8 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     idx_retained = idx_retained[::-1]
 
     return(X_removed, idx_removed, idx_retained)
+
+# ------------------------------------------------------------------------------
 
 def order_variables(X, method='mean', descending=True):
     """
@@ -522,6 +532,8 @@ def order_variables(X, method='mean', descending=True):
     X_ordered = X[:,idx]
 
     return (X_ordered, idx)
+
+# ------------------------------------------------------------------------------
 
 def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
     """
@@ -744,13 +756,158 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 
     return (idx_outliers_removed, idx_outliers)
 
+# ------------------------------------------------------------------------------
+
+class ConditionalStatistics:
+    """
+    Enables computing conditional statistics on the original data set, :math:`\\mathbf{X}`.
+
+    This includes:
+
+    - conditional mean
+    - conditional minimum
+    - conditional maximum
+    - conditional standard deviation
+
+    Other quantities can be added in the future at the user's request.
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param conditioning_variable:
+        ``numpy.ndarray`` specifying a single variable to be used as a
+        conditioning variable. It should be of size ``(n_observations,1)`` or ``(n_observations,)``.
+    :param k:
+        ``int`` specifying the number of bins to create in the conditioning variable.
+        It has to be a positive number.
+    :param split_values:
+        ``list`` specifying values at which splits should be performed.
+        If set to ``None``, splits will be performed using :math:`k` equal variable bins.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    **Attributes:**
+
+    - **idx** - (read only)
+    - **borders** - (read only)
+    - **centroids** - (read only)
+    - **conditional_mean** - (read only) ``numpy.ndarray`` specifying the conditional means of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
+    - **conditional_minimum** - (read only) ``numpy.ndarray`` specifying the conditional minimums of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
+    - **conditional_maximum** - (read only) ``numpy.ndarray`` specifying the conditional maximums of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
+    - **conditional_standard_deviation** - (read only) ``numpy.ndarray`` specifying the conditional standard deviations of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
+    """
+
+    def __init__(self, X, conditioning_variable, k=20, split_values=None, verbose=False):
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations_X, n_variables_X) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        if not isinstance(conditioning_variable, np.ndarray):
+            raise ValueError("Parameter `conditioning_variable` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations, n_variables) = np.shape(conditioning_variable)
+        except:
+            (n_observations,) = np.shape(conditioning_variable)
+            n_variables = 1
+
+        if n_observations_X != n_observations:
+            raise ValueError("The original data set `X` and the `conditioning_variable` should have the same number of observations.")
+
+        if n_variables != 1:
+            raise ValueError("Parameter `conditioning_variable` has to have shape `(n_observations,1)` or `(n_observations,)`.")
+
+        if not (isinstance(k, int) and k > 0):
+            raise ValueError("Parameter `k` has to be a positive `int`.")
+
+        if split_values is not None:
+            if not isinstance(split_values, list):
+                raise ValueError("Parameter `split_values` has to be of type `None` or `list`.")
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be of type `bool`.")
+
+        if split_values is None:
+
+            if verbose:
+                print('Conditioning the data set based on equal bins of the conditioning variable.')
+
+            (idx, borders) = variable_bins(conditioning_variable, k, verbose=verbose)
+
+        if split_values is not None:
+
+            if verbose:
+                print('Conditioning the data set based on user-specified bins of the conditioning variable.')
+
+            (idx, borders) = predefined_variable_bins(conditioning_variable, split_values=split_values, verbose=verbose)
+
+        conditional_mean = np.zeros((k, n_variables_X))
+        conditional_minimum = np.zeros((k, n_variables_X))
+        conditional_maximum = np.zeros((k, n_variables_X))
+        conditional_standard_deviation = np.zeros((k, n_variables_X))
+
+        centroids = []
+
+        for i in range(0,k):
+
+            # Compute the centroids of all bins:
+            centroids.append((borders[i] + borders[i+1])/2)
+
+            # Compute conditional statistics in the generated bins:
+            conditional_mean[i,:] = np.mean(X[idx==i,:], axis=0)[None,:]
+            conditional_minimum[i,:] = np.min(X[idx==i,:], axis=0)[None,:]
+            conditional_maximum[i,:] = np.max(X[idx==i,:], axis=0)[None,:]
+            conditional_standard_deviation[i,:] = np.std(X[idx==i,:], axis=0)[None,:]
+
+        self.__idx = idx
+        self.__borders = borders
+        self.__centroids = np.array(centroids)
+        self.__conditional_mean = conditional_mean
+        self.__conditional_minimum = conditional_minimum
+        self.__conditional_maximum = conditional_maximum
+        self.__conditional_standard_deviation = conditional_standard_deviation
+
+    @property
+    def idx(self):
+        return self.__idx
+
+    @property
+    def borders(self):
+        return self.__borders
+
+    @property
+    def centroids(self):
+        return self.__centroids
+
+    @property
+    def conditional_mean(self):
+        return self.__conditional_mean
+
+    @property
+    def conditional_minimum(self):
+        return self.__conditional_minimum
+
+    @property
+    def conditional_maximum(self):
+        return self.__conditional_maximum
+
+    @property
+    def conditional_standard_deviation(self):
+        return self.__conditional_standard_deviation
+
+# ------------------------------------------------------------------------------
+
 class KernelDensity:
     """
-    This class enables kernel density weighting of data sets
+    Enables kernel density weighting of data sets
     based on *single-variable* or *multi-variable* case as proposed in
     :cite:`Coussement2012`.
 
-    The goal of both cases is to obtain a vector of weights :math:`\mathbf{W_c}` that
+    The goal of both cases is to obtain a vector of weights :math:`\\mathbf{W_c}` that
     has the same number of elements as there are observations in the original
     data set :math:`\mathbf{X}`.
     Each observation will then get multiplied by the corresponding weight from
@@ -850,9 +1007,9 @@ class KernelDensity:
 
     **Attributes:**
 
-        - **weights** - ``numpy.ndarray`` specifying the computed weights, :math:`\mathbf{W_c}`. It has size ``(n_observations,1)``.
-        - **X_weighted** - ``numpy.ndarray`` specifying the weighted data set (each observation in\
-        :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`). It has size ``(n_observations,n_variables)``.
+    - **weights** - ``numpy.ndarray`` specifying the computed weights, :math:`\mathbf{W_c}`. It has size ``(n_observations,1)``.
+    - **X_weighted** - ``numpy.ndarray`` specifying the weighted data set (each observation in\
+    :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`). It has size ``(n_observations,n_variables)``.
     """
 
     def __init__(self, X, conditioning_variable, verbose=False):
@@ -1273,6 +1430,8 @@ class DataSampler:
 
         print('\nSelected ' + str(np.size(idx_train)) + ' train samples (%.1f' % (np.size(idx_train)*100/n_observations) + '%) and ' + str(np.size(idx_test)) + ' test samples (%.1f' % (np.size(idx_test)*100/n_observations) + '%).\n')
 
+# ------------------------------------------------------------------------------
+
     def number(self, perc, test_selection_option=1):
         """
         This function uses classifications into :math:`k` clusters and samples
@@ -1427,6 +1586,8 @@ class DataSampler:
 
         return (idx_train, idx_test)
 
+# ------------------------------------------------------------------------------
+
     def percentage(self, perc, test_selection_option=1):
         """
         This function uses classifications into :math:`k` clusters and
@@ -1568,6 +1729,8 @@ class DataSampler:
             self.__print_verbose_information_sampling(self.idx, idx_train, idx_test)
 
         return (idx_train, idx_test)
+
+# ------------------------------------------------------------------------------
 
     def manual(self, sampling_dictionary, sampling_type='percentage', test_selection_option=1):
         """
@@ -1789,6 +1952,8 @@ class DataSampler:
 
         return (idx_train, idx_test)
 
+# ------------------------------------------------------------------------------
+
     def random(self, perc, test_selection_option=1):
         """
         This function samples train data at random from the entire data set.
@@ -1947,6 +2112,8 @@ def __print_verbose_information_clustering(var, idx, bins_borders):
         print("Bounds for cluster " + str(cl_id) + ":")
         print("\t" + str(round(np.min(var[np.argwhere(idx==cl_id)]), 4)) + ", " + str(round(np.max(var[np.argwhere(idx==cl_id)]), 4)))
 
+# ------------------------------------------------------------------------------
+
 def variable_bins(var, k, verbose=False):
     """
     Clusters the data by dividing a variable vector ``var`` into
@@ -2035,6 +2202,8 @@ def variable_bins(var, k, verbose=False):
 
     return (idx, borders)
 
+# ------------------------------------------------------------------------------
+
 def predefined_variable_bins(var, split_values, verbose=False):
     """
     Clusters the data by dividing a variable vector ``var`` into
@@ -2089,6 +2258,9 @@ def predefined_variable_bins(var, split_values, verbose=False):
     if n_variables != 1:
         raise ValueError("Parameter `var` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
+    if not isinstance(split_values, list):
+        raise ValueError("Parameter `split_values` has to be a list.")
+
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be a boolean.")
 
@@ -2129,6 +2301,8 @@ def predefined_variable_bins(var, split_values, verbose=False):
     borders = bins_borders
 
     return (idx, borders)
+
+# ------------------------------------------------------------------------------
 
 def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
     """
@@ -2250,6 +2424,8 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
         __print_verbose_information_clustering(Z, idx, borders)
 
     return (idx, borders)
+
+# ------------------------------------------------------------------------------
 
 def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
     """
@@ -2431,6 +2607,8 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
     return (idx, borders)
 
+# ------------------------------------------------------------------------------
+
 def degrade_clusters(idx, verbose=False):
     """
     Re-numerates clusters if either of these two cases is true:
@@ -2529,6 +2707,8 @@ def degrade_clusters(idx, verbose=False):
 
     return (np.asarray(idx_degraded), k_update)
 
+# ------------------------------------------------------------------------------
+
 def flip_clusters(idx, dictionary):
     """
     Flips cluster labelling according to instructions provided
@@ -2624,6 +2804,8 @@ def flip_clusters(idx, dictionary):
 
     return(np.asarray(flipped_idx))
 
+# ------------------------------------------------------------------------------
+
 def get_centroids(X, idx):
     """
     Computes the centroids for all variables in the original data set,
@@ -2712,6 +2894,8 @@ def get_centroids(X, idx):
 
     return(centroids)
 
+# ------------------------------------------------------------------------------
+
 def get_partition(X, idx):
     """
     Partitions the observations from the original data
@@ -2790,6 +2974,8 @@ def get_partition(X, idx):
 
     return(X_in_clusters, idx_in_clusters)
 
+# ------------------------------------------------------------------------------
+
 def get_populations(idx):
     """
     Computes populations (number of observations) in clusters
@@ -2854,6 +3040,8 @@ def get_populations(idx):
         populations.append(int((idx==i).sum()))
 
     return(populations)
+
+# ------------------------------------------------------------------------------
 
 def get_average_centroid_distance(X, idx, weighted=False):
     """
@@ -3123,6 +3311,8 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', first_cluster_index_zero=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a three-dimensional manifold divided into clusters.
@@ -3367,6 +3557,8 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
     """
     Plots a 2-dimensional manifold divided into train and test
@@ -3556,5 +3748,172 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
 
     if title != None: figure.suptitle(title, fontsize=font_title, **csfont)
     if save_filename != None: figure.savefig(save_filename, dpi = 500, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_conditional_statistics(variable, conditioning_variable, k=20, split_values=None, statistics_to_plot=['mean'], color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+    """
+    Plots a 2-dimensional manifold given by ``variable`` and ``conditioning_variable``
+    and the selected conditional statistics (as per ``preprocess.ConditionalStatistics``).
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_conditional_statistics
+        import numpy as np
+
+        # Generate dummy variables:
+        conditioning_variable = np.linspace(-1,1,100)
+        y = -x**2 + 1
+
+        # Plot the conditional statistics:
+        plt = plot_conditional_statistics(y[:,None], conditioning_variable, k=10, x_label='$x$', y_label='$y$', figure_size=(5,5), title='Conditional mean', save_filename='conditional-mean.pdf')
+        plt.close()
+
+    :param variable:
+        ``numpy.ndarray`` specifying a single dependent variable to condition.
+        This will be plotted on the :math:`y`-axis.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param conditioning_variable:
+        ``numpy.ndarray`` specifying a single variable to be used as a
+        conditioning variable. This will be plotted on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param k:
+        ``int`` specifying the number of bins to create in the conditioning variable.
+        It has to be a positive number.
+    :param split_values:
+        ``list`` specifying values at which splits should be performed.
+        If set to ``None``, splits will be performed using :math:`k` equal variable bins.
+    :param statistics_to_plot:
+        ``list`` of ``str`` specifying conditional statistics to plot. The strings can be ``mean``,
+        ``min``, ``max`` or ``std``.
+    :param color: (optional)
+        vector or string specifying color for the manifold. If it is a
+        vector, it has to have length consistent with the number of observations
+        in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+        It can also be set to a string specifying the color directly, for
+        instance ``'r'`` or ``'#006778'``.
+        If not specified, manifold will be plotted in black.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param colorbar_label: (optional)
+        string specifying colorbar label annotation.
+        If set to ``None``, colorbar label will not be plotted.
+    :param color_map: (optional)
+        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - plot handle.
+    """
+
+    __statistics_to_plot = ['mean', 'min', 'max', 'std']
+
+    if not isinstance(variable, np.ndarray):
+        raise ValueError("Parameter `variable` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(variable)
+        n_var_x = 1
+        cond = ConditionalStatistics(variable[:,None], conditioning_variable, k=k, split_values=split_values, verbose=False)
+    except:
+        (n_x, n_var_x) = np.shape(variable)
+        cond = ConditionalStatistics(variable, conditioning_variable, k=k, split_values=split_values, verbose=False)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `variable` has to be a 0D or 1D vector.")
+
+    if not isinstance(conditioning_variable, np.ndarray):
+        raise ValueError("Parameter `conditioning_variable` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_y,) = np.shape(conditioning_variable)
+        n_var_y = 1
+    except:
+        (n_y, n_var_y) = np.shape(conditioning_variable)
+
+    if n_var_y != 1:
+        raise ValueError("Parameter `conditioning_variable` has to be a 0D or 1D vector.")
+
+    if n_x != n_y:
+        raise ValueError("Parameter `variable` has different number of elements than `conditioning_variable`.")
+
+    for statistics in statistics_to_plot:
+        if statistics not in __statistics_to_plot:
+            raise ValueError("Parameter `statistics_to_plot` has to be `mean`, `min`, `max` or `std`.")
+
+    if color is not None:
+        if not isinstance(color, str):
+            if not isinstance(color, np.ndarray):
+                raise ValueError("Parameter `color` has to be `None`, or of type `str` or `numpy.ndarray`.")
+
+    conditional_mean_color = '#0000FF'
+    conditional_minimum_color = '#ff2f18'
+    conditional_maximum_color = '#239411'
+    conditional_standard_deviation_color = '#ffa112'
+
+    if isinstance(color, np.ndarray):
+
+        try:
+            (n_color,) = np.shape(color)
+            n_var_color = 1
+        except:
+            (n_color, n_var_color) = np.shape(color)
+
+        if n_var_color != 1:
+            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+
+        if n_color != n_x:
+            raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
+
+    fig, axs = plt.subplots(1, 1, figsize=figure_size)
+
+    if color is None:
+        scat = plt.scatter(conditioning_variable.ravel(), variable.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    elif isinstance(color, str):
+        scat = plt.scatter(conditioning_variable.ravel(), variable.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    elif isinstance(color, np.ndarray):
+        scat = plt.scatter(conditioning_variable.ravel(), variable.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+
+    for statistics in statistics_to_plot:
+
+        if statistics == 'mean': plt.plot(cond.centroids, cond.conditional_mean, 'o-', c=conditional_mean_color, label='Cond. mean')
+        if statistics == 'min': plt.plot(cond.centroids, cond.conditional_minimum, 'o-', c=conditional_minimum_color, label='Cond. min')
+        if statistics == 'max': plt.plot(cond.centroids, cond.conditional_maximum, 'o-', c=conditional_maximum_color, label='Cond. max')
+        if statistics == 'std': plt.plot(cond.centroids, cond.conditional_standard_deviation, 'o-', c=conditional_standard_deviation_color, label='Cond. std')
+
+    plt.xticks(fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
+    if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
+    plt.grid(alpha=grid_opacity)
+
+    plt.legend(loc='upper right', fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend)
+
+    if isinstance(color, np.ndarray):
+        if color is not None:
+            cb = fig.colorbar(scat)
+            cb.ax.tick_params(labelsize=font_colorbar_axes)
+            if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+
+    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt

@@ -69,6 +69,11 @@ Class ``PreProcessing``
 
 .. autofunction:: PCAfold.preprocess.outlier_detection
 
+Class ``ConditionalStatistics``
+===============================
+
+.. autoclass:: PCAfold.preprocess.ConditionalStatistics
+
 Class ``KernelDensity``
 =======================
 

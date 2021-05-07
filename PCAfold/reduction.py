@@ -2534,6 +2534,8 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a 3-dimensional manifold given three vectors
@@ -2710,6 +2712,8 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a parity plot between a variable and its reconstruction.
@@ -2850,6 +2854,8 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_path=None, save_filename=None):
     """
     This function plots weights on eigenvectors. It will generate as many
@@ -2961,6 +2967,8 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         plot_handles.append(plt)
 
     return plot_handles
+
+# ------------------------------------------------------------------------------
 
 def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None):
     """
@@ -3076,6 +3084,8 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save_filename=None):
     """
     This function plots eigenvalue distribution.
@@ -3150,6 +3160,8 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt
+
+# ------------------------------------------------------------------------------
 
 def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', title=None, save_filename=None):
     """
@@ -3247,6 +3259,8 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filename=None):
     """
     This function plots the eigenvalues as bars and their cumulative sum to visualize
@@ -3325,3 +3339,5 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt
+
+# ------------------------------------------------------------------------------

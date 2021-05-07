@@ -18,6 +18,7 @@ from .preprocess import PreProcessing
 from .preprocess import outlier_detection
 from .preprocess import KernelDensity
 from .preprocess import DataSampler
+from .preprocess import ConditionalStatistics
 from .preprocess import variable_bins
 from .preprocess import predefined_variable_bins
 from .preprocess import mixture_fraction_bins
@@ -31,6 +32,7 @@ from .preprocess import get_average_centroid_distance
 from .preprocess import plot_2d_clustering
 from .preprocess import plot_3d_clustering
 from .preprocess import plot_2d_train_test_samples
+from .preprocess import plot_conditional_statistics
 
 # Module: `reduction`
 from .reduction import PCA
