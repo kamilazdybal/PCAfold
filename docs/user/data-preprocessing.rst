@@ -69,6 +69,11 @@ Class ``PreProcessing``
 
 .. autofunction:: PCAfold.preprocess.outlier_detection
 
+Class ``ConditionalStatistics``
+===============================
+
+.. autoclass:: PCAfold.preprocess.ConditionalStatistics
+
 Class ``KernelDensity``
 =======================
 
@@ -240,6 +245,11 @@ visualizing the formed clusters.
 ==============================
 
 .. autofunction:: PCAfold.preprocess.plot_2d_train_test_samples
+
+``plot_conditional_statistics``
+===============================
+
+.. autofunction:: PCAfold.preprocess.plot_conditional_statistics
 
 --------------------------------------------------------------------------------
 

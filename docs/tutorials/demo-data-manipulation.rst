@@ -76,6 +76,57 @@ as well as centers and scales:
 
 --------------------------------------------------------------------------------
 
+************************************************
+Conditional statistics
+************************************************
+
+In this section, we demonstrate how conditional statistics can be computed and plotted for the original data set. A data set representing combustion of syngas in air generated from steady laminar flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical mechanism by Hawkes et al. :cite:`Hawkes2007` is used as a demo data set. We begin by importing the data set composed of the original state space variables, :math:`\mathbf{X}`, and the corresponding mixture fraction observations, :math:`Z`, that will serve as the conditioning variable:
+
+.. code:: python
+
+    X = np.genfromtxt('data-state-space.csv', delimiter=',')
+    Z = np.genfromtxt('data-mixture-fraction.csv', delimiter=',')
+
+First, we create an object of the ``ConditionalStatistics`` class. We condition the entire data set :math:`\mathbf{X}`, using the mixture fraction as a conditioning variable. We compute the conditional stastics in 20 bins of the conditioning variable:
+
+.. code:: python
+
+    cond = preprocess.ConditionalStatistics(X, Z, k=20)
+
+We can then retrieve the centroids for which the conditional statistics
+
+.. code:: python
+
+    cond.centroids
+
+and retrieve different conditional statistics. For instance, the conditional mean can be accessed through:
+
+.. code:: python
+
+    conditional_mean = cond.conditional_mean
+
+The conditional statistics can also be ploted using a dedicated function:
+
+.. code:: python
+    
+    plt = preprocess.plot_conditional_statistics(X[:,0], Z, k=20, x_label='Mixture fraction [-]', y_label='$T$ [K]', color='#c0c0c0', statistics_to_plot=['mean', 'max', 'min'], figure_size=(10,4), save_filename=save_filename)
+
+.. image:: ../images/conditional-statistics.svg
+  :width: 600
+  :align: center
+
+Note, that the original data set that is plotted in the backround can be colored using any vector variable:
+
+.. code:: python
+
+    plt = preprocess.plot_conditional_statistics(X[:,0], Z, k=20, statistics_to_plot=['mean', 'max', 'min'], x_label='Mixture fraction [-]', y_label='$T$ [K]', color=X[:,2], color_map='inferno', colorbar_label='$Y_{O_2}$ [-]', figure_size=(12.5,4), save_filename=save_filename)
+
+.. image:: ../images/conditional-statistics-colored.svg
+  :width: 700
+  :align: center
+
+--------------------------------------------------------------------------------
+
 ******************************
 Multivariate outlier detection
 ******************************
@@ -312,3 +363,12 @@ The result of this reconstruction can be seen below:
 .. image:: ../images/kernel-density-multi-x2.svg
   :width: 350
   :align: center
+
+--------------------------------------------------------------------------------
+
+**********************
+Bibliography
+**********************
+
+.. bibliography:: demo-handling-source-terms.bib
+  :labelprefix: M

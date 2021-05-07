@@ -5,6 +5,7 @@ from PCAfold import reduction
 from PCAfold import PCA
 from PCAfold import PreProcessing
 from PCAfold import KernelDensity
+from PCAfold import ConditionalStatistics
 
 
 class TestManipulation(unittest.TestCase):
@@ -1026,3 +1027,116 @@ class TestManipulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             kerneld = KernelDensity(X, X[20:30,:])
+
+    def test_ConditionalStatistics__allowed_calls(self):
+
+        X = np.random.rand(100,20)
+        cond_variable = np.random.rand(100,)
+
+        try:
+            cond = ConditionalStatistics(X, cond_variable, k=2)
+            cond.idx
+            cond.borders
+            cond.centroids
+            cond.conditional_mean
+            cond.conditional_minimum
+            cond.conditional_maximum
+            cond.conditional_standard_deviation
+        except:
+            self.assertTrue(False)
+
+        cond_variable = np.random.rand(100,1)
+
+        try:
+            cond = ConditionalStatistics(X, cond_variable, k=2)
+        except:
+            self.assertTrue(False)
+
+        split_values = [0.1,0.5]
+
+        try:
+            cond = ConditionalStatistics(X, cond_variable, k=2, split_values=split_values)
+        except:
+            self.assertTrue(False)
+
+    def test_ConditionalStatistics__not_allowed_calls(self):
+
+        X = np.random.rand(100,20)
+        cond_variable = np.random.rand(100,)
+        cond = ConditionalStatistics(X, cond_variable, k=2)
+
+        with self.assertRaises(AttributeError):
+            cond.idx = []
+
+        with self.assertRaises(AttributeError):
+            cond.borders = []
+
+        with self.assertRaises(AttributeError):
+            cond.centroids = []
+
+        with self.assertRaises(AttributeError):
+            cond.conditional_mean = []
+
+        with self.assertRaises(AttributeError):
+            cond.conditional_minimum = []
+
+        with self.assertRaises(AttributeError):
+            cond.conditional_maximum = []
+
+        with self.assertRaises(AttributeError):
+            cond.conditional_standard_deviation = []
+
+        with self.assertRaises(ValueError):
+            cond = ConditionalStatistics([1,2,3], cond_variable, k=2)
+
+        with self.assertRaises(ValueError):
+            cond = ConditionalStatistics(X, X[:,0:5], k=2)
+
+        with self.assertRaises(ValueError):
+            cond = ConditionalStatistics(X, cond_variable, k=0)
+
+        with self.assertRaises(ValueError):
+            cond = ConditionalStatistics(X, cond_variable, k=-1)
+
+        with self.assertRaises(ValueError):
+            cond = ConditionalStatistics(X, cond_variable, split_values=2)
+
+    def test_plot_conditional_statistics_allowed_calls(self):
+
+        X = np.random.rand(100,)
+        cond_variable = np.random.rand(100,)
+
+        try:
+            plt = preprocess.plot_conditional_statistics(X, cond_variable, k=2)
+            plt.close()
+        except:
+            self.assertTrue(False)
+
+        X = np.random.rand(100,1)
+        cond_variable = np.random.rand(100,1)
+
+        try:
+            plt = preprocess.plot_conditional_statistics(X, cond_variable, k=2)
+            plt.close()
+        except:
+            self.assertTrue(False)
+
+        X = np.random.rand(100,)
+        cond_variable = np.random.rand(100,)
+
+        try:
+            plt = preprocess.plot_conditional_statistics(X, cond_variable, k=2)
+            plt.close()
+        except:
+            self.assertTrue(False)
+
+    def test_plot_conditional_statistics_not_allowed_calls(self):
+
+        X = np.random.rand(100,1)
+        cond_variable = np.random.rand(100,)
+
+        with self.assertRaises(ValueError):
+            plt = preprocess.plot_conditional_statistics(X, cond_variable, statistics_to_plot=['none'])
+
+        with self.assertRaises(ValueError):
+            plt = preprocess.plot_conditional_statistics(X, cond_variable, statistics_to_plot=['mean', 'none'])

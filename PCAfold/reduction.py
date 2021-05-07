@@ -96,8 +96,8 @@ class PCA:
     :param use_eigendec: (optional)
         boolean specifying the method for obtaining eigenvalues and eigenvectors:
 
-            * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
-            * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+        * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+        * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
 
@@ -122,17 +122,17 @@ class PCA:
 
     **Attributes:**
 
-        - **n_components** - (can be re-set) number of retained Principal Components :math:`q`.
-        - **n_components_init** - (read only) number of retained Principal Components :math:`q` with which ``PCA`` class object was initialized.
-        - **scaling** - (read only) scaling criteria with which ``PCA`` class object was initialized.
-        - **n_variables** - (read only) number of variables of the original data set on which ``PCA`` class object was initialized.
-        - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
-        - **S** - (read only) covariance matrix :math:`\mathbf{S}`.
-        - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
-        - **A** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
-        - **loadings** - (read only) loadings :math:`\mathbf{l}` (vectors are stored in columns, rows correspond to weights).
+    - **n_components** - (can be re-set) number of retained Principal Components :math:`q`.
+    - **n_components_init** - (read only) number of retained Principal Components :math:`q` with which ``PCA`` class object was initialized.
+    - **scaling** - (read only) scaling criteria with which ``PCA`` class object was initialized.
+    - **n_variables** - (read only) number of variables of the original data set on which ``PCA`` class object was initialized.
+    - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
+    - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+    - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+    - **S** - (read only) covariance matrix :math:`\mathbf{S}`.
+    - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
+    - **A** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
+    - **loadings** - (read only) loadings :math:`\mathbf{l}` (vectors are stored in columns, rows correspond to weights).
     """
 
     def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1347,8 +1347,8 @@ class LPCA:
     :param use_eigendec: (optional)
         boolean specifying the method for obtaining eigenvalues and eigenvectors:
 
-            * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
-            * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+        * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+        * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
 
@@ -1373,9 +1373,9 @@ class LPCA:
 
     **Attributes:**
 
-        - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
-        - **L** - (read only) list of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
-        - **principal_components** - (read only) list of matrices of local Principal Components :math:`\mathbf{Z}`. Each list element corresponds to Principal Components in a single cluster.
+    - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
+    - **L** - (read only) list of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
+    - **principal_components** - (read only) list of matrices of local Principal Components :math:`\mathbf{Z}`. Each list element corresponds to Principal Components in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -2534,6 +2534,8 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a 3-dimensional manifold given three vectors
@@ -2710,6 +2712,8 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
     This function plots a parity plot between a variable and its reconstruction.
@@ -2850,6 +2854,8 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_path=None, save_filename=None):
     """
     This function plots weights on eigenvectors. It will generate as many
@@ -2961,6 +2967,8 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         plot_handles.append(plt)
 
     return plot_handles
+
+# ------------------------------------------------------------------------------
 
 def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None):
     """
@@ -3076,6 +3084,8 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save_filename=None):
     """
     This function plots eigenvalue distribution.
@@ -3150,6 +3160,8 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt
+
+# ------------------------------------------------------------------------------
 
 def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', title=None, save_filename=None):
     """
@@ -3247,6 +3259,8 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filename=None):
     """
     This function plots the eigenvalues as bars and their cumulative sum to visualize
@@ -3325,3 +3339,5 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
         plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
 
     return plt
+
+# ------------------------------------------------------------------------------
