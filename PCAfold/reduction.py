@@ -96,8 +96,8 @@ class PCA:
     :param use_eigendec: (optional)
         boolean specifying the method for obtaining eigenvalues and eigenvectors:
 
-            * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
-            * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+        * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+        * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
 
@@ -122,17 +122,17 @@ class PCA:
 
     **Attributes:**
 
-        - **n_components** - (can be re-set) number of retained Principal Components :math:`q`.
-        - **n_components_init** - (read only) number of retained Principal Components :math:`q` with which ``PCA`` class object was initialized.
-        - **scaling** - (read only) scaling criteria with which ``PCA`` class object was initialized.
-        - **n_variables** - (read only) number of variables of the original data set on which ``PCA`` class object was initialized.
-        - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
-        - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-        - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
-        - **S** - (read only) covariance matrix :math:`\mathbf{S}`.
-        - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
-        - **A** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
-        - **loadings** - (read only) loadings :math:`\mathbf{l}` (vectors are stored in columns, rows correspond to weights).
+    - **n_components** - (can be re-set) number of retained Principal Components :math:`q`.
+    - **n_components_init** - (read only) number of retained Principal Components :math:`q` with which ``PCA`` class object was initialized.
+    - **scaling** - (read only) scaling criteria with which ``PCA`` class object was initialized.
+    - **n_variables** - (read only) number of variables of the original data set on which ``PCA`` class object was initialized.
+    - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
+    - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
+    - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
+    - **S** - (read only) covariance matrix :math:`\mathbf{S}`.
+    - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
+    - **A** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
+    - **loadings** - (read only) loadings :math:`\mathbf{l}` (vectors are stored in columns, rows correspond to weights).
     """
 
     def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1347,8 +1347,8 @@ class LPCA:
     :param use_eigendec: (optional)
         boolean specifying the method for obtaining eigenvalues and eigenvectors:
 
-            * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
-            * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+        * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+        * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
 
@@ -1373,9 +1373,9 @@ class LPCA:
 
     **Attributes:**
 
-        - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
-        - **L** - (read only) list of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
-        - **principal_components** - (read only) list of matrices of local Principal Components :math:`\mathbf{Z}`. Each list element corresponds to Principal Components in a single cluster.
+    - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
+    - **L** - (read only) list of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
+    - **principal_components** - (read only) list of matrices of local Principal Components :math:`\mathbf{Z}`. Each list element corresponds to Principal Components in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):

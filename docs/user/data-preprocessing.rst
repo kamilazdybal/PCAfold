@@ -246,6 +246,11 @@ visualizing the formed clusters.
 
 .. autofunction:: PCAfold.preprocess.plot_2d_train_test_samples
 
+``plot_conditional_statistics``
+===============================
+
+.. autofunction:: PCAfold.preprocess.plot_conditional_statistics
+
 --------------------------------------------------------------------------------
 
 ************

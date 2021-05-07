@@ -761,7 +761,6 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 class ConditionalStatistics:
     """
     Enables computing conditional statistics on the original data set, :math:`\\mathbf{X}`.
-
     This includes:
 
     - conditional mean
@@ -770,6 +769,30 @@ class ConditionalStatistics:
     - conditional standard deviation
 
     Other quantities can be added in the future at the user's request.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import ConditionalStatistics
+        import numpy as np
+
+        # Generate dummy variables:
+        conditioning_variable = np.linspace(-1,1,100)
+        y = -conditioning_variable**2 + 1
+
+        # Instantiate object of the ConditionalStatistics class
+        # and compute conditional statistics in 10 bins of the conditioning variable:
+        cond = ConditionalStatistics(y[:,None], conditioning_variable, k=10)
+
+        # Access conditional statistics:
+        conditional_mean = cond.conditional_mean
+        conditional_min = cond.conditional_minimum
+        conditional_max = cond.conditional_maximum
+        conditional_std = cond.conditional_standard_deviation
+
+        # Access the centroids of the created bins:
+        centroids = cond.centroids
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -787,9 +810,9 @@ class ConditionalStatistics:
 
     **Attributes:**
 
-    - **idx** - (read only)
-    - **borders** - (read only)
-    - **centroids** - (read only)
+    - **idx** - (read only) ``numpy.ndarray`` of cluster (bins) classifications. It has size ``(n_observations,)``.
+    - **borders** - (read only) ``list`` of values that define borders for the clusters (bins). It has length ``k+1``.
+    - **centroids** - (read only) ``list`` of values that specify bins centers. It has length ``k``.
     - **conditional_mean** - (read only) ``numpy.ndarray`` specifying the conditional means of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
     - **conditional_minimum** - (read only) ``numpy.ndarray`` specifying the conditional minimums of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
     - **conditional_maximum** - (read only) ``numpy.ndarray`` specifying the conditional maximums of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
@@ -3767,7 +3790,7 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
 
         # Generate dummy variables:
         conditioning_variable = np.linspace(-1,1,100)
-        y = -x**2 + 1
+        y = -conditioning_variable**2 + 1
 
         # Plot the conditional statistics:
         plt = plot_conditional_statistics(y[:,None], conditioning_variable, k=10, x_label='$x$', y_label='$y$', figure_size=(5,5), title='Conditional mean', save_filename='conditional-mean.pdf')
