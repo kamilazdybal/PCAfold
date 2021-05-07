@@ -29,7 +29,7 @@ _scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', 
 
 def center_scale(X, scaling, nocenter=False):
     """
-    Centers and scales the data set.
+    Centers and scales the original data set, :math:`\mathbf{X}`.
     In the discussion below, we understand that :math:`X_j` is the :math:`j^{th}` column
     of :math:`\mathbf{X}`.
 
@@ -237,9 +237,9 @@ def invert_center_scale(X_cs, X_center, X_scale):
     :param X_cs:
         ``numpy.ndarray`` specifying the centered and scaled data set, :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
     :param X_center:
-        ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+        ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set, :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     :param X_scale:
-        ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
+        ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set, :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
 
     :return:
         - **X** - ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It has size ``(n_observations,n_variables)``.
@@ -289,7 +289,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
 class PreProcessing:
     """
     Performs a composition of data manipulation done by ``remove_constant_vars``
-    and ``center_scale`` functions on the original data set
+    and ``center_scale`` functions on the original data set,
     :math:`\mathbf{X}`. It can be used to store the result of that manipulation.
     Specifically, it:
 
@@ -324,7 +324,7 @@ class PreProcessing:
     - **X_removed** - (read only) ``numpy.ndarray`` specifying the original data set with any constant columns removed. It has size ``(n_observations,n_variables)``.
     - **idx_removed** - (read only) ``list`` specifying the indices of columns removed from :math:`\mathbf{X}`.
     - **idx_retained** - (read only) ``list`` specifying the indices of columns retained in :math:`\mathbf{X}`.
-    - **X_cs** - (read only) ``numpy.ndarray`` specifying the centered and scaled data set :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
+    - **X_cs** - (read only) ``numpy.ndarray`` specifying the centered and scaled data set, :math:`\mathbf{X_{cs}}`.  It should be of size ``(n_observations,n_variables)``.
     - **X_center** - (read only) ``numpy.ndarray`` specifying the centers, :math:`c_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     - **X_scale** - (read only) ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     """
@@ -362,8 +362,8 @@ class PreProcessing:
 
 def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
     """
-    Removes any constant columns in the data set :math:`\mathbf{X}`.
-    The :math:`j^{th}` column :math:`X_j` is considered constant if either of the following is true:
+    Removes any constant columns from the original data set, :math:`\mathbf{X}`.
+    The :math:`j^{th}` column, :math:`X_j`, is considered constant if either of the following is true:
 
     - The maximum of an absolute value of a column :math:`X_j` is less than ``maxtol``:
 
@@ -446,7 +446,7 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
 
 def order_variables(X, method='mean', descending=True):
     """
-    Orders variables in the data set using a selected method.
+    Orders variables in the original data set, :math:`\mathbf{X}`, using a selected method.
 
     **Example:**
 
@@ -537,13 +537,13 @@ def order_variables(X, method='mean', descending=True):
 
 def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
     """
-    Finds outliers in a data set :math:`\mathbf{X}` and returns
+    Finds outliers in the original data set, :math:`\mathbf{X}`, and returns
     indices of observations without outliers as well as indices of the outliers
     themselves. Two options are implemented here:
 
     - ``'MULTIVARIATE TRIMMING'``
 
-    Outliers are detected based on multivariate Mahalanobis distance :math:`D_M`:
+    Outliers are detected based on multivariate Mahalanobis distance, :math:`D_M`:
 
     .. math::
 
@@ -585,8 +585,8 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
 
         \sum_{j=k}^{Q} \\frac{z_{ij}^2}{L_j} > c_2
 
-    where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the Principal
-    Components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
+    where :math:`z_{ij}` is the :math:`i^{th}, j^{th}` element from the principal
+    components matrix :math:`\mathbf{Z}` and :math:`L_j` is the :math:`j^{th}`
     eigenvalue from :math:`\mathbf{L}` (as per ``PCA`` class).
     Major PCs are selected such that the total variance explained is 50%.
     Minor PCs are selected such that the remaining variance they explain is 20%.
@@ -868,14 +868,16 @@ class ConditionalStatistics:
 
             (idx, borders) = predefined_variable_bins(conditioning_variable, split_values=split_values, verbose=verbose)
 
-        conditional_mean = np.zeros((k, n_variables_X))
-        conditional_minimum = np.zeros((k, n_variables_X))
-        conditional_maximum = np.zeros((k, n_variables_X))
-        conditional_standard_deviation = np.zeros((k, n_variables_X))
+        true_k = len(np.unique(idx))
+
+        conditional_mean = np.zeros((true_k, n_variables_X))
+        conditional_minimum = np.zeros((true_k, n_variables_X))
+        conditional_maximum = np.zeros((true_k, n_variables_X))
+        conditional_standard_deviation = np.zeros((true_k, n_variables_X))
 
         centroids = []
 
-        for i in range(0,k):
+        for i in range(0,true_k):
 
             # Compute the centroids of all bins:
             centroids.append((borders[i] + borders[i+1])/2)
@@ -926,13 +928,13 @@ class ConditionalStatistics:
 
 class KernelDensity:
     """
-    Enables kernel density weighting of data sets
+    Enables kernel density weighting of the original data set, :math:`\mathbf{X}`,
     based on *single-variable* or *multi-variable* case as proposed in
     :cite:`Coussement2012`.
 
-    The goal of both cases is to obtain a vector of weights :math:`\\mathbf{W_c}` that
+    The goal of both cases is to obtain a vector of weights, :math:`\\mathbf{W_c}`, that
     has the same number of elements as there are observations in the original
-    data set :math:`\mathbf{X}`.
+    data set, :math:`\mathbf{X}`.
     Each observation will then get multiplied by the corresponding weight from
     :math:`\mathbf{W_c}`.
 
@@ -1420,7 +1422,7 @@ class DataSampler:
 
     def __print_verbose_information_sampling(self, idx, idx_train, idx_test):
         """
-        This private function prints detailed information on train and test sampling when
+        Prints detailed information on train and test sampling when
         ``verbose=True``.
 
         :param idx:
@@ -1457,7 +1459,7 @@ class DataSampler:
 
     def number(self, perc, test_selection_option=1):
         """
-        This function uses classifications into :math:`k` clusters and samples
+        Uses classifications into :math:`k` clusters and samples
         fixed number of observations from every cluster as training data.
         In general, this results in a balanced representation of features
         identified by a clustering algorithm.
@@ -1613,7 +1615,7 @@ class DataSampler:
 
     def percentage(self, perc, test_selection_option=1):
         """
-        This function uses classifications into :math:`k` clusters and
+        Uses classifications into :math:`k` clusters and
         samples a certain percentage ``perc`` from every cluster as the training data.
 
         **Example:**
@@ -1757,7 +1759,7 @@ class DataSampler:
 
     def manual(self, sampling_dictionary, sampling_type='percentage', test_selection_option=1):
         """
-        This function uses classifications into :math:`k` clusters
+        Uses classifications into :math:`k` clusters
         and a dictionary ``sampling_dictionary`` in which you manually specify what
         ``'percentage'`` (or what ``'number'``) of samples will be
         selected as the train data from each cluster. The dictionary keys are
@@ -1979,7 +1981,7 @@ class DataSampler:
 
     def random(self, perc, test_selection_option=1):
         """
-        This function samples train data at random from the entire data set.
+        Samples train data at random from the entire data set.
 
         **Example:**
 
@@ -2645,6 +2647,7 @@ def degrade_clusters(idx, verbose=False):
     .. code:: python
 
         from PCAfold import degrade_clusters
+        import numpy as np
 
         # Generate dummy idx vector:
         idx = np.array([0, 0, 2, 0, 5, 10])
@@ -2664,6 +2667,7 @@ def degrade_clusters(idx, verbose=False):
     .. code:: python
 
         from PCAfold import degrade_clusters
+        import numpy as np
 
         # Generate dummy idx vector:
         idx = np.array([1, 1, 2, 2, 3, 3])
@@ -2743,6 +2747,7 @@ def flip_clusters(idx, dictionary):
     .. code:: python
 
         from PCAfold import flip_clusters
+        import numpy as np
 
         # Generate dummy idx vector:
         idx = np.array([0,0,0,1,1,1,1,2,2])
@@ -2866,6 +2871,7 @@ def get_centroids(X, idx):
         # Generate dummy clustering of the data set:
         idx = np.zeros((100,))
         idx[50:80] = 1
+        idx = idx.astype(int)
 
         # Compute the centroids of each cluster:
         centroids = get_centroids(X, idx)
@@ -2922,7 +2928,7 @@ def get_centroids(X, idx):
 def get_partition(X, idx):
     """
     Partitions the observations from the original data
-    set :math:`\mathbf{X}` into :math:`k` clusters according to ``idx`` provided.
+    set, :math:`\mathbf{X}`, into :math:`k` clusters according to ``idx`` provided.
 
     **Example:**
 
@@ -2937,6 +2943,7 @@ def get_partition(X, idx):
         # Generate dummy clustering of the data set:
         idx = np.zeros((100,))
         idx[50:80] = 1
+        idx = idx.astype(int)
 
         # Generate partitioning of the data set according to idx:
         (X_in_clusters, idx_in_clusters) = get_partition(X, idx)
@@ -3015,7 +3022,7 @@ def get_populations(idx):
 
         # Generate dummy partitioning:
         x = np.linspace(-1,1,100)
-        idx = variable_bins(x, 4, verbose=True)
+        (idx, borders) = variable_bins(x, 4, verbose=True)
 
         # Compute cluster populations:
         populations = get_populations(idx)
@@ -3090,6 +3097,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
         # Generate dummy clustering of the data set:
         idx = np.zeros((100,))
         idx[50:80] = 1
+        idx = idx.astype(int)
 
         # Compute average distance from cluster centroids:
         average_centroid_distance = get_average_centroid_distance(X, idx, weighted=False)
@@ -3357,7 +3365,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         (idx, _) = variable_bins(x, 4, verbose=False)
 
         # Plot the clustering result:
-        plt = plot_3d_clustering(x, y, z, idx, x_label='$x$', y_label='$y$', z_label='$z$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(10,6), title='x-y-z data set', save_filename='clustering.pdf')
+        plt = plot_3d_clustering(x, y, z, idx, x_label='$x$', y_label='$y$', z_label='$z$', color_map='viridis', first_cluster_index_zero=False, figure_size=(10,6), title='x-y-z data set', save_filename='clustering.pdf')
         plt.close()
 
     :param x:
@@ -3584,7 +3592,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
 
 def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
     """
-    Plots a 2-dimensional manifold divided into train and test
+    Plots a two-dimensional manifold divided into train and test
     samples. Number of observations in train and test data respectively will be
     plotted in the legend.
 
@@ -3600,7 +3608,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         y = -x**2 + 1
 
         # Generate dummy clustering of the data set:
-        idx = variable_bins(x, 4, verbose=False)
+        (idx, borders) = variable_bins(x, 4, verbose=False)
 
         # Generate dummy sampling of the data set:
         sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
@@ -3778,7 +3786,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
 
 def plot_conditional_statistics(variable, conditioning_variable, k=20, split_values=None, statistics_to_plot=['mean'], color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
-    Plots a 2-dimensional manifold given by ``variable`` and ``conditioning_variable``
+    Plots a two-dimensional manifold given by ``variable`` and ``conditioning_variable``
     and the selected conditional statistics (as per ``preprocess.ConditionalStatistics``).
 
     **Example:**
@@ -3793,7 +3801,7 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
         y = -conditioning_variable**2 + 1
 
         # Plot the conditional statistics:
-        plt = plot_conditional_statistics(y[:,None], conditioning_variable, k=10, x_label='$x$', y_label='$y$', figure_size=(5,5), title='Conditional mean', save_filename='conditional-mean.pdf')
+        plt = plot_conditional_statistics(y, conditioning_variable, k=10, x_label='$x$', y_label='$y$', figure_size=(10,3), title='Conditional mean', save_filename='conditional-mean.pdf')
         plt.close()
 
     :param variable:
@@ -3844,7 +3852,7 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     __statistics_to_plot = ['mean', 'min', 'max', 'std']
@@ -3855,10 +3863,10 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
     try:
         (n_x,) = np.shape(variable)
         n_var_x = 1
-        cond = ConditionalStatistics(variable[:,None], conditioning_variable, k=k, split_values=split_values, verbose=False)
+        add_dimension = True
     except:
         (n_x, n_var_x) = np.shape(variable)
-        cond = ConditionalStatistics(variable, conditioning_variable, k=k, split_values=split_values, verbose=False)
+        add_dimension = False
 
     if n_var_x != 1:
         raise ValueError("Parameter `variable` has to be a 0D or 1D vector.")
@@ -3887,10 +3895,42 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
             if not isinstance(color, np.ndarray):
                 raise ValueError("Parameter `color` has to be `None`, or of type `str` or `numpy.ndarray`.")
 
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     conditional_mean_color = '#0000FF'
     conditional_minimum_color = '#ff2f18'
     conditional_maximum_color = '#239411'
     conditional_standard_deviation_color = '#ffa112'
+
+    if add_dimension:
+        cond = ConditionalStatistics(variable[:,None], conditioning_variable, k=k, split_values=split_values, verbose=False)
+    else:
+        cond = ConditionalStatistics(variable, conditioning_variable, k=k, split_values=split_values, verbose=False)
 
     if isinstance(color, np.ndarray):
 
