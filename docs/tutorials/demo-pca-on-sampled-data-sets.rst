@@ -8,7 +8,7 @@ In this tutorial, we present how PCA can be performed on sampled data sets using
 various helpful functions from the ``preprocess`` and the ``reduction`` module. Those functions essentially allow to compare PCA done on the original full data set, :math:`\mathbf{X}`, and on the sampled data set, :math:`\mathbf{X_r}`. We are first going to present major functionalities for performing and analyzing PCA on a sampled data set using a special case of sampling - by taking equal number of samples from each cluster. Next, we are going to show a more general way to
 perform PCA on data sets that are sampled in any way of choice. A general overview for performing PCA on a sampled data set is presented below:
 
-.. image:: ../images/PCA-on-sampled-data-set.svg
+.. image:: ../images/pca-on-sampled-data-set.svg
   :width: 700
 
 The main goal is to inform the PCA transformation with some of the characteristics of the sampled data set, :math:`\mathbf{X_r}`. There are several ways in which that information
