@@ -1,21 +1,39 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
-          accessed `here <https://mybinder.org/v2/git/https%3A%2F%2Fgitlab.multiscale.utah.edu%2Fcommon%2FPCAfold/master?filepath=docs%2Ftutorials%2Fdemo-pca.ipynb>`_.
+          accessed `here <https://mybinder.org/v2/git/https%3A%2F%2Fgitlab.multiscale.utah.edu%2Fcommon%2FPCAfold/master?filepath=docs%2Ftutorials%2Fdemo-global-vs-local-pca.ipynb>`_.
 
 Global and local PCA
 ====================
 
-In this example we present how global and local PCA can be performed on a
+In this tutorial, we present how global and local PCA can be performed on a
 synthetic data set using the ``reduction`` module.
-We need to import the ``PCA`` and ``LPCA`` classes:
+
+We import the necessary modules:
 
 .. code:: python
 
-  from PCAfold import preprocess
-  from PCAfold import reduction
-  from PCAfold import PCA, LPCA
-  import numpy as np
+    from PCAfold import preprocess
+    from PCAfold import reduction
+    from PCAfold import PCA, LPCA
+    import matplotlib.pyplot as plt
+    from matplotlib import gridspec
+    from matplotlib.colors import ListedColormap
+    import numpy as np
+  
+and we set some initial parameters:
 
-We generate a synthetic data set on which the global PCA will be performed:
+.. code:: python
+
+    n_points = 1000
+    save_filename = None
+    global_color = '#454545'
+    k1_color = '#0e7da7'
+    k2_color = '#ceca70'
+    color_map = ListedColormap([k1_color, k2_color])
+
+Generate a synthetic data set for global PCA
+-------------------------------------------------------------------
+
+We generate a synthetic data set on which the global PCA will be performed. This data set is composed of a single cloud of points.
 
 .. code:: python
 
@@ -33,23 +51,31 @@ We generate a synthetic data set on which the global PCA will be performed:
 This data set can be seen below:
 
 .. image:: ../images/tutorial-pca-data-set-for-global-pca.svg
-  :width: 350
+  :width: 500
   :align: center
 
-We perform global PCA to obtain PC-scores, eigenvectors and eigenvalues:
+Global PCA
+^^^^^^^^^^
+
+We perform global PCA to obtain global principal components, global eigenvectors and global eigenvalues:
 
 .. code:: python
 
-  # Perform PCA:
-  pca = PCA(Dataset_global, 'none', n_components=2)
-  PC_scores_global = pca.transform(Dataset_global, nocenter=False)
-  eigenvectors_global = pca.A
-  eigenvalues_global = pca.L
+    pca = PCA(Dataset_global, 'none', n_components=2)
+    principal_components_global = pca.transform(Dataset_global, nocenter=False)
+    eigenvectors_global = pca.A
+    eigenvalues_global = pca.L
 
-  # Centered data set:
-  Dataset_global_pp = pca.X_cs
+We also retrieve the centered and scaled data set:
 
-Similarly, we generate another synthetic data set that is composed of two distinct clouds of points:
+.. code:: python
+
+    Dataset_global_pp = pca.X_cs
+
+Generate a synthetic data set for local PCA
+-------------------------------------------------------------------
+
+Similarly, we generate another synthetic data set that is composed of two distinct clouds of points.
 
 .. code:: python
 
@@ -68,10 +94,13 @@ Similarly, we generate another synthetic data set that is composed of two distin
 This data set can be seen below:
 
 .. image:: ../images/tutorial-pca-data-set-for-local-pca.svg
-  :width: 350
+  :width: 500
   :align: center
 
-We perform clustering based on pre-defined bins using the available
+Cluster the data set for local PCA
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We perform clustering of this data set based on pre-defined bins using the available
 ``preprocess.predefined_variable_bins`` function.
 We obtain cluster classifications and centroids for each cluster:
 
@@ -80,18 +109,34 @@ We obtain cluster classifications and centroids for each cluster:
   (idx, borders) = preprocess.predefined_variable_bins(Dataset_local[:,0], [2.5], verbose=False)
   centroids = preprocess.get_centroids(Dataset_local, idx)
 
-We perform local PCA to obtain local PC-scores, eigenvectors and eigenvalues:
+The result of this clustering can be seen below:
+
+.. image:: ../images/tutorial-local-pca-clustering.svg
+  :width: 650
+  :align: center
+
+In local PCA, PCA is applied in each cluster separately.
+
+Local PCA
+^^^^^^^^^
+
+We perform local PCA to obtain local principal components, local eigenvectors and local eigenvalues:
 
 .. code:: python
 
-  lpca = LPCA(Dataset_local, idx, scaling='none')
+    lpca = LPCA(Dataset_local, idx, scaling='none')
+    principal_components_local = lpca.principal_components
+    eigenvectors_local = lpca.A
+    eigenvalues_local = lpca.L
 
-  eigenvectors_local = lpca.A
-  eigenvalues_local = lpca.L
+Plotting global versus local PCA
+--------------------------------
 
-Finally, we plot the identified global and local eigenvectors on top of the synthetic data sets.
+Finally, for the demonstration purposes, we plot the identified global and local eigenvectors on top of both synthetic data sets.
 The visual result of performing PCA globally and locally can be seen below:
 
 .. image:: ../images/tutorial-pca-global-local-pca.svg
   :width: 700
   :align: center
+
+Note, that in local PCA, a separate set of eigenvectors is found in each cluster. The same goes for principal components and eigenvalues.

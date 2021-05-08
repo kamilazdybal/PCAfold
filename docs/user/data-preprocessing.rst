@@ -6,7 +6,10 @@ Data preprocessing
 
 The ``preprocess`` module can be used for performing data preprocessing
 including centering and scaling, outlier detection and removal, kernel density
-weighting of data sets, data clustering and data sampling.
+weighting of data sets, data clustering and data sampling. It also includes
+functionalities that allow the user to perform initial data inspection such
+as computing conditional statistics or ordering variables in a data set according
+to a criterion.
 
 .. note:: The format for the user-supplied input data matrix
   :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}`, common to all modules, is that
@@ -94,8 +97,8 @@ Clustering functions
 
 Each function that clusters the data set returns a vector of integers ``idx``
 of type ``numpy.ndarray`` of size ``(n_observations,)`` that specifies
-classification of each observation from the original data set
-:math:`\mathbf{X}` to a local cluster.
+classification of each observation from the original data set,
+:math:`\mathbf{X}`, to a local cluster.
 
 .. image:: ../images/clustering-idx.svg
   :width: 400
@@ -229,7 +232,8 @@ Plotting functions
 ******************
 
 This section includes functions for data preprocessing related plotting such as
-visualizing the formed clusters.
+visualizing the formed clusters, visualizing the selected train and test samples
+or plotting the conditional statistics.
 
 ``plot_2d_clustering``
 ======================

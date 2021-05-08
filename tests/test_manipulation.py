@@ -1059,6 +1059,20 @@ class TestManipulation(unittest.TestCase):
         except:
             self.assertTrue(False)
 
+    def test_ConditionalStatistics__computation(self):
+
+        X = np.array([[1],[2],[3],[4],[5]])
+        cond_variable = X
+
+        try:
+            cond = ConditionalStatistics(X, cond_variable, k=4)
+            self.assertTrue(np.array_equal(np.array([1.5, 2.5, 3.5, 4.5]), cond.centroids))
+            self.assertTrue(np.array_equal(np.array([[1.],[2.],[3.],[4.5]]), cond.conditional_mean))
+            self.assertTrue(np.array_equal(np.array([[1.],[2.],[3.],[4.]]), cond.conditional_minimum))
+            self.assertTrue(np.array_equal(np.array([[1.],[2.],[3.],[5.]]), cond.conditional_maximum))
+        except:
+            self.assertTrue(False)
+
     def test_ConditionalStatistics__not_allowed_calls(self):
 
         X = np.random.rand(100,20)
@@ -1100,43 +1114,3 @@ class TestManipulation(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             cond = ConditionalStatistics(X, cond_variable, split_values=2)
-
-    def test_plot_conditional_statistics_allowed_calls(self):
-
-        X = np.random.rand(100,)
-        cond_variable = np.random.rand(100,)
-
-        try:
-            plt = preprocess.plot_conditional_statistics(X, cond_variable, k=2)
-            plt.close()
-        except:
-            self.assertTrue(False)
-
-        X = np.random.rand(100,1)
-        cond_variable = np.random.rand(100,1)
-
-        try:
-            plt = preprocess.plot_conditional_statistics(X, cond_variable, k=2)
-            plt.close()
-        except:
-            self.assertTrue(False)
-
-        X = np.random.rand(100,)
-        cond_variable = np.random.rand(100,)
-
-        try:
-            plt = preprocess.plot_conditional_statistics(X, cond_variable, k=2)
-            plt.close()
-        except:
-            self.assertTrue(False)
-
-    def test_plot_conditional_statistics_not_allowed_calls(self):
-
-        X = np.random.rand(100,1)
-        cond_variable = np.random.rand(100,)
-
-        with self.assertRaises(ValueError):
-            plt = preprocess.plot_conditional_statistics(X, cond_variable, statistics_to_plot=['none'])
-
-        with self.assertRaises(ValueError):
-            plt = preprocess.plot_conditional_statistics(X, cond_variable, statistics_to_plot=['mean', 'none'])

@@ -4,7 +4,7 @@
 Manifold Assessment
 ===================
 
-In this notebook we demonstrate tools that may be used for assessing
+In this tutorial, we demonstrate tools that may be used for assessing
 manifold quality and dimensionality as well as comparing manifolds
 (parameterizations) in terms of representing dependent variables of
 interest.

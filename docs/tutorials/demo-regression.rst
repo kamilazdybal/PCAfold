@@ -16,6 +16,12 @@ We import the necessary modules:
   from PCAfold import analysis
   import numpy as np
 
+and we set some initial parameters:
+
+.. code:: python
+
+    save_filename = None
+
 ************************************
 Generating a synthetic data set
 ************************************

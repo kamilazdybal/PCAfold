@@ -338,8 +338,8 @@ def r2value(observed, predicted):
 
 def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=False):
     """
-    This function computes the stratified coefficient of determination
-    :math:`R^2` values. Stratified :math:`R^2` is computed separately in each
+    Computes the stratified coefficient of determination,
+    :math:`R^2`, values. Stratified :math:`R^2` is computed separately in each
     of the ``n_bins`` of an observed dependent variable, :math:`\\phi`.
 
     :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
@@ -405,19 +405,19 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         plot_stratified_r2(r2_in_bins, bins_borders)
 
     :param observed:
-        vector of the observed values of a single dependent variable. It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        vector of the predicted values of a single dependent variable. It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param n_bins:
-        number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
+        ``int`` specifying the number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
     :param use_global_mean: (optional)
-        boolean specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
+        ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
     :param verbose: (optional)
-        boolean for printing sizes (number of observations) and :math:`R^2` values in each bin.
+        ``bool`` for printing sizes (number of observations) and :math:`R^2` values in each bin.
 
     :return:
-        - **r2_in_bins** - list of coefficients of determination :math:`R^2` in each bin.
-        - **bins_borders** - list of bins borders that were created to stratify the dependent variable. Note that there will be one more entry in this list compared to ``r2_in_bins`` list.
+        - **r2_in_bins** - ``list`` specifying the coefficients of determination :math:`R^2` in each bin. It has length ``n_bins``.
+        - **bins_borders** - ``list`` specifying the bins borders that were created to stratify the dependent variable. It has length ``n_bins+1``.
     """
 
     if not isinstance(observed, np.ndarray):
@@ -647,7 +647,7 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from mpl_toolkits.mplot3d import Axes3D
@@ -797,7 +797,7 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from matplotlib import cm
@@ -903,7 +903,7 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from matplotlib import cm
@@ -987,7 +987,7 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from matplotlib import cm
@@ -1070,7 +1070,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from matplotlib import cm
@@ -1170,7 +1170,7 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     bin_length = bins_borders[1] - bins_borders[0]

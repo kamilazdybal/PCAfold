@@ -26,10 +26,9 @@ from PCAfold.preprocess import _scalings_list
 
 class PCA:
     """
-    This class enables performing Principal Component Analysis (PCA)
-    of the original data set :math:`\mathbf{X}`.
-
-    For more detailed information on PCA the user is referred to :cite:`Jolliffe2002`.
+    Enables performing Principal Component Analysis (PCA)
+    of the original data set, :math:`\mathbf{X}`. For more detailed information
+    on the theory of PCA the user is referred to :cite:`Jolliffe2002`.
 
     Two options for performing PCA are implemented:
 
@@ -60,18 +59,18 @@ class PCA:
 
         \mathbf{S} = \\frac{1}{N-1} \mathbf{X_{cs}}^{\mathbf{T}} \mathbf{X_{cs}}
 
-    where :math:`N` is the number of observations in the data set :math:`\mathbf{X}`.
+    where :math:`N` is the number of observations in the original data set, :math:`\mathbf{X}`.
 
-    Loadings matrix :math:`\mathbf{l}` is computed at the class initialization as well
-    such that element :math:`\mathbf{l}_{ij}` is the corresponding scaled element
-    of the eigenvectors matrix :math:`\mathbf{A}_{ij}`:
+    Loadings matrix, :math:`\mathbf{l}`, is computed at the class initialization as well
+    such that the element :math:`\mathbf{l}_{ij}` is the corresponding scaled element
+    of the eigenvectors matrix, :math:`\mathbf{A}_{ij}`:
 
     .. math::
 
         \mathbf{l}_{ij} = \\frac{\mathbf{A}_{ij} \\sqrt{\mathbf{L}_j}}{\\sqrt{\mathbf{S}_{ii}}}
 
     where :math:`\mathbf{L}_j` is the :math:`j^{th}` eigenvalue and :math:`\mathbf{S}_{ii}`
-    is the :math:`i^{th}` element on the diagonal of the covariance matrix :math:`\mathbf{S}`.
+    is the :math:`i^{th}` element on the diagonal of the covariance matrix, :math:`\mathbf{S}`.
 
     **Example:**
 
@@ -87,43 +86,25 @@ class PCA:
         pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
-    :param scaling: (optional)
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param scaling:
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param n_components: (optional)
-        number of retained Principal Components :math:`q`. If set to 0 all PCs are retained.
+        ``int`` specifying the number of retained principal components, :math:`q`. If set to 0 all PCs are retained. It should be a non-negative number.
     :param use_eigendec: (optional)
-        boolean specifying the method for obtaining eigenvalues and eigenvectors:
+        ``bool`` specifying the method for obtaining eigenvalues and eigenvectors:
 
         * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
         * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
     :param nocenter: (optional)
-        boolean specifying whether data should be centered by mean.
-
-    :raises ValueError:
-        if the original data set :math:`\mathbf{X}` has more variables (columns)
-        then observations (rows).
-
-    :raises ValueError:
-        if a constant column is detected in the original data set :math:`\mathbf{X}`.
-
-    :raises ValueError:
-        if ``scaling`` method is not a string or is not within the available scalings.
-
-    :raises ValueError:
-        if ``n_components`` is not an integer, is negative or larger than the number of variables in a data set.
-
-    :raises ValueError:
-        if ``use_eigendec`` is not a boolean.
-
-    :raises ValueError:
-        if ``nocenter`` is not a boolean.
+        ``bool`` specifying whether the data original data set should be centered by mean.
 
     **Attributes:**
 
-    - **n_components** - (can be re-set) number of retained Principal Components :math:`q`.
-    - **n_components_init** - (read only) number of retained Principal Components :math:`q` with which ``PCA`` class object was initialized.
+    - **n_components** - (can be re-set) number of retained principal components :math:`q`.
+    - **n_components_init** - (read only) number of retained principal components :math:`q` with which ``PCA`` class object was initialized.
     - **scaling** - (read only) scaling criteria with which ``PCA`` class object was initialized.
     - **n_variables** - (read only) number of variables of the original data set on which ``PCA`` class object was initialized.
     - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
@@ -272,26 +253,26 @@ class PCA:
 
     def transform(self, X, nocenter=False):
         """
-        This function transforms any data set :math:`\mathbf{X}` to a new
-        truncated basis :math:`\mathbf{A_q}` identified by PCA.
-        It computes the :math:`q`-first Principal Components
-        :math:`\mathbf{Z_q}` given the original data.
+        Transforms any original data set, :math:`\mathbf{X}`, to a new
+        truncated basis, :math:`\mathbf{A}_q`, identified by PCA.
+        It computes the :math:`q` first principal components,
+        :math:`\mathbf{Z}_q`, given the original data.
 
         If ``nocenter=False``:
 
         .. math::
 
-            \mathbf{Z_q} = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
+            \mathbf{Z}_q = (\mathbf{X} - \mathbf{C}) \cdot \mathbf{D}^{-1} \cdot \mathbf{A}_q
 
         If ``nocenter=True``:
 
         .. math::
 
-            \mathbf{Z_q} = \mathbf{X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
+            \mathbf{Z}_q = \mathbf{X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A}_q
 
         Here :math:`\mathbf{C}` and :math:`\mathbf{D}` are centers and scales
         computed during ``PCA`` class initialization
-        and :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors
+        and :math:`\mathbf{A}_q` is the matrix of :math:`q` first eigenvectors
         extracted from :math:`\mathbf{A}`.
 
         .. warning::
@@ -299,15 +280,16 @@ class PCA:
             Set ``nocenter=True`` only if you know what you are doing.
 
             One example when ``nocenter`` should be set to ``True`` is
-            when transforming chemical source terms :math:`\mathbf{S_X}` to Principal Components space
+            when transforming chemical source terms, :math:`\mathbf{S_X}`, to
+            principal components space
             (as per :cite:`Sutherland2009`)
-            to obtain sources of Principal Components :math:`\mathbf{S_Z}`. In
+            to obtain sources of principal components, :math:`\mathbf{S_Z}`. In
             that case :math:`\mathbf{X} = \mathbf{S_X}` and the transformation
             should be performed *without* centering:
 
             .. math::
 
-                \mathbf{S_{Z_q}} = \mathbf{S_X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A_q}
+                \mathbf{S}_{\mathbf{Z}, q} = \mathbf{S_X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A}_q
 
         **Example:**
 
@@ -322,7 +304,7 @@ class PCA:
             # Instantiate PCA class object:
             pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
 
-            # Calculate the Principal Components:
+            # Calculate the principal components:
             principal_components = pca_X.transform(X)
 
         :param X:
@@ -344,7 +326,7 @@ class PCA:
             if the number of variables in a data set is inconsistent with number of eigenvectors.
 
         :return:
-            - **principal_components** - the :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
+            - **principal_components** - the :math:`q` first principal components :math:`\mathbf{Z}_q`.
         """
 
         if not isinstance(nocenter, bool):
@@ -373,25 +355,24 @@ class PCA:
 
     def reconstruct(self, principal_components, nocenter=False):
         """
-        This function calculates rank-:math:`q` reconstruction of the
-        data set from the :math:`q`-first  Principal Components
-        :math:`\mathbf{Z_q}`.
+        Calculates rank-:math:`q` reconstruction of the
+        data set from the :math:`q` first principal components, :math:`\mathbf{Z}_q`.
 
         If ``nocenter=False``:
 
         .. math::
 
-            \mathbf{X_{rec}} = \mathbf{Z_q} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D} + \mathbf{C}
+            \mathbf{X_{rec}} = \mathbf{Z}_q \mathbf{A}_q^{\mathbf{T}} \cdot \mathbf{D} + \mathbf{C}
 
         If ``nocenter=True``:
 
         .. math::
 
-            \mathbf{X_{rec}} = \mathbf{Z_q} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D}
+            \mathbf{X_{rec}} = \mathbf{Z}_q \mathbf{A}_q^{\mathbf{T}} \cdot \mathbf{D}
 
         Here :math:`\mathbf{C}` and :math:`\mathbf{D}` are centers and scales
         computed during ``PCA`` class initialization
-        and :math:`\mathbf{A_q}` is the matrix of :math:`q`-first eigenvectors
+        and :math:`\mathbf{A}_q` is the matrix of :math:`q` first eigenvectors
         extracted from :math:`\mathbf{A}`.
 
         .. warning::
@@ -399,15 +380,15 @@ class PCA:
             Set ``nocenter=True`` only if you know what you are doing.
 
             One example when ``nocenter`` should be set to ``True`` is
-            when reconstructing chemical source terms :math:`\mathbf{S_X}`
+            when reconstructing chemical source terms, :math:`\mathbf{S_X}`,
             (as per :cite:`Sutherland2009`)
-            from the :math:`q`-first sources of Principal Components :math:`\mathbf{S_{Z_q}}`. In
-            that case :math:`\mathbf{Z_q} = \mathbf{S_{Z_q}}` and the reconstruction
+            from the :math:`q` first sources of principal components, :math:`\mathbf{S}_{\mathbf{Z}, q}`. In
+            that case :math:`\mathbf{Z}_q = \mathbf{S}_{\mathbf{Z}, q}` and the reconstruction
             should be performed *without* uncentering:
 
             .. math::
 
-                \mathbf{S_{X, rec}} = \mathbf{S_{Z_q}} \mathbf{A_q}^{\mathbf{T}} \cdot \mathbf{D}
+                \mathbf{S_{X, rec}} = \mathbf{S}_{\mathbf{Z}, q} \mathbf{A}_q^{\mathbf{T}} \cdot \mathbf{D}
 
         **Example:**
 
@@ -422,14 +403,14 @@ class PCA:
             # Instantiate PCA class object:
             pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
 
-            # Calculate the Principal Components:
+            # Calculate the principal components:
             principal_components = pca_X.transform(X)
 
             # Calculate the reconstructed variables:
             X_rec = pca_X.reconstruct(principal_components)
 
         :param principal_components:
-            matrix of :math:`q`-first Principal Components :math:`\mathbf{Z_q}`.
+            matrix of :math:`q` first principal components :math:`\mathbf{Z}_q`.
         :param nocenter: (optional)
             boolean specifying whether ``PCA.X_center`` centers should be applied to
             un-center the reconstructed data set.
@@ -440,7 +421,7 @@ class PCA:
             if ``nocenter`` is not a boolean.
 
         :raises ValueError:
-            if the number of Principal Components supplied is larger than the number of eigenvectors computed by PCA.
+            if the number of principal components supplied is larger than the number of eigenvectors computed by PCA.
 
         :return:
             - **X_rec** - rank-:math:`q` reconstruction of the original data set.
@@ -452,9 +433,9 @@ class PCA:
         (n_observations, n_components) = np.shape(principal_components)
 
         if n_components > self.n_variables:
-            raise ValueError("Number of Principal Components supplied is larger than the number of eigenvectors computed by PCA.")
+            raise ValueError("Number of principal components supplied is larger than the number of eigenvectors computed by PCA.")
 
-        # Select n_components first Principal Components:
+        # Select n_components first principal components:
         A = self.A[:, 0:n_components]
 
         # Calculate unscaled, uncentered approximation to the data:
@@ -470,9 +451,9 @@ class PCA:
 
     def get_weights_dictionary(self, variable_names, pc_index, n_digits=10):
         """
-        This function creates a dictionary where keys are the names of the variables
+        Creates a dictionary where keys are the names of the variables
         in the original data set :math:`\mathbf{X}` and values are the eigenvector weights
-        corresponding to the Principal Component selected by ``pc_index``.
+        corresponding to the principal component selected by ``pc_index``.
         This function helps in accessing weight value for a specific variable and for a specific PC.
 
         **Example:**
@@ -554,9 +535,9 @@ class PCA:
 
     def calculate_r2(self, X):
         """
-        This function calculates coefficient of determination :math:`R^2` values
-        for the rank-:math:`q` reconstruction :math:`\mathbf{X_{rec}}` of the original
-        data set :math:`\mathbf{X}`:
+        Calculates coefficient of determination, :math:`R^2`, values
+        for the rank-:math:`q` reconstruction, :math:`\mathbf{X_{rec}}`, of the original
+        data set, :math:`\mathbf{X}`:
 
         .. math::
 
@@ -586,7 +567,7 @@ class PCA:
             r2 = pca_X.calculate_r2(X)
 
         :param X:
-            original data set :math:`\mathbf{X}`.
+            ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
 
         :return:
             - **r2** - coefficient of determination values :math:`R^2` for the rank-:math:`q` reconstruction of the original data set.
@@ -609,7 +590,7 @@ class PCA:
 
     def data_consistency_check(self, X, errors_are_fatal=False):
         """
-        This function checks if the supplied data matrix ``X`` is consistent
+        Checks if the supplied data matrix ``X`` is consistent
         with the current ``PCA`` class object.
 
         **Example:**
@@ -638,16 +619,10 @@ class PCA:
             is_consistent = pca_X.data_consistency_check(X_3, errors_are_fatal=True)
 
         :param X:
-            data set to check.
+            ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
         :param errors_are_fatal: (optional)
             boolean indicating if ValueError should be raised if an incompatibility
             is detected.
-
-        :raises ValueError:
-            if ``errors_are_fatal`` is not a boolean.
-
-        :raises ValueError:
-            when data set is not consistent with the ``PCA`` class object and ``errors_are_fatal=True`` flag has been set.
 
         :return:
             - **is_consistent** - boolean for whether or not supplied data matrix ``X``\
@@ -689,10 +664,10 @@ class PCA:
 
     def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10, verbose=False, save_filename=None):
         """
-        This function returns and optionally prints and/or saves to ``.txt`` file
+        Returns and optionally prints and/or saves to ``.txt`` file
         :math:`R^2` values (as per ``PCA.calculate_r2``
         function) for reconstruction of the original data set :math:`\mathbf{X}`
-        as a function of number of retained Principal Components (PCs).
+        as a function of number of retained principal components (PCs).
 
         **Example:**
 
@@ -720,7 +695,7 @@ class PCA:
             | 3          | 1.0        | 1.0        | 1.0        | 1.0        |
 
         :param X:
-            original dataset :math:`\mathbf{X}`.
+            ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
         :param n_pcs:
             the maximum number of PCs to consider.
         :param variable_names: (optional)
@@ -731,15 +706,6 @@ class PCA:
             boolean for printing out the table with :math:`R^2` values.
         :param save_filename: (optional)
             string specifying ``.txt`` save location/filename.
-
-        :raises ValueError:
-            if ``n_pcs`` is not a positive integer or is larger than the number of variables in a data set provided.
-        :raises ValueError:
-            if the number of variables in ``variable_names`` is not consistent with the number of variables in a data set provided.
-        :raises ValueError:
-            if ``save_filename`` is not a string.
-        :raises ValueError:
-            if ``verbose`` is not a boolean.
 
         :return:
             - **r2** - matrix of size ``(n_pcs, n_variables)`` containing the :math:`R^2` values\
@@ -824,7 +790,7 @@ class PCA:
 
     def principal_variables(self, method='B2', x=[]):
         """
-        This function extracts Principal Variables (PVs) from a PCA.
+        Extracts Principal Variables (PVs) from a PCA.
 
         The following methods are currently supported:
 
@@ -860,15 +826,8 @@ class PCA:
 
         :param method: (optional)
             string specifying the method for determining the Principal Variables (PVs).
-
         :param x: (optional)
             data set to accompany ``'M2'`` method. Note that this is *only* required for the ``'M2'`` method.
-
-        :raises ValueError:
-            if the method selected is not ``'B4'``, ``'B2'`` or ``'M2'``.
-
-        :raises ValueError:
-            if the data set ``x`` is not supplied when ``method='M2'``.
 
         :return:
             - **principal_variables_indices** - a vector of indices of retained Principal Variables (PVs).
@@ -978,9 +937,9 @@ class PCA:
 
     def save_to_txt(self, save_filename):
         """
-        This function writes the eigenvector matrix :math:`\mathbf{A}`,
-        loadings :math:`\mathbf{l}`, centering :math:`\mathbf{C}`
-        and scaling :math:`\mathbf{D}` vectors to ``.txt`` file.
+        Writes the eigenvector matrix, :math:`\mathbf{A}`,
+        loadings, :math:`\mathbf{l}`, centering, :math:`\mathbf{C}`,
+        and scaling ,:math:`\mathbf{D}`, to ``.txt`` file.
 
         **Example:**
 
@@ -999,7 +958,7 @@ class PCA:
             pca_X.save_to_txt('pca_X_Data.txt')
 
         :param save_filename:
-            string specifying ``.txt`` save location/filename.
+            ``str`` specifying ``.txt`` save location/filename.
         """
 
         fid = open(save_filename, 'w')
@@ -1036,7 +995,7 @@ class PCA:
 
     def set_retained_eigenvalues(self, method='SCREE GRAPH', option=None):
         """
-        This function helps determine how many Principal Components (PCs) should be retained.
+        Helps determine how many principal components (PCs) should be retained.
         The following methods are available:
 
         * ``'TOTAL VARIANCE'`` - retain the PCs whose eigenvalues account for a\
@@ -1080,7 +1039,7 @@ class PCA:
             # Compute a new ``PCA`` class object with the new number of retained components:
             pca_X_new = pca_X.set_retained_eigenvalues(method='TOTAL VARIANCE', option=0.6)
 
-            # The new number of Principal Components that has been set:
+            # The new number of principal components that has been set:
             print(pca_X_new.n_components)
 
         This function provides a few methods to select the number of eigenvalues
@@ -1165,11 +1124,11 @@ class PCA:
 
     def u_scores(self, X):
         """
-        This function calculates the U-scores (Principal Components):
+        Calculates the U-scores (principal components):
 
         .. math::
 
-            \mathbf{U_{scores}} = \mathbf{X_{cs}} \mathbf{A_q}
+            \mathbf{U_{scores}} = \mathbf{X_{cs}} \mathbf{A}_q
 
         This function is equivalent to ``PCA.transform``.
 
@@ -1197,7 +1156,7 @@ class PCA:
             computed on the data set used when constructing the PCA object.
 
         :return:
-            - **u_scores** - U-scores (Principal Components).
+            - **u_scores** - U-scores (principal components).
         """
 
         self.data_consistency_check(X, errors_are_fatal=True)
@@ -1208,14 +1167,14 @@ class PCA:
 
     def w_scores(self, X):
         """
-        This function calculates the W-scores which are the Principal Components
+        Calculates the W-scores which are the principal components
         scaled by the inverse square root of the corresponding eigenvalue:
 
         .. math::
 
-            \mathbf{W_{scores}} = \\frac{\mathbf{Z_q}}{\\sqrt{\mathbf{L_q}}}
+            \mathbf{W_{scores}} = \\frac{\mathbf{Z}_q}{\\sqrt{\mathbf{L_q}}}
 
-        where :math:`\mathbf{L_q}` are the :math:`q`-first eigenvalues extracted
+        where :math:`\mathbf{L_q}` are the :math:`q` first eigenvalues extracted
         from :math:`\mathbf{L}`.
         The W-scores are still uncorrelated and have variances equal unity.
 
@@ -1243,7 +1202,7 @@ class PCA:
             computed on the data set used when constructing the PCA object.
 
         :return:
-            - **w_scores** - W-scores (scaled Principal Components).
+            - **w_scores** - W-scores (scaled principal components).
         """
 
         self.data_consistency_check(X, errors_are_fatal=True)
@@ -1306,7 +1265,7 @@ class PCA:
 
 class LPCA:
     """
-    This class enables performing local Principal Component Analysis (LPCA)
+    Enables performing local Principal Component Analysis (LPCA)
     of the original data set :math:`\mathbf{X}` partitioned into clusters.
 
     **Example:**
@@ -1332,18 +1291,18 @@ class LPCA:
         # Access the local eigenvalues in the first cluster:
         L_k1 = lpca_X.L[0]
 
-        # Access the local Principal Components in the first cluster:
+        # Access the local principal components in the first cluster:
         Z_k1 = lpca_X.principal_components[0]
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
         vector of cluster classifications.
     :param scaling: (optional)
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param n_components: (optional)
-        number of returned eigenvectors, eigenvalues and Principal Components :math:`q`. If set to 0 all are returned.
+        number of returned eigenvectors, eigenvalues and principal components :math:`q`. If set to 0 all are returned.
     :param use_eigendec: (optional)
         boolean specifying the method for obtaining eigenvalues and eigenvectors:
 
@@ -1352,30 +1311,11 @@ class LPCA:
     :param nocenter: (optional)
         boolean specifying whether data should be centered by mean.
 
-    :raises ValueError:
-        if the original data set :math:`\mathbf{X}` has more variables (columns)
-        then observations (rows).
-
-    :raises ValueError:
-        if the size of the ``idx`` vector is not consistent with the number of observations in the original data set :math:`\mathbf{X}`.
-
-    :raises ValueError:
-        if ``scaling`` method is not a string or is not within the available scalings.
-
-    :raises ValueError:
-        if ``n_components`` is not an integer, is negative or larger than the number of variables in a data set.
-
-    :raises ValueError:
-        if ``use_eigendec`` is not a boolean.
-
-    :raises ValueError:
-        if ``nocenter`` is not a boolean.
-
     **Attributes:**
 
     - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
     - **L** - (read only) list of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
-    - **principal_components** - (read only) list of matrices of local Principal Components :math:`\mathbf{Z}`. Each list element corresponds to Principal Components in a single cluster.
+    - **principal_components** - (read only) list of matrices of local principal components :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1472,8 +1412,8 @@ class LPCA:
 
 def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X_source=[]):
     """
-    This function performs PCA on sampled data set :math:`\mathbf{X_r}` with one
-    of four implemented options.
+    Performs PCA on sampled data set, :math:`\mathbf{X_r}`, with one
+    of the four implemented options.
 
     Reach out to the
     `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-option-1>`_
@@ -1507,7 +1447,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         string specifying the scaling methodology as per
         ``preprocess.center_scale`` function.
     :param n_components:
-        number of :math:`q`-first Principal Components that will be saved.
+        number of :math:`q` first principal components that will be saved.
     :param biasing_option:
         integer specifying biasing option. Can only attain values 1, 2, 3 or 4.
     :param X_source: (optional)
@@ -1521,8 +1461,8 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
     :return:
         - **eigenvalues** - biased eigenvalues :math:`\mathbf{L_r}`.
         - **eigenvectors** - biased eigenvectors :math:`\mathbf{A_r}`.
-        - **pc_scores** - :math:`q`-first biased Principal Components :math:`\mathbf{Z_r}`.
-        - **pc_sources** - :math:`q`-first biased sources of Principal Components :math:`\mathbf{S_{Z_r}}`. More information can be found in :cite:`Sutherland2009`.\
+        - **pc_scores** - :math:`q` first biased principal components :math:`\mathbf{Z_r}`.
+        - **pc_sources** - :math:`q` first biased sources of principal components :math:`\mathbf{S_{Z_r}}`. More information can be found in :cite:`Sutherland2009`.\
         This parameter is only computed if ``X_source`` input parameter was specified.
         - **C** - a vector of centers :math:`\mathbf{C}` that were used to pre-process the\
         original full data set :math:`\mathbf{X}`.
@@ -1661,7 +1601,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
 def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], title=None, save_filename=None):
     """
-    This function analyzes the change in normalized centers computed on the
+    Analyzes the change in normalized centers computed on the
     sampled subset of the original data set :math:`\mathbf{X_r}` with respect
     to the full original data set :math:`\mathbf{X}`.
 
@@ -1714,7 +1654,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         (normalized_C, normalized_C_r, center_movement_percentage, plt) = analyze_centers_change(X, idx_X_r)
 
     :param X:
-        original data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
@@ -1742,7 +1682,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         - **normalized_C_r** - normalized centers :math:`||\mathbf{C_r}||`.
         - **center_movement_percentage** - percentage :math:`p`\
         measuring the relative change in normalized centers.
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     color_X = '#191b27'
@@ -1812,7 +1752,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
 def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
     """
-    This function analyzes the change of weights on an eigenvector obtained
+    Analyzes the change of weights on an eigenvector obtained
     from a reduced data set as specified by the ``eigenvectors`` matrix.
     This matrix can contain many versions of eigenvectors, for instance coming
     from each iteration from the ``equilibrate_cluster_populations`` function.
@@ -1891,12 +1831,8 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
-    :raises ValueError:
-        if the number of variables in ``variable_names`` list does not
-        correspond to variables in the ``eigenvectors_matrix``.
-
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     (n_variables, n_versions) = np.shape(eigenvectors)
@@ -2008,7 +1944,7 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
 
 def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_label=[], title=None, save_filename=None):
     """
-    This function analyzes the normalized eigenvalue distribution when PCA is
+    Analyzes the normalized eigenvalue distribution when PCA is
     performed on the original data set :math:`\mathbf{X}` and on the sampled
     data set :math:`\mathbf{X_r}`.
 
@@ -2036,7 +1972,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         plt = analyze_eigenvalue_distribution(X, idx_X_r, 'auto', biasing_option=1)
 
     :param X:
-        original (full) data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx_X_r:
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
@@ -2060,7 +1996,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     color_X = '#191b27'
@@ -2120,7 +2056,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
 
 def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_option, X_source=[], n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
     """
-    This function gradually (in ``n_iterations``) equilibrates cluster populations heading towards
+    Gradually (in ``n_iterations``) equilibrates cluster populations heading towards
     population of the smallest cluster, in each cluster.
 
     At each iteration it generates a reduced data set :math:`\mathbf{X_r}^{(i)}`
@@ -2181,7 +2117,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = equilibrate_cluster_populations(X, idx, 'auto', n_components=2, biasing_option=1, n_iterations=1, random_seed=100, verbose=True)
 
     :param X:
-        original (full) data set :math:`\mathbf{X}`.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
         vector of cluster classifications.
         The first cluster has index 0.
@@ -2193,7 +2129,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
         representing reactive flows. More information can be found in :cite:`Sutherland2009`.
     :param n_components:
-        number of :math:`q`-first Principal Components that will be saved.
+        number of :math:`q` first principal components that will be saved.
     :param biasing_option:
         integer specifying biasing option.
         Can only attain values 1, 2, 3 or 4.
@@ -2206,19 +2142,13 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     :param verbose: (optional)
         boolean for printing verbose details.
 
-    :raises ValueError:
-        if ``biasing_option`` is not 1, 2, 3 or 4.
-
-    :raises ValueError:
-        if ``random_seed`` is not an integer.
-
     :return:
         - **eigenvalues** - collected eigenvalues from each iteration.
         - **eigenvectors_matrix** - collected eigenvectors from each iteration.\
         This is a 3D array of size ``(n_variables, n_components, n_iterations+1)``.
-        - **pc_scores_matrix** - collected Principal Components from each iteration.\
+        - **pc_scores_matrix** - collected principal components from each iteration.\
         This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
-        - **pc_sources_matrix** - collected sources of Principal Components from each iteration.\
+        - **pc_sources_matrix** - collected sources of principal components from each iteration.\
         This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
         - **idx_train** - the final training indices from the equilibrated iteration.
         - **C_r** - a vector of final centers that were used to center\
@@ -2400,8 +2330,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 
 def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots a 2-dimensional manifold given two vectors
-    defining the manifold.
+    Plots a two-dimensional manifold given two vectors defining the manifold.
 
     **Example:**
 
@@ -2459,7 +2388,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     if not isinstance(x, np.ndarray):
@@ -2538,8 +2467,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
 def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots a 3-dimensional manifold given three vectors
-    defining the manifold.
+    Plots a three-dimensional manifold given three vectors defining the manifold.
 
     **Example:**
 
@@ -2607,7 +2535,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from mpl_toolkits.mplot3d import Axes3D
@@ -2716,7 +2644,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
 
 def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots a parity plot between a variable and its reconstruction.
+    Plots a parity plot between a variable and its reconstruction.
 
     **Example:**
 
@@ -2775,7 +2703,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     if not isinstance(variable, np.ndarray):
@@ -2858,7 +2786,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_path=None, save_filename=None):
     """
-    This function plots weights on eigenvectors. It will generate as many
+    Plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
 
     **Example:**
@@ -2972,7 +2900,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
 
 def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None):
     """
-    This function plots a comparison of weights on eigenvectors.
+    Plots a comparison of weights on eigenvectors.
 
     **Example:**
 
@@ -3014,7 +2942,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from matplotlib import cm
@@ -3088,7 +3016,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
 def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save_filename=None):
     """
-    This function plots eigenvalue distribution.
+    Plots eigenvalue distribution.
 
     **Example:**
 
@@ -3123,7 +3051,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     color_plot = '#191b27'
@@ -3165,7 +3093,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
 
 def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', title=None, save_filename=None):
     """
-    This function plots a comparison of eigenvalue distributions.
+    Plots a comparison of eigenvalue distributions.
 
     **Example:**
 
@@ -3208,7 +3136,7 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     from matplotlib import cm
@@ -3263,9 +3191,9 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
 def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filename=None):
     """
-    This function plots the eigenvalues as bars and their cumulative sum to visualize
-    the percent variance in the data explained by each Principal Component
-    individually and by each Principal Component cumulatively.
+    Plots the eigenvalues as bars and their cumulative sum to visualize
+    the percent variance in the data explained by each principal component
+    individually and by each principal component cumulatively.
 
     **Example:**
 
@@ -3300,7 +3228,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
         is ``.png``.
 
     :return:
-        - **plt** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     bar_color = '#191b27'
