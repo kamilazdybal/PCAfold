@@ -5,7 +5,7 @@
 Preprocessing
 #################
 
-In this tutorial we present data manipulation functionalities of the ``preprocess`` module. To import the module:
+In this tutorial, we present data manipulation functionalities of the ``preprocess`` module. To import the module:
 
 .. code:: python
 
@@ -370,5 +370,5 @@ The result of this reconstruction can be seen below:
 Bibliography
 **********************
 
-.. bibliography:: demo-handling-source-terms.bib
+.. bibliography:: demo-data-manipulation-bib.bib
   :labelprefix: M

@@ -506,5 +506,5 @@ positive or high negative magnitudes.
 Bibliography
 **********************
 
-.. bibliography:: demo-clustering.bib
+.. bibliography:: demo-clustering-bib.bib
   :labelprefix: C

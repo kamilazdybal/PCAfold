@@ -289,7 +289,7 @@ class PCA:
 
             .. math::
 
-                \mathbf{S_{Z_q}} = \mathbf{S_X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A}_q
+                \mathbf{S}_{\mathbf{Z}, q} = \mathbf{S_X} \cdot \mathbf{D}^{-1} \cdot \mathbf{A}_q
 
         **Example:**
 
@@ -382,13 +382,13 @@ class PCA:
             One example when ``nocenter`` should be set to ``True`` is
             when reconstructing chemical source terms, :math:`\mathbf{S_X}`,
             (as per :cite:`Sutherland2009`)
-            from the :math:`q` first sources of principal components, :math:`\mathbf{S_{Z_q}}`. In
-            that case :math:`\mathbf{Z}_q = \mathbf{S_{Z_q}}` and the reconstruction
+            from the :math:`q` first sources of principal components, :math:`\mathbf{S}_{\mathbf{Z}, q}`. In
+            that case :math:`\mathbf{Z}_q = \mathbf{S}_{\mathbf{Z}, q}` and the reconstruction
             should be performed *without* uncentering:
 
             .. math::
 
-                \mathbf{S_{X, rec}} = \mathbf{S_{Z_q}} \mathbf{A}_q^{\mathbf{T}} \cdot \mathbf{D}
+                \mathbf{S_{X, rec}} = \mathbf{S}_{\mathbf{Z}, q} \mathbf{A}_q^{\mathbf{T}} \cdot \mathbf{D}
 
         **Example:**
 
