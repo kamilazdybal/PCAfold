@@ -2763,8 +2763,12 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
     elif isinstance(color, np.ndarray):
         scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
-    plt.plot(variable, variable, c=color_line)
-    plt.axis('equal')
+
+    plot_offset = 0.05 * (np.max(variable) - np.min(variable))
+
+    line = plt.plot([np.min(variable)-plot_offset, np.max(variable)+plot_offset], [np.min(variable)-plot_offset, np.max(variable)+plot_offset], c=color_line)
+    plt.xlim([np.min(variable)-plot_offset, np.max(variable)+plot_offset])
+    plt.ylim([np.min(variable)-plot_offset, np.max(variable)+plot_offset])
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
