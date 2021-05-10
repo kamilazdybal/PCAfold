@@ -93,7 +93,7 @@ First, we create an object of the ``ConditionalStatistics`` class. We condition 
 
     cond = preprocess.ConditionalStatistics(X, Z, k=20)
 
-We can then retrieve the centroids for which the conditional statistics
+We can then retrieve the centroids of the bins for which the conditional statistics have been computed:
 
 .. code:: python
 
