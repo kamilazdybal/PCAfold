@@ -744,7 +744,7 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     lgnd.legendHandles[1]._sizes = [marker_size*5]
 
     if title != None: ax.set_title(title, **csfont, fontsize=font_title)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -843,7 +843,7 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -953,7 +953,7 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -1032,7 +1032,7 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
         plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -1119,7 +1119,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
         plt.legend(bbox_to_anchor=(1.05,1), fancybox=True, shadow=True, ncol=2, fontsize=font_legend, markerscale=marker_scale_legend)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -1183,6 +1183,6 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
     plt.ylabel('$R^2$ [-]')
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt

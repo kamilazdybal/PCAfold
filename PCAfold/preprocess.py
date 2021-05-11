@@ -3338,7 +3338,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     if grid_on: plt.grid(alpha=grid_opacity)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -3584,7 +3584,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         label.set_fontsize(font_axes)
 
     if title != None: ax.set_title(title, **csfont, fontsize=font_title)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -3778,7 +3778,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     ax2.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=4, fontsize=font_legend/2, markerscale=marker_scale_legend_clustering/2)
 
     if title != None: figure.suptitle(title, fontsize=font_title, **csfont)
-    if save_filename != None: figure.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: figure.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -3977,6 +3977,6 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
             if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt

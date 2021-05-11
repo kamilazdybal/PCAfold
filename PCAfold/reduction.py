@@ -1746,7 +1746,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
     ax.spines["left"].set_visible(True)
 
     if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return(normalized_C, normalized_C_r, center_movement_percentage, plt)
 
@@ -1938,7 +1938,7 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         cbar = plt.colorbar(scat, ticks=[0, round((n_versions-1)/2), n_versions-1])
 
     if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -2050,7 +2050,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -2459,7 +2459,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
             if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -2636,7 +2636,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
             if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
 
     if title != None: ax.set_title(title, **csfont, fontsize=font_title)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -2782,7 +2782,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
             if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -2894,7 +2894,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
             plt.title(title, fontsize=font_title, **csfont)
 
         if save_filename != None:
-            plt.savefig(save_path + 'eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename, dpi = 500, bbox_inches='tight')
+            plt.savefig(save_path + 'eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename, dpi=save_dpi, bbox_inches='tight')
 
         plot_handles.append(plt)
 
@@ -3012,7 +3012,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -3089,7 +3089,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -3187,7 +3187,7 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
@@ -3268,7 +3268,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
         plt.title(title, fontsize=font_title, **csfont)
 
     if save_filename != None:
-        plt.savefig(save_filename, dpi = 500, bbox_inches='tight')
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 

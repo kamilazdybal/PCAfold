@@ -8,6 +8,8 @@
 
 from matplotlib import rcParams
 
+save_dpi = 100
+
 csfont = {'fontname':'Charter', 'fontweight':'regular'}
 hfont = {'fontname':'Charter', 'fontweight':'bold'}
 ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
