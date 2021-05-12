@@ -5,22 +5,16 @@
 Handling source terms
 #################################
 
-This tutorial can be of interest to researchers working with reactive flows data sets.
-We present how source terms of the original state
-variables can be handled using **PCAfold** software.
-Specifically, **PCAfold** functionalities accommodate treatment of sources
-of principal components which can be valuable for implementing PC-transport
-approaches such as proposed in :cite:`Sutherland2009`.
+This tutorial can be of interest to researchers working with reactive flows data sets. We present how source terms of the original state variables can be handled using **PCAfold** software. Specifically, **PCAfold** functionalities accommodate treatment of sources of principal components (PCs) which can be valuable for implementing PC-transport approaches such as proposed in  :cite:`Sutherland2009`.
 
 *********
 Theory
 *********
 
-The methodology for the standard PC-score transport approach was first proposed
-in :cite:`Sutherland2009`. As an illustrative example, 0-D PC-transport
-equations for the standard PC-scores and the biased PC-scores are presented below.
-The reader is referred to :cite:`Biglari2015`, :cite:`Echekki2015` for treatment
-of the full PC-transport equations including diffusion.
+The methodology for the standard PC-transport approach was first proposed
+in :cite:`Sutherland2009`. As an illustrative example, PC-transport
+equations adequate to a 0D chemical reactor are presented below.
+The reader is referred to :cite:`Biglari2015`, :cite:`Echekki2015` for treatment of the full PC-transport equations including diffusion.
 
 We assume that the data set containing original state-space variables is:
 
@@ -34,13 +28,12 @@ source terms of the original state-space variables are:
 
 .. math::
 
-  \mathbf{S_X} = [-\frac{1}{\rho c_p} \sum_{i=1}^{N_s} ( s_i h_i ), \frac{s_1}{\rho}, \frac{s_2}{\rho}, \dots, \frac{s_{N_s-1}}{\rho}]
+  \mathbf{S_X} = [-\frac{1}{\rho c_p} \sum_{i=1}^{N_s} ( \omega_i h_i ), \frac{\omega_1}{\rho}, \frac{\omega_2}{\rho}, \dots, \frac{\omega_{N_s-1}}{\rho}]
 
-where :math:`\rho` is density and :math:`c_p` is specific heat of the mixture,
-:math:`s_i` is mass production rate and :math:`h_i` is enthalpy respectively
-of species :math:`i`.
+where :math:`\rho` is the density of the mixture and :math:`c_p` is the specific heat capacity of the mixture,
+:math:`\omega_i` is the net mass production rate of species :math:`i` and :math:`h_i` is the enthalpy of species :math:`i`.
 
-For a 0D-system we can write the evolution equation as:
+For a 0D-system, we can write the evolution equation as:
 
 .. math::
 
