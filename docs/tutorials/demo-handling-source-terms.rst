@@ -28,7 +28,7 @@ source terms of the original state-space variables are:
 
 .. math::
 
-  \mathbf{S_X} = [-\frac{1}{\rho c_p} \sum_{i=1}^{N_s} ( \omega_i h_i ), \frac{\omega_1}{\rho}, \frac{\omega_2}{\rho}, \dots, \frac{\omega_{N_s-1}}{\rho}]
+  \mathbf{S_X} = \Big[-\frac{1}{\rho c_p} \sum_{i=1}^{N_s} ( \omega_i h_i ), \frac{\omega_1}{\rho}, \frac{\omega_2}{\rho}, \dots, \frac{\omega_{N_s-1}}{\rho} \Big]
 
 where :math:`\rho` is the density of the mixture and :math:`c_p` is the specific heat capacity of the mixture,
 :math:`\omega_i` is the net mass production rate of species :math:`i` and :math:`h_i` is the enthalpy of species :math:`i`.

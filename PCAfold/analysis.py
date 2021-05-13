@@ -715,7 +715,7 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111, projection='3d')
 
-    scat = ax.scatter(x.ravel(), y.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=1)
+    scat = ax.scatter(x.ravel(), y.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=0.1)
     scat = ax.scatter(x.ravel(), y.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=1)
 
     if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
