@@ -125,6 +125,11 @@ Class ``KReg``
 Plotting functions
 ******************
 
+``plot_2d_regression``
+======================
+
+.. autofunction:: PCAfold.analysis.plot_2d_regression
+
 ``plot_3d_regression``
 ======================
 

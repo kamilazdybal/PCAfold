@@ -585,10 +585,132 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 #
 ################################################################################
 
+def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figure_size=(7,7), title=None, save_filename=None):
+    """
+    Plots the result of regression of a dependent variable on top
+    of a one-dimensional manifold defined by a single independent variable ``x``.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_2d_regression
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Obtain two-dimensional manifold from PCA:
+        pca_X = PCA(X)
+        PCs = pca_X.transform(X)
+        X_rec = pca_X.reconstruct(PCs)
+
+        # Plot the manifold:
+        plt = plot_2d_regression(X[:,0], X[:,0], X_rec[:,0], x_label='$x$', y_label='$y$', figure_size=(10,10), title='2D regression', save_filename='2d-regression.pdf')
+        plt.close()
+
+    :param x:
+        variable on the :math:`x`-axis. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+    :param observed:
+        vector of the observed values of a single dependent variable.
+        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        vector of the predicted values of a single dependent variable.
+        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param x_label: (optional)
+        string specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        string specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        string specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        string specifying plot save location/filename. If set to ``None``
+        plot will not be saved.
+        You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(x)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(x)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if n_x != n_observed:
+        raise ValueError("Parameter `observed` has different number of elements than `x`.")
+
+    if n_x != n_predicted:
+        raise ValueError("Parameter `predicted` has different number of elements than `x`.")
+
+    color_observed = '#191b27'
+    color_predicted = '#ff928b'
+
+    fig = plt.figure(figsize=figure_size)
+
+    scat = plt.scatter(x.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=0.1)
+    scat = plt.scatter(x.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=1)
+
+    if x_label != None: plt.xlabel(x_label, **csfont, fontsize=font_labels)
+    if y_label != None: plt.ylabel(y_label, **csfont, fontsize=font_labels)
+    plt.xticks(fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    plt.grid(alpha=grid_opacity)
+    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, loc="upper right")
+    lgnd.legendHandles[0]._sizes = [marker_size*5]
+    lgnd.legendHandles[1]._sizes = [marker_size*5]
+
+    if title != None: plt.title(title, **csfont, fontsize=font_title)
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
 def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, figure_size=(7,7), title=None, save_filename=None):
     """
-    This function plots the result of regression of a dependent variable on top
-    of a two-dimensional manifold defined by ``x`` and ``y``.
+    Plots the result of regression of a dependent variable on top
+    of a two-dimensional manifold defined by two independent variables ``x`` and ``y``.
 
     **Example:**
 
@@ -600,7 +722,7 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         # Generate dummy data set:
         X = np.random.rand(100,10)
 
-        # Obtain 3-dimensional manifold from PCA:
+        # Obtain three-dimensional manifold from PCA:
         pca_X = PCA(X)
         PCs = pca_X.transform(X)
         X_rec = pca_X.reconstruct(PCs)
