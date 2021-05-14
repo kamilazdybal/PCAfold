@@ -698,7 +698,7 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
     plt.grid(alpha=grid_opacity)
-    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, loc="upper right")
+    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, loc="best")
     lgnd.legendHandles[0]._sizes = [marker_size*5]
     lgnd.legendHandles[1]._sizes = [marker_size*5]
 

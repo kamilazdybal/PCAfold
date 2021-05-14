@@ -116,8 +116,18 @@ Nonlinear regression assessment
 
 In this section we will perform few assessments of the quality of the nonlinear regression.
 
-We begin by visualizing the regressed (predicted) dependent variable :math:`\phi`:
+We begin by visualizing the regressed (predicted) dependent variable :math:`\phi`. This can be done either in 2D:
 
+.. code:: 
+
+    plt = analysis.plot_2d_regression(x, phi, phi_predicted, x_label='$x$', y_label='$\phi$', figure_size=(10,4), save_filename=save_filename)
+
+.. image:: ../images/tutorial-regression-result-2d.svg
+    :width: 500
+    :align: center
+
+or in 3D:
+    
 .. code::
 
   plt = analysis.plot_3d_regression(x, y, phi, phi_predicted, elev=20, azim=-100, x_label='$x$', y_label='$y$', z_label='$\phi$', figure_size=(10,7), save_filename=None)
