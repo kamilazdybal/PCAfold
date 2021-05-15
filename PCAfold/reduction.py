@@ -12,6 +12,7 @@ __status__ = "Production"
 import numpy as np
 import copy as cp
 from scipy import linalg as lg
+from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 from PCAfold import preprocess
 from PCAfold import DataSampler
@@ -1335,6 +1336,8 @@ class LPCA:
         if len(idx) != n_observations:
             raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
 
+        self.__idx = idx
+
         # Check scaling:
         if not isinstance(scaling, str):
             raise ValueError("Parameter `scaling` has to be a string.")
@@ -1404,6 +1407,140 @@ class LPCA:
     def principal_components(self):
         return self.__principal_components
 
+    def local_correlation(self, variable, index=0, metric='pearson', verbose=False):
+        """
+        Computes a globally-averaged correlation metric between the local
+        principal component and some specified variable, :math:`x`.
+        The average is taken from each of the :math:`k` clusters.
+        Correlation in the :math:`n^{th}` cluster is referred to as :math:`r_n(\\mathrm{PC}, x)`.
+
+        Available correlation functions are:
+
+        - Pearson correlation coefficient (PCC) ``metric='pearson'``:
+
+        .. math::
+
+            r_n(\\mathrm{PC}, x) = \\mathrm{abs} \\Bigg( \\frac{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}}) (x_i - \\bar{x})}{\\sqrt{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}})^2} \\sqrt{\\sum_{i=1}^{N_n} (x_i - \\bar{x})^2}} \\Bigg)
+
+        where :math:`N_n` is the number of observations in the :math:`n^{th}` cluster.
+
+        - Distance correlation (dCor) ``metric='dcor'``:
+
+        .. math::
+
+            r_n(\\mathrm{PC}, x) = \\sqrt{ \\frac{\\mathrm{dCov}(\\mathrm{PC}_n, x_n)}{\\mathrm{dCov}(\\mathrm{PC}_n, \\mathrm{PC}_n) \\mathrm{dCov}(x_n, x_n)} }
+
+        Globally-averaged correlation metric is computed in two variants:
+
+        - Weighted ``'weighted=True'``, where the local correlation is\
+        additionally weighted by the size of each cluster:
+
+        .. math::
+
+            \\bar{r} = \\frac{1}{N} \\sum_{n=1}^k N_n r_n(\\mathrm{PC}, x)
+
+        - Unweighted ``'weighted=False'``, which computes an arithmetic average\
+        of local correlations from all clusters:
+
+        .. math::
+
+            r = \\frac{1}{k} \\sum_{n=1}^k r_n(\\mathrm{PC}, x)
+
+        :param variable:
+            ``numpy.ndarray`` specifying the variable for correlation computation.
+            It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        :param index:
+            ``int`` specifying the index of the local principal component for correlation computation.
+        :param metric:
+            ``str`` specifying the correlation metric to use. It can be ``'pearson'`` or ``'dcor'``.
+        :param verbose: (optional)
+            ``bool`` for printing verbose details.
+
+        :return:
+            - **local_correlations** - ``numpy.ndarray`` specifying the computed correlations in each cluster. It has size ``(k,)``.
+            - **weighted** - ``float`` specifying the globally-averaged weighted correlation.
+            - **unweighted** - ``float`` specifying the globally-averaged unweighted correlation.
+        """
+
+        __metrics = ['pearson', 'dcor']
+
+        if not isinstance(variable, np.ndarray):
+            raise ValueError("Parameter `variable` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations,) = np.shape(variable)
+            n_dim = 1
+        except:
+            (n_observations,n_dim) = np.shape(variable)
+
+        if n_dim != 1:
+            raise ValueError("Parameter `variable` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+        (n_observations_idx,) = np.shape(self.__idx)
+
+        if n_observations != n_observations_idx:
+            raise ValueError("Parameter `variable` has different number of observations than parameter `idx`.")
+
+        if not isinstance(index, int):
+            raise ValueError("Parameter `index` has to be of type `int`.")
+
+        if metric not in __metrics:
+            raise ValueError("Parameter `metric` can be `'pearson'` or `'dcor'`.")
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be of type `bool`.")
+
+        n_clusters = len(np.unique(self.__idx))
+
+        weighted_collected = []
+        unweighted_collected = []
+
+        local_correlations = np.zeros((n_clusters,))
+
+        for k in range(0, n_clusters):
+
+            indices = list(np.where(self.__idx==k)[0])
+
+            # Extract the variable in the current cluster:
+            try:
+                local_variable = variable[indices]
+            except:
+                local_variable = variable[indices,:]
+
+            # Extract the principal component in the current cluster:
+            local_pc = self.principal_components[k][:,index]
+
+            if metric == 'pearson':
+
+                # Compute local PCC:
+                (local_correlation, _) = pearsonr(local_pc, local_variable)
+                local_correlations[k] = local_correlation
+
+                if verbose:
+                    print('PCC in cluster ' + str(k) + '\t:' + str(round(local_correlation,6)))
+
+            elif metric == 'dcor':
+
+                pass
+
+            # Compute the weighted correlation:
+            weighted_collected.append(abs(local_correlation) * len(indices))
+
+            # Compute the unweighted correlation:
+            unweighted_collected.append(abs(local_correlation))
+
+        # Compute the globally averaged weighted correlation:
+        weighted = np.sum(weighted_collected) / n_observations
+
+        # Compute the globally averaged unweighted correlation:
+        unweighted = np.sum(unweighted_collected) / n_clusters
+
+        if verbose:
+            print('\nGlobally-averaged weighted correlation: ' + str(round(weighted,6)))
+            print('Globally-averaged unweighted correlation: ' + str(round(unweighted,6)))
+
+        return (local_correlations, weighted, unweighted)
+
 ################################################################################
 #
 # Principal Component Analysis on sampled data sets
@@ -1454,9 +1591,6 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         source terms :math:`\mathbf{S_X}` corresponding to the state-space
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
         representing reactive flows. More information can be found in :cite:`Sutherland2009`.
-
-    :raises ValueError:
-        if ``biasing_option`` is not 1, 2, 3 or 4.
 
     :return:
         - **eigenvalues** - biased eigenvalues :math:`\mathbf{L_r}`.

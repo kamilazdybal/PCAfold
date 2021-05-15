@@ -106,6 +106,11 @@ Class ``LPCA``
 
 .. autoclass:: PCAfold.reduction.LPCA
 
+``LPCA.local_correlation``
+============================
+
+.. autofunction:: PCAfold.reduction.LPCA.local_correlation
+
 --------------------------------------------------------------------------------
 
 ********************************************************
