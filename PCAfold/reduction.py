@@ -1432,15 +1432,13 @@ class LPCA:
 
         Globally-averaged correlation metric is computed in two variants:
 
-        - Weighted ``'weighted=True'``, where the local correlation is\
-        additionally weighted by the size of each cluster:
+        - Weighted, where the local correlation is weighted by the size of each cluster:
 
         .. math::
 
             \\bar{r} = \\frac{1}{N} \\sum_{n=1}^k N_n r_n(\\mathrm{PC}, x)
 
-        - Unweighted ``'weighted=False'``, which computes an arithmetic average\
-        of local correlations from all clusters:
+        - Unweighted, which computes an arithmetic average of local correlations from all clusters:
 
         .. math::
 
