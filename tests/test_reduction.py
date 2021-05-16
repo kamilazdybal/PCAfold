@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
-from PCAfold import PCA
+from PCAfold import PCA, LPCA
 from PCAfold import DataSampler
 from scipy import linalg as lg
 
@@ -1182,6 +1182,284 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(comparison.all())
         except Exception:
             self.assertTrue(False)
+
+################################################################################
+#
+# Test LPCA class
+#
+################################################################################
+
+    def test_LPCA__allowed_calls(self):
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='none', n_components=2)
+            A = lpca_X.A
+            L = lpca_X.L
+            Z = lpca_X.principal_components
+            A_k1 = lpca_X.A[0]
+            L_k1 = lpca_X.L[0]
+            Z_k1 = lpca_X.principal_components[0]
+            A1_k1 = lpca_X.A[0][:,0]
+            L1_k1 = lpca_X.L[0][0]
+            Z1_k1 = lpca_X.principal_components[0][:,0]
+        except Exception:
+            self.assertTrue(False)
+
+        idx = np.zeros((100,1))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='none', n_components=2)
+            A = lpca_X.A
+            L = lpca_X.L
+            Z = lpca_X.principal_components
+            A_k1 = lpca_X.A[0]
+            L_k1 = lpca_X.L[0]
+            Z_k1 = lpca_X.principal_components[0]
+            A1_k1 = lpca_X.A[0][:,0]
+            L1_k1 = lpca_X.L[0][0]
+            Z1_k1 = lpca_X.principal_components[0][:,0]
+        except Exception:
+            self.assertTrue(False)
+
+    def test_LPCA_equivalent_to_PCA_for_one_cluster(self):
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,))
+        idx = idx.astype(int)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='none', n_components=2)
+            pca_X = PCA(X, scaling='none', n_components=2)
+            lpca_A = lpca_X.A[0]
+            pca_A = pca_X.A[:,0:2]
+            self.assertTrue(np.array_equal(lpca_A, pca_A))
+            lpca_L = lpca_X.L[0]
+            pca_L = pca_X.L[0:2]
+            self.assertTrue(np.array_equal(lpca_L, pca_L))
+            lpca_Z = lpca_X.principal_components[0]
+            pca_Z = pca_X.transform(X)
+            self.assertTrue(np.array_equal(lpca_Z, pca_Z))
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='range', n_components=2)
+            pca_X = PCA(X, scaling='range', n_components=2)
+            lpca_A = lpca_X.A[0]
+            pca_A = pca_X.A[:,0:2]
+            self.assertTrue(np.array_equal(lpca_A, pca_A))
+            lpca_L = lpca_X.L[0]
+            pca_L = pca_X.L[0:2]
+            self.assertTrue(np.array_equal(lpca_L, pca_L))
+            lpca_Z = lpca_X.principal_components[0]
+            pca_Z = pca_X.transform(X)
+            self.assertTrue(np.array_equal(lpca_Z, pca_Z))
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='auto', n_components=0)
+            pca_X = PCA(X, scaling='auto', n_components=0)
+            lpca_A = lpca_X.A[0]
+            pca_A = pca_X.A
+            self.assertTrue(np.array_equal(lpca_A, pca_A))
+            lpca_L = lpca_X.L[0]
+            pca_L = pca_X.L
+            self.assertTrue(np.array_equal(lpca_L, pca_L))
+            lpca_Z = lpca_X.principal_components[0]
+            pca_Z = pca_X.transform(X)
+            self.assertTrue(np.array_equal(lpca_Z, pca_Z))
+        except:
+            self.assertTrue(False)
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,1))
+        idx = idx.astype(int)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='none', n_components=2)
+            pca_X = PCA(X, scaling='none', n_components=2)
+            lpca_A = lpca_X.A[0]
+            pca_A = pca_X.A[:,0:2]
+            self.assertTrue(np.array_equal(lpca_A, pca_A))
+            lpca_L = lpca_X.L[0]
+            pca_L = pca_X.L[0:2]
+            self.assertTrue(np.array_equal(lpca_L, pca_L))
+            lpca_Z = lpca_X.principal_components[0]
+            pca_Z = pca_X.transform(X)
+            self.assertTrue(np.array_equal(lpca_Z, pca_Z))
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='range', n_components=2)
+            pca_X = PCA(X, scaling='range', n_components=2)
+            lpca_A = lpca_X.A[0]
+            pca_A = pca_X.A[:,0:2]
+            self.assertTrue(np.array_equal(lpca_A, pca_A))
+            lpca_L = lpca_X.L[0]
+            pca_L = pca_X.L[0:2]
+            self.assertTrue(np.array_equal(lpca_L, pca_L))
+            lpca_Z = lpca_X.principal_components[0]
+            pca_Z = pca_X.transform(X)
+            self.assertTrue(np.array_equal(lpca_Z, pca_Z))
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca_X = LPCA(X, idx, scaling='auto', n_components=0)
+            pca_X = PCA(X, scaling='auto', n_components=0)
+            lpca_A = lpca_X.A[0]
+            pca_A = pca_X.A
+            self.assertTrue(np.array_equal(lpca_A, pca_A))
+            lpca_L = lpca_X.L[0]
+            pca_L = pca_X.L
+            self.assertTrue(np.array_equal(lpca_L, pca_L))
+            lpca_Z = lpca_X.principal_components[0]
+            pca_Z = pca_X.transform(X)
+            self.assertTrue(np.array_equal(lpca_Z, pca_Z))
+        except:
+            self.assertTrue(False)
+
+    def test_LPCA__not_allowed_calls(self):
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+        lpca_X = LPCA(X, idx, scaling='none', n_components=5)
+
+        with self.assertRaises(IndexError):
+            A = lpca_X.A[2]
+
+        with self.assertRaises(IndexError):
+            L = lpca_X.L[2]
+
+        with self.assertRaises(IndexError):
+            Z = lpca_X.principal_components[2]
+
+        with self.assertRaises(IndexError):
+            A = lpca_X.A[0][:,8]
+
+        with self.assertRaises(IndexError):
+            L = lpca_X.L[0][8]
+
+        with self.assertRaises(IndexError):
+            Z = lpca_X.principal_components[0][:,8]
+
+        with self.assertRaises(ValueError):
+            lpca_X = LPCA([1,2,3], idx, scaling='none', n_components=5)
+
+        with self.assertRaises(ValueError):
+            lpca_X = LPCA(X, [1,2,3], scaling='none', n_components=5)
+
+        with self.assertRaises(ValueError):
+            lpca_X = LPCA(X, idx, scaling=1, n_components=5)
+
+        with self.assertRaises(ValueError):
+            lpca_X = LPCA(X, idx, scaling='none', n_components=20)
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((200,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+
+        with self.assertRaises(ValueError):
+            lpca_X = LPCA(X, idx)
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,2))
+        idx = idx.astype(int)
+
+        with self.assertRaises(ValueError):
+            lpca_X = LPCA(X, idx)
+
+    def test_LPCA__not_allowed_attribute_set(self):
+
+        X = np.random.rand(100,5)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+        lpca_X = LPCA(X, idx)
+
+        with self.assertRaises(AttributeError):
+            lpca_X.A = 1
+
+        with self.assertRaises(AttributeError):
+            lpca_X.L = 1
+
+        with self.assertRaises(AttributeError):
+            lpca_X.principal_components = 1
+
+    def test_LPCA_local_correlation__allowed_calls(self):
+
+        X = np.random.rand(100,5)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+
+        try:
+            lpca = LPCA(X, idx)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0])
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca = LPCA(X, idx)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0:1])
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca = LPCA(X, idx)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=1, metric='pearson')
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca = LPCA(X, idx, n_components=2)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=1, metric='pearson')
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca = LPCA(X, idx, n_components=0)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=4, metric='pearson')
+        except:
+            self.assertTrue(False)
+
+    def test_LPCA_local_correlation__not_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+        lpca = LPCA(X, idx, n_components=2)
+
+        with self.assertRaises(ValueError):
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0:2])
+
+        with self.assertRaises(ValueError):
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[0:50,0])
+
+        with self.assertRaises(ValueError):
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=-1)
+
+        with self.assertRaises(ValueError):
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=2)
+
+        with self.assertRaises(ValueError):
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], metric='none')
+
+        with self.assertRaises(ValueError):
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], verbose=1)
 
 ################################################################################
 #

@@ -1267,7 +1267,7 @@ class PCA:
 class LPCA:
     """
     Enables performing local Principal Component Analysis (LPCA)
-    of the original data set :math:`\mathbf{X}` partitioned into clusters.
+    of the original data set, :math:`\mathbf{X}`, partitioned into clusters.
 
     **Example:**
 
@@ -1282,6 +1282,7 @@ class LPCA:
         # Generate dummy vector of cluster classifications:
         idx = np.zeros((100,))
         idx[50:80] = 1
+        idx = idx.astype(int)
 
         # Instantiate LPCA class object:
         lpca_X = LPCA(X, idx, scaling='none', n_components=2)
@@ -1298,47 +1299,61 @@ class LPCA:
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param idx:
-        vector of cluster classifications.
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param scaling: (optional)
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param n_components: (optional)
-        number of returned eigenvectors, eigenvalues and principal components :math:`q`. If set to 0 all are returned.
+        ``int`` specifying the number of returned eigenvectors, eigenvalues and principal components, :math:`q`. If set to 0 all are returned.
     :param use_eigendec: (optional)
-        boolean specifying the method for obtaining eigenvalues and eigenvectors:
+        ``bool`` specifying the method for obtaining eigenvalues and eigenvectors:
 
         * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
         * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
     :param nocenter: (optional)
-        boolean specifying whether data should be centered by mean.
+        ``bool`` specifying whether data should be centered by mean.
 
     **Attributes:**
 
-    - **A** - (read only) list of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
-    - **L** - (read only) list of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
-    - **principal_components** - (read only) list of matrices of local principal components :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
+    - **A** - (read only) ``list`` of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
+    - **L** - (read only) ``list`` of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
+    - **principal_components** - (read only) ``list`` of matrices of local principal components :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
 
-        # Check X:
-        (n_observations, n_variables) = np.shape(X)
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
 
-        if (n_observations < n_variables):
-            raise ValueError('Variables should be in columns; observations in rows.\n'
-                             'Also ensure that you have more than one observation\n')
+        try:
+            (n_observations, n_variables) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
 
-        # Degrade clusters if needed:
-        if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
-            (idx, _) = degrade_clusters(idx, verbose)
+        try:
+            (n_observations_idx, ) = np.shape(idx)
+            n_idx = 1
+        except:
+            (n_observations_idx, n_idx) = np.shape(idx)
 
-        # Check if `idx` vector has the same number of observations as `X`:
-        if len(idx) != n_observations:
+        if n_idx != 1:
+            raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+        if isinstance(idx, np.ndarray):
+            if not all(isinstance(i, np.integer) for i in idx.ravel()):
+                raise ValueError("Parameter `idx` can only contain integers.")
+        else:
+            raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+        if n_observations_idx != n_observations:
             raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
 
-        self.__idx = idx
+        if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
+            (idx, _) = preprocess.degrade_clusters(idx, verbose)
 
-        # Check scaling:
+        self.__idx = idx.ravel()
+
         if not isinstance(scaling, str):
             raise ValueError("Parameter `scaling` has to be a string.")
         else:
@@ -1347,7 +1362,6 @@ class LPCA:
             else:
                 self.__scaling = scaling.upper()
 
-        # Check n_components:
         if not isinstance(n_components, int) or isinstance(n_components, bool):
             raise ValueError("Parameter `n_components` has to be an integer.")
         else:
@@ -1359,11 +1373,9 @@ class LPCA:
                 else:
                     self.__n_components = n_variables
 
-        # Check use_eigendec:
         if not isinstance(use_eigendec, bool):
             raise ValueError("Parameter `use_eigendec` has to be a boolean.")
 
-        # Check nocenter:
         if not isinstance(nocenter, bool):
             raise ValueError("Parameter `nocenter` has to be a boolean.")
 
@@ -1377,7 +1389,7 @@ class LPCA:
         for k in range(0, n_clusters):
 
             # Extract local cluster:
-            X_k = X[idx==k,:]
+            X_k = X[self.__idx==k,:]
 
             # Remove constant variables from local cluster:
             (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X_k, maxtol=1e-12, rangetol=0.0001)
@@ -1539,6 +1551,12 @@ class LPCA:
         if not isinstance(index, int):
             raise ValueError("Parameter `index` has to be of type `int`.")
 
+        if index < 0:
+            raise ValueError("Parameter `index` has to be a positive `int`.")
+
+        if index > self.__n_components-1:
+            raise ValueError("Parameter `index` is larger than the number of principal components `n_components` at `LPCA` class initialization.")
+
         if metric not in __metrics:
             raise ValueError("Parameter `metric` can be `'pearson'` or `'dcor'`.")
 
@@ -1573,7 +1591,7 @@ class LPCA:
 
             if metric == 'pearson':
 
-                (local_correlation, _) = pearsonr(local_pc, local_variable)
+                (local_correlation, _) = pearsonr(local_pc, local_variable.ravel())
                 local_correlations[k] = local_correlation
 
                 if verbose:
