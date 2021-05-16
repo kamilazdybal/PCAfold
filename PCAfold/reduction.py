@@ -1409,26 +1409,43 @@ class LPCA:
 
     def local_correlation(self, variable, index=0, metric='pearson', verbose=False):
         """
-        Computes a globally-averaged correlation metric between the local
-        principal component and some specified variable, :math:`x`.
+        Computes a correlation in each cluster and a globally-averaged correlation between the local
+        principal component, PC, and some specified variable, :math:`\\phi`.
         The average is taken from each of the :math:`k` clusters.
-        Correlation in the :math:`n^{th}` cluster is referred to as :math:`r_n(\\mathrm{PC}, x)`.
+        Correlation in the :math:`n^{th}` cluster is referred to as :math:`r_n(\\mathrm{PC}, \\phi)`.
 
         Available correlation functions are:
 
-        - Pearson correlation coefficient (PCC) ``metric='pearson'``:
+        - Pearson correlation coefficient (PCC), set ``metric='pearson'``:
 
         .. math::
 
-            r_n(\\mathrm{PC}, x) = \\mathrm{abs} \\Bigg( \\frac{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}}) (x_i - \\bar{x})}{\\sqrt{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}})^2} \\sqrt{\\sum_{i=1}^{N_n} (x_i - \\bar{x})^2}} \\Bigg)
+            r_n(\\mathrm{PC}, \\phi) = \\mathrm{abs} \\Bigg( \\frac{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}}) (\\phi_i - \\bar{\\phi})}{\\sqrt{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}})^2} \\sqrt{\\sum_{i=1}^{N_n} (\\phi_i - \\bar{\\phi})^2}} \\Bigg)
 
         where :math:`N_n` is the number of observations in the :math:`n^{th}` cluster.
 
-        - Distance correlation (dCor) ``metric='dcor'``:
+        - Distance correlation (dCor), set ``metric='dcor'``:
 
         .. math::
 
-            r_n(\\mathrm{PC}, x) = \\sqrt{ \\frac{\\mathrm{dCov}(\\mathrm{PC}_n, x_n)}{\\mathrm{dCov}(\\mathrm{PC}_n, \\mathrm{PC}_n) \\mathrm{dCov}(x_n, x_n)} }
+            r_n(\\mathrm{PC}, \\phi) = \\sqrt{ \\frac{\\mathrm{dCov}(\\mathrm{PC}_n, \\phi_n)}{\\mathrm{dCov}(\\mathrm{PC}_n, \\mathrm{PC}_n) \\mathrm{dCov}(\\phi_n, \\phi_n)} }
+
+        where :math:`\\mathrm{dCov}` is the distance covariance computed for any two varibles :math:`X` and :math:`Y` as:
+
+        .. math::
+
+            \\mathrm{dCov}(X,Y) = \\sqrt{ \\frac{1}{N^2} \\sum_{i,j=1}^N x_{i,j} y_{i,j}}
+
+        where :math:`x_{i,j}` and :math:`y_{i,j}` are the elements of the
+        double-centered Euclidean distances matrices for :math:`X` and :math:`Y`
+        observations respectively, and :math:`N` is the total number of observations.
+        :math:`X` and :math:`Y` do not have to have equal dimensions.
+
+        .. note::
+
+            The distance correlation requires the ``dcor`` module. You can install it through:
+
+            ``pip install dcor``
 
         Globally-averaged correlation metric is computed in two variants:
 
@@ -1436,26 +1453,60 @@ class LPCA:
 
         .. math::
 
-            \\bar{r} = \\frac{1}{N} \\sum_{n=1}^k N_n r_n(\\mathrm{PC}, x)
+            \\bar{r} = \\frac{1}{N} \\sum_{n=1}^k N_n r_n(\\mathrm{PC}, \\phi)
 
         - Unweighted, which computes an arithmetic average of local correlations from all clusters:
 
         .. math::
 
-            r = \\frac{1}{k} \\sum_{n=1}^k r_n(\\mathrm{PC}, x)
+            r = \\frac{1}{k} \\sum_{n=1}^k r_n(\\mathrm{PC}, \\phi)
+
+        **Example:**
+
+        .. code::
+
+            from PCAfold import predefined_variable_bins, LPCA
+            import numpy as np
+
+            # Generate dummy data set:
+            x = np.linspace(-1,1,1000)
+            y = -x**2 + 1
+            X = np.hstack((x[:,None], y[:,None]))
+
+            # Generate dummy vector of cluster classifications:
+            (idx, _) = predefined_variable_bins(x, [-0.9, 0, 0.6])
+
+            # Instantiate LPCA class object:
+            lpca = LPCA(X, idx, scaling='none')
+
+            # Compute local Pearson correlation coefficient between PC-1 and y:
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(y, index=0, metric='pearson', verbose=True)
+
+        With ``verbose=True`` we will see some detailed information:
+
+        .. code-block:: text
+
+            PCC in cluster 1:	0.999996
+            PCC in cluster 2:	-0.990817
+            PCC in cluster 3:	0.983221
+            PCC in cluster 4:	0.999838
+
+            Globally-averaged weighted correlation: 0.990801
+            Globally-averaged unweighted correlation: 0.993468
 
         :param variable:
-            ``numpy.ndarray`` specifying the variable for correlation computation.
-            It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+            ``numpy.ndarray`` specifying the variable, :math:`\\phi`, for correlation computation.
+            It should be of size ``(n_observations,)`` or ``(n_observations,1)`` or ``(n_observations,n_variables)`` when ``metric='dcor'``.
         :param index:
             ``int`` specifying the index of the local principal component for correlation computation.
+            Set ``index=0`` if you want to look at the first PC.
         :param metric:
             ``str`` specifying the correlation metric to use. It can be ``'pearson'`` or ``'dcor'``.
         :param verbose: (optional)
             ``bool`` for printing verbose details.
 
         :return:
-            - **local_correlations** - ``numpy.ndarray`` specifying the computed correlations in each cluster. It has size ``(k,)``.
+            - **local_correlations** - ``numpy.ndarray`` specifying the computed correlation in each cluster. It has size ``(k,)``.
             - **weighted** - ``float`` specifying the globally-averaged weighted correlation.
             - **unweighted** - ``float`` specifying the globally-averaged unweighted correlation.
         """
@@ -1465,14 +1516,20 @@ class LPCA:
         if not isinstance(variable, np.ndarray):
             raise ValueError("Parameter `variable` has to be of type `numpy.ndarray`.")
 
-        try:
-            (n_observations,) = np.shape(variable)
-            n_dim = 1
-        except:
-            (n_observations,n_dim) = np.shape(variable)
+        if metric != 'dcor':
+            try:
+                (n_observations,) = np.shape(variable)
+                n_dim = 1
+            except:
+                (n_observations,n_dim) = np.shape(variable)
 
-        if n_dim != 1:
-            raise ValueError("Parameter `variable` has to have size `(n_observations,)` or `(n_observations,1)`.")
+            if n_dim != 1:
+                raise ValueError("Parameter `variable` has to have size `(n_observations,)` or `(n_observations,1)`.")
+        else:
+            try:
+                (n_observations,) = np.shape(variable)
+            except:
+                (n_observations,_) = np.shape(variable)
 
         (n_observations_idx,) = np.shape(self.__idx)
 
@@ -1484,6 +1541,12 @@ class LPCA:
 
         if metric not in __metrics:
             raise ValueError("Parameter `metric` can be `'pearson'` or `'dcor'`.")
+
+        if metric == 'dcor':
+            try:
+                from dcor import distance_correlation
+            except:
+                raise ValueError("Distance correlation requires the `dcor` module: `pip install dcor`.")
 
         if not isinstance(verbose, bool):
             raise ValueError("Parameter `verbose` has to be of type `bool`.")
@@ -1510,16 +1573,18 @@ class LPCA:
 
             if metric == 'pearson':
 
-                # Compute local PCC:
                 (local_correlation, _) = pearsonr(local_pc, local_variable)
                 local_correlations[k] = local_correlation
 
                 if verbose:
-                    print('PCC in cluster ' + str(k) + '\t:' + str(round(local_correlation,6)))
+                    print('PCC in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
 
             elif metric == 'dcor':
 
-                pass
+                local_correlation = distance_correlation(local_pc, local_variable)
+
+                if verbose:
+                    print('dCor in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
 
             # Compute the weighted correlation:
             weighted_collected.append(abs(local_correlation) * len(indices))
