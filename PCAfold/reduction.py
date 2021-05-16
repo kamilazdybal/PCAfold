@@ -1316,9 +1316,9 @@ class LPCA:
 
     **Attributes:**
 
-    - **A** - (read only) ``list`` of matrices of local eigenvectors :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
-    - **L** - (read only) ``list`` of vectors of local eigenvalues :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
-    - **principal_components** - (read only) ``list`` of matrices of local principal components :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
+    - **A** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvectors, :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
+    - **L** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvalues, :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
+    - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal component, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1442,7 +1442,7 @@ class LPCA:
 
             r_n(\\mathrm{PC}, \\phi) = \\sqrt{ \\frac{\\mathrm{dCov}(\\mathrm{PC}_n, \\phi_n)}{\\mathrm{dCov}(\\mathrm{PC}_n, \\mathrm{PC}_n) \\mathrm{dCov}(\\phi_n, \\phi_n)} }
 
-        where :math:`\\mathrm{dCov}` is the distance covariance computed for any two varibles :math:`X` and :math:`Y` as:
+        where :math:`\\mathrm{dCov}` is the distance covariance computed for any two variables, :math:`X` and :math:`Y`, as:
 
         .. math::
 
@@ -1450,18 +1450,19 @@ class LPCA:
 
         where :math:`x_{i,j}` and :math:`y_{i,j}` are the elements of the
         double-centered Euclidean distances matrices for :math:`X` and :math:`Y`
-        observations respectively, and :math:`N` is the total number of observations.
-        :math:`X` and :math:`Y` do not have to have equal dimensions.
+        observations respectively. :math:`N` is the total number of observations.
+        Note, that the distance correlation computation allows :math:`X` and :math:`Y`
+        to have different dimensions.
 
         .. note::
 
-            The distance correlation requires the ``dcor`` module. You can install it through:
+            The distance correlation computation requires the ``dcor`` module. You can install it through:
 
             ``pip install dcor``
 
         Globally-averaged correlation metric is computed in two variants:
 
-        - Weighted, where the local correlation is weighted by the size of each cluster:
+        - Weighted, where each local correlation is weighted by the size of each cluster:
 
         .. math::
 
