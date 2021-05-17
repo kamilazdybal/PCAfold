@@ -23,7 +23,9 @@ We assume that the data set containing original state-space variables is:
   \mathbf{X} = [T, Y_1, Y_2, \dots, Y_{N_s-1}]
 
 where :math:`T` is temperature and :math:`Y_i` is a mass fraction of species
-:math:`i`. :math:`N_s` is the total number of chemical species. The corresponding
+:math:`i`. :math:`N_s` is the total number of chemical species. :math:`\mathbf{X}`
+is also referred to as the *state vector*, see :cite:`Hansen2018` for
+various definitions of the state vector. The corresponding
 source terms of the original state-space variables are:
 
 .. math::
@@ -40,8 +42,8 @@ For a 0D-system, we can write the evolution equation as:
   \frac{d \mathbf{X}}{dt} = \mathbf{S_X}
 
 This equation can be instead written in the space of principal components by applying
-a linear operator :math:`\mathbf{A}` identified by PCA. We can also account for
-centering and scaling the original data set :math:`\mathbf{X}` using centers
+a linear operator, :math:`\mathbf{A}`, identified by PCA. We can also account for
+centering and scaling the original data set, :math:`\mathbf{X}`, using centers
 :math:`\mathbf{C}` and scales :math:`\mathbf{D}`:
 
 .. math::
@@ -49,7 +51,7 @@ centering and scaling the original data set :math:`\mathbf{X}` using centers
   \frac{d \Big( \frac{\mathbf{X} - \mathbf{C}}{\mathbf{D}} \Big) \mathbf{A}}{dt} = \frac{\mathbf{S_X}}{\mathbf{D}}\mathbf{A}
 
 It is worth noting that when the original data set is centered and scaled,
-the corresponding source terms should only be scaled and not centered, since:
+the corresponding source terms should only be scaled and *not* centered, since:
 
 .. math::
 
@@ -82,8 +84,8 @@ A data set representing combustion of syngas in air generated from steady lamina
 flamelet model using *Spitfire* software :cite:`Hansen2020` and a chemical
 mechanism by Hawkes et al. :cite:`Hawkes2007` is used as a demo data set.
 
-We begin by importing the data set composed of the original state space variables
-:math:`\mathbf{X}` and the corresponding source terms :math:`\mathbf{S_X}`:
+We begin by importing the data set composed of the original state space variables,
+:math:`\mathbf{X}`, and the corresponding source terms, :math:`\mathbf{S_X}`:
 
 .. code::
 
@@ -97,14 +99,14 @@ We perform PCA on the original data:
   pca_X = PCA(X, scaling='auto', n_components=2)
 
 We transform the original data set  to the newly identified basis and
-compute the principal components (PCs) :math:`\mathbf{Z}`:
+compute the principal components (PCs), :math:`\mathbf{Z}`:
 
 .. code::
 
   Z = pca_X.transform(X, nocenter=False)
 
 Transform the source terms to the newly identified basis and compute the sources
-of principal components :math:`\mathbf{S_Z}`:
+of principal components, :math:`\mathbf{S_Z}`:
 
 .. code::
 
