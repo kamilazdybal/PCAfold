@@ -70,7 +70,7 @@ Two weight normalizations are available:
 
 .. code::
 
-    plt = reduction.plot_eigenvectors(pca_X_Auto.A[:,0], eigenvectors_indices=[], variable_names=X_names, plot_absolute=False, save_path='../images/', save_filename=save_filename)
+    plt = reduction.plot_eigenvectors(pca_X_Auto.A[:,0], eigenvectors_indices=[], variable_names=X_names, plot_absolute=False, save_filename=save_filename)
 
 
 .. image:: ../images/eigenvector-1-plotting-pca.svg
@@ -81,7 +81,7 @@ Two weight normalizations are available:
 
 .. code::
 
-    plt = reduction.plot_eigenvectors(pca_X_Auto.A[:,0], eigenvectors_indices=[], variable_names=X_names, plot_absolute=True, save_path='../images/', save_filename=save_filename)
+    plt = reduction.plot_eigenvectors(pca_X_Auto.A[:,0], eigenvectors_indices=[], variable_names=X_names, plot_absolute=True, save_filename=save_filename)
 
 .. image:: ../images/eigenvector-1-plotting-pca-absolute.svg
     :width: 500

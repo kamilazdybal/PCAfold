@@ -610,29 +610,27 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis. It should be of type ``numpy.ndarray`` and size
-        ``(n_observations,)`` or ``(n_observations,1)``.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param observed:
-        vector of the observed values of a single dependent variable.
-        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        vector of the predicted values of a single dependent variable.
-        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -732,39 +730,36 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis. It should be of type ``numpy.ndarray`` and size
-        ``(n_observations,)`` or ``(n_observations,1)``.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis. It should be of type ``numpy.ndarray`` and size
-        ``(n_observations,)`` or ``(n_observations,1)``.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param observed:
-        vector of the observed values of a single dependent variable.
-        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        vector of the predicted values of a single dependent variable.
-        It should be of type ``numpy.ndarray`` and size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param elev: (optional)
         elevation angle.
     :param azim: (optional)
         azimuth angle.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param z_label: (optional)
-        string specifying :math:`z`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`z`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -903,18 +898,18 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         an object of ``VarianceData`` class objects whose normalized variance quantities
         should be plotted.
     :param plot_variables: (optional)
-        list of integers specifying indices of variables to be plotted.
+        ``list`` of ``int`` specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *Blues*.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'Blues'``.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -1003,24 +998,24 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         plt.close()
 
     :param variance_data_tuple:
-        a tuple of ``VarianceData`` class objects whose normalized variance quantities
+        ``tuple`` of ``VarianceData`` class objects whose normalized variance quantities
         should be compared on one plot. For instance: ``(variance_data_1, variance_data_2)``.
     :param plot_variables_tuple:
-        list of integers specifying indices of variables to be plotted.
+        ``list`` of ``int`` specifying indices of variables to be plotted.
         It should have as many elements as there are ``VarianceData`` class objects supplied.
         For instance: ``([], [])`` will plot all variables.
-    :param color_map_tuple:
-        colormap to use as per ``matplotlib.cm``.
+    :param color_map: (optional)
+        ``tuple`` of ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``.
         It should have as many elements as there are ``VarianceData`` class objects supplied.
         For instance: ``('Blues', 'Reds')``.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -1093,18 +1088,18 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
         an object of ``VarianceData`` class objects whose normalized variance derivative quantities
         should be plotted.
     :param plot_variables: (optional)
-        list of integers specifying indices of variables to be plotted.
+        ``list`` of ``int`` specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *Blues*.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'Blues'``.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -1170,24 +1165,24 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
     Example is similar to that found for ``plot_normalized_variance_comparison``.
 
     :param variance_data_tuple:
-        a tuple of ``VarianceData`` class objects whose normalized variance derivative quantities
+        ``tuple`` of ``VarianceData`` class objects whose normalized variance derivative quantities
         should be compared on one plot. For instance: ``(variance_data_1, variance_data_2)``.
     :param plot_variables_tuple:
-        list of integers specifying indices of variables to be plotted.
+        ``list`` of ``int`` specifying indices of variables to be plotted.
         It should have as many elements as there are ``VarianceData`` class objects supplied.
         For instance: ``([], [])`` will plot all variables.
-    :param color_map_tuple:
-        colormap to use as per ``matplotlib.cm``.
+    :param color_map: (optional)
+        ``tuple`` of ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``.
         It should have as many elements as there are ``VarianceData`` class objects supplied.
         For instance: ``('Blues', 'Reds')``.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -1281,13 +1276,13 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
         string specifying the name of the variable for which :math:`R^2` were computed. If set to ``None``
         label on the x-axis will not be plotted.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 

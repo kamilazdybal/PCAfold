@@ -29,7 +29,7 @@ z
    <g id="matplotlib.axis_1"/>
    <g id="matplotlib.axis_2"/>
    <g id="line2d_1">
-    <path clip-path="url(#p539df812f6)" d="M 331.521168 147.769517 
+    <path clip-path="url(#pa153917b32)" d="M 331.521168 147.769517 
 L 330.611076 146.142534 
 L 329.569897 150.946608 
 L 337.109203 147.997417 
@@ -217,7 +217,7 @@ L 29.703125 54.09375
 z
 " id="Charter-Bold-65"/>
     </defs>
-    <g style="fill:#ca0614;" transform="translate(7.2 273.197593)scale(1 -1)">
+    <g style="fill:#cc0000;" transform="translate(7.2 273.197593)scale(1 -1)">
      <use xlink:href="#Charter-Bold-80"/>
      <use x="58.699997" xlink:href="#Charter-Bold-67"/>
      <use x="122.499985" xlink:href="#Charter-Bold-65"/>
@@ -332,7 +332,7 @@ Q 36.5 8.59375 38.90625 9.5
 z
 " id="Charter-Bold-100"/>
     </defs>
-    <g style="fill:#004a8d;" transform="translate(192.65437 273.197593)scale(1 -1)">
+    <g style="fill:#004d95;" transform="translate(192.65437 273.197593)scale(1 -1)">
      <use xlink:href="#Charter-Bold-102"/>
      <use x="34.099991" xlink:href="#Charter-Bold-111"/>
      <use x="91.799988" xlink:href="#Charter-Bold-108"/>
@@ -342,7 +342,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="p539df812f6">
+  <clipPath id="pa153917b32">
    <rect height="332.64" width="334.8" x="140.943995" y="7.2"/>
   </clipPath>
  </defs>

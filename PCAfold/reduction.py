@@ -309,25 +309,19 @@ class PCA:
             principal_components = pca_X.transform(X)
 
         :param X:
-            data set to transform. Note that it does not need to
-            be the same data set that was used to construct the PCA object. It
+            ``numpy.ndarray`` specifying the data set :math:`\mathbf{X}` to transform. It should be of size ``(n_observations,n_variables)``.
+            Note that it does not need to be the same data set that was used to construct the ``PCA`` class object. It
             could for instance be a function of that data set. By default,
             this data set will be pre-processed with the centers and scales
             computed on the data set used when constructing the PCA object.
         :param nocenter: (optional)
-            boolean specifying whether ``PCA.X_center`` centers should be applied to
+            ``bool`` specifying whether ``PCA.X_center`` centers should be applied to
             center the data set before transformation.
             If ``nocenter=True`` centers will not be applied on the
             data set.
 
-        :raises ValueError:
-            if ``nocenter`` is not a boolean.
-
-        :raises ValueError:
-            if the number of variables in a data set is inconsistent with number of eigenvectors.
-
         :return:
-            - **principal_components** - the :math:`q` first principal components :math:`\mathbf{Z}_q`.
+            - **principal_components** - ``numpy.ndarray`` specifying the :math:`q` first principal components :math:`\mathbf{Z}_q`. It has size ``(n_observations,n_components)``.
         """
 
         if not isinstance(nocenter, bool):
@@ -411,18 +405,12 @@ class PCA:
             X_rec = pca_X.reconstruct(principal_components)
 
         :param principal_components:
-            matrix of :math:`q` first principal components :math:`\mathbf{Z}_q`.
+            ``numpy.ndarray`` of :math:`q` first principal components, :math:`\mathbf{Z}_q`. It should be of size ``(n_observations,n_variables)``.
         :param nocenter: (optional)
-            boolean specifying whether ``PCA.X_center`` centers should be applied to
+            ``bool`` specifying whether ``PCA.X_center`` centers should be applied to
             un-center the reconstructed data set.
             If ``nocenter=True`` centers will not be applied on the
             reconstructed data set.
-
-        :raises ValueError:
-            if ``nocenter`` is not a boolean.
-
-        :raises ValueError:
-            if the number of principal components supplied is larger than the number of eigenvectors computed by PCA.
 
         :return:
             - **X_rec** - rank-:math:`q` reconstruction of the original data set.
@@ -493,26 +481,14 @@ class PCA:
             PC1_weights_dictionary['A3']
 
         :param variable_names:
-            list of strings specifying names for all variables in the original data set :math:`\mathbf{X}`.
+            ``list`` of ``str`` specifying names for all variables in the original data set, :math:`\mathbf{X}`.
         :param pc_index:
-            non-negative integer specifying the index of the PC to create the dictionary for. Set ``pc_index=0`` if you want to look at the first PC.
+            non-negative ``int`` specifying the index of the PC to create the dictionary for. Set ``pc_index=0`` if you want to look at the first PC.
         :param n_digits: (optional)
-            non-negative integer specifying how many digits should be kept in rounding the eigenvector weights.
-
-        :raises ValueError:
-            if the number of variables in ``variable_names`` is not consistent with the number of variables in the original data set :math:`\mathbf{X}`.
-
-        :raises ValueError:
-            if ``pc_index`` is not a non-negative integer.
-
-        :raises ValueError:
-            if ``pc_index`` is not consistent with the number of eigenvectors found for the original data set :math:`\mathbf{X}`.
-
-        :raises ValueError:
-            if ``n_digits`` is not a non-negative integer.
+            non-negative ``int`` specifying how many digits should be kept in rounding the eigenvector weights.
 
         :return:
-            - **weights_dictionary** - dictionary of variable names as keys and selected eigenvector weights as values.
+            - **weights_dictionary** - ``dict`` of variable names as keys and selected eigenvector weights as values.
         """
 
         (n_variables, n_pcs) = np.shape(self.A)
@@ -571,7 +547,7 @@ class PCA:
             ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
 
         :return:
-            - **r2** - coefficient of determination values :math:`R^2` for the rank-:math:`q` reconstruction of the original data set.
+            - **r2** - ``numpy.ndarray`` specifying the coefficient of determination values :math:`R^2` for the rank-:math:`q` reconstruction of the original data set. It has size ``(n_variables,)``.
         """
 
         self.data_consistency_check(X, errors_are_fatal=True)
@@ -622,11 +598,10 @@ class PCA:
         :param X:
             ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
         :param errors_are_fatal: (optional)
-            boolean indicating if ValueError should be raised if an incompatibility
-            is detected.
+            ``bool`` indicating if ``ValueError`` should be raised if an incompatibility is detected.
 
         :return:
-            - **is_consistent** - boolean for whether or not supplied data matrix ``X``\
+            - **is_consistent** - ``bool`` specifying whether or not the supplied data matrix :math:`\mathbf{X}`\
             is consistent with the ``PCA`` class object.
         """
 
@@ -700,13 +675,13 @@ class PCA:
         :param n_pcs:
             the maximum number of PCs to consider.
         :param variable_names: (optional)
-            list of strings specifying variable names. If not specified variables will be numbered.
+            ``list`` of strings specifying variable names. If not specified variables will be numbered.
         :param print_width: (optional)
             width of columns printed out.
         :param verbose: (optional)
-            boolean for printing out the table with :math:`R^2` values.
+            ``bool`` for printing out the table with :math:`R^2` values.
         :param save_filename: (optional)
-            string specifying ``.txt`` save location/filename.
+            ``str`` specifying ``.txt`` save location/filename.
 
         :return:
             - **r2** - matrix of size ``(n_pcs, n_variables)`` containing the :math:`R^2` values\
@@ -826,7 +801,7 @@ class PCA:
             principal_variables_indices = pca_X.principal_variables(method='M2', X)
 
         :param method: (optional)
-            string specifying the method for determining the Principal Variables (PVs).
+            ``str`` specifying the method for determining the Principal Variables (PVs).
         :param x: (optional)
             data set to accompany ``'M2'`` method. Note that this is *only* required for the ``'M2'`` method.
 
@@ -1047,19 +1022,11 @@ class PCA:
         to be retained in the PCA reduction.
 
         :param method: (optional)
-            string specifying the method to use in selecting retained eigenvalues.
+            ``str`` specifying the method to use in selecting retained eigenvalues.
         :param option: (optional)
             additional parameter used for the ``'TOTAL VARIANCE'`` and
             ``'INDIVIDUAL VARIANCE'`` methods. If not supplied, information
             will be obtained interactively.
-
-        :raises ValueError:
-            if the fraction of retained variance supplied by the ``option`` parameter
-            is not a number between 0 and 1.
-
-        :raises ValueError:
-            if the method selected is not ``'TOTAL VARIANCE'``, ``'INDIVIDUAL VARIANCE'``,
-            ``'BROKEN STICK'`` or ``'SCREE GRAPH'``.
 
         :return:
             - **pca** - the PCA object with the number of retained eigenvalues set on it.
@@ -1224,7 +1191,7 @@ class PCA:
             second PCA object.
 
         :return:
-            - **iseq** - boolean for ``(a == b)``.
+            - **iseq** - ``bool`` for ``(a == b)``.
         """
         iseq = False
         scalErr = np.abs(a.X_scale - b.X_scale) / np.max(np.abs(a.X_scale))
@@ -1252,7 +1219,7 @@ class PCA:
             second PCA object.
 
         :return:
-            - **result** - boolean for ``(a != b)``.
+            - **result** - ``bool`` for ``(a != b)``.
         """
         result = not (a == b)
 
@@ -1663,8 +1630,9 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
     :param scaling:
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param n_components:
         number of :math:`q` first principal components that will be saved.
     :param biasing_option:
@@ -1875,21 +1843,20 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
     :param variable_names: (optional)
-        list of strings specifying variable names.
+        ``list`` of ``str`` specifying variable names.
     :param plot_variables: (optional)
-        list of integers specifying indices of variables to be plotted.
+        ``list`` of ``int`` specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param legend_label: (optional)
-        list of strings specifying labels for the legend. First entry will refer
+        ``list`` of ``str`` specifying labels for the legend. First entry will refer
         to :math:`||\mathbf{C}||` and second entry to :math:`||\mathbf{C_r}||`.
         If the list is empty, legend will not be plotted.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -2024,26 +1991,26 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
             eigenvectors_1 = eigenvectors_matrix[:,0,:]
             eigenvectors_2 = eigenvectors_matrix[:,1,:]
     :param variable_names: (optional)
-        list of strings specifying variable names.
+        ``list`` of ``str`` specifying variable names.
     :param plot_variables: (optional)
         list of integers specifying indices of variables to be plotted.
         By default, all variables are plotted.
     :param normalize: (optional)
-        boolean specifying whether weights should be normlized at all.
+        ``bool`` specifying whether weights should be normlized at all.
         If set to false, the absolute values are plotted.
     :param zero_norm: (optional)
-        boolean specifying whether weights should be normalized between 0 and 1.
+        ``bool`` specifying whether weights should be normalized between 0 and 1.
         By default they are not normalized to start at 0.
         Only has effect if ``normalize=True``.
     :param legend_label: (optional)
-        list of strings specifying labels for the legend. If the list is empty,
+        ``list`` of ``str`` specifying labels for the legend. If the list is empty,
         legend will not be plotted.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -2193,21 +2160,22 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         vector of indices that should be extracted from :math:`\mathbf{X}` to
         form :math:`\mathbf{X_r}`.
     :param scaling:
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param biasing_option:
-        integer specifying biasing option.
+        ``int`` specifying biasing option.
         Can only attain values 1, 2, 3 or 4.
     :param legend_label: (optional)
-        list of strings specifying labels for the legend. First entry will refer
+        ``list`` of ``str`` specifying labels for the legend. First entry will refer
         to :math:`\mathbf{X}` and second entry to :math:`\mathbf{X_r}`.
         If the list is empty, legend will not be plotted.
     :param title: (optional)
-        boolean or string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -2338,8 +2306,9 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
         vector of cluster classifications.
         The first cluster has index 0.
     :param scaling:
-        string specifying the scaling methodology as per
-        ``preprocess.center_scale`` function.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param X_source:
         source terms :math:`\mathbf{S_X}` corresponding to the state-space
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
@@ -2356,7 +2325,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
     :param random_seed: (optional)
         integer specifying random seed for random sample selection.
     :param verbose: (optional)
-        boolean for printing verbose details.
+        ``bool`` for printing verbose details.
 
     :return:
         - **eigenvalues** - collected eigenvalues from each iteration.
@@ -2567,11 +2536,11 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         plt.close()
 
     :param x:
-        variable on the :math:`x`-axis. It should be of type ``numpy.ndarray`` and size
-        ``(n_observations,)`` or ``(n_observations,1)``.
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param y:
-        variable on the :math:`y`-axis. It should be of type ``numpy.ndarray`` and size
-        ``(n_observations,)`` or ``(n_observations,1)``.
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param color: (optional)
         vector or string specifying color for the manifold. If it is a
         vector, it has to have length consistent with the number of observations
@@ -2581,25 +2550,24 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param colorbar_label: (optional)
-        string specifying colorbar label annotation.
+        ``str`` specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -2725,28 +2693,27 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
     :param azim: (optional)
         azimuth angle.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param z_label: (optional)
-        string specifying :math:`z`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`z`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param colorbar_label: (optional)
-        string specifying colorbar label annotation.
+        ``str`` specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -2896,25 +2863,24 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
         instance ``'r'`` or ``'#006778'``.
         If not specified, parity plot will be plotted in black.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param colorbar_label: (optional)
-        string specifying colorbar label annotation.
+        ``str`` specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *viridis*.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -3004,7 +2970,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_path=None, save_filename=None):
+def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None):
     """
     Plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
@@ -3032,25 +2998,22 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         matrix of eigenvectors to plot. It can be supplied as an attribute of
         the ``PCA`` class: ``PCA.A``.
     :param eigenvectors_indices:
-        list of integers specifying indexing of eigenvectors inside
+        ``list`` of ``int`` specifying indexing of eigenvectors inside
         ``eigenvectors`` supplied. If it is not supplied, it is assumed that
         eigenvectors are numbered :math:`[0, 1, 2, \\dots, n]`, where :math:`n`
         is the number of eigenvectors provided.
     :param variable_names: (optional)
-        list of strings specifying variable names.
+        ``list`` of ``str`` specifying variable names.
     :param plot_absolute:
-        boolean specifying whether absolute values of eigenvectors should be plotted.
+        ``bool`` specifying whether absolute values of eigenvectors should be plotted.
     :param bar_color: (optional)
-        string specifying color of bars.
+        ``str`` specifying color of bars.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
-    :param save_path: (optional)
-        string specifying plot save location.
     :param save_filename: (optional)
-        string specifying plot save filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``. Note that a prefix ``eigenvector-#`` will be added out front
         the filename, where ``#`` is the number of the currently plotted eigenvector.
@@ -3110,7 +3073,11 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
             plt.title(title, fontsize=font_title, **csfont)
 
         if save_filename != None:
-            plt.savefig(save_path + 'eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename, dpi=save_dpi, bbox_inches='tight')
+            save_filename_list = save_filename.split('/')
+            if len(save_filename_list) == 1:
+                plt.savefig('eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename_list[-1], dpi=save_dpi, bbox_inches='tight')
+            elif len(save_filename_list) > 1:
+                plt.savefig('/'.join(save_filename_list[0:-1]) + '/eigenvector-' + str(eigenvectors_indices[n_pc] + 1) + '-' + save_filename_list[-1], dpi=save_dpi, bbox_inches='tight')
 
         plot_handles.append(plt)
 
@@ -3141,23 +3108,22 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         plt.close()
 
     :param eigenvectors_tuple:
-        a tuple of eigenvectors to plot. Each eigenvector inside a tuple should be a 0D array.
+        ``tuple`` specifying the eigenvectors to plot. Each eigenvector inside a tuple should be a 0D array.
         It can be supplied as an attribute of the ``PCA`` class, for instance: ``(PCA.A[:,0], PCA.A[:,1])``.
     :param legend_labels:
-        list of strings specifying labels for each element in the ``eigenvectors_tuple``.
+        ``list`` of ``str`` specifying labels for each element in the ``eigenvectors_tuple``.
     :param variable_names: (optional)
-        list of strings specifying variable names.
+        ``list`` of ``str`` specifying variable names.
     :param plot_absolute:
-        boolean specifying whether absolute values of eigenvectors should be plotted.
+        ``bool`` specifying whether absolute values of eigenvectors should be plotted.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *coolwarm*.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'coolwarm'``.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -3260,13 +3226,13 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         a 0D vector of eigenvalues to plot. It can be supplied as an attribute of the
         ``PCA`` class: ``PCA.L``.
     :param normalized: (optional)
-        boolean specifying whether eigenvalues should be normalized to 1.
+        ``bool`` specifying whether eigenvalues should be normalized to 1.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -3337,21 +3303,21 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         plt.close()
 
     :param eigenvalues_tuple:
-        a tuple of eigenvalues to plot. Each vector of eigenvalues inside a tuple
+        ``tuple`` specifying the eigenvalues to plot. Each vector of eigenvalues inside a tuple
         should be a 0D array. It can be supplied as an attribute of the
         ``PCA`` class, for instance: ``(PCA_1.L, PCA_2.L)``.
     :param legend_labels:
-        list of strings specifying labels for each element in the ``eigenvalues_tuple``.
+        ``list`` of ``str`` specifying the labels for each element in the ``eigenvalues_tuple``.
     :param normalized: (optional)
-        boolean specifying whether eigenvalues should be normalized to 1.
+        ``bool`` specifying whether eigenvalues should be normalized to 1.
     :param color_map: (optional)
-        colormap to use as per ``matplotlib.cm``. Default is *coolwarm*.
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'coolwarm'``.
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
@@ -3439,11 +3405,11 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
     :param n_components: (optional)
         how many principal components you want to visualize (default is all).
     :param title: (optional)
-        string specifying plot title. If set to ``None``
-        title will not be plotted.
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
     :param save_filename: (optional)
-        plot save location/filename. If set to ``None`` plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 

@@ -3222,7 +3222,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         If set to ``False`` the first cluster will be indexed ``1``.
     :param grid_on:
         ``bool`` specifying whether grid should be plotted.
-    :param figure_size:
+    :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
@@ -3394,7 +3394,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
     :param first_cluster_index_zero: (optional)
         ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
-    :param figure_size:
+    :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
@@ -3641,7 +3641,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         If set to ``False`` the first cluster will be indexed ``1``.
     :param grid_on:
         ``bool`` specifying whether grid should be plotted.
-    :param figure_size:
+    :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
@@ -3827,12 +3827,12 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
         ``(n_observations,)`` or ``(n_observations,1)``.
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
-        If not specified, manifold will be plotted in black.
+        If not specified, data will be plotted in black.
     :param x_label: (optional)
-        string specifying :math:`x`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param y_label: (optional)
-        string specifying :math:`y`-axis label annotation. If set to ``None``
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param colorbar_label: (optional)
         string specifying colorbar label annotation.
@@ -3840,14 +3840,13 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
     :param color_map: (optional)
         colormap to use as per ``matplotlib.cm``. Default is *viridis*.
     :param figure_size: (optional)
-        tuple specifying figure size.
+        ``tuple`` specifying figure size.
     :param title: (optional)
-        string specifying plot title. If set to ``None`` title will not be
+        ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
     :param save_filename: (optional)
-        string specifying plot save location/filename. If set to ``None``
-        plot will not be saved.
-        You can also set a desired file extension,
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
         is ``.png``.
 
