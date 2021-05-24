@@ -13,14 +13,14 @@ from matplotlib import rcParams
 save_dpi = 100
 
 # Set font styles:
-csfont = {'fontname':'Charter', 'fontweight':'regular'}
-hfont = {'fontname':'Charter', 'fontweight':'bold'}
-ifont = {'fontname':'Charter', 'fontweight':'regular', 'style':'italic'}
+csfont = {'fontname':'Arial', 'fontweight':'regular'}
+hfont = {'fontname':'Arial', 'fontweight':'bold'}
+ifont = {'fontname':'Arial', 'fontweight':'regular', 'style':'italic'}
 rcParams["font.family"] = "serif"
-rcParams["font.serif"] = "Charter"
-rcParams["font.sans-serif"] = "Charter"
-rcParams["font.cursive"] = "Charter"
-rcParams["font.monospace"] = "Charter"
+rcParams["font.serif"] = "Arial"
+rcParams["font.sans-serif"] = "Arial"
+rcParams["font.cursive"] = "Arial"
+rcParams["font.monospace"] = "Arial"
 rcParams['mathtext.fontset'] = 'custom'
 rcParams['mathtext.rm'] = 'Charter'
 rcParams['mathtext.it'] = 'Charter:italic'
