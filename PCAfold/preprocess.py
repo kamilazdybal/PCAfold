@@ -148,6 +148,16 @@ def center_scale(X, scaling, nocenter=False):
     if not isinstance(nocenter, bool):
         raise ValueError("Parameter `nocenter` has to be a boolean.")
 
+    if scaling.lower() not in ['max', 'level', 'poisson']:
+        for i in range(0, n_variables):
+            if np.all(X[:,i] == X[0,i]):
+                raise ValueError("Constant variable(s) are detected in the original data set. This will cause division by zero for the selected scaling. Consider removing the constant variables using `preprocess.remove_constant_vars`.")
+
+    if scaling.lower() in ['max', 'level', 'poisson']:
+        for i in range(0, n_variables):
+            if np.all(X[:,i] == 0):
+                raise ValueError("Constant and zeroed variable(s) are detected in the original data set. This will cause division by zero for the selected scaling. Consider removing the constant variables using `preprocess.remove_constant_vars`.")
+
     X_cs = np.zeros_like(X, dtype=float)
     X_center = X.mean(axis=0)
 
@@ -156,11 +166,13 @@ def center_scale(X, scaling, nocenter=False):
 
     for i in range(0, n_variables):
 
-        # Calculate the standard deviation (required for some scalings):
-        dev[i] = np.std(X[:, i], ddof=0)
+        if scaling.lower() in ['auto', 'std', 'vast', 'vast_2', 'vast_3', 'vast_4', 'pareto']:
+            # Calculate the standard deviation (required for some scalings):
+            dev[i] = np.std(X[:, i], ddof=0)
 
-        # Calculate the kurtosis (required for some scalings):
-        kurt[i] = np.sum((X[:, i] - X_center[i]) ** 4) / n_observations / (np.sum((X[:, i] - X_center[i]) ** 2) / n_observations) ** 2
+        if scaling.lower() in ['vast_2', 'vast_3', 'vast_4']:
+            # Calculate the kurtosis (required for some scalings):
+            kurt[i] = np.sum((X[:, i] - X_center[i]) ** 4) / n_observations / (np.sum((X[:, i] - X_center[i]) ** 2) / n_observations) ** 2
 
     scaling = scaling.upper()
     eps = np.finfo(float).eps
@@ -191,7 +203,7 @@ def center_scale(X, scaling, nocenter=False):
     elif scaling == 'PARETO':
        X_scale = np.zeros(n_variables)
        for i in range(0, n_variables):
-           X_scale[i] = np.sqrt(np.std(X[:, i], ddof=0))
+           X_scale[i] = np.sqrt(dev[i])
     elif scaling == 'POISSON':
        X_scale = np.sqrt(X_center)
     else:

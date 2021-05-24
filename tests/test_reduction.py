@@ -41,16 +41,16 @@ class TestReduction(unittest.TestCase):
 
         # comparing mean(centering), centered data, Q, and L
 
-        if np.any(xbar - pca.X_center > tol) or np.any(xbar - pca2.X_center > tol):
+        if np.any(abs(xbar - pca.X_center) > tol):
             self.assertTrue(False)
 
-        if np.any(PHI - pca.X_cs > tol) or np.any(PHI - pca2.X_cs > tol):
+        if np.any(abs(PHI - pca.X_cs) > tol):
             self.assertTrue(False)
 
-        if np.any(Q - pca.A > tol) or np.any(Q - pca2.A > tol):
+        if np.any(abs(Q - pca.A) > tol):
             self.assertTrue(False)
 
-        if np.any(L - pca.L > tol) or np.any(L - pca2.L > tol):
+        if np.any(abs(L - pca.L) > tol):
             self.assertTrue(False)
 
         # Check if feed eta's to PCA, return same eta's when do transform
@@ -73,7 +73,7 @@ class TestReduction(unittest.TestCase):
                 eta_new2[:, i] *= -1
 
         # checking eta's are the same from transformation of eta
-        if np.any(eta - eta_new > tol) or np.any(eta - eta_new2 > tol):
+        if np.any(abs(eta - eta_new) > tol):
             self.assertTrue(False)
 
 # Test if 10 PCA class attributes cannot be set by the user after `PCA` object has been created:
