@@ -9,11 +9,13 @@ Dependencies
 
 **PCAfold** requires ``python3.7`` and the following packages:
 
-- ``Cython``
-- ``matplotlib``
-- ``numpy``
-- ``scipy``
-- ``termcolor``
+.. code-block:: text
+
+  pip install Cython
+  pip install matplotlib
+  pip install numpy
+  pip install scipy
+  pip install termcolor
 
 Build from source
 ^^^^^^^^^^^^^^^^^
@@ -32,39 +34,7 @@ Run the ``setup.py`` script as below to complete the installation:
   python3.7 setup.py build_ext --inplace
   python3.7 setup.py install
 
-You are ready to ``import PCAfold``!
-
-Local documentation build
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-To build the documentation locally, you need ``sphinx`` installed on your machine,
-along with the following extensions:
-
-.. code-block:: text
-
-  sphinx.ext.todo
-  sphinx.ext.githubpages
-  sphinx.ext.autodoc
-  sphinx.ext.napoleon
-  sphinx.ext.mathjax
-  sphinx.ext.autosummary
-  sphinxcontrib.bibtex
-
-Then, navigate to ``docs/`` directory and build the documentation:
-
-.. code-block:: text
-
-  sphinx-build -b html . builddir
-
-  make html
-
-Documentation main page ``_build/html/index.html`` can be opened in a web browser.
-
-In MacOS you can open it directly from the terminal:
-
-.. code-block:: text
-
-  open _build/html/index.html
+If the installation was successful, you are ready to ``import PCAfold``!
 
 Testing
 ^^^^^^^
@@ -80,24 +50,52 @@ To switch verbose on, use the ``-v`` flag.
 All tests should be passing. If any of the tests is failing and you can’t sort
 out why, please open an issue on `GitLab <https://gitlab.multiscale.utah.edu/common/PCAfold>`_.
 
+Local documentation build
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To build the documentation locally, you need ``sphinx`` installed on your machine,
+along with few extensions:
+
+.. code-block:: text
+
+  pip install Sphinx
+  pip install sphinxcontrib-bibtex
+  pip install furo
+
+Then, navigate to ``docs/`` directory and build the documentation:
+
+.. code-block:: text
+
+  sphinx-build -b html . builddir
+
+  make html
+
+Documentation main page ``_build/html/index.html`` can be opened in a web browser.
+
+On MacOS, you can open it directly from the terminal:
+
+.. code-block:: text
+
+  open _build/html/index.html
+
 Plotting
 --------
 
 Some functions within **PCAfold** result in plot outputs. Global styles for the
-plots are set using the ``styles.py`` file. This file can be updated with new
-settings that will be seen globally by **PCAfold** modules. Re-build the project
-after changing ``styles.py`` file:
+plots, such as font types and sizes, are set using the ``PCAfold/styles.py`` file.
+This file can be updated with new settings that will be seen globally by all
+**PCAfold** modules. Re-build the project after changing ``styles.py`` file:
 
 .. code-block:: text
 
   python3.7 setup.py install
 
-All plotting functions return handles to generated plots.
+Note, that all plotting functions return handles to generated plots.
 
 Workflows
 ---------
 
-In this section we present several popular workflows that can be achieved using
+In this section, we present several popular workflows that can be achieved using
 functionalities of **PCAfold**. An overview for combining **PCAfold** modules
 into a complete workflow is presented in the diagram below:
 
@@ -131,7 +129,7 @@ Data manipulation
 
 Basic data manipulation such as centering, scaling, outlier detection and removal
 or kernel density weighting of data sets can be achieved using the ``preprocess``
-module only.
+module.
 
 Data clustering
 ^^^^^^^^^^^^^^^
