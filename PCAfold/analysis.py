@@ -130,11 +130,11 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
         variance_data.normalized_variance['B']
 
     :param indepvars:
-        independent variable values (size: n_observations x n_independent variables)
+        ``numpy.ndarray`` specifying the independent variable values. It should be of size ``(n_observations,n_independent_variables)``.
     :param depvars:
-        dependent variable values (size: n_observations x n_dependent variables)
+        ``numpy.ndarray`` specifying the dependent variable values. It should be of size ``(n_observations,n_dependent_variables)``.
     :param depvar_names:
-        list of strings corresponding to the names of the dependent variables (for saving values in a dictionary)
+        ``list`` of ``str`` corresponding to the names of the dependent variables (for saving values in a dictionary)
     :param npts_bandwidth:
         (optional, default 25) number of points to build a logspace of bandwidth values
     :param min_bandwidth:
@@ -318,23 +318,54 @@ def find_local_maxima(dependent_values, independent_values, logscaling=True, thr
         zero_locations = 10. ** np.array(zero_locations)
     return np.array(zero_locations, dtype=float), np.array(zero_Dvalues, dtype=float)
 
+# ------------------------------------------------------------------------------
 
 def r2value(observed, predicted):
     """
-    Calculate the coefficient of determination :math:`R^2` value
+    Calculates the coefficient of determination, :math:`R^2`, value.
 
     :param observed:
-        observed values
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        predicted values
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
 
     :return:
-        coefficient of determination
+        - **r2** - coefficient of determination, :math:`R^2`.
     """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
     r2 = 1. - np.sum((observed - predicted) * (observed - predicted)) / np.sum(
         (observed - np.mean(observed)) * (observed - np.mean(observed)))
+
     return r2
 
+# ------------------------------------------------------------------------------
 
 def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=False):
     """
@@ -492,6 +523,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 
     return (r2_in_bins, bins_borders)
 
+# ------------------------------------------------------------------------------
 
 def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
                                         n_sample_iterations=1, verbose=True, npts_bandwidth=25, min_bandwidth=None,
@@ -577,7 +609,6 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
         avg_der_data[p] = avg_der
         normvar_data[p] = nv_data
     return avg_der_data, xder, normvar_data
-
 
 ################################################################################
 #
@@ -704,6 +735,8 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
+
+# ------------------------------------------------------------------------------
 
 def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, figure_size=(7,7), title=None, save_filename=None):
     """
@@ -865,6 +898,8 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title=None, save_filename=None):
     """
     This function plots normalized variance :math:`\mathcal{N}(\sigma)` over
@@ -963,6 +998,8 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
+
+# ------------------------------------------------------------------------------
 
 def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tuple, color_map_tuple, figure_size=(10,5), title=None, save_filename=None):
     """
@@ -1074,6 +1111,8 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
 
     return plt
 
+# ------------------------------------------------------------------------------
+
 def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title=None, save_filename=None):
     """
     This function plots a scaled normalized variance derivative (computed over logarithmically scaled bandwidths), :math:`\hat{\mathcal{D}(\sigma)}`,
@@ -1153,6 +1192,7 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
 
     return plt
 
+# ------------------------------------------------------------------------------
 
 def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_variables_tuple, color_map_tuple, figure_size=(10,5), title=None, save_filename=None):
     """
@@ -1239,6 +1279,8 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
+
+# ------------------------------------------------------------------------------
 
 def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
     """

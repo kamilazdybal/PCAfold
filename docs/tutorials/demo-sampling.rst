@@ -103,7 +103,7 @@ sampling.
 
 .. code:: python
 
-  sample = DataSampler(idx, idx_test=[], random_seed=random_seed, verbose=True)
+  sample = DataSampler(idx, idx_test=None, random_seed=random_seed, verbose=True)
 
 --------------------------------------------------------------------------------
 

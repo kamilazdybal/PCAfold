@@ -1616,7 +1616,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
         X = np.random.rand(100,10)
 
         # Generate dummy sampling indices:
-        idx = np.zeros((100,))
+        idx = np.zeros((100,)).astype(int)
         idx[50:80] = 1
         selection = DataSampler(idx)
         (idx_X_r, _) = selection.number(20, test_selection_option=1)
@@ -1829,7 +1829,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         X = np.random.rand(100,10)
 
         # Generate dummy sampling indices:
-        idx = np.zeros((100,))
+        idx = np.zeros((100,)).astype(int)
         idx[50:80] = 1
         selection = DataSampler(idx)
         (idx_X_r, _) = selection.number(20, test_selection_option=1)
@@ -2146,7 +2146,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         X = np.random.rand(100,10)
 
         # Generate dummy sampling indices:
-        idx = np.zeros((100,))
+        idx = np.zeros((100,)).astype(int)
         idx[50:80] = 1
         selection = DataSampler(idx)
         (idx_X_r, _) = selection.number(20, test_selection_option=1)

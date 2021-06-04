@@ -10,7 +10,7 @@
 from matplotlib import rcParams
 
 # Set resolution for the saved plots (in dpi - dots-per-inch):
-save_dpi = 100
+save_dpi = 200
 
 # Set font styles:
 csfont = {'fontname':'Arial', 'fontweight':'regular'}

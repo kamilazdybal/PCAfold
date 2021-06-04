@@ -81,9 +81,9 @@ class KReg:
       predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)
 
     :param indepvars:
-        independent variable training data (n_observations x n_independent_variables), :math:`x` in equations above
+        ``numpy.ndarray`` specifying the independent variable training data, :math:`x` in equations above. It should be of size ``(n_observations,n_independent_variables)``.
     :param depvars:
-        dependent variable training data (n_observations x n_dependent_variables), :math:`y` in equations above
+        ``numpy.ndarray`` specifying the dependent variable training data, :math:`y` in equations above. It should be of size ``(n_observations,n_dependent_variables)``.
     :param internal_dtype:
         (optional, default float) data type to enforce in training and evaluating
     :param supress_warning:
@@ -212,7 +212,7 @@ class KReg:
         Calculate dependent variable predictions at ``query_points``.
 
         :param query_points:
-            array of independent variable points to query the model (n_points x n_independent_variables)
+            ``numpy.ndarray`` specifying the independent variable points to query the model. It should be of size ``(n_points,n_independent_variables)``.
         :param bandwidth:
             value(s) to use for the bandwidth in the Gaussian kernel. Supported formats include:
 

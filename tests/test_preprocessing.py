@@ -140,7 +140,7 @@ class TestPreprocessing(unittest.TestCase):
         x = np.linspace(-1,1,100)
         y = -x**2 + 1
         (idx, borders) = preprocess.variable_bins(x, 4, verbose=False)
-        sample = preprocess.DataSampler(idx, idx_test=[], random_seed=None, verbose=False)
+        sample = preprocess.DataSampler(idx, idx_test=None, random_seed=None, verbose=False)
         (idx_train, idx_test) = sample.number(40, test_selection_option=1)
 
         try:
@@ -161,7 +161,7 @@ class TestPreprocessing(unittest.TestCase):
         y = np.random.rand(100,1)
         (idx, borders) = preprocess.variable_bins(x, 4, verbose=False)
 
-        sample = preprocess.DataSampler(idx, idx_test=[], random_seed=None, verbose=False)
+        sample = preprocess.DataSampler(idx, idx_test=None, random_seed=None, verbose=False)
         (idx_train, idx_test) = sample.number(10, test_selection_option=1)
 
         with self.assertRaises(ValueError):

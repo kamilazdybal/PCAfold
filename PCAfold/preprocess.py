@@ -1306,46 +1306,66 @@ class DataSampler:
       idx = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1])
 
       # Instantiate DataSampler class object:
-      selection = DataSampler(idx, idx_test=[5,9], random_seed=100, verbose=True)
+      selection = DataSampler(idx, idx_test=np.array([5,9]), random_seed=100, verbose=True)
 
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx_test: (optional)
-        ``numpy.ndarray`` or ``list`` of user-provided indices for test data. If specified, train
+        ``numpy.ndarray`` specifying the user-provided indices for test data. If specified, train
         data will be selected ignoring the indices in ``idx_test`` and the test
         data will be returned the same as the user-provided ``idx_test``.
         If not specified, test samples will be selected according to the
         ``test_selection_option`` parameter (see documentation for each sampling function).
         Setting fixed ``idx_test`` parameter may be useful if training a machine
         learning model on specific test samples is desired.
+        It should be of size ``(n_test_samples,)`` or ``(n_test_samples,1)``.
     :param random_seed: (optional)
         ``int`` specifying random seed for random sample selection.
     :param verbose: (optional)
         ``bool`` for printing verbose details.
     """
 
-    def __init__(self, idx, idx_test=[], random_seed=None, verbose=False):
+    def __init__(self, idx, idx_test=None, random_seed=None, verbose=False):
 
-        if len(idx) == 0:
-            raise ValueError("Parameter `idx` has length zero.")
-        else:
-            if len(np.unique(idx_test)) > len(idx):
-                raise ValueError("Parameter `idx` has less observations than current `idx_test`.")
-            else:
-                if isinstance(idx, list) or isinstance(idx, np.ndarray):
-                    self.__idx = idx
-                else:
-                    raise ValueError("Parameter `idx` has to be a list or numpy.ndarray.")
+        if isinstance(idx, np.ndarray):
+            if not all(isinstance(i, np.integer) for i in idx.ravel()):
+                raise ValueError("Parameter `idx` can only contain integers.")
+            try:
+                (n_observations, n_dim) = np.shape(idx)
+            except:
+                (n_observations,) = np.shape(idx)
+                n_dim = 1
+            if n_dim != 1:
+                raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+            if n_observations == 0:
+                raise ValueError("Parameter `idx` is an empty array.")
 
-        if len(np.unique(idx_test)) > len(idx):
-            raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
+            self.__idx = idx
         else:
-            if isinstance(idx_test, list) or isinstance(idx_test, np.ndarray):
+            raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+        if idx_test is not None:
+
+            if isinstance(idx_test, np.ndarray):
+                if not all(isinstance(i, np.integer) for i in idx_test.ravel()):
+                    raise ValueError("Parameter `idx_test` can only contain integers.")
+                try:
+                    (n_test_samples, n_dim) = np.shape(idx_test)
+                except:
+                    (n_test_samples,) = np.shape(idx_test)
+                    n_dim = 1
+                if n_dim != 1:
+                    raise ValueError("Parameter `idx_test` has to have size `(n_test_samples,)` or `(n_test_samples,1)`.")
                 self.__idx_test = idx_test
             else:
-                raise ValueError("Parameter `idx_test` has to be a list or numpy.ndarray.")
+                raise ValueError("Parameter `idx_test` has to be of type `numpy.ndarray`.")
 
-        if random_seed != None:
+            if len(np.unique(idx_test)) > len(idx):
+                raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
+        else:
+            self.__idx_test = idx_test
+
+        if random_seed is not None:
             if not isinstance(random_seed, int):
                 raise ValueError("Parameter `random_seed` has to be an integer or None.")
             if isinstance(random_seed, bool):
@@ -1360,10 +1380,13 @@ class DataSampler:
         else:
             self.__verbose = verbose
 
-        if len(np.unique(idx_test)) != 0:
-            self.__using_user_defined_idx_test = True
-            if self.verbose==True:
-                print('User defined test samples will be used. Parameter `test_selection_option` will be ignored.\n')
+        if idx_test is not None:
+            if len(np.unique(idx_test)) != 0:
+                self.__using_user_defined_idx_test = True
+                if self.verbose==True:
+                    print('User defined test samples will be used. Parameter `test_selection_option` will be ignored.\n')
+            else:
+                self.__using_user_defined_idx_test = False
         else:
             self.__using_user_defined_idx_test = False
 
@@ -1385,37 +1408,59 @@ class DataSampler:
 
     @idx.setter
     def idx(self, new_idx):
-        if len(new_idx) == 0:
-            raise ValueError("Parameter `idx` has length zero.")
+
+        if isinstance(new_idx, np.ndarray):
+            if not all(isinstance(i, np.integer) for i in new_idx.ravel()):
+                raise ValueError("Parameter `idx` can only contain integers.")
+            try:
+                (n_observations, n_dim) = np.shape(new_idx)
+            except:
+                (n_observations,) = np.shape(new_idx)
+                n_dim = 1
+            if n_dim != 1:
+                raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+            if n_observations == 0:
+                raise ValueError("Parameter `idx` is an empty array.")
+            self.__idx = new_idx
         else:
-            if len(np.unique(self.idx_test)) > len(new_idx):
-                raise ValueError("Parameter `idx` has less observations than current `idx_test`.")
-            else:
-                if isinstance(new_idx, list) or isinstance(new_idx, np.ndarray):
-                    self.__idx = new_idx
-                else:
-                    raise ValueError("Parameter `idx` has to be a list or numpy.ndarray.")
+            raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+        if len(np.unique(self.idx_test)) > len(new_idx):
+            raise ValueError("Parameter `idx` has less observations than current `idx_test`.")
 
     @idx_test.setter
     def idx_test(self, new_idx_test):
-        if len(new_idx_test) > len(self.idx):
-            raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
-        else:
-            if isinstance(new_idx_test, list) or isinstance(new_idx_test, np.ndarray):
-                self.__idx_test = new_idx_test
+        if new_idx_test is not None:
+            if len(new_idx_test) > len(self.idx):
+                raise ValueError("Parameter `idx_test` has more unique observations than `idx`.")
             else:
-                raise ValueError("Parameter `idx_test` has to be a list or numpy.ndarray.")
+                if isinstance(new_idx_test, np.ndarray):
+                    if not all(isinstance(i, np.integer) for i in new_idx_test.ravel()):
+                        raise ValueError("Parameter `idx_test` can only contain integers.")
+                    try:
+                        (n_test_samples, n_dim) = np.shape(new_idx_test)
+                    except:
+                        (n_test_samples,) = np.shape(new_idx_test)
+                        n_dim = 1
+                    if n_dim != 1:
+                        raise ValueError("Parameter `idx_test` has to have size `(n_test_samples,)` or `(n_test_samples,1)`.")
+                    self.__idx_test = new_idx_test
+                else:
+                    raise ValueError("Parameter `idx_test` has to be of type `numpy.ndarray`.")
 
-            if len(np.unique(new_idx_test)) != 0:
-                self.__using_user_defined_idx_test = True
-                if self.verbose==True:
-                    print('User defined test samples will be used. Parameter `test_selection_option` will be ignored.\n')
-            else:
-                self.__using_user_defined_idx_test = False
+                if len(np.unique(new_idx_test)) != 0:
+                    self.__using_user_defined_idx_test = True
+                    if self.verbose==True:
+                        print('User defined test samples will be used. Parameter `test_selection_option` will be ignored.\n')
+                else:
+                    self.__using_user_defined_idx_test = False
+        else:
+            self.__idx_test = new_idx_test
+            self.__using_user_defined_idx_test = False
 
     @random_seed.setter
     def random_seed(self, new_random_seed):
-        if new_random_seed != None:
+        if new_random_seed is not None:
             if not isinstance(new_random_seed, int):
                 raise ValueError("Parameter `random_seed` has to be an integer or None.")
             if isinstance(new_random_seed, bool):
@@ -1555,7 +1600,10 @@ class DataSampler:
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
         idx_full = np.arange(0, n_observations)
-        idx_test = np.unique(np.array(self.idx_test))
+        if self.idx_test is not None:
+            idx_test = np.unique(np.array(self.idx_test))
+        else:
+            idx_test = np.array([])
         idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
         # Find the number of clusters:
@@ -1709,7 +1757,10 @@ class DataSampler:
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
         idx_full = np.arange(0, n_observations)
-        idx_test = np.unique(np.array(self.idx_test))
+        if self.idx_test is not None:
+            idx_test = np.unique(np.array(self.idx_test))
+        else:
+            idx_test = np.array([])
         idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
         # Find the number of clusters:
@@ -1891,7 +1942,10 @@ class DataSampler:
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
         idx_full = np.arange(0,n_observations)
-        idx_test = np.unique(np.array(self.idx_test))
+        if self.idx_test is not None:
+            idx_test = np.unique(np.array(self.idx_test))
+        else:
+            idx_test = np.array([])
         idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
         # Find the number of clusters:
@@ -2088,7 +2142,10 @@ class DataSampler:
         # Initialize vector of indices 0..n_observations:
         n_observations = len(self.idx)
         idx_full = np.arange(0, n_observations)
-        idx_test = np.unique(np.array(self.idx_test))
+        if self.idx_test is not None:
+            idx_test = np.unique(np.array(self.idx_test))
+        else:
+            idx_test = np.array([])
         idx_full_no_test = np.setdiff1d(idx_full, idx_test)
 
         # Find the number of clusters:
