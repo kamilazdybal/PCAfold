@@ -74,6 +74,21 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.stratified_r2
 
+``mean_squared_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.mean_squared_error
+
+``root_mean_squared_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.root_mean_squared_error
+
+``normalized_root_mean_squared_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.normalized_root_mean_squared_error
+
 --------------------------------------------------------------------------------
 
 ******************

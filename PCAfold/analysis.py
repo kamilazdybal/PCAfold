@@ -322,7 +322,7 @@ def find_local_maxima(dependent_values, independent_values, logscaling=True, thr
 
 def r2value(observed, predicted):
     """
-    Calculates the coefficient of determination, :math:`R^2`, value.
+    Computes the coefficient of determination, :math:`R^2`, value.
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -522,6 +522,159 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         r2_in_bins.append(r2)
 
     return (r2_in_bins, bins_borders)
+
+# ------------------------------------------------------------------------------
+
+def mean_squared_error(observed, predicted):
+    """
+    Computes the mean squared error.
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **mse** - mean squared error.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    mse = 1.0 / n_observed * np.sum((observed - predicted) * (observed - predicted))
+
+    return mse
+
+# ------------------------------------------------------------------------------
+
+def root_mean_squared_error(observed, predicted):
+    """
+    Computes the root mean squared error.
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **rmse** - root mean squared error.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    rmse = (mean_squared_error(observed, predicted))**0.5
+
+    return rmse
+
+# ------------------------------------------------------------------------------
+
+def normalized_root_mean_squared_error(observed, predicted, norm='std'):
+    """
+    Computes the normalized root mean squared error.
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :parm norm:
+        ``str`` specifying the normalization. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
+
+    :return:
+        - **nrmse** - normalized root mean squared error.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    rmse = root_mean_squared_error(observed, predicted)
+
+    if norm == 'root_square_mean':
+        nrmse = rmse/sqrt(np.mean(observed**2))
+    elif norm == 'std':
+        nrmse = rmse/(np.std(observed))
+    elif norm == 'range':
+        nrmse = rmse/(np.max(observed) - np.min(observed))
+    elif norm == 'root_square_range':
+        nrmse = rmse/sqrt(np.max(observed**2) - np.min(observed**2))
+    elif norm == 'root_square_std':
+        nrmse = rmse/sqrt(np.std(observed**2))
+    elif norm == 'abs_mean':
+        nrmse = rmse/abs(np.mean(observed))
+
+    return nrmse
 
 # ------------------------------------------------------------------------------
 
