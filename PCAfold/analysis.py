@@ -320,9 +320,28 @@ def find_local_maxima(dependent_values, independent_values, logscaling=True, thr
 
 # ------------------------------------------------------------------------------
 
-def r2value(observed, predicted):
+def coefficient_of_determination(observed, predicted):
     """
     Computes the coefficient of determination, :math:`R^2`, value.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, coefficient_of_determination
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the coefficient of determination for the first variable:
+        r2 = coefficient_of_determination(X[:,0], X_rec[:,0])
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -508,7 +527,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
             r2 = 1. - np.sum((__observed[idx_bin] - __predicted[idx_bin]) * (__observed[idx_bin] - __predicted[idx_bin])) / np.sum(
                 (__observed[idx_bin] - global_mean) * (__observed[idx_bin] - global_mean))
         else:
-            r2 = r2value(__observed[idx_bin], __predicted[idx_bin])
+            r2 = coefficient_of_determination(__observed[idx_bin], __predicted[idx_bin])
 
         constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
         constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
@@ -528,6 +547,25 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 def mean_squared_error(observed, predicted):
     """
     Computes the mean squared error.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the mean squared error for the first variable:
+        mse = mean_squared_error(X[:,0], X_rec[:,0])
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -575,6 +613,25 @@ def root_mean_squared_error(observed, predicted):
     """
     Computes the root mean squared error.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, root_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the root mean squared error for the first variable:
+        rmse = root_mean_squared_error(X[:,0], X_rec[:,0])
+
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
@@ -620,6 +677,25 @@ def root_mean_squared_error(observed, predicted):
 def normalized_root_mean_squared_error(observed, predicted, norm='std'):
     """
     Computes the normalized root mean squared error.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, normalized_root_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the root mean squared error for the first variable:
+        nrmse = normalized_root_mean_squared_error(X[:,0], X_rec[:,0], norm='std')
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -675,6 +751,112 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
         nrmse = rmse/abs(np.mean(observed))
 
     return nrmse
+
+# ------------------------------------------------------------------------------
+
+def turning_points(observed, predicted):
+    """
+    Computes the turning points percentage - the percentage of predicted outputs
+    that have the opposite growth tendency to the corresponding observed growth tendency.
+
+    :return:
+        - **turning_points** - turning points percentage in %.
+    """
+
+
+
+
+
+    return turning_points
+
+# ------------------------------------------------------------------------------
+
+def good_estimate(observed, predicted, tolerance=0.05):
+    """
+    Computes the good estimate (GE) - the percentage of predicted values that
+    are within the specified tolerance from the corresponding observed values.
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :parm tolerance:
+        ``float`` specifying the tolerance.
+
+    :return:
+        - **good_estimate** - good estimate (GE) in %.
+    """
+
+
+
+
+
+
+    return good_estimate
+
+# ------------------------------------------------------------------------------
+
+def good_direction_estimate(observed, predicted, tolerance=0.05):
+    """
+    Computes the good direction estimate (GDE) - the percentage of predicted vector
+    observations whose direction is within the specified tolerance from the direction of the
+    corresponding observed vector.
+
+    It also outputs the GDE field corresponding to each observation in the observed vector.
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,n_dimensions)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,n_dimensions)``.
+    :parm tolerance:
+        ``float`` specifying the tolerance.
+
+    :return:
+        - **good_direction_estimate** - good direction estimate (GDE) in %.
+        - **good_direction_estimate_field** - a field of good direction estimate (GDE). It has size ``(n_observations,)``.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed, n_dimensions_1) = np.shape(observed)
+    except:
+        raise ValueError("Parameter `observed` should be a matrix.")
+
+    if n_dimensions_1 < 2:
+        raise ValueError("Parameter `observed` has to have at least two dimensions.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted, n_dimensions_2) = np.shape(predicted)
+    except:
+        raise ValueError("Parameter `predicted` should be a matrix.")
+
+    if n_dimensions_2 < 2:
+        raise ValueError("Parameter `predicted` has to have at least two dimensions.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if n_dimensions_1 != n_dimensions_2:
+        raise ValueError("Parameter `observed` has different number of dimensions than `predicted`.")
+
+    good_direction_estimate_field = np.zeros((n_observed,))
+
+    for i in range(0,n_observed):
+
+        observed_observation = observed[i,:]/np.linalg.norm(observed[i,:])
+        predicted_observation = predicted[i,:]/np.linalg.norm(predicted[i,:])
+        good_direction_estimate_field[i] = np.dot(observed_observation, predicted_observation)
+
+    (idx_good_direction, ) = np.where(good_direction_estimate_field >= 1.0 - tolerance)
+
+    good_direction_estimate = len(idx_good_direction)/n_observed * 100.0
+
+    return (good_direction_estimate, good_direction_estimate_field)
 
 # ------------------------------------------------------------------------------
 

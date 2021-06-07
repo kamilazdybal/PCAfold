@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from PCAfold import compute_normalized_variance, r2value, normalized_variance_derivative, find_local_maxima, random_sampling_normalized_variance
+from PCAfold import compute_normalized_variance, coefficient_of_determination, normalized_variance_derivative, find_local_maxima, random_sampling_normalized_variance
 from PCAfold import PCA, plot_normalized_variance, plot_normalized_variance_comparison
 from PCAfold import plot_normalized_variance_derivative, plot_normalized_variance_derivative_comparison
 from PCAfold import stratified_r2, plot_stratified_r2
@@ -101,12 +101,12 @@ class TestNormalizedVariance(unittest.TestCase):
         self.assertFalse(np.max(np.abs(der[self._names[0]] - pct2[self._names[0]])) <= tol)
         self.assertTrue(np.max(np.abs(sig - xder)) <= tol)
 
-    def test_r2value(self):
+    def test_coefficient_of_determination(self):
         obs = np.array([0., 1., 2.])
         offset = 1.e-1
         expected = 1. - 0.5*(3 * offset**2)
-        self.assertTrue(np.abs(r2value(obs, obs + offset) - expected) < 1.e-6)
-        self.assertTrue(np.abs(r2value(obs, obs) - 1.0) < 1.e-6)
+        self.assertTrue(np.abs(coefficient_of_determination(obs, obs + offset) - expected) < 1.e-6)
+        self.assertTrue(np.abs(coefficient_of_determination(obs, obs) - 1.0) < 1.e-6)
 
     def test_plot_normalized_variance(self):
 

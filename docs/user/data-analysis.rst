@@ -64,10 +64,10 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.random_sampling_normalized_variance
 
-``r2value``
+``coefficient_of_determination``
 ================================================
 
-.. autofunction:: PCAfold.analysis.r2value
+.. autofunction:: PCAfold.analysis.coefficient_of_determination
 
 ``stratified_r2``
 ================================================
@@ -88,6 +88,21 @@ Class ``VarianceData``
 ================================================
 
 .. autofunction:: PCAfold.analysis.normalized_root_mean_squared_error
+
+``turning_points``
+================================================
+
+.. autofunction:: PCAfold.analysis.turning_points
+
+``good_estimate``
+================================================
+
+.. autofunction:: PCAfold.analysis.good_estimate
+
+``good_direction_estimate``
+================================================
+
+.. autofunction:: PCAfold.analysis.good_direction_estimate
 
 --------------------------------------------------------------------------------
 

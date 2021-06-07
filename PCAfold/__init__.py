@@ -56,9 +56,15 @@ from .kernel_regression import KReg
 from .analysis import compute_normalized_variance
 from .analysis import normalized_variance_derivative
 from .analysis import find_local_maxima
-from .analysis import r2value
-from .analysis import stratified_r2
 from .analysis import random_sampling_normalized_variance
+from .analysis import coefficient_of_determination
+from .analysis import stratified_r2
+from .analysis import mean_squared_error
+from .analysis import root_mean_squared_error
+from .analysis import normalized_root_mean_squared_error
+from .analysis import turning_points
+from .analysis import good_estimate
+from .analysis import good_direction_estimate
 from .analysis import plot_2d_regression
 from .analysis import plot_3d_regression
 from .analysis import plot_normalized_variance
