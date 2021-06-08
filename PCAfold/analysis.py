@@ -21,6 +21,11 @@ from PCAfold.styles import *
 from PCAfold import preprocess
 from termcolor import colored
 
+################################################################################
+#
+# Manifold assessment
+#
+################################################################################
 
 class VarianceData:
     """
@@ -80,7 +85,7 @@ class VarianceData:
         bandwidth approaches zero (numerically at 1.e-16) for each variable"""
         return self._normalized_variance_limit.copy()
 
-
+# ------------------------------------------------------------------------------
 
 def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth=25, min_bandwidth=None,
                                 max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
@@ -214,6 +219,7 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit)
     return solution_data
 
+# ------------------------------------------------------------------------------
 
 def normalized_variance_derivative(variance_data):
     """
@@ -253,6 +259,7 @@ def normalized_variance_derivative(variance_data):
         derivative_dict[key] = scaled_derivative
     return derivative_dict, x
 
+# ------------------------------------------------------------------------------
 
 def find_local_maxima(dependent_values, independent_values, logscaling=True, threshold=1.e-2, show_plot=False):
     """
@@ -320,6 +327,97 @@ def find_local_maxima(dependent_values, independent_values, logscaling=True, thr
 
 # ------------------------------------------------------------------------------
 
+def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
+                                        n_sample_iterations=1, verbose=True, npts_bandwidth=25, min_bandwidth=None,
+                                        max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
+    """
+    Compute the normalized variance derivatives :math:`\\hat{\\mathcal{D}}(\\sigma)` for random samples of the provided
+    data specified using ``sampling_percentages``. These will be averaged over ``n_sample_iterations`` iterations. Analyzing
+    the shift in peaks of :math:`\\hat{\\mathcal{D}}(\\sigma)` due to sampling can distinguish between characteristic
+    features and non-uniqueness due to a transformation/reduction of manifold coordinates. True features should not show
+    significant sensitivity to sampling while non-uniqueness/folds in the manifold will.
+
+    :param sampling_percentages:
+        list or 1D array of fractions (between 0 and 1) of the provided data to sample for computing the normalized variance
+    :param indepvars:
+        independent variable values (size: n_observations x n_independent variables)
+    :param depvars:
+        dependent variable values (size: n_observations x n_dependent variables)
+    :param depvar_names:
+        list of strings corresponding to the names of the dependent variables (for saving values in a dictionary)
+    :param n_sample_iterations:
+        (optional, default 1) how many iterations for each ``sampling_percentages`` to average the normalized variance derivative over
+    :param verbose:
+        (optional, default True) when True, progress statements are printed
+    :param npts_bandwidth:
+        (optional, default 25) number of points to build a logspace of bandwidth values
+    :param min_bandwidth:
+        (optional, default to minimum nonzero interpoint distance) minimum bandwidth
+    :param max_bandwidth:
+        (optional, default to estimated maximum interpoint distance) maximum bandwidth
+    :param bandwidth_values:
+        (optional) array of bandwidth values, i.e. filter widths for a Gaussian filter, to loop over
+    :param scale_unit_box:
+        (optional, default True) center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension
+    :param n_threads:
+        (optional, default None) number of threads to run this computation. If None, default behavior of multiprocessing.Pool is used, which is to use all available cores on the current system.
+
+    :return:
+        - a dictionary of the normalized variance derivative (:math:`\\hat{\\mathcal{D}}(\\sigma)`) for each sampling percentage in ``sampling_percentages`` averaged over ``n_sample_iterations`` iterations
+        - the :math:`\\sigma` values used for computing :math:`\\hat{\\mathcal{D}}(\\sigma)`
+        - a dictionary of the ``VarianceData`` objects for each sampling percentage and iteration in ``sampling_percentages`` and ``n_sample_iterations``
+    """
+    assert indepvars.ndim == 2, "independent variable array must be 2D: n_observations x n_variables."
+    assert depvars.ndim == 2, "dependent variable array must be 2D: n_observations x n_variables."
+
+    if isinstance(sampling_percentages, list):
+        for p in sampling_percentages:
+            assert p > 0., "sampling percentages must be between 0 and 1"
+            assert p <= 1., "sampling percentages must be between 0 and 1"
+    elif isinstance(sampling_percentages, np.ndarray):
+        assert sampling_percentages.ndim ==1, "sampling_percentages must be given as a list or 1D array"
+        for p in sampling_percentages:
+            assert p > 0., "sampling percentages must be between 0 and 1"
+            assert p <= 1., "sampling percentages must be between 0 and 1"
+    else:
+        raise ValueError("sampling_percentages must be given as a list or 1D array.")
+
+    normvar_data = {}
+    avg_der_data = {}
+
+    for p in sampling_percentages:
+        if verbose:
+            print('sampling', p * 100., '% of the data')
+        nv_data = {}
+        avg_der = {}
+
+        for it in range(n_sample_iterations):
+            if verbose:
+                print('  iteration', it + 1, 'of', n_sample_iterations)
+            rnd.seed(it)
+            idxsample = rnd.sample(list(np.arange(0, indepvars.shape[0])), int(p * indepvars.shape[0]))
+            nv_data[it] = compute_normalized_variance(indepvars[idxsample, :], depvars[idxsample, :], depvar_names,
+                                                      npts_bandwidth=npts_bandwidth, min_bandwidth=min_bandwidth,
+                                                      max_bandwidth=max_bandwidth, bandwidth_values=bandwidth_values,
+                                                      scale_unit_box=scale_unit_box, n_threads=n_threads)
+
+            der, xder = normalized_variance_derivative(nv_data[it])
+            for key in der.keys():
+                if it == 0:
+                    avg_der[key] = der[key] / np.float(n_sample_iterations)
+                else:
+                    avg_der[key] += der[key] / np.float(n_sample_iterations)
+
+        avg_der_data[p] = avg_der
+        normvar_data[p] = nv_data
+    return avg_der_data, xder, normvar_data
+
+################################################################################
+#
+# Regression assessment
+#
+################################################################################
+
 def coefficient_of_determination(observed, predicted):
     """
     Computes the coefficient of determination, :math:`R^2`, value.
@@ -386,11 +484,11 @@ def coefficient_of_determination(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=False):
+def stratified_coefficient_of_determination(observed, predicted, n_bins, use_global_mean=True, verbose=False):
     """
     Computes the stratified coefficient of determination,
     :math:`R^2`, values. Stratified :math:`R^2` is computed separately in each
-    of the ``n_bins`` of an observed dependent variable, :math:`\\phi`.
+    of the ``n_bins`` of an observed dependent variable, :math:`\\phi_o`.
 
     :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
 
@@ -398,21 +496,21 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 
     .. math::
 
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_i^{j} - \\hat{\\phi}_{i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_i^{j} - mean(\\phi))^2}
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - mean(\\phi_o))^2}
 
     - If ``use_global_mean=False``, the mean of the considered :math:`j^{th}` bin is used as a reference:
 
     .. math::
 
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_i^{j} - \\hat{\\phi}_{i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_i^{j} - mean(\\phi^{j}))^2}
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - mean(\\phi_o^{j}))^2}
 
     where :math:`N_j` is the number of observations in the :math:`j^{th}` bin and
-    :math:`\\hat{\\phi}` is the predicted dependent variable.
+    :math:`\\phi_p` is the predicted dependent variable.
 
     .. note::
 
         After running this function you can call
-        ``analysis.plot_stratified_r2(r2_in_bins, bins_borders)`` on the
+        ``analysis.plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)`` on the
         function outputs and it will visualize how stratified :math:`R^2` changes across bins.
 
     .. warning::
@@ -436,7 +534,7 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
 
     .. code:: python
 
-        from PCAfold import PCA, stratified_r2, plot_stratified_r2
+        from PCAfold import PCA, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
         import numpy as np
 
         # Generate dummy data set:
@@ -449,15 +547,15 @@ def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=Fal
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
+        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
 
         # Plot the stratified R2 values:
-        plot_stratified_r2(r2_in_bins, bins_borders)
+        plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)
 
     :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param n_bins:
         ``int`` specifying the number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
     :param use_global_mean: (optional)
@@ -798,22 +896,31 @@ def good_estimate(observed, predicted, tolerance=0.05):
 
 def good_direction_estimate(observed, predicted, tolerance=0.05):
     """
-    Computes the good direction estimate (GDE) - the percentage of predicted vector
-    observations whose direction is within the specified tolerance from the direction of the
+    Computes the good direction (GD) and the good direction estimate (GDE).
+
+    GD for observation :math:`i`, is computed as:
+
+    .. math::
+
+        GD_i = \\frac{\\vec{\\phi}_{o,i}}{|| \\vec{\\phi}_{o,i} ||} \\cdot \\frac{\\vec{\\phi}_{p,i}}{|| \\vec{\\phi}_{p,i} ||}
+
+    where :math:`\\vec{\\phi}_o` is the observed vector quantity and :math:`\\vec{\\phi}_p` is the
+    predicted vector quantity.
+
+    GDE is computed as the percentage of predicted vector observations whose
+    direction is within the specified tolerance from the direction of the
     corresponding observed vector.
 
-    It also outputs the GDE field corresponding to each observation in the observed vector.
-
     :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,n_dimensions)``.
+        ``numpy.ndarray`` specifying the observed vector quantity, :math:`\\vec{\\phi}_o`. It should be of size ``(n_observations,n_dimensions)``.
     :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,n_dimensions)``.
-    :parm tolerance:
+        ``numpy.ndarray`` specifying the predicted vector quantity, :math:`\\vec{\\phi}_p`. It should be of size ``(n_observations,n_dimensions)``.
+    :param tolerance:
         ``float`` specifying the tolerance.
 
     :return:
+        - **good_direction** - ``numpy.ndarray`` specifying a vector of good direction (GD). It has size ``(n_observations,)``.
         - **good_direction_estimate** - good direction estimate (GDE) in %.
-        - **good_direction_estimate_field** - a field of good direction estimate (GDE). It has size ``(n_observations,)``.
     """
 
     if not isinstance(observed, np.ndarray):
@@ -844,106 +951,16 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
     if n_dimensions_1 != n_dimensions_2:
         raise ValueError("Parameter `observed` has different number of dimensions than `predicted`.")
 
-    good_direction_estimate_field = np.zeros((n_observed,))
+    good_direction = np.zeros((n_observed,))
 
     for i in range(0,n_observed):
+        good_direction[i] = np.dot(observed[i,:]/np.linalg.norm(observed[i,:]), predicted[i,:]/np.linalg.norm(predicted[i,:]))
 
-        observed_observation = observed[i,:]/np.linalg.norm(observed[i,:])
-        predicted_observation = predicted[i,:]/np.linalg.norm(predicted[i,:])
-        good_direction_estimate_field[i] = np.dot(observed_observation, predicted_observation)
-
-    (idx_good_direction, ) = np.where(good_direction_estimate_field >= 1.0 - tolerance)
+    (idx_good_direction, ) = np.where(good_direction >= 1.0 - tolerance)
 
     good_direction_estimate = len(idx_good_direction)/n_observed * 100.0
 
-    return (good_direction_estimate, good_direction_estimate_field)
-
-# ------------------------------------------------------------------------------
-
-def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
-                                        n_sample_iterations=1, verbose=True, npts_bandwidth=25, min_bandwidth=None,
-                                        max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
-    """
-    Compute the normalized variance derivatives :math:`\\hat{\\mathcal{D}}(\\sigma)` for random samples of the provided
-    data specified using ``sampling_percentages``. These will be averaged over ``n_sample_iterations`` iterations. Analyzing
-    the shift in peaks of :math:`\\hat{\\mathcal{D}}(\\sigma)` due to sampling can distinguish between characteristic
-    features and non-uniqueness due to a transformation/reduction of manifold coordinates. True features should not show
-    significant sensitivity to sampling while non-uniqueness/folds in the manifold will.
-
-    :param sampling_percentages:
-        list or 1D array of fractions (between 0 and 1) of the provided data to sample for computing the normalized variance
-    :param indepvars:
-        independent variable values (size: n_observations x n_independent variables)
-    :param depvars:
-        dependent variable values (size: n_observations x n_dependent variables)
-    :param depvar_names:
-        list of strings corresponding to the names of the dependent variables (for saving values in a dictionary)
-    :param n_sample_iterations:
-        (optional, default 1) how many iterations for each ``sampling_percentages`` to average the normalized variance derivative over
-    :param verbose:
-        (optional, default True) when True, progress statements are printed
-    :param npts_bandwidth:
-        (optional, default 25) number of points to build a logspace of bandwidth values
-    :param min_bandwidth:
-        (optional, default to minimum nonzero interpoint distance) minimum bandwidth
-    :param max_bandwidth:
-        (optional, default to estimated maximum interpoint distance) maximum bandwidth
-    :param bandwidth_values:
-        (optional) array of bandwidth values, i.e. filter widths for a Gaussian filter, to loop over
-    :param scale_unit_box:
-        (optional, default True) center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension
-    :param n_threads:
-        (optional, default None) number of threads to run this computation. If None, default behavior of multiprocessing.Pool is used, which is to use all available cores on the current system.
-
-    :return:
-        - a dictionary of the normalized variance derivative (:math:`\\hat{\\mathcal{D}}(\\sigma)`) for each sampling percentage in ``sampling_percentages`` averaged over ``n_sample_iterations`` iterations
-        - the :math:`\\sigma` values used for computing :math:`\\hat{\\mathcal{D}}(\\sigma)`
-        - a dictionary of the ``VarianceData`` objects for each sampling percentage and iteration in ``sampling_percentages`` and ``n_sample_iterations``
-    """
-    assert indepvars.ndim == 2, "independent variable array must be 2D: n_observations x n_variables."
-    assert depvars.ndim == 2, "dependent variable array must be 2D: n_observations x n_variables."
-
-    if isinstance(sampling_percentages, list):
-        for p in sampling_percentages:
-            assert p > 0., "sampling percentages must be between 0 and 1"
-            assert p <= 1., "sampling percentages must be between 0 and 1"
-    elif isinstance(sampling_percentages, np.ndarray):
-        assert sampling_percentages.ndim ==1, "sampling_percentages must be given as a list or 1D array"
-        for p in sampling_percentages:
-            assert p > 0., "sampling percentages must be between 0 and 1"
-            assert p <= 1., "sampling percentages must be between 0 and 1"
-    else:
-        raise ValueError("sampling_percentages must be given as a list or 1D array.")
-
-    normvar_data = {}
-    avg_der_data = {}
-
-    for p in sampling_percentages:
-        if verbose:
-            print('sampling', p * 100., '% of the data')
-        nv_data = {}
-        avg_der = {}
-
-        for it in range(n_sample_iterations):
-            if verbose:
-                print('  iteration', it + 1, 'of', n_sample_iterations)
-            rnd.seed(it)
-            idxsample = rnd.sample(list(np.arange(0, indepvars.shape[0])), int(p * indepvars.shape[0]))
-            nv_data[it] = compute_normalized_variance(indepvars[idxsample, :], depvars[idxsample, :], depvar_names,
-                                                      npts_bandwidth=npts_bandwidth, min_bandwidth=min_bandwidth,
-                                                      max_bandwidth=max_bandwidth, bandwidth_values=bandwidth_values,
-                                                      scale_unit_box=scale_unit_box, n_threads=n_threads)
-
-            der, xder = normalized_variance_derivative(nv_data[it])
-            for key in der.keys():
-                if it == 0:
-                    avg_der[key] = der[key] / np.float(n_sample_iterations)
-                else:
-                    avg_der[key] += der[key] / np.float(n_sample_iterations)
-
-        avg_der_data[p] = avg_der
-        normvar_data[p] = nv_data
-    return avg_der_data, xder, normvar_data
+    return (good_direction, good_direction_estimate)
 
 ################################################################################
 #
@@ -1617,7 +1634,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
 
 # ------------------------------------------------------------------------------
 
-def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
+def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
     """
     This function plots the stratified coefficient of determination :math:`R^2`
     across bins of a dependent variable.
@@ -1626,7 +1643,7 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
 
     .. code:: python
 
-        from PCAfold import PCA, stratified_r2, plot_stratified_r2
+        from PCAfold import PCA, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
         import numpy as np
 
         # Generate dummy data set:
@@ -1639,16 +1656,16 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
+        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
 
         # Visualize how R2 changes across bins:
-        plt = plot_stratified_r2(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
+        plt = plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
         plt.close()
 
     :param r2_in_bins:
-        list of coefficients of determination :math:`R^2` in each bin as per ``analysis.stratified_r2`` function.
+        list of coefficients of determination :math:`R^2` in each bin as per ``analysis.stratified_coefficient_of_determination`` function.
     :param bins_borders:
-        list of bins borders that were created to stratify the dependent variable as per ``analysis.stratified_r2`` function.
+        list of bins borders that were created to stratify the dependent variable as per ``analysis.stratified_coefficient_of_determination`` function.
     :param variable_name: (optional)
         string specifying the name of the variable for which :math:`R^2` were computed. If set to ``None``
         label on the x-axis will not be plotted.

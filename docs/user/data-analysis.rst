@@ -64,46 +64,6 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.random_sampling_normalized_variance
 
-``coefficient_of_determination``
-================================================
-
-.. autofunction:: PCAfold.analysis.coefficient_of_determination
-
-``stratified_r2``
-================================================
-
-.. autofunction:: PCAfold.analysis.stratified_r2
-
-``mean_squared_error``
-================================================
-
-.. autofunction:: PCAfold.analysis.mean_squared_error
-
-``root_mean_squared_error``
-================================================
-
-.. autofunction:: PCAfold.analysis.root_mean_squared_error
-
-``normalized_root_mean_squared_error``
-================================================
-
-.. autofunction:: PCAfold.analysis.normalized_root_mean_squared_error
-
-``turning_points``
-================================================
-
-.. autofunction:: PCAfold.analysis.turning_points
-
-``good_estimate``
-================================================
-
-.. autofunction:: PCAfold.analysis.good_estimate
-
-``good_direction_estimate``
-================================================
-
-.. autofunction:: PCAfold.analysis.good_direction_estimate
-
 --------------------------------------------------------------------------------
 
 ******************
@@ -151,6 +111,52 @@ Class ``KReg``
 
 --------------------------------------------------------------------------------
 
+***********************
+Regression assessment
+***********************
+
+``coefficient_of_determination``
+================================================
+
+.. autofunction:: PCAfold.analysis.coefficient_of_determination
+
+``stratified_coefficient_of_determination``
+================================================
+
+.. autofunction:: PCAfold.analysis.stratified_coefficient_of_determination
+
+``mean_squared_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.mean_squared_error
+
+``root_mean_squared_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.root_mean_squared_error
+
+``normalized_root_mean_squared_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.normalized_root_mean_squared_error
+
+``turning_points``
+================================================
+
+.. autofunction:: PCAfold.analysis.turning_points
+
+``good_estimate``
+================================================
+
+.. autofunction:: PCAfold.analysis.good_estimate
+
+``good_direction_estimate``
+================================================
+
+.. autofunction:: PCAfold.analysis.good_direction_estimate
+
+--------------------------------------------------------------------------------
+
 ******************
 Plotting functions
 ******************
@@ -185,10 +191,10 @@ Plotting functions
 
 .. autofunction:: PCAfold.analysis.plot_normalized_variance_derivative_comparison
 
-``plot_stratified_r2``
+``plot_stratified_coefficient_of_determination``
 ===================================================
 
-.. autofunction:: PCAfold.analysis.plot_stratified_r2
+.. autofunction:: PCAfold.analysis.plot_stratified_coefficient_of_determination
 
 --------------------------------------------------------------------------------
 

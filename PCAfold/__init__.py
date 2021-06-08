@@ -58,7 +58,7 @@ from .analysis import normalized_variance_derivative
 from .analysis import find_local_maxima
 from .analysis import random_sampling_normalized_variance
 from .analysis import coefficient_of_determination
-from .analysis import stratified_r2
+from .analysis import stratified_coefficient_of_determination
 from .analysis import mean_squared_error
 from .analysis import root_mean_squared_error
 from .analysis import normalized_root_mean_squared_error
@@ -71,4 +71,4 @@ from .analysis import plot_normalized_variance
 from .analysis import plot_normalized_variance_comparison
 from .analysis import plot_normalized_variance_derivative
 from .analysis import plot_normalized_variance_derivative_comparison
-from .analysis import plot_stratified_r2
+from .analysis import plot_stratified_coefficient_of_determination

@@ -3,7 +3,7 @@ import numpy as np
 from PCAfold import compute_normalized_variance, coefficient_of_determination, normalized_variance_derivative, find_local_maxima, random_sampling_normalized_variance
 from PCAfold import PCA, plot_normalized_variance, plot_normalized_variance_comparison
 from PCAfold import plot_normalized_variance_derivative, plot_normalized_variance_derivative_comparison
-from PCAfold import stratified_r2, plot_stratified_r2
+from PCAfold import stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
 
 
 class TestNormalizedVariance(unittest.TestCase):
@@ -252,109 +252,109 @@ class TestNormalizedVariance(unittest.TestCase):
 
 class TestStratifiedR2(unittest.TestCase):
 
-    def test_stratified_r2_allowed_calls(self):
+    def test_stratified_coefficient_of_determination_allowed_calls(self):
 
         X = np.random.rand(100,10)
         pca_X = PCA(X, scaling='auto', n_components=2)
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], 10)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,3], X_rec[:,3], 1)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,3], X_rec[:,3], 1)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, use_global_mean=True, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], 10, use_global_mean=True, verbose=False)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,1], X_rec[:,1], 10, use_global_mean=False, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,1], X_rec[:,1], 10, use_global_mean=False, verbose=False)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:1], X_rec[:,0], 10)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0:1], X_rec[:,0], 10)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,3], X_rec[:,3:4], 1)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,3], X_rec[:,3:4], 1)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:1], X_rec[:,0:1], 10, use_global_mean=True, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0:1], X_rec[:,0:1], 10, use_global_mean=True, verbose=False)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,1:2], X_rec[:,1:2], 10, use_global_mean=False, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,1:2], X_rec[:,1:2], 10, use_global_mean=False, verbose=False)
         except Exception:
             self.assertTrue(False)
 
-    def test_stratified_r2_not_allowed_calls(self):
+    def test_stratified_coefficient_of_determination_not_allowed_calls(self):
 
         X = np.random.rand(100,10)
         pca_X = PCA(X, scaling='auto', n_components=2)
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,1], X_rec[:,1], 0, use_global_mean=False, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,1], X_rec[:,1], 0, use_global_mean=False, verbose=False)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,1], X_rec[:,1], -10, use_global_mean=False, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,1], X_rec[:,1], -10, use_global_mean=False, verbose=False)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,1], X_rec[:,1], 5, use_global_mean=1, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,1], X_rec[:,1], 5, use_global_mean=1, verbose=False)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,1], X_rec[:,1], 10, use_global_mean=False, verbose=1)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,1], X_rec[:,1], 10, use_global_mean=False, verbose=1)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,1], X_rec[:,1], '10', use_global_mean=False, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,1], X_rec[:,1], '10', use_global_mean=False, verbose=False)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:2], X_rec[:,0], 10)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0:2], X_rec[:,0], 10)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0:3], 10)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0:3], 10)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,3:5], X_rec[:,3:5], 1)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,3:5], X_rec[:,3:5], 1)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0:2], X_rec[:,0:4], 10, use_global_mean=True, verbose=False)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0:2], X_rec[:,0:4], 10, use_global_mean=True, verbose=False)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[0:10,0], X_rec[:,0], 10)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[0:10,0], X_rec[:,0], 10)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[10:50,0], 10)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[10:50,0], 10)
 
         with self.assertRaises(ValueError):
-            (r2_in_bins, bins_borders) = stratified_r2([10,20,30], [1,2,3], 10)
+            (r2_in_bins, bins_borders) = stratified_coefficient_of_determination([10,20,30], [1,2,3], 10)
 
-    def test_plot_stratified_r2_allowed_calls(self):
+    def test_plot_stratified_coefficient_of_determination_allowed_calls(self):
 
         X = np.random.rand(100,5)
         pca_X = PCA(X, scaling='auto', n_components=2)
         X_rec = pca_X.reconstruct(pca_X.transform(X))
-        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], 10, use_global_mean=True, verbose=False)
+        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], 10, use_global_mean=True, verbose=False)
 
         try:
-            plt = plot_stratified_r2(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title=None, save_filename=None)
+            plt = plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title=None, save_filename=None)
             plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
-            plt = plot_stratified_r2(r2_in_bins, bins_borders)
+            plt = plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)
             plt.close()
         except Exception:
             self.assertTrue(False)

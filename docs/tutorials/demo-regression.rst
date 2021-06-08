@@ -77,7 +77,8 @@ We first generate train and test samples using the ``DataSampler`` class:
   train_perc = 80
   random_seed = 100
 
-  sample_random = preprocess.DataSampler(np.zeros((n_observations,)), random_seed=random_seed, verbose=False)
+  idx = np.zeros((n_observations,)).astype(int)
+  sample_random = preprocess.DataSampler(idx, random_seed=random_seed, verbose=False)
   (idx_train, idx_test) = sample_random.random(train_perc, test_selection_option=1)
 
   xy_train = xy[idx_train,:]
@@ -140,8 +141,8 @@ We can then compute the coefficient of determination, :math:`R^2`, values for th
 
 .. code::
 
-  r2_test = analysis.r2value(phi_test, phi_test_predicted)
-  r2_all = analysis.r2value(phi, phi_predicted)
+  r2_test = analysis.coefficient_of_determination(phi_test, phi_test_predicted)
+  r2_all = analysis.coefficient_of_determination(phi, phi_predicted)
 
   print('All R2:\t\t' + str(round(r2_all, 6)) + '\nTest R2:\t' + str(round(r2_test, 6)))
 
@@ -163,7 +164,7 @@ We will compute the stratified :math:`R^2` in 20 bins of :math:`\phi`:
   use_global_mean = False
   verbose = True
 
-  (r2_in_bins, bins_borders) = analysis.stratified_r2(phi, phi_predicted, n_bins=n_bins, use_global_mean=use_global_mean, verbose=verbose)
+  (r2_in_bins, bins_borders) = analysis.stratified_coefficient_of_determination(phi, phi_predicted, n_bins=n_bins, use_global_mean=use_global_mean, verbose=verbose)
 
 The code above will print:
 
@@ -194,7 +195,7 @@ Finally, we can plot the stratified :math:`R^2` values across bins centers:
 
 .. code:: python
 
-  plt = analysis.plot_stratified_r2(r2_in_bins, bins_borders, variable_name='$\phi$', figure_size=(10,2), save_filename=None)
+  plt = analysis.plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name='$\phi$', figure_size=(10,2), save_filename=None)
 
 .. image:: ../images/tutorial-regression-stratified-r2.svg
     :width: 500

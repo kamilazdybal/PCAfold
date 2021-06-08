@@ -65,7 +65,7 @@ marker_scale_legend = 1
 marker_scale_legend_clustering = 5
 
 # Set point size for all scatter plots:
-scatter_point_size = 2
+scatter_point_size = 10
 
 # Set line width for all line plots:
 line_width = 1
