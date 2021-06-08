@@ -21,6 +21,11 @@ from PCAfold.styles import *
 from PCAfold import preprocess
 from termcolor import colored
 
+################################################################################
+#
+# Manifold assessment
+#
+################################################################################
 
 class VarianceData:
     """
@@ -80,7 +85,7 @@ class VarianceData:
         bandwidth approaches zero (numerically at 1.e-16) for each variable"""
         return self._normalized_variance_limit.copy()
 
-
+# ------------------------------------------------------------------------------
 
 def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth=25, min_bandwidth=None,
                                 max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
@@ -214,6 +219,7 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit)
     return solution_data
 
+# ------------------------------------------------------------------------------
 
 def normalized_variance_derivative(variance_data):
     """
@@ -253,6 +259,7 @@ def normalized_variance_derivative(variance_data):
         derivative_dict[key] = scaled_derivative
     return derivative_dict, x
 
+# ------------------------------------------------------------------------------
 
 def find_local_maxima(dependent_values, independent_values, logscaling=True, threshold=1.e-2, show_plot=False):
     """
@@ -317,211 +324,6 @@ def find_local_maxima(dependent_values, independent_values, logscaling=True, thr
     if logscaling:
         zero_locations = 10. ** np.array(zero_locations)
     return np.array(zero_locations, dtype=float), np.array(zero_Dvalues, dtype=float)
-
-# ------------------------------------------------------------------------------
-
-def r2value(observed, predicted):
-    """
-    Calculates the coefficient of determination, :math:`R^2`, value.
-
-    :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
-    :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
-
-    :return:
-        - **r2** - coefficient of determination, :math:`R^2`.
-    """
-
-    if not isinstance(observed, np.ndarray):
-        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
-
-    try:
-        (n_observed,) = np.shape(observed)
-        n_var_observed = 1
-    except:
-        (n_observed, n_var_observed) = np.shape(observed)
-
-    if n_var_observed != 1:
-        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
-
-    if not isinstance(predicted, np.ndarray):
-        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
-
-    try:
-        (n_predicted,) = np.shape(predicted)
-        n_var_predicted = 1
-    except:
-        (n_predicted, n_var_predicted) = np.shape(predicted)
-
-    if n_var_predicted != 1:
-        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
-
-    if n_observed != n_predicted:
-        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
-
-    r2 = 1. - np.sum((observed - predicted) * (observed - predicted)) / np.sum(
-        (observed - np.mean(observed)) * (observed - np.mean(observed)))
-
-    return r2
-
-# ------------------------------------------------------------------------------
-
-def stratified_r2(observed, predicted, n_bins, use_global_mean=True, verbose=False):
-    """
-    Computes the stratified coefficient of determination,
-    :math:`R^2`, values. Stratified :math:`R^2` is computed separately in each
-    of the ``n_bins`` of an observed dependent variable, :math:`\\phi`.
-
-    :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
-
-    - If ``use_global_mean=True``, the mean of the entire observed variable is used as a reference:
-
-    .. math::
-
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_i^{j} - \\hat{\\phi}_{i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_i^{j} - mean(\\phi))^2}
-
-    - If ``use_global_mean=False``, the mean of the considered :math:`j^{th}` bin is used as a reference:
-
-    .. math::
-
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_i^{j} - \\hat{\\phi}_{i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_i^{j} - mean(\\phi^{j}))^2}
-
-    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin and
-    :math:`\\hat{\\phi}` is the predicted dependent variable.
-
-    .. note::
-
-        After running this function you can call
-        ``analysis.plot_stratified_r2(r2_in_bins, bins_borders)`` on the
-        function outputs and it will visualize how stratified :math:`R^2` changes across bins.
-
-    .. warning::
-
-        The stratified :math:`R^2` metric can be misleading if there are large
-        variations in point density in an observed variable. For instance, below is a data set
-        composed of lines of points that have uniform spacing on the :math:`x` axis
-        but become more and more sparse in the direction of increasing :math:`\\phi`
-        due to an increasing gradient of :math:`\\phi`.
-        If bins are narrow enough (``n_bins`` is high enough), a single bin
-        (like the bin bounded by the red dashed lines) can contain only one of
-        those lines of points for high value of :math:`\\phi`. :math:`R^2` will then be computed
-        for constant, or almost constant observations, even though globally those
-        observations lie in a location of a large gradient of the observed variable!
-
-        .. image:: ../images/stratified-r2.png
-            :width: 500
-            :align: center
-
-    **Example:**
-
-    .. code:: python
-
-        from PCAfold import PCA, stratified_r2, plot_stratified_r2
-        import numpy as np
-
-        # Generate dummy data set:
-        X = np.random.rand(100,10)
-
-        # Instantiate PCA class object:
-        pca_X = PCA(X, scaling='auto', n_components=2)
-
-        # Approximate the data set:
-        X_rec = pca_X.reconstruct(pca_X.transform(X))
-
-        # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
-
-        # Plot the stratified R2 values:
-        plot_stratified_r2(r2_in_bins, bins_borders)
-
-    :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
-    :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
-    :param n_bins:
-        ``int`` specifying the number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
-    :param use_global_mean: (optional)
-        ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
-    :param verbose: (optional)
-        ``bool`` for printing sizes (number of observations) and :math:`R^2` values in each bin.
-
-    :return:
-        - **r2_in_bins** - ``list`` specifying the coefficients of determination :math:`R^2` in each bin. It has length ``n_bins``.
-        - **bins_borders** - ``list`` specifying the bins borders that were created to stratify the dependent variable. It has length ``n_bins+1``.
-    """
-
-    if not isinstance(observed, np.ndarray):
-        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
-
-    try:
-        (n_observed,) = np.shape(observed)
-        n_var_observed = 1
-    except:
-        (n_observed, n_var_observed) = np.shape(observed)
-
-    if n_var_observed != 1:
-        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
-
-    if not isinstance(predicted, np.ndarray):
-        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
-
-    try:
-        (n_predicted,) = np.shape(predicted)
-        n_var_predicted = 1
-    except:
-        (n_predicted, n_var_predicted) = np.shape(predicted)
-
-    if n_var_predicted != 1:
-        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
-
-    if n_observed != n_predicted:
-        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
-
-    if not isinstance(n_bins, int):
-        raise ValueError("Parameter `n_bins` has to be an integer.")
-
-    if n_bins < 1:
-        raise ValueError("Parameter `n_bins` has to be an integer larger than 0.")
-
-    if not isinstance(use_global_mean, bool):
-        raise ValueError("Parameter `use_global_mean` has to be a boolean.")
-
-    if not isinstance(verbose, bool):
-        raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    __observed = observed.ravel()
-    __predicted = predicted.ravel()
-
-    (idx, bins_borders) = preprocess.variable_bins(__observed, n_bins, verbose=False)
-
-    r2_in_bins = []
-
-    if use_global_mean:
-        global_mean = np.mean(__observed)
-
-    for cl in np.unique(idx):
-
-        (idx_bin,) = np.where(idx==cl)
-
-        if use_global_mean:
-            r2 = 1. - np.sum((__observed[idx_bin] - __predicted[idx_bin]) * (__observed[idx_bin] - __predicted[idx_bin])) / np.sum(
-                (__observed[idx_bin] - global_mean) * (__observed[idx_bin] - global_mean))
-        else:
-            r2 = r2value(__observed[idx_bin], __predicted[idx_bin])
-
-        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
-        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
-
-        if verbose:
-            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
-                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
-            else:
-                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)))
-
-        r2_in_bins.append(r2)
-
-    return (r2_in_bins, bins_borders)
 
 # ------------------------------------------------------------------------------
 
@@ -609,6 +411,556 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
         avg_der_data[p] = avg_der
         normvar_data[p] = nv_data
     return avg_der_data, xder, normvar_data
+
+################################################################################
+#
+# Regression assessment
+#
+################################################################################
+
+def coefficient_of_determination(observed, predicted):
+    """
+    Computes the coefficient of determination, :math:`R^2`, value.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, coefficient_of_determination
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the coefficient of determination for the first variable:
+        r2 = coefficient_of_determination(X[:,0], X_rec[:,0])
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **r2** - coefficient of determination, :math:`R^2`.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    r2 = 1. - np.sum((observed - predicted) * (observed - predicted)) / np.sum(
+        (observed - np.mean(observed)) * (observed - np.mean(observed)))
+
+    return r2
+
+# ------------------------------------------------------------------------------
+
+def stratified_coefficient_of_determination(observed, predicted, n_bins, use_global_mean=True, verbose=False):
+    """
+    Computes the stratified coefficient of determination,
+    :math:`R^2`, values. Stratified :math:`R^2` is computed separately in each
+    of the ``n_bins`` of an observed dependent variable, :math:`\\phi_o`.
+
+    :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
+
+    - If ``use_global_mean=True``, the mean of the entire observed variable is used as a reference:
+
+    .. math::
+
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - mean(\\phi_o))^2}
+
+    - If ``use_global_mean=False``, the mean of the considered :math:`j^{th}` bin is used as a reference:
+
+    .. math::
+
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - mean(\\phi_o^{j}))^2}
+
+    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    .. note::
+
+        After running this function you can call
+        ``analysis.plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)`` on the
+        function outputs and it will visualize how stratified :math:`R^2` changes across bins.
+
+    .. warning::
+
+        The stratified :math:`R^2` metric can be misleading if there are large
+        variations in point density in an observed variable. For instance, below is a data set
+        composed of lines of points that have uniform spacing on the :math:`x` axis
+        but become more and more sparse in the direction of increasing :math:`\\phi`
+        due to an increasing gradient of :math:`\\phi`.
+        If bins are narrow enough (``n_bins`` is high enough), a single bin
+        (like the bin bounded by the red dashed lines) can contain only one of
+        those lines of points for high value of :math:`\\phi`. :math:`R^2` will then be computed
+        for constant, or almost constant observations, even though globally those
+        observations lie in a location of a large gradient of the observed variable!
+
+        .. image:: ../images/stratified-r2.png
+            :width: 500
+            :align: center
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute stratified R2 in 10 bins of the first variable in a data set:
+        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
+
+        # Plot the stratified R2 values:
+        plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param n_bins:
+        ``int`` specifying the number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
+    :param use_global_mean: (optional)
+        ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
+    :param verbose: (optional)
+        ``bool`` for printing sizes (number of observations) and :math:`R^2` values in each bin.
+
+    :return:
+        - **r2_in_bins** - ``list`` specifying the coefficients of determination :math:`R^2` in each bin. It has length ``n_bins``.
+        - **bins_borders** - ``list`` specifying the bins borders that were created to stratify the dependent variable. It has length ``n_bins+1``.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if not isinstance(n_bins, int):
+        raise ValueError("Parameter `n_bins` has to be an integer.")
+
+    if n_bins < 1:
+        raise ValueError("Parameter `n_bins` has to be an integer larger than 0.")
+
+    if not isinstance(use_global_mean, bool):
+        raise ValueError("Parameter `use_global_mean` has to be a boolean.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    (idx, bins_borders) = preprocess.variable_bins(__observed, n_bins, verbose=False)
+
+    r2_in_bins = []
+
+    if use_global_mean:
+        global_mean = np.mean(__observed)
+
+    for cl in np.unique(idx):
+
+        (idx_bin,) = np.where(idx==cl)
+
+        if use_global_mean:
+            r2 = 1. - np.sum((__observed[idx_bin] - __predicted[idx_bin]) * (__observed[idx_bin] - __predicted[idx_bin])) / np.sum(
+                (__observed[idx_bin] - global_mean) * (__observed[idx_bin] - global_mean))
+        else:
+            r2 = coefficient_of_determination(__observed[idx_bin], __predicted[idx_bin])
+
+        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
+        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
+
+        if verbose:
+            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+            else:
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| R2\t' + str(round(r2,6)))
+
+        r2_in_bins.append(r2)
+
+    return (r2_in_bins, bins_borders)
+
+# ------------------------------------------------------------------------------
+
+def mean_squared_error(observed, predicted):
+    """
+    Computes the mean squared error.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the mean squared error for the first variable:
+        mse = mean_squared_error(X[:,0], X_rec[:,0])
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **mse** - mean squared error.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    mse = 1.0 / n_observed * np.sum((observed - predicted) * (observed - predicted))
+
+    return mse
+
+# ------------------------------------------------------------------------------
+
+def root_mean_squared_error(observed, predicted):
+    """
+    Computes the root mean squared error.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, root_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the root mean squared error for the first variable:
+        rmse = root_mean_squared_error(X[:,0], X_rec[:,0])
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **rmse** - root mean squared error.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    rmse = (mean_squared_error(observed, predicted))**0.5
+
+    return rmse
+
+# ------------------------------------------------------------------------------
+
+def normalized_root_mean_squared_error(observed, predicted, norm='std'):
+    """
+    Computes the normalized root mean squared error.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, normalized_root_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the root mean squared error for the first variable:
+        nrmse = normalized_root_mean_squared_error(X[:,0], X_rec[:,0], norm='std')
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :parm norm:
+        ``str`` specifying the normalization. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
+
+    :return:
+        - **nrmse** - normalized root mean squared error.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    rmse = root_mean_squared_error(observed, predicted)
+
+    if norm == 'root_square_mean':
+        nrmse = rmse/sqrt(np.mean(observed**2))
+    elif norm == 'std':
+        nrmse = rmse/(np.std(observed))
+    elif norm == 'range':
+        nrmse = rmse/(np.max(observed) - np.min(observed))
+    elif norm == 'root_square_range':
+        nrmse = rmse/sqrt(np.max(observed**2) - np.min(observed**2))
+    elif norm == 'root_square_std':
+        nrmse = rmse/sqrt(np.std(observed**2))
+    elif norm == 'abs_mean':
+        nrmse = rmse/abs(np.mean(observed))
+
+    return nrmse
+
+# ------------------------------------------------------------------------------
+
+def turning_points(observed, predicted):
+    """
+    Computes the turning points percentage - the percentage of predicted outputs
+    that have the opposite growth tendency to the corresponding observed growth tendency.
+
+    :return:
+        - **turning_points** - turning points percentage in %.
+    """
+
+
+
+
+
+    return turning_points
+
+# ------------------------------------------------------------------------------
+
+def good_estimate(observed, predicted, tolerance=0.05):
+    """
+    Computes the good estimate (GE) - the percentage of predicted values that
+    are within the specified tolerance from the corresponding observed values.
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :parm tolerance:
+        ``float`` specifying the tolerance.
+
+    :return:
+        - **good_estimate** - good estimate (GE) in %.
+    """
+
+
+
+
+
+
+    return good_estimate
+
+# ------------------------------------------------------------------------------
+
+def good_direction_estimate(observed, predicted, tolerance=0.05):
+    """
+    Computes the good direction (GD) and the good direction estimate (GDE).
+
+    GD for observation :math:`i`, is computed as:
+
+    .. math::
+
+        GD_i = \\frac{\\vec{\\phi}_{o,i}}{|| \\vec{\\phi}_{o,i} ||} \\cdot \\frac{\\vec{\\phi}_{p,i}}{|| \\vec{\\phi}_{p,i} ||}
+
+    where :math:`\\vec{\\phi}_o` is the observed vector quantity and :math:`\\vec{\\phi}_p` is the
+    predicted vector quantity.
+
+    GDE is computed as the percentage of predicted vector observations whose
+    direction is within the specified tolerance from the direction of the
+    corresponding observed vector.
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed vector quantity, :math:`\\vec{\\phi}_o`. It should be of size ``(n_observations,n_dimensions)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted vector quantity, :math:`\\vec{\\phi}_p`. It should be of size ``(n_observations,n_dimensions)``.
+    :param tolerance:
+        ``float`` specifying the tolerance.
+
+    :return:
+        - **good_direction** - ``numpy.ndarray`` specifying a vector of good direction (GD). It has size ``(n_observations,)``.
+        - **good_direction_estimate** - good direction estimate (GDE) in %.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed, n_dimensions_1) = np.shape(observed)
+    except:
+        raise ValueError("Parameter `observed` should be a matrix.")
+
+    if n_dimensions_1 < 2:
+        raise ValueError("Parameter `observed` has to have at least two dimensions.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted, n_dimensions_2) = np.shape(predicted)
+    except:
+        raise ValueError("Parameter `predicted` should be a matrix.")
+
+    if n_dimensions_2 < 2:
+        raise ValueError("Parameter `predicted` has to have at least two dimensions.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if n_dimensions_1 != n_dimensions_2:
+        raise ValueError("Parameter `observed` has different number of dimensions than `predicted`.")
+
+    good_direction = np.zeros((n_observed,))
+
+    for i in range(0,n_observed):
+        good_direction[i] = np.dot(observed[i,:]/np.linalg.norm(observed[i,:]), predicted[i,:]/np.linalg.norm(predicted[i,:]))
+
+    (idx_good_direction, ) = np.where(good_direction >= 1.0 - tolerance)
+
+    good_direction_estimate = len(idx_good_direction)/n_observed * 100.0
+
+    return (good_direction, good_direction_estimate)
 
 ################################################################################
 #
@@ -1282,7 +1634,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
 
 # ------------------------------------------------------------------------------
 
-def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
+def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
     """
     This function plots the stratified coefficient of determination :math:`R^2`
     across bins of a dependent variable.
@@ -1291,7 +1643,7 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
 
     .. code:: python
 
-        from PCAfold import PCA, stratified_r2, plot_stratified_r2
+        from PCAfold import PCA, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
         import numpy as np
 
         # Generate dummy data set:
@@ -1304,16 +1656,16 @@ def plot_stratified_r2(r2_in_bins, bins_borders, variable_name=None, figure_size
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_r2(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
+        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
 
         # Visualize how R2 changes across bins:
-        plt = plot_stratified_r2(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
+        plt = plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
         plt.close()
 
     :param r2_in_bins:
-        list of coefficients of determination :math:`R^2` in each bin as per ``analysis.stratified_r2`` function.
+        list of coefficients of determination :math:`R^2` in each bin as per ``analysis.stratified_coefficient_of_determination`` function.
     :param bins_borders:
-        list of bins borders that were created to stratify the dependent variable as per ``analysis.stratified_r2`` function.
+        list of bins borders that were created to stratify the dependent variable as per ``analysis.stratified_coefficient_of_determination`` function.
     :param variable_name: (optional)
         string specifying the name of the variable for which :math:`R^2` were computed. If set to ``None``
         label on the x-axis will not be plotted.
