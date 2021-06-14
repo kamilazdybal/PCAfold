@@ -962,6 +962,97 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
 
     return (good_direction, good_direction_estimate)
 
+# ------------------------------------------------------------------------------
+
+def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', label=''):
+    """
+    Generates ``tex`` code for a table from a ``pandas.DataFrame``. This function
+    can be useful e.g. for printing regression results.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, generate_tex_table
+        import numpy as np
+        import pandas as pd
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Generate dummy variables names:
+        variable_names = ['A1', 'A2', 'A3', 'A4', 'A5']
+
+        # Instantiate PCA class object:
+        pca_q2 = PCA(X, scaling='auto', n_components=2, use_eigendec=True, nocenter=False)
+        pca_q3 = PCA(X, scaling='auto', n_components=3, use_eigendec=True, nocenter=False)
+
+        # Calculate the R2 values:
+        r2_q2 = pca_q2.calculate_r2(X)[None,:]
+        r2_q3 = pca_q3.calculate_r2(X)[None,:]
+
+        # Generate pandas.DataFrame from the R2 values:
+        r2_table = pd.DataFrame(np.vstack((r2_q2, r2_q3)), columns=variable_names, index=['PCA, $q=2$', 'PCA, $q=3$'])
+
+        # Generate tex code for the table:
+        generate_tex_table(r2_table, format_displayed="%.3f", caption='$R^2$ values.', label='r2-values')
+
+    .. note::
+
+        The code above will produce the ``tex`` code:
+
+        .. code-block:: text
+
+            \\begin{table}[h!]
+            \\begin{center}
+            \\begin{tabular}{llllll} \\toprule
+             & \\textit{A1} & \\textit{A2} & \\textit{A3} & \\textit{A4} & \\textit{A5} \\\\ \\midrule
+            PCA, $q=2$ & 0.507 & 0.461 & 0.485 & 0.437 & 0.611 \\\\
+            PCA, $q=3$ & 0.618 & 0.658 & 0.916 & 0.439 & 0.778 \\\\
+            \\end{tabular}
+            \\caption{$R^2$ values.}\\label{r2-values}
+            \\end{center}
+            \\end{table}
+
+        Which if compiled, will result in a table:
+
+        .. image:: ../images/generate-tex-table.png
+            :width: 450
+            :align: center
+
+    :param data_frame_table:
+        table in the ``pandas.DataFrame`` format (can include column names and
+        index names).
+    :param format_displayed:
+        string specifying display format for the numerical entries inside the
+        table. By default it is set to ``'%.2f'``.
+    :param caption:
+        string specifying caption for the table.
+    :param label:
+        string specifying label for the table.
+    """
+
+    (n_rows, n_columns) = np.shape(data_frame_table)
+    rows_labels = data_frame_table.index.values
+    columns_labels = data_frame_table.columns.values
+
+    print('')
+    print(r'\begin{table}[h!]')
+    print(r'\begin{center}')
+    print(r'\begin{tabular}{' + ''.join(['l' for i in range(0, n_columns+1)]) + r'} \toprule')
+    print(' & ' + ' & '.join([r'\textit{' + name + '}' for name in columns_labels]) + r' \\ \midrule')
+
+    for row_i, row_label in enumerate(rows_labels):
+
+        row_values = list(data_frame_table.iloc[row_i,:])
+        print(row_label + r' & '+  ' & '.join([str(format_displayed % value) for value in row_values]) + r' \\')
+
+    print(r'\end{tabular}')
+    print(r'\caption{' + caption + r'}\label{' + label + '}')
+    print(r'\end{center}')
+    print(r'\end{table}')
+    print('')
+
 ################################################################################
 #
 # Plotting functions

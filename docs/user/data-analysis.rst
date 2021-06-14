@@ -155,6 +155,11 @@ Regression assessment
 
 .. autofunction:: PCAfold.analysis.good_direction_estimate
 
+``generate_tex_table``
+================================================
+
+.. autofunction:: PCAfold.analysis.generate_tex_table
+
 --------------------------------------------------------------------------------
 
 ******************

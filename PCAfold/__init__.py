@@ -65,6 +65,7 @@ from .analysis import normalized_root_mean_squared_error
 from .analysis import turning_points
 from .analysis import good_estimate
 from .analysis import good_direction_estimate
+from .analysis import generate_tex_table
 from .analysis import plot_2d_regression
 from .analysis import plot_3d_regression
 from .analysis import plot_normalized_variance
