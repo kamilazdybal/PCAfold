@@ -1898,7 +1898,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     x_range = np.arange(1, n_variables+1)
 
-    fig, ax = plt.subplots(figsize=(n_variables, 6))
+    fig, ax = plt.subplots(figsize=(n_variables, 4))
 
     plt.scatter(x_range, normalized_C, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
     plt.scatter(x_range, normalized_C_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -2054,7 +2054,7 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         color_X_r = '#ff2f18'
         color_link = '#bbbbbb'
 
-        fig, ax = plt.subplots(figsize=(n_variables, 6))
+        fig, ax = plt.subplots(figsize=(n_variables, 4))
 
         plt.scatter(x_range, eigenvectors[:,0], c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
         plt.scatter(x_range, eigenvectors[:,-1], c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -2098,7 +2098,7 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         color_range = np.arange(0, n_versions)
 
         # Plot the eigenvector weights movement:
-        fig, ax = plt.subplots(figsize=(n_variables, 6))
+        fig, ax = plt.subplots(figsize=(n_variables, 4))
 
         for idx, variable in enumerate(variable_names):
             scat = ax.scatter(np.repeat(idx, n_versions), eigenvectors[idx,:], c=color_range, cmap=plt.cm.Spectral)
@@ -2204,7 +2204,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     eigenvalues_original = eigenvalues_original / np.max(eigenvalues_original)
     eigenvalues_sampled = eigenvalues_sampled / np.max(eigenvalues_sampled)
 
-    fig, ax = plt.subplots(figsize=(n_variables, 6))
+    fig, ax = plt.subplots(figsize=(n_variables, 4))
 
     # Plot the eigenvalue distribution from the full original data set X:
     original_distribution = plt.scatter(n_components_range, eigenvalues_original, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -2970,7 +2970,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, title=None, save_filename=None):
+def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, figure_size=None, title=None, save_filename=None):
     """
     Plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
@@ -3008,6 +3008,8 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         ``bool`` specifying whether absolute values of eigenvectors should be plotted.
     :param bar_color: (optional)
         ``str`` specifying color of bars.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -3044,7 +3046,10 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
 
     for n_pc in range(0,n_components):
 
-        fig, ax = plt.subplots(figsize=(n_variables, 6))
+        if figure_size is None:
+            fig, ax = plt.subplots(figsize=(n_variables, 4))
+        else:
+            fig, ax = plt.subplots(figsize=figure_size)
 
         if plot_absolute:
             plt.bar(x_range, abs(eigenvectors[:,n_pc]), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
@@ -3085,7 +3090,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', title=None, save_filename=None):
+def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', figure_size=None, title=None, save_filename=None):
     """
     Plots a comparison of weights on eigenvectors.
 
@@ -3118,6 +3123,8 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         ``bool`` specifying whether absolute values of eigenvectors should be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'coolwarm'``.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -3161,7 +3168,10 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
     plot_handles = []
 
-    fig, ax = plt.subplots(figsize=(n_variables, 6))
+    if figure_size is None:
+        fig, ax = plt.subplots(figsize=(n_variables, 4))
+    else:
+        fig, ax = plt.subplots(figsize=figure_size)
 
     for n_set in range(0,n_sets):
 
@@ -3200,7 +3210,7 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save_filename=None):
+def plot_eigenvalue_distribution(eigenvalues, normalized=False, figure_size=None, title=None, save_filename=None):
     """
     Plots eigenvalue distribution.
 
@@ -3227,6 +3237,8 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
         ``PCA`` class: ``PCA.L``.
     :param normalized: (optional)
         ``bool`` specifying whether eigenvalues should be normalized to 1.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -3245,7 +3257,10 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
     (n_eigenvalues, ) = np.shape(eigenvalues)
     x_range = np.arange(1, n_eigenvalues+1)
 
-    fig, ax = plt.subplots(figsize=(n_eigenvalues, 6))
+    if figure_size is None:
+        fig, ax = plt.subplots(figsize=(n_eigenvalues, 4))
+    else:
+        fig, ax = plt.subplots(figsize=figure_size)
 
     if normalized:
         plt.scatter(x_range, eigenvalues/np.max(eigenvalues), c=color_plot, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -3277,7 +3292,7 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, title=None, save
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', title=None, save_filename=None):
+def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', figure_size=None, title=None, save_filename=None):
     """
     Plots a comparison of eigenvalue distributions.
 
@@ -3312,6 +3327,8 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         ``bool`` specifying whether eigenvalues should be normalized to 1.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'coolwarm'``.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -3339,7 +3356,10 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
     if len(legend_labels) == 0:
         legend_labels = ['Set ' + str(i) + '' for i in range(1, n_sets+1)]
 
-    fig, ax = plt.subplots(figsize=(n_eigenvalues, 6))
+    if figure_size is None:
+        fig, ax = plt.subplots(figsize=(n_eigenvalues, 4))
+    else:
+        fig, ax = plt.subplots(figsize=figure_size)
 
     for n_set in range(0,n_sets):
 
@@ -3375,7 +3395,7 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
 # ------------------------------------------------------------------------------
 
-def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filename=None):
+def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, title=None, save_filename=None):
     """
     Plots the eigenvalues as bars and their cumulative sum to visualize
     the percent variance in the data explained by each principal component
@@ -3404,6 +3424,8 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
         ``PCA`` class: ``PCA.L``.
     :param n_components: (optional)
         how many principal components you want to visualize (default is all).
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -3429,7 +3451,10 @@ def plot_cumulative_variance(eigenvalues, n_components=0, title=None, save_filen
 
     x_range = np.arange(1, n_retained+1)
 
-    fig, ax1 = plt.subplots(figsize=(n_retained, 6))
+    if figure_size is None:
+        fig, ax1 = plt.subplots(figsize=(n_retained, 4))
+    else:
+        fig, ax = plt.subplots(figsize=figure_size)
 
     ax1.bar(x_range, eigenvalues[0:n_retained], color=bar_color, edgecolor=bar_color, align='center', zorder=2, label='Eigenvalue')
     ax1.set_ylabel('Eigenvalue [-]', fontsize=font_labels, **csfont)
