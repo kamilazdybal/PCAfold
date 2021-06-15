@@ -919,7 +919,7 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
         ``float`` specifying the tolerance.
 
     :return:
-        - **good_direction** - ``numpy.ndarray`` specifying a vector of good direction (GD). It has size ``(n_observations,)``.
+        - **good_direction** - ``numpy.ndarray`` specifying the vector of good direction (GD). It has size ``(n_observations,)``.
         - **good_direction_estimate** - good direction estimate (GDE) in %.
     """
 
@@ -966,7 +966,7 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
 
 def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', label=''):
     """
-    Generates ``tex`` code for a table from a ``pandas.DataFrame``. This function
+    Generates ``tex`` code for a table stored in a ``pandas.DataFrame``. This function
     can be useful e.g. for printing regression results.
 
     **Example:**
@@ -999,7 +999,7 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
 
     .. note::
 
-        The code above will produce the ``tex`` code:
+        The code above will produce ``tex`` code:
 
         .. code-block:: text
 
@@ -1014,22 +1014,22 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
             \\end{center}
             \\end{table}
 
-        Which if compiled, will result in a table:
+        Which, when compiled, will result in a table:
 
         .. image:: ../images/generate-tex-table.png
             :width: 450
             :align: center
 
     :param data_frame_table:
-        table in the ``pandas.DataFrame`` format (can include column names and
-        index names).
+        ``pandas.DataFrame`` specifying the table to convert to ``tex`` code. It can include column names and
+        index names.
     :param format_displayed:
-        string specifying display format for the numerical entries inside the
+        ``str`` specifying the display format for the numerical entries inside the
         table. By default it is set to ``'%.2f'``.
     :param caption:
-        string specifying caption for the table.
+        ``str`` specifying caption for the table.
     :param label:
-        string specifying label for the table.
+        ``str`` specifying label for the table.
     """
 
     (n_rows, n_columns) = np.shape(data_frame_table)
