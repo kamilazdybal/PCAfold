@@ -57,6 +57,7 @@ from .analysis import compute_normalized_variance
 from .analysis import normalized_variance_derivative
 from .analysis import find_local_maxima
 from .analysis import random_sampling_normalized_variance
+from .analysis import average_knn_distance
 from .analysis import coefficient_of_determination
 from .analysis import stratified_coefficient_of_determination
 from .analysis import mean_squared_error
