@@ -48,6 +48,10 @@ Citing PCAfold
 **PCAfold** is published in the `SoftwareX journal <https://authors.elsevier.com/sd/article/S2352711020303435>`_.
 If you use **PCAfold** in a scientific publication, you can cite the software as:
 
+  Zdybał, K., Armstrong, E., Parente, A. and Sutherland, J.C., 2020. PCAfold: Python software to generate, analyze and improve PCA-derived low-dimensional manifolds. SoftwareX, 12, p.100630.
+
+or using BibTeX:
+
 .. code-block:: text
 
   @article{pcafold2020,

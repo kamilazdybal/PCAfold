@@ -13,6 +13,28 @@ clustering and sampling), uses PCA as a dimensionality reduction technique
 and utilizes a novel approach to assess the quality of the obtained
 low-dimensional manifolds.
 
+## Citing PCAfold
+
+PCAfold is published in the [SoftwareX journal](https://www.sciencedirect.com/science/article/pii/S2352711020303435). If you use PCAfold in a scientific publication, you can cite the software as:
+
+> Zdybał, K., Armstrong, E., Parente, A. and Sutherland, J.C., 2020. *PCAfold: Python software to generate, analyze and improve PCA-derived low-dimensional manifolds.* SoftwareX, 12, p.100630.
+
+or using BibTeX:
+
+```
+@article{pcafold2020,
+title = "PCAfold: Python software to generate, analyze and improve PCA-derived low-dimensional manifolds",
+journal = "SoftwareX",
+volume = "12",
+pages = "100630",
+year = "2020",
+issn = "2352-7110",
+doi = "https://doi.org/10.1016/j.softx.2020.100630",
+url = "http://www.sciencedirect.com/science/article/pii/S2352711020303435",
+author = "Kamila Zdybał and Elizabeth Armstrong and Alessandro Parente and James C. Sutherland"
+}
+```
+
 ## [PCAfold documentation](https://pcafold.readthedocs.io/en/latest/)
 
 **PCAfold** documentation contains a thorough user guide including equations, references and example code snippets. Numerous illustrative tutorials and demos are presented as well. The corresponding Jupyter notebooks can be found in the `docs/tutorials` directory.
