@@ -1,7 +1,7 @@
 """analysis.py: module for manifolds analysis."""
 
 __author__ = "Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
-__copyright__ = "Copyright (c) 2020, Kamila Zdybal and Elizabeth Armstrong"
+__copyright__ = "Copyright (c) 2020, 2021, Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
 __credits__ = ["Department of Chemical Engineering, University of Utah, Salt Lake City, Utah, USA", "Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
 __license__ = "MIT"
 __version__ = "1.0.0"
@@ -107,6 +107,8 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     The bandwidth values may be specified directly through ``bandwidth_values`` or default values will be calculated as a
     logspace from ``min_bandwidth`` to ``max_bandwidth`` with ``npts_bandwidth`` number of values. If left unspecified,
     ``min_bandwidth`` and ``max_bandwidth`` will be calculated as the minimum and maximum nonzero distance between points, respectively.
+
+    More information can be found in :cite:`Armstrong2021`.
 
     **Example:**
 
@@ -240,6 +242,8 @@ def normalized_variance_derivative(variance_data):
     with central finite differencing and the limit is approximated by :math:`\\mathcal{N}(\\sigma=10^{-16})` using the
     ``normalized_variance_limit`` attribute of the ``VarianceData`` object.
 
+    More information can be found in :cite:`Armstrong2021`.
+
     :param variance_data:
         a ``VarianceData`` class returned from ``compute_normalized_variance``
 
@@ -337,6 +341,8 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
     features and non-uniqueness due to a transformation/reduction of manifold coordinates. True features should not show
     significant sensitivity to sampling while non-uniqueness/folds in the manifold will.
 
+    More information can be found in :cite:`Armstrong2021`.
+
     :param sampling_percentages:
         list or 1D array of fractions (between 0 and 1) of the provided data to sample for computing the normalized variance
     :param indepvars:
@@ -422,7 +428,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
     **Example:**
 
     .. code:: python
-    
+
         from PCAfold import PCA, average_knn_distance
         import numpy as np
 

@@ -1,7 +1,7 @@
 """preprocess.py: module for data pre-processing."""
 
 __author__ = "Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
-__copyright__ = "Copyright (c) 2020, Kamila Zdybal and Elizabeth Armstrong"
+__copyright__ = "Copyright (c) 2020, 2021, Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
 __credits__ = ["Department of Chemical Engineering, University of Utah, Salt Lake City, Utah, USA", "Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
 __license__ = "MIT"
 __version__ = "1.0.0"
