@@ -1046,6 +1046,9 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
     if n_dimensions_1 != n_dimensions_2:
         raise ValueError("Parameter `observed` has different number of dimensions than `predicted`.")
 
+    if not isinstance(tolerance, float):
+        raise ValueError("Parameter `tolerance` has to be of type `float`.")
+
     good_direction = np.zeros((n_observed,))
 
     for i in range(0,n_observed):
@@ -1252,6 +1255,25 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
     if n_x != n_predicted:
         raise ValueError("Parameter `predicted` has different number of elements than `x`.")
 
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     color_observed = '#191b27'
     color_predicted = '#ff928b'
 
@@ -1396,6 +1418,29 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
 
     if n_x != n_predicted:
         raise ValueError("Parameter `predicted` has different number of elements than `x`, `y` and `z`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if z_label is not None:
+        if not isinstance(z_label, str):
+            raise ValueError("Parameter `z_label` has to be of type `str`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     color_observed = '#191b27'
     color_predicted = '#ff928b'
