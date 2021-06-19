@@ -18,6 +18,7 @@ from PCAfold import preprocess
 from PCAfold import DataSampler
 from PCAfold.styles import *
 from PCAfold.preprocess import _scalings_list
+import warnings
 
 ################################################################################
 #
@@ -1285,7 +1286,7 @@ class LPCA:
 
     - **A** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvectors, :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
     - **L** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvalues, :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
-    - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal component, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
+    - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1589,6 +1590,192 @@ class LPCA:
             print('Globally-averaged unweighted correlation: ' + str(round(unweighted,6)))
 
         return (local_correlations, weighted, unweighted)
+
+################################################################################
+#
+# Subset Principal Component Analysis
+#
+################################################################################
+
+class SubsetPCA:
+    """
+    Enables performing Principal Component Analysis (PCA) of a subset of the
+    original data set, :math:`\mathbf{X}`.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import SubsetPCA
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Instantiate SubsetPCA class object:
+        subset_pca_X = SubsetPCA(X, full_sequence=True, scaling='std', n_components=2)
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param X_source: (optional)
+        ``numpy.ndarray`` specifying the source terms, :math:`\mathbf{S_X}`, corresponding to the state-space
+        variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`.
+    :param full_sequence: (optional)
+        ``bool`` specifying if a full sequence of subset PCAs should be performed. If set to ``True``, it is assumed that variables in :math:`\mathbf{X}` have been ordered
+        according to some criterion. A sequence of subset PCAs will then be performed starting from the first ``n_components+1`` variables
+        and gradually adding the next variable in :math:`\mathbf{X}`. When ``full_sequence=True``, parameter ``subset_indices`` will be ignored
+        and the class attributes will be of type ``list`` of ``numpy.ndarray``. Each element in those lists corresponds to one subset PCA in a sequence.
+    :param subset_indices: (optional)
+        ``list`` specifying the indices of columns to be taken from the original data set to form a subset of a data set.
+    :param variable_names: (optional)
+        ``list`` of ``str`` specifying the names of variables in :math:`\mathbf{X}`. It should have length ``n_variables`` and each element should correspond to a column in :math:`\mathbf{X}`.
+    :param scaling: (optional)
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+    :param n_components: (optional)
+        ``int`` specifying the number of retained principal components, :math:`q`. If set to 0 all PCs are retained. It should be a non-negative number.
+    :param use_eigendec: (optional)
+        ``bool`` specifying the method for obtaining eigenvalues and eigenvectors:
+
+        * ``use_eigendec=True`` uses eigendecomposition of the covariance matrix (from ``numpy.linalg.eigh``)
+        * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
+    :param nocenter: (optional)
+        ``bool`` specifying whether the data original data set should be centered by mean.
+
+    **Attributes:**
+
+    - **S** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the covariance matrix, :math:`\mathbf{S}`.
+    - **L** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the vector of eigenvalues, :math:`\mathbf{L}`.
+    - **A** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the matrix of eigenvectors, :math:`\mathbf{A}`.
+    - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`.
+    """
+
+    def __init__(self, X, X_source=None, full_sequence=True, subset_indices=None, variable_names=None, scaling='std', n_components=2, use_eigendec=True, nocenter=False, verbose=False):
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations, n_variables) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        if subset_indices is not None:
+            if not isinstance(subset_indices, list):
+                raise ValueError("Parameter `subset_indices` has to be of type `list`.")
+
+        if variable_names is not None:
+            if not isinstance(variable_names, list):
+                raise ValueError("Parameter `variable_names` has to be of type `list`.")
+            else:
+                n_names = len(variable_names)
+        else:
+            variable_names = []
+            for i in range(0,n_variables):
+                variable_names.append('X' + str(i))
+
+        if n_variables != n_names:
+            raise ValueError("Parameters `X` and `variables_names` have different number of variables.")
+
+        if not isinstance(scaling, str):
+            raise ValueError("Parameter `scaling` has to be a string.")
+        else:
+            if scaling.lower() not in _scalings_list:
+                raise ValueError("Unrecognized scaling method.")
+            else:
+                self.__scaling = scaling.upper()
+
+        if not isinstance(n_components, int) or isinstance(n_components, bool):
+            raise ValueError("Parameter `n_components` has to be an integer.")
+        else:
+            if (n_components < 0) or (n_components > n_variables):
+                raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
+
+        if not isinstance(use_eigendec, bool):
+            raise ValueError("Parameter `use_eigendec` has to be a boolean.")
+
+        if not isinstance(nocenter, bool):
+            raise ValueError("Parameter `nocenter` has to be a boolean.")
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
+
+        if full_sequence:
+
+            covariance_matrix = []
+            eigenvectors = []
+            eigenvalues = []
+            PCs = []
+            PC_source_terms = []
+            variable_sequence = []
+
+            if verbose:
+                print('Full sequence of subset PCAs will be performed.')
+
+            if subset_indices is not None:
+                if len(subset_indices) != 0:
+                    warnings.warn('Parameter `subset_indices` will be ignored.')
+
+            for i_subset in range(n_components+1, n_variables+1):
+
+                # Perform global PCA on the current subset:
+                global_pca = PCA(X[:,0:i_subset], scaling=scaling, n_components=n_components, use_eigendec=use_eigendec, nocenter=nocenter)
+                global_PCs = global_pca.transform(X[:,0:i_subset], nocenter=False)
+                if X_source is not None: global_PC_sources = global_pca.transform(X_source[:,0:i_subset], nocenter=True)
+
+                # Append the current subset PCA solution:
+                covariance_matrix.append(global_pca.S)
+                eigenvectors.append(global_pca.A[:,0:n_components])
+                eigenvalues.append(global_pca.L[0:n_components])
+                PCs.append(global_PCs)
+                if X_source is not None: PC_source_terms.append(global_PC_sources)
+                variable_sequence.append(variable_names[0:i_subset])
+
+        else:
+
+            # Perform global PCA on the current subset:
+            global_pca = PCA(X[:,subset_indices], scaling=scaling, n_components=n_components, use_eigendec=use_eigendec, nocenter=nocenter)
+
+            # Append the current subset PCA solution:
+            covariance_matrix = global_pca.S
+            eigenvectors = global_pca.A[:,0:n_components]
+            eigenvalues = global_pca.L[0:n_components]
+            PCs = global_pca.transform(X[:,subset_indices], nocenter=False)
+            if X_source is not None: PC_source_terms = global_pca.transform(X_source[:,subset_indices], nocenter=True)
+            variable_sequence = list(variable_names[i] for i in subset_indices)
+
+        self.__S = covariance_matrix
+        self.__A = eigenvectors
+        self.__L = eigenvalues
+        self.__principal_components = PCs
+        self.__PC_source_terms = PC_source_terms
+        self.__variable_sequence = variable_sequence
+
+    @property
+    def S(self):
+        return self.__S
+
+    @property
+    def A(self):
+        return self.__A
+
+    @property
+    def L(self):
+        return self.__L
+
+    @property
+    def principal_components(self):
+        return self.__principal_components
+
+    @property
+    def PC_source_terms(self):
+        return self.__PC_source_terms
+
+    @property
+    def variable_sequence(self):
+        return self.__variable_sequence
 
 ################################################################################
 #
