@@ -1610,7 +1610,7 @@ class SubsetPCA:
         import numpy as np
 
         # Generate dummy data set:
-        X = np.random.rand(100,20)
+        X = np.random.rand(100,10)
 
         # Instantiate SubsetPCA class object:
         subset_pca_X = SubsetPCA(X, full_sequence=True, scaling='std', n_components=2)
@@ -1675,6 +1675,7 @@ class SubsetPCA:
             variable_names = []
             for i in range(0,n_variables):
                 variable_names.append('X' + str(i))
+            n_names = len(variable_names)
 
         if n_variables != n_names:
             raise ValueError("Parameters `X` and `variables_names` have different number of variables.")
