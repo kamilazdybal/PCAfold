@@ -41,7 +41,7 @@ font_labels = 24
 font_annotations = 20
 
 # Set font size for plot title:
-font_title = 18
+font_title = 24
 
 # Set font size for plotted text:
 font_text = 16

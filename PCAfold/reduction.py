@@ -2809,6 +2809,25 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         if n_color != n_x:
             raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
 
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     fig, axs = plt.subplots(1, 1, figsize=figure_size)
 
     if color is None:
@@ -2969,6 +2988,29 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         if n_color != n_x:
             raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
 
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if z_label is not None:
+        if not isinstance(z_label, str):
+            raise ValueError("Parameter `z_label` has to be of type `str`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111, projection='3d')
 
@@ -3007,6 +3049,169 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
             if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
 
     if title != None: ax.set_title(title, **csfont, fontsize=font_title)
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=False, colorbar_label=None, color_map='viridis', figure_size=(7,3), title=None, save_filename=None):
+    """
+    Plots a sequence of two-dimensional manifolds given a list of two vectors defining the manifold.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import SubsetPCA, plot_2d_manifold_sequence
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Obtain two-dimensional manifolds from subset PCA:
+        subset_PCA = SubsetPCA(X)
+        principal_components = subset_PCA.principal_components
+
+        # Plot the manifold:
+        plt = plot_2d_manifold_sequence(principal_components, color=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', figure_size=(7,3), title=['First', 'Second', 'Third'], save_filename='2d-manifold-sequence.pdf')
+        plt.close()
+
+    :param xy:
+        ``list`` of ``numpy.ndarray`` specifying the variable on the :math:`x`-axis.
+        Each element of the list should be of size ``(n_observations,2)``.
+    :param color: (optional)
+        ``numpy.ndarray``, ``list`` of ``numpy.ndarray`` or ``str`` specifying colors for the manifolds. If it is a
+        vector, it has to have length consistent with the number of observations
+        in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+        It can also be set to a string specifying the color directly, for
+        instance ``'r'`` or ``'#006778'``.
+        If not specified, manifold will be plotted in black.
+    :param x_label: (optional)
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param cbar: (optional)
+        ``bool`` specifying if the colorbar should be plotted.
+    :param colorbar_label: (optional)
+        ``str`` specifying colorbar label annotation.
+        If set to ``None``, colorbar label will not be plotted.
+    :param color_map: (optional)
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        ``list`` of ``str`` specifying title for each subplot. If set to ``None`` titles will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(xy, list):
+        raise ValueError("Parameter `xy` has to be of type `list`.")
+
+    n_subplots = len(xy)
+
+    for i, element in enumerate(xy):
+        if not isinstance(element, np.ndarray):
+            raise ValueError("Parameter `xy` has to have elements of type `numpy.ndarray`.")
+
+        (n_observations, n_variables) = np.shape(element)
+
+        if n_variables != 2:
+            raise ValueError("Parameter `xy` has to have elements of shape `(n_observations,2)`.")
+
+        if i > 0:
+            if n_observations != prev_n_observations or n_variables != prev_n_variables:
+                raise ValueError("Parameter `xy` has to have elements of the same shapes, `(n_observations,2)`.")
+
+        prev_n_observations = n_observations
+        prev_n_variables = n_variables
+
+    if color is not None:
+        if (not isinstance(color, str)) and (not isinstance(color, np.ndarray)) and (not isinstance(color, list)):
+                raise ValueError("Parameter `color` has to be `None`, or of type `str` or `numpy.ndarray` or `list`.")
+
+    if isinstance(color, np.ndarray):
+
+        try:
+            (n_color,) = np.shape(color)
+            n_var_color = 1
+        except:
+            (n_color, n_var_color) = np.shape(color)
+
+        if n_var_color != 1:
+            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+
+        if n_color != n_observations:
+            raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, list):
+            raise ValueError("Parameter `title` has to be of type `list`.")
+        if len(title) != n_subplots:
+            raise ValueError("Parameter `title` has to have the same number of elements as parameter `xy`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    fig = plt.figure(figsize=figure_size)
+    spec = fig.add_gridspec(ncols=n_subplots, nrows=1)
+
+    for i, element in enumerate(xy):
+
+        ax = fig.add_subplot(spec[0,i])
+
+        if color is None:
+            scat = ax.scatter(element[:,0], element[:,1], c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        elif isinstance(color, str):
+            scat = ax.scatter(element[:,0], element[:,1], c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        elif isinstance(color, np.ndarray):
+            scat = ax.scatter(element[:,0], element[:,1], c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        elif isinstance(color, list):
+            scat = ax.scatter(element[:,0], element[:,1], c=color[i].ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+
+        if title != None: ax.set_title(title[i], fontsize=font_title, **csfont)
+        ax.set_xticklabels([], fontdict=None, minor=False)
+        ax.set_yticklabels([], fontdict=None, minor=False)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+        if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
+
+        if i == 0:
+            if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
+
+    if cbar:
+        if isinstance(color, np.ndarray):
+            if color is not None:
+                cb = fig.colorbar(scat)
+                cb.ax.tick_params(labelsize=font_colorbar_axes)
+                if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+
+    fig.tight_layout(pad=0)
+
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
@@ -3121,6 +3326,25 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
         if n_color != n_x:
             raise ValueError("Parameter `color` has different number of elements than `variable` and `variable_rec`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     color_line = '#ff2f18'
 
