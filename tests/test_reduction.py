@@ -1183,6 +1183,184 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+    def test_calculate_r2_on_all_available_scalings(self):
+
+        test_data_set = np.random.rand(1000,20)
+        r2_test = np.ones((20,))
+
+        try:
+            pca_X = PCA(test_data_set, scaling='none', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='auto', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='pareto', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='range', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='level', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='max', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='poisson', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_2', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_3', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_4', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+    def test_calculate_r2_on_all_available_scalings_with_no_centering(self):
+
+        test_data_set = np.random.rand(1000,20)
+        r2_test = np.ones((20,))
+
+        try:
+            pca_X = PCA(test_data_set, scaling='none', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='auto', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='pareto', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='range', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='level', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='max', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='poisson', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_2', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_3', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(test_data_set, scaling='vast_4', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
 ################################################################################
 #
 # Test LPCA class
@@ -1831,6 +2009,93 @@ class TestReduction(unittest.TestCase):
             plt = reduction.plot_3d_manifold(X[:,0], X[:,0], X[:,0], color=X[0:10,0])
             plt.close()
 
+    def test_plot_2d_manifold_sequence_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+        subset_PCA = reduction.SubsetPCA(X)
+        xy = subset_PCA.principal_components
+
+        try:
+            reduction.plot_2d_manifold_sequence(xy)
+        except:
+            self.assertTrue(False)
+
+        try:
+            reduction.plot_2d_manifold_sequence(xy, color=['k', 'b', 'r'])
+        except:
+            self.assertTrue(False)
+
+        try:
+            reduction.plot_2d_manifold_sequence(xy, color=['k', 'b', 'r'])
+        except:
+            self.assertTrue(False)
+
+        try:
+            reduction.plot_2d_manifold_sequence(xy, color='k')
+        except:
+            self.assertTrue(False)
+
+        try:
+            reduction.plot_2d_manifold_sequence(xy, color=X[:,0], x_label='A', y_label='B ', cbar=True, colorbar_label='V', color_map='viridis', figure_size=(10, 3), title=['A', 'B', 'C'])
+        except:
+            self.assertTrue(False)
+
+        try:
+            reduction.plot_2d_manifold_sequence(xy, color=[X[:,1], X[:,1], X[:,2]], x_label='A', y_label='B ', cbar=True, colorbar_label='V', color_map='viridis', figure_size=(10, 3), title=['A', 'B', 'C'])
+        except:
+            self.assertTrue(False)
+
+    def test_plot_2d_manifold_sequence_not_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+        subset_PCA = reduction.SubsetPCA(X)
+        xy = subset_PCA.principal_components
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(X)
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence([1,2,3])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(X[:,0])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, color=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, color=X[:,0:2])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, color=[X[:,1], X[:,1]])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, x_label=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, y_label=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, cbar=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, colorbar_label=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy,color_map=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, figure_size=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, title=[1])
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, title='Title')
+
+        with self.assertRaises(ValueError):
+            reduction.plot_2d_manifold_sequence(xy, title=['Title'])
+
     def test_plot_parity_allowed_calls(self):
 
         X = np.random.rand(100,5)
@@ -2057,180 +2322,185 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
-    def test_calculate_r2_on_all_avaiable_scalings(self):
+    def test_plot_heatmap_allowed_calls(self):
 
-        test_data_set = np.random.rand(1000,20)
-        r2_test = np.ones((20,))
+        X = np.random.rand(100,5)
+        pca_X = PCA(X)
+        M = pca_X.S
 
         try:
-            pca_X = PCA(test_data_set, scaling='none', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap(M)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca_X = PCA(test_data_set, scaling='auto', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap(M[:,0:3])
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca_X = PCA(test_data_set, scaling='pareto', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap(M, annotate=True, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5, 5), title=None)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca_X = PCA(test_data_set, scaling='vast', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap(M, annotate=True, text_color='w', format_displayed='%.1f', x_ticks=True, y_ticks=True, color_map='viridis', cbar=True, colorbar_label='C', figure_size=(10, 5), title='Title')
+        except Exception:
+            self.assertTrue(False)
+
+        X = np.random.rand(10,1)
+
+        try:
+            plt = reduction.plot_heatmap(X)
+        except Exception:
+            self.assertTrue(False)
+
+        X = np.random.rand(1,10)
+
+        try:
+            plt = reduction.plot_heatmap(X)
+        except Exception:
+            self.assertTrue(False)
+
+    def test_plot_heatmap_not_allowed_calls(self):
+
+        X = np.random.rand(10,)
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(X)
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap([1])
+
+        X = np.random.rand(100,5)
+        pca_X = PCA(X)
+        M = pca_X.S
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, annotate=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, text_color=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, format_displayed=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, x_ticks=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, y_ticks=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, color_map=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, cbar=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, colorbar_label=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, figure_size=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, title=[1])
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, save_filename=[1])
+
+    def test_plot_heatmap_sequence_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+        pca_X = PCA(X)
+        M = [pca_X.S, pca_X.S]
+
+        try:
+            plt = reduction.plot_heatmap_sequence(M)
+        except Exception:
+            self.assertTrue(False)
+
+        M = [pca_X.S, pca_X.S[:,0:3]]
+
+        try:
+            plt = reduction.plot_heatmap_sequence(M)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca_X = PCA(test_data_set, scaling='range', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap_sequence(M, annotate=True, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5, 5), title=None)
         except Exception:
             self.assertTrue(False)
 
         try:
-            pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap_sequence(M, annotate=True, text_color='w', format_displayed='%.1f', x_ticks=True, y_ticks=True, color_map='viridis', cbar=True, colorbar_label='C', figure_size=(10, 5), title=['A', 'B'])
         except Exception:
             self.assertTrue(False)
+
+        X = [np.random.rand(10,1), np.random.rand(10,1)]
 
         try:
-            pca_X = PCA(test_data_set, scaling='level', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap_sequence(X)
         except Exception:
             self.assertTrue(False)
+
+        X = [np.random.rand(1,10), np.random.rand(1,10)]
 
         try:
-            pca_X = PCA(test_data_set, scaling='max', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
+            plt = reduction.plot_heatmap_sequence(X)
         except Exception:
             self.assertTrue(False)
 
-        try:
-            pca_X = PCA(test_data_set, scaling='poisson', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+    def test_plot_heatmap_sequence_not_allowed_calls(self):
 
-        try:
-            pca_X = PCA(test_data_set, scaling='vast_2', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        X = [np.random.rand(10,), np.random.rand(10,)]
 
-        try:
-            pca_X = PCA(test_data_set, scaling='vast_3', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(X)
 
-        try:
-            pca_X = PCA(test_data_set, scaling='vast_4', n_components=20, use_eigendec=True, nocenter=False)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        X = [[1,2,3], [1,2,3]]
 
-    def test_calculate_r2_on_all_avaiable_scalings_with_no_centering(self):
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(X)
 
-        test_data_set = np.random.rand(1000,20)
-        r2_test = np.ones((20,))
+        X = np.random.rand(100,5)
 
-        try:
-            pca_X = PCA(test_data_set, scaling='none', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(X)
 
-        try:
-            pca_X = PCA(test_data_set, scaling='auto', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        X = np.random.rand(100,5)
+        pca_X = PCA(X)
+        M = [pca_X.S, pca_X.S]
 
-        try:
-            pca_X = PCA(test_data_set, scaling='pareto', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, annotate=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='vast', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, text_color=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='range', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, format_displayed=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, x_ticks=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='level', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, y_ticks=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='max', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, color_map=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='poisson', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, cbar=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='vast_2', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, colorbar_label=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='vast_3', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap(M, figure_size=[1])
 
-        try:
-            pca_X = PCA(test_data_set, scaling='vast_4', n_components=20, use_eigendec=True, nocenter=True)
-            r2_values = pca_X.calculate_r2(test_data_set)
-            self.assertTrue(np.allclose(r2_values, r2_test))
-        except Exception:
-            self.assertTrue(False)
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, title=1)
+
+        with self.assertRaises(ValueError):
+            plt = reduction.plot_heatmap_sequence(M, save_filename=[1])

@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from PCAfold import preprocess
 from PCAfold import DataSampler
 from PCAfold.styles import *
+from matplotlib.colors import ListedColormap
 from PCAfold.preprocess import _scalings_list
 import warnings
 
@@ -3086,16 +3087,16 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         plt.close()
 
     :param xy:
-        ``list`` of ``numpy.ndarray`` specifying the manifold (variable on the :math:`x` and :math:`y-axis).
+        ``list`` of ``numpy.ndarray`` specifying the manifold (variables on the :math:`x` and :math:`y` -axis).
         Each element of the list should be of size ``(n_observations,2)``.
     :param color: (optional)
-        ``numpy.ndarray``, ``list`` of ``numpy.ndarray`` or ``str`` specifying colors for the manifolds. If it is a
+        ``numpy.ndarray`` or ``str``, or ``list`` of ``numpy.ndarray`` or ``str`` specifying colors for the manifolds. If it is a
         vector, it has to have length consistent with the number of observations
-        in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
+        in ``x`` and ``y`` vectors. Each ``numpy.ndarray`` should be of size
         ``(n_observations,)`` or ``(n_observations,1)``.
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
-        If not specified, manifold will be plotted in black.
+        If not specified, manifolds will be plotted in black.
     :param x_label: (optional)
         ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -3161,7 +3162,18 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
             raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
 
         if n_color != n_observations:
-            raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
+            raise ValueError("Parameter `color` has different number of observations than `xy`.")
+
+    if isinstance(color, list):
+        if len(color) != n_subplots:
+            raise ValueError("Parameter `color` has different number of elements than `xy`.")
+
+    if not isinstance(cbar, bool):
+        raise ValueError("Parameter `cbar` has to be of type `bool`.")
+
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
 
     if x_label is not None:
         if not isinstance(x_label, str):
@@ -3202,7 +3214,12 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         elif isinstance(color, np.ndarray):
             scat = ax.scatter(element[:,0], element[:,1], c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
         elif isinstance(color, list):
-            scat = ax.scatter(element[:,0], element[:,1], c=color[i].ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+            if isinstance(color[i], np.ndarray):
+                scat = ax.scatter(element[:,0], element[:,1], c=color[i].ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+            elif isinstance(color[i], str):
+                scat = ax.scatter(element[:,0], element[:,1], c=color[i], cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+            else:
+                raise ValueError("Parameter `color` should have elements of type `numpy.ndarray` or `str`.")
 
         if title != None: ax.set_title(title[i], fontsize=font_title, **csfont)
         ax.set_xticklabels([], fontdict=None, minor=False)
@@ -3917,7 +3934,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, titl
 
 # ------------------------------------------------------------------------------
 
-def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=False, y_ticks=False, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
     """
     Plots a heatmap for any matrix :math:`\\mathbf{M}`.
 
@@ -3948,10 +3965,14 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', col
     :param format_displayed: (optional)
         ``str`` specifying the display format for the numerical entries inside the
         table. By default it is set to ``'%.2f'``.
-    :param cbar: (optional)
-        ``bool`` specifying whether colorbar should be plotted.
+    :param x_ticks: (optional)
+        ``bool`` specifying whether ticks on the :math:`x` -axis should be plotted.
+    :param y_ticks: (optional)
+        ``bool`` specifying whether ticks on the :math:`y` -axis should be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param cbar: (optional)
+        ``bool`` specifying whether colorbar should be plotted.
     :param colorbar_label: (optional)
         ``str`` specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
@@ -3987,12 +4008,22 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', col
     if not isinstance(format_displayed, str):
         raise ValueError("Parameter `format_displayed` has to be of type `str`.")
 
+    if not isinstance(x_ticks, bool):
+        raise ValueError("Parameter `x_ticks` has to be of type `bool`.")
+
+    if not isinstance(y_ticks, bool):
+        raise ValueError("Parameter `y_ticks` has to be of type `bool`.")
+
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
     if not isinstance(cbar, bool):
         raise ValueError("Parameter `cbar` has to be of type `bool`.")
+
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
 
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
@@ -4007,8 +4038,16 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', col
 
     fig = plt.figure(figsize=figure_size)
     ims = plt.imshow(M, cmap=color_map)
-    plt.yticks(np.arange(0,n_x))
-    plt.xticks(np.arange(0,n_y))
+
+    if x_ticks:
+        plt.xticks(np.arange(0,n_x))
+    else:
+        plt.xticks([])
+
+    if y_ticks:
+        plt.yticks(np.arange(0,n_y))
+    else:
+        plt.yticks([])
 
     if annotate:
         for i in range(n_x):
@@ -4030,7 +4069,7 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', col
 
 # ------------------------------------------------------------------------------
 
-def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=False, y_ticks=False, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
     """
     Plots a sequence of heatmaps for matrices :math:`\\mathbf{M}` stored in a list.
 
@@ -4064,10 +4103,14 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
     :param format_displayed: (optional)
         ``str`` specifying the display format for the numerical entries inside the
         table. By default it is set to ``'%.2f'``.
-    :param cbar: (optional)
-        ``bool`` specifying whether colorbar should be plotted.
+    :param x_ticks: (optional)
+        ``bool`` specifying whether ticks on the :math:`x` -axis should be plotted.
+    :param y_ticks: (optional)
+        ``bool`` specifying whether ticks on the :math:`y` -axis should be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param cbar: (optional)
+        ``bool`` specifying whether colorbar should be plotted.
     :param colorbar_label: (optional)
         ``str`` specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
@@ -4093,6 +4136,8 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
         if not isinstance(element, np.ndarray):
             raise ValueError("Parameter `M` has to have elements of type `numpy.ndarray`.")
 
+    n_subplots = len(M)
+
     if not isinstance(annotate, bool):
         raise ValueError("Parameter `annotate` has to be of type `bool`.")
 
@@ -4102,6 +4147,12 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
     if not isinstance(format_displayed, str):
         raise ValueError("Parameter `format_displayed` has to be of type `str`.")
 
+    if not isinstance(x_ticks, bool):
+        raise ValueError("Parameter `x_ticks` has to be of type `bool`.")
+
+    if not isinstance(y_ticks, bool):
+        raise ValueError("Parameter `y_ticks` has to be of type `bool`.")
+
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
@@ -4109,18 +4160,24 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
     if not isinstance(cbar, bool):
         raise ValueError("Parameter `cbar` has to be of type `bool`.")
 
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
     if title is not None:
         if not isinstance(title, list):
             raise ValueError("Parameter `title` has to be of type `list`.")
+        if len(title) != n_subplots:
+            raise ValueError("Parameter `title` has to have the same number of elements as parameter `xy`.")
 
     if save_filename is not None:
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    n_subplots = len(M)
+
     fig = plt.figure(figsize=figure_size)
     spec = fig.add_gridspec(ncols=n_subplots, nrows=1)
 
@@ -4133,8 +4190,16 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
 
         ax = fig.add_subplot(spec[0,index])
         ims = plt.imshow(element, cmap=color_map)
-        plt.yticks(np.arange(0,n_x))
-        plt.xticks(np.arange(0,n_y))
+
+        if x_ticks:
+            plt.xticks(np.arange(0,n_x))
+        else:
+            plt.xticks([])
+
+        if y_ticks:
+            plt.yticks(np.arange(0,n_y))
+        else:
+            plt.yticks([])
 
         if annotate:
             for i in range(n_x):
