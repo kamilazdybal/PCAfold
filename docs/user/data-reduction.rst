@@ -318,6 +318,16 @@ Plotting functions
 
 .. autofunction:: PCAfold.reduction.plot_cumulative_variance
 
+``plot_heatmap``
+============================
+
+.. autofunction:: PCAfold.reduction.plot_heatmap
+
+``plot_heatmap_sequence``
+============================
+
+.. autofunction:: PCAfold.reduction.plot_heatmap_sequence
+
 --------------------------------------------------------------------------------
 
 ************

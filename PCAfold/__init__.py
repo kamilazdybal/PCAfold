@@ -52,6 +52,8 @@ from .reduction import plot_eigenvectors_comparison
 from .reduction import plot_eigenvalue_distribution
 from .reduction import plot_eigenvalue_distribution_comparison
 from .reduction import plot_cumulative_variance
+from .reduction import plot_heatmap
+from .reduction import plot_heatmap_sequence
 
 # Module: `analysis`
 from .kernel_regression import KReg

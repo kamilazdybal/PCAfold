@@ -422,7 +422,7 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 
 def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
     """
-    Computes average Euclidean distances to the :math:`k` nearest neighbors on
+    Computes average Euclidean distances to :math:`k` nearest neighbors on
     a manifold defined by the independent variables.
 
     **Example:**

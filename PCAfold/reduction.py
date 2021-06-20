@@ -2817,6 +2817,10 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         if not isinstance(y_label, str):
             raise ValueError("Parameter `y_label` has to be of type `str`.")
 
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -3000,6 +3004,10 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         if not isinstance(z_label, str):
             raise ValueError("Parameter `z_label` has to be of type `str`.")
 
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -3078,7 +3086,7 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         plt.close()
 
     :param xy:
-        ``list`` of ``numpy.ndarray`` specifying the variable on the :math:`x`-axis.
+        ``list`` of ``numpy.ndarray`` specifying the manifold (variable on the :math:`x` and :math:`y-axis).
         Each element of the list should be of size ``(n_observations,2)``.
     :param color: (optional)
         ``numpy.ndarray``, ``list`` of ``numpy.ndarray`` or ``str`` specifying colors for the manifolds. If it is a
@@ -3162,6 +3170,10 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
     if y_label is not None:
         if not isinstance(y_label, str):
             raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
@@ -3334,6 +3346,10 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
     if y_label is not None:
         if not isinstance(y_label, str):
             raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
@@ -3559,6 +3575,10 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         except:
             pass
 
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
     n_sets = len(eigenvectors_tuple)
 
     updated_bar_width = eigenvector_bar_width/n_sets
@@ -3756,6 +3776,10 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
     from matplotlib import cm
 
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
     n_sets = len(eigenvalues_tuple)
 
     (n_eigenvalues, ) = np.shape(eigenvalues_tuple[0])
@@ -3892,3 +3916,241 @@ def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, titl
     return plt
 
 # ------------------------------------------------------------------------------
+
+def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+    """
+    Plots a heatmap for any matrix :math:`\\mathbf{M}`.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_heatmap
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA and obtain the covariance matrix:
+        pca_X = PCA(X)
+        covariance_matrix = pca_X.S
+
+        # Plot a heatmap of the covariance matrix:
+        plt = plot_heatmap(covariance_matrix, annotate=True, title='Covariance', save_filename='covariance.pdf')
+        plt.close()
+
+    :param M:
+        ``numpy.ndarray`` specifying the matrix :math:`\\mathbf{M}`.
+    :param annotate: (optional)
+        ``bool`` specifying whether numerical values of matrix elements should be plot on top of the heatmap.
+    :param text_color: (optional)
+        ``str`` specifying the color of the annotation text.
+    :param format_displayed: (optional)
+        ``str`` specifying the display format for the numerical entries inside the
+        table. By default it is set to ``'%.2f'``.
+    :param cbar: (optional)
+        ``bool`` specifying whether colorbar should be plotted.
+    :param color_map: (optional)
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param colorbar_label: (optional)
+        ``str`` specifying colorbar label annotation.
+        If set to ``None``, colorbar label will not be plotted.
+    :param figure_size: (optional)
+        ``tuple`` specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(M, np.ndarray):
+        raise ValueError("Parameter `M` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x, n_y) = np.shape(M)
+    except:
+        raise ValueError("Parameter `M` has to be a matrix.")
+
+    if not isinstance(annotate, bool):
+        raise ValueError("Parameter `annotate` has to be of type `bool`.")
+
+    if not isinstance(text_color, str):
+        raise ValueError("Parameter `text_color` has to be of type `str`.")
+
+    if not isinstance(format_displayed, str):
+        raise ValueError("Parameter `format_displayed` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
+    if not isinstance(cbar, bool):
+        raise ValueError("Parameter `cbar` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    fig = plt.figure(figsize=figure_size)
+    ims = plt.imshow(M, cmap=color_map)
+    plt.yticks(np.arange(0,n_x))
+    plt.xticks(np.arange(0,n_y))
+
+    if annotate:
+        for i in range(n_x):
+            for j in range(n_y):
+                text = plt.text(j, i, str(format_displayed % M[i,j]), fontsize=font_text, ha="center", va="center", color=text_color)
+
+    if cbar:
+        cb = fig.colorbar(ims)
+        cb.ax.tick_params(labelsize=font_colorbar_axes)
+        if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+
+    if title != None:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+    """
+    Plots a sequence of heatmaps for matrices :math:`\\mathbf{M}` stored in a list.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_heatmap_sequence
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA and obtain the covariance matrices:
+        pca_X_auto = PCA(X, scaling='auto')
+        pca_X_range = PCA(X, scaling='range')
+        pca_X_vast = PCA(X, scaling='vast')
+        covariance_matrices = [pca_X_auto.S, pca_X_range.S, pca_X_vast.S]
+        titles = ['Auto', 'Range', 'VAST']
+
+        # Plot a sequence of heatmaps of the covariance matrices:
+        plt = plot_heatmap_sequence(covariance_matrices, annotate=True, text_color='w', format_displayed='%.1f', color_map='viridis', cbar=True, title=titles, figure_size=(12,3), save_filename='covariance-matrices.pdf')
+        plt.close()
+
+    :param M:
+        ``list`` of ``numpy.ndarray`` specifying the matrices :math:`\\mathbf{M}`.
+    :param annotate: (optional)
+        ``bool`` specifying whether numerical values of matrix elements should be plot on top of the heatmap.
+    :param text_color: (optional)
+        ``str`` specifying the color of the annotation text.
+    :param format_displayed: (optional)
+        ``str`` specifying the display format for the numerical entries inside the
+        table. By default it is set to ``'%.2f'``.
+    :param cbar: (optional)
+        ``bool`` specifying whether colorbar should be plotted.
+    :param color_map: (optional)
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param colorbar_label: (optional)
+        ``str`` specifying colorbar label annotation.
+        If set to ``None``, colorbar label will not be plotted.
+    :param figure_size: (optional)
+        ``tuple`` specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(M, list):
+        raise ValueError("Parameter `M` has to be of type `list`.")
+
+    for i, element in enumerate(M):
+        if not isinstance(element, np.ndarray):
+            raise ValueError("Parameter `M` has to have elements of type `numpy.ndarray`.")
+
+    if not isinstance(annotate, bool):
+        raise ValueError("Parameter `annotate` has to be of type `bool`.")
+
+    if not isinstance(text_color, str):
+        raise ValueError("Parameter `text_color` has to be of type `str`.")
+
+    if not isinstance(format_displayed, str):
+        raise ValueError("Parameter `format_displayed` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
+    if not isinstance(cbar, bool):
+        raise ValueError("Parameter `cbar` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, list):
+            raise ValueError("Parameter `title` has to be of type `list`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    n_subplots = len(M)
+    fig = plt.figure(figsize=figure_size)
+    spec = fig.add_gridspec(ncols=n_subplots, nrows=1)
+
+    for index, element in enumerate(M):
+
+        try:
+            (n_x, n_y) = np.shape(element)
+        except:
+            raise ValueError("Parameter `M` has to have elements that are matrices.")
+
+        ax = fig.add_subplot(spec[0,index])
+        ims = plt.imshow(element, cmap=color_map)
+        plt.yticks(np.arange(0,n_x))
+        plt.xticks(np.arange(0,n_y))
+
+        if annotate:
+            for i in range(n_x):
+                for j in range(n_y):
+                    text = plt.text(j, i, str(format_displayed % element[i,j]), fontsize=font_text, ha="center", va="center", color=text_color)
+
+        if cbar:
+            cb = fig.colorbar(ims)
+            cb.ax.tick_params(labelsize=font_colorbar_axes)
+            if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+
+        if title != None:
+            plt.title(title[index], fontsize=font_title, **csfont)
+
+    fig.tight_layout(pad=0)
+
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
