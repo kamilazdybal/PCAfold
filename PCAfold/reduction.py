@@ -3087,7 +3087,7 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         plt.close()
 
     :param xy:
-        ``list`` of ``numpy.ndarray`` specifying the manifold (variables on the :math:`x` and :math:`y` -axis).
+        ``list`` of ``numpy.ndarray`` specifying the manifolds (variables on the :math:`x` and :math:`y` -axis).
         Each element of the list should be of size ``(n_observations,2)``.
     :param color: (optional)
         ``numpy.ndarray`` or ``str``, or ``list`` of ``numpy.ndarray`` or ``str`` specifying colors for the manifolds. If it is a
@@ -3130,43 +3130,48 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
 
     n_subplots = len(xy)
 
-    for i, element in enumerate(xy):
-        if not isinstance(element, np.ndarray):
-            raise ValueError("Parameter `xy` has to have elements of type `numpy.ndarray`.")
-
-        (n_observations, n_variables) = np.shape(element)
-
-        if n_variables != 2:
-            raise ValueError("Parameter `xy` has to have elements of shape `(n_observations,2)`.")
-
-        if i > 0:
-            if n_observations != prev_n_observations or n_variables != prev_n_variables:
-                raise ValueError("Parameter `xy` has to have elements of the same shapes, `(n_observations,2)`.")
-
-        prev_n_observations = n_observations
-        prev_n_variables = n_variables
+    if isinstance(color, list):
+        if len(color) != n_subplots:
+            raise ValueError("Parameter `color` has different number of elements than `xy`.")
 
     if color is not None:
         if (not isinstance(color, str)) and (not isinstance(color, np.ndarray)) and (not isinstance(color, list)):
                 raise ValueError("Parameter `color` has to be `None`, or of type `str` or `numpy.ndarray` or `list`.")
 
-    if isinstance(color, np.ndarray):
-
+    for i, element in enumerate(xy):
+        if not isinstance(element, np.ndarray):
+            raise ValueError("Parameter `xy` has to have elements of type `numpy.ndarray`.")
         try:
-            (n_color,) = np.shape(color)
-            n_var_color = 1
+            (n_observations, n_variables) = np.shape(element)
         except:
-            (n_color, n_var_color) = np.shape(color)
+            raise ValueError("Parameter `xy` has to have elements of shape `(n_observations,2)`.")
+        if n_variables != 2:
+            raise ValueError("Parameter `xy` has to have elements of shape `(n_observations,2)`.")
 
-        if n_var_color != 1:
-            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+        if isinstance(color, np.ndarray):
+            try:
+                (n_color,) = np.shape(color)
+                n_var_color = 1
+            except:
+                (n_color, n_var_color) = np.shape(color)
+            if n_var_color != 1:
+                raise ValueError("Parameter `color` has to be a 0D or a 1D vector.")
+            if n_color != n_observations:
+                raise ValueError("Parameters `color` and `xy` have to have consistent number of observations.")
 
-        if n_color != n_observations:
-            raise ValueError("Parameter `color` has different number of observations than `xy`.")
-
-    if isinstance(color, list):
-        if len(color) != n_subplots:
-            raise ValueError("Parameter `color` has different number of elements than `xy`.")
+        if isinstance(color, list):
+            if isinstance(color[i], np.ndarray):
+                try:
+                    (n_color,) = np.shape(color[i])
+                    n_var_color = 1
+                except:
+                    (n_color, n_var_color) = np.shape(color[i])
+                if n_var_color != 1:
+                    raise ValueError("Parameter `color` has to have elements that are a 0D or 1D vector.")
+                if n_color != n_observations:
+                    raise ValueError("Parameters `color` and `xy` have to have consistent number of observations.")
+            elif not isinstance(color[i], str):
+                raise ValueError("Parameters `color` has to have elements of type `str` or `numpy.ndarray`.")
 
     if not isinstance(cbar, bool):
         raise ValueError("Parameter `cbar` has to be of type `bool`.")
