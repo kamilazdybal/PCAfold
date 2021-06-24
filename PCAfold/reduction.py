@@ -3939,7 +3939,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, titl
 
 # ------------------------------------------------------------------------------
 
-def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=False, y_ticks=False, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=None, y_ticks=None, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
     """
     Plots a heatmap for any matrix :math:`\\mathbf{M}`.
 
@@ -3957,8 +3957,11 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_t
         pca_X = PCA(X)
         covariance_matrix = pca_X.S
 
+        # Define ticks:
+        ticks = ['A', 'B', 'C', 'D', 'E']
+
         # Plot a heatmap of the covariance matrix:
-        plt = plot_heatmap(covariance_matrix, annotate=True, title='Covariance', save_filename='covariance.pdf')
+        plt = plot_heatmap(covariance_matrix, annotate=True, text_color='w', format_displayed='%.1f', x_ticks=ticks, y_ticks=ticks, title='Covariance', save_filename='covariance.pdf')
         plt.close()
 
     :param M:
@@ -3971,9 +3974,9 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_t
         ``str`` specifying the display format for the numerical entries inside the
         table. By default it is set to ``'%.2f'``.
     :param x_ticks: (optional)
-        ``bool`` specifying whether ticks on the :math:`x` -axis should be plotted.
+        ``bool`` specifying whether ticks on the :math:`x` -axis should be plotted or ``list`` specifying the ticks on the :math:`x` -axis.
     :param y_ticks: (optional)
-        ``bool`` specifying whether ticks on the :math:`y` -axis should be plotted.
+        ``bool`` specifying whether ticks on the :math:`y` -axis should be plotted or ``list`` specifying the ticks on the :math:`y` -axis.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param cbar: (optional)
@@ -4013,11 +4016,13 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_t
     if not isinstance(format_displayed, str):
         raise ValueError("Parameter `format_displayed` has to be of type `str`.")
 
-    if not isinstance(x_ticks, bool):
-        raise ValueError("Parameter `x_ticks` has to be of type `bool`.")
+    if x_ticks is not None:
+        if not isinstance(x_ticks, bool) and not isinstance(x_ticks, list):
+            raise ValueError("Parameter `x_ticks` has to be of type `bool` or `list`.")
 
-    if not isinstance(y_ticks, bool):
-        raise ValueError("Parameter `y_ticks` has to be of type `bool`.")
+    if y_ticks is not None:
+        if not isinstance(y_ticks, bool) and not isinstance(y_ticks, list):
+            raise ValueError("Parameter `y_ticks` has to be of type `bool` or `list`.")
 
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
@@ -4044,15 +4049,35 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_t
     fig = plt.figure(figsize=figure_size)
     ims = plt.imshow(M, cmap=color_map)
 
-    if x_ticks:
-        plt.xticks(np.arange(0,n_x))
-    else:
+    if isinstance(x_ticks, bool):
+        if x_ticks:
+            plt.xticks(np.arange(0,n_x))
+        else:
+            plt.xticks([])
+
+    if isinstance(y_ticks, bool):
+        if y_ticks:
+            plt.yticks(np.arange(0,n_y))
+        else:
+            plt.yticks([])
+
+    if x_ticks is None:
         plt.xticks([])
 
-    if y_ticks:
-        plt.yticks(np.arange(0,n_y))
-    else:
+    if y_ticks is None:
         plt.yticks([])
+
+    if isinstance(x_ticks, list):
+        if len(x_ticks) != n_x:
+            raise ValueError("Parameter `x_ticks` has to have elements of consistent size with the columns of the matrix `M`.")
+        else:
+            plt.xticks(np.arange(0,n_x), x_ticks, fontsize=font_axes, **csfont, rotation=90)
+
+    if isinstance(y_ticks, list):
+        if len(y_ticks) != n_y:
+            raise ValueError("Parameter `y_ticks` has to have elements of consistent size with the rows of the matrix `M`.")
+        else:
+            plt.yticks(np.arange(0,n_y), y_ticks, fontsize=font_axes, **csfont)
 
     if annotate:
         for i in range(n_x):
@@ -4074,7 +4099,7 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_t
 
 # ------------------------------------------------------------------------------
 
-def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=False, y_ticks=False, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=None, y_ticks=None, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
     """
     Plots a sequence of heatmaps for matrices :math:`\\mathbf{M}` stored in a list.
 
@@ -4109,9 +4134,9 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
         ``str`` specifying the display format for the numerical entries inside the
         table. By default it is set to ``'%.2f'``.
     :param x_ticks: (optional)
-        ``bool`` specifying whether ticks on the :math:`x` -axis should be plotted.
+        ``bool`` specifying whether ticks on the :math:`x` -axis should be plotted or ``list`` of ``list`` specifying the ticks on the :math:`x` -axis.
     :param y_ticks: (optional)
-        ``bool`` specifying whether ticks on the :math:`y` -axis should be plotted.
+        ``bool`` specifying whether ticks on the :math:`y` -axis should be plotted or ``list`` of ``list`` specifying the ticks on the :math:`y` -axis.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param cbar: (optional)
@@ -4152,11 +4177,13 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
     if not isinstance(format_displayed, str):
         raise ValueError("Parameter `format_displayed` has to be of type `str`.")
 
-    if not isinstance(x_ticks, bool):
-        raise ValueError("Parameter `x_ticks` has to be of type `bool`.")
+    if x_ticks is not None:
+        if not isinstance(x_ticks, bool) and not isinstance(x_ticks, list):
+            raise ValueError("Parameter `x_ticks` has to be of type `bool` or `list`.")
 
-    if not isinstance(y_ticks, bool):
-        raise ValueError("Parameter `y_ticks` has to be of type `bool`.")
+    if y_ticks is not None:
+        if not isinstance(y_ticks, bool) and not isinstance(y_ticks, list):
+            raise ValueError("Parameter `y_ticks` has to be of type `bool` or `list`.")
 
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
@@ -4196,15 +4223,35 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
         ax = fig.add_subplot(spec[0,index])
         ims = plt.imshow(element, cmap=color_map)
 
-        if x_ticks:
-            plt.xticks(np.arange(0,n_x))
-        else:
+        if isinstance(x_ticks, bool):
+            if x_ticks:
+                plt.xticks(np.arange(0,n_x))
+            else:
+                plt.xticks([])
+
+        if isinstance(y_ticks, bool):
+            if y_ticks:
+                plt.yticks(np.arange(0,n_y))
+            else:
+                plt.yticks([])
+
+        if x_ticks is None:
             plt.xticks([])
 
-        if y_ticks:
-            plt.yticks(np.arange(0,n_y))
-        else:
+        if y_ticks is None:
             plt.yticks([])
+
+        if isinstance(x_ticks, list):
+            if len(x_ticks[index]) != n_x:
+                raise ValueError("Parameter `x_ticks` has to have elements of consistent size with the columns of the matrix `M`.")
+            else:
+                plt.xticks(np.arange(0,n_x), x_ticks[index], fontsize=font_axes, **csfont, rotation=90)
+
+        if isinstance(y_ticks, list):
+            if len(y_ticks[index]) != n_y:
+                raise ValueError("Parameter `y_ticks` has to have elements of consistent size with the rows of the matrix `M`.")
+            else:
+                plt.yticks(np.arange(0,n_y), y_ticks[index], fontsize=font_axes, **csfont)
 
         if annotate:
             for i in range(n_x):

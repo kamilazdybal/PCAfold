@@ -2330,21 +2330,25 @@ class TestReduction(unittest.TestCase):
 
         try:
             plt = reduction.plot_heatmap(M)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
             plt = reduction.plot_heatmap(M[:,0:3])
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
             plt = reduction.plot_heatmap(M, annotate=True, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5, 5), title=None)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
             plt = reduction.plot_heatmap(M, annotate=True, text_color='w', format_displayed='%.1f', x_ticks=True, y_ticks=True, color_map='viridis', cbar=True, colorbar_label='C', figure_size=(10, 5), title='Title')
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
@@ -2352,6 +2356,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             plt = reduction.plot_heatmap(X)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
@@ -2359,6 +2364,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             plt = reduction.plot_heatmap(X)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
@@ -2386,10 +2392,10 @@ class TestReduction(unittest.TestCase):
             plt = reduction.plot_heatmap(M, format_displayed=[1])
 
         with self.assertRaises(ValueError):
-            plt = reduction.plot_heatmap(M, x_ticks=[1])
+            plt = reduction.plot_heatmap(M, x_ticks=1)
 
         with self.assertRaises(ValueError):
-            plt = reduction.plot_heatmap(M, y_ticks=[1])
+            plt = reduction.plot_heatmap(M, y_ticks=1)
 
         with self.assertRaises(ValueError):
             plt = reduction.plot_heatmap(M, color_map=[1])
@@ -2417,6 +2423,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             plt = reduction.plot_heatmap_sequence(M)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
@@ -2424,16 +2431,19 @@ class TestReduction(unittest.TestCase):
 
         try:
             plt = reduction.plot_heatmap_sequence(M)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
             plt = reduction.plot_heatmap_sequence(M, annotate=True, text_color='w', format_displayed='%.2f', color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5, 5), title=None)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
             plt = reduction.plot_heatmap_sequence(M, annotate=True, text_color='w', format_displayed='%.1f', x_ticks=True, y_ticks=True, color_map='viridis', cbar=True, colorbar_label='C', figure_size=(10, 5), title=['A', 'B'])
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
@@ -2441,6 +2451,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             plt = reduction.plot_heatmap_sequence(X)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
@@ -2448,6 +2459,7 @@ class TestReduction(unittest.TestCase):
 
         try:
             plt = reduction.plot_heatmap_sequence(X)
+            plt.close()
         except Exception:
             self.assertTrue(False)
 
@@ -2482,10 +2494,10 @@ class TestReduction(unittest.TestCase):
             plt = reduction.plot_heatmap_sequence(M, format_displayed=[1])
 
         with self.assertRaises(ValueError):
-            plt = reduction.plot_heatmap_sequence(M, x_ticks=[1])
+            plt = reduction.plot_heatmap_sequence(M, x_ticks=1)
 
         with self.assertRaises(ValueError):
-            plt = reduction.plot_heatmap_sequence(M, y_ticks=[1])
+            plt = reduction.plot_heatmap_sequence(M, y_ticks=1)
 
         with self.assertRaises(ValueError):
             plt = reduction.plot_heatmap_sequence(M, color_map=[1])
