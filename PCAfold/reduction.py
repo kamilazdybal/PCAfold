@@ -2702,7 +2702,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold given two vectors defining the manifold.
 
@@ -2749,6 +2749,8 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param grid_on:
+        ``bool`` specifying whether grid should be plotted.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
@@ -2846,7 +2848,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
     plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
-    plt.grid(alpha=grid_opacity)
+    if grid_on: plt.grid(alpha=grid_opacity)
 
     if isinstance(color, np.ndarray):
         if color is not None:
@@ -3064,7 +3066,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
 
 # ------------------------------------------------------------------------------
 
-def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=False, colorbar_label=None, color_map='viridis', figure_size=(7,3), title=None, save_filename=None):
+def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=False, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,3), title=None, save_filename=None):
     """
     Plots a sequence of two-dimensional manifolds given a list of two vectors defining the manifold.
 
@@ -3110,6 +3112,8 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param grid_on:
+        ``bool`` specifying whether grid should be plotted.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
@@ -3231,6 +3235,7 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         ax.set_yticklabels([], fontdict=None, minor=False)
         ax.set_xticks([])
         ax.set_yticks([])
+        if grid_on: plt.grid(alpha=grid_opacity)
 
         if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
 
@@ -3252,7 +3257,7 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
 
 # ------------------------------------------------------------------------------
 
-def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a parity plot between a variable and its reconstruction.
 
@@ -3300,6 +3305,8 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param grid_on:
+        ``bool`` specifying whether grid should be plotted.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
@@ -3405,7 +3412,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
     plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
     if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
-    plt.grid(alpha=grid_opacity)
+    if grid_on: plt.grid(alpha=grid_opacity)
 
     if not isinstance(color, str):
         if color is not None:

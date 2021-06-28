@@ -34,27 +34,19 @@ Generate independent variables :math:`x` and :math:`y` from a uniform grid:
 
 .. code:: python
 
-  n_points = 100
-
-  x = np.tile(np.linspace(0,100,n_points), n_points)
-  y = np.zeros((n_points,1))
-  for i in range(1,n_points):
-      y = np.vstack((y, np.ones((n_points,1))*i))
-  y = y.ravel()
-
-  xy = np.hstack((x[:,None],y[:,None]))
-
-  (n_observations, _) = np.shape(xy)
+    n_points = 100
+    grid = np.linspace(0,100,n_points)
+    x, y = np.meshgrid(grid, grid)
+    x = x.flatten()
+    y = y.flatten()
+    xy = np.hstack((x[:,None],y[:,None]))
+    (n_observations, _) = np.shape(xy)
 
 Generate a dependent variable :math:`\phi` as a linear function of :math:`x`:
 
 .. code:: python
 
-  phi = np.zeros((n_points*n_points,1))
-
-  for observation, x_value in enumerate(x):
-
-      phi[observation] = x_value
+    phi = xy[:,0:1]**2
 
 Visualize the generated data set:
 

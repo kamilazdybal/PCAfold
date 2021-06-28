@@ -1275,12 +1275,12 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     color_observed = '#191b27'
-    color_predicted = '#ff928b'
+    color_predicted = '#C7254E'
 
     fig = plt.figure(figsize=figure_size)
 
     scat = plt.scatter(x.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=0.1)
-    scat = plt.scatter(x.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=1)
+    scat = plt.scatter(x.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=0.4)
 
     if x_label != None: plt.xlabel(x_label, **csfont, fontsize=font_labels)
     if y_label != None: plt.ylabel(y_label, **csfont, fontsize=font_labels)
@@ -1443,13 +1443,13 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     color_observed = '#191b27'
-    color_predicted = '#ff928b'
+    color_predicted = '#C7254E'
 
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111, projection='3d')
 
     scat = ax.scatter(x.ravel(), y.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=0.1)
-    scat = ax.scatter(x.ravel(), y.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=1)
+    scat = ax.scatter(x.ravel(), y.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=0.4)
 
     if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
     if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
@@ -1472,7 +1472,7 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     for label in (ax.get_zticklabels()):
         label.set_fontsize(font_axes)
 
-    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, bbox_to_anchor=(1,1), loc="upper left")
+    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, bbox_to_anchor=(0.9,0.9), loc="upper left")
     lgnd.legendHandles[0]._sizes = [marker_size*5]
     lgnd.legendHandles[1]._sizes = [marker_size*5]
 
@@ -1921,8 +1921,8 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
     figure = plt.figure(figsize=figure_size)
     plt.scatter(bin_centers, r2_in_bins, c='#191b27')
     plt.grid(alpha=0.3)
-    if variable_name != None: plt.xlabel(variable_name)
-    plt.ylabel('$R^2$ [-]')
+    if variable_name != None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
+    plt.ylabel('$R^2$ [-]', **csfont, fontsize=font_labels)
 
     if title != None: plt.title(title, fontsize=font_title, **csfont)
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
