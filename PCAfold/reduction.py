@@ -1650,7 +1650,9 @@ class SubsetPCA:
     - **S** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the covariance matrix, :math:`\mathbf{S}`.
     - **L** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the vector of eigenvalues, :math:`\mathbf{L}`.
     - **A** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the matrix of eigenvectors, :math:`\mathbf{A}`.
-    - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`.
+    - **principal_components** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the principal components, :math:`\mathbf{Z}`.
+    - **PC_source_terms** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the PC source terms, :math:`\mathbf{S_Z}`.
+    - **variable_sequence - (read only) ``list`` or ``list`` of ``list`` specifying the names of variables that were used in each subset PCA.
     """
 
     def __init__(self, X, X_source=None, full_sequence=True, subset_indices=None, variable_names=None, scaling='std', n_components=2, use_eigendec=True, nocenter=False, verbose=False):
