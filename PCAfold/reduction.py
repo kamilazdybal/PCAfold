@@ -1652,7 +1652,7 @@ class SubsetPCA:
     - **A** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the matrix of eigenvectors, :math:`\mathbf{A}`.
     - **principal_components** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the principal components, :math:`\mathbf{Z}`.
     - **PC_source_terms** - (read only) ``numpy.ndarray`` or ``list`` of ``numpy.ndarray`` specifying the PC source terms, :math:`\mathbf{S_Z}`.
-    - **variable_sequence - (read only) ``list`` or ``list`` of ``list`` specifying the names of variables that were used in each subset PCA.
+    - **variable_sequence** - (read only) ``list`` or ``list`` of ``list`` specifying the names of variables that were used in each subset PCA.
     """
 
     def __init__(self, X, X_source=None, full_sequence=True, subset_indices=None, variable_names=None, scaling='std', n_components=2, use_eigendec=True, nocenter=False, verbose=False):
@@ -1731,8 +1731,8 @@ class SubsetPCA:
 
                 # Append the current subset PCA solution:
                 covariance_matrix.append(global_pca.S)
-                eigenvectors.append(global_pca.A[:,0:n_components])
-                eigenvalues.append(global_pca.L[0:n_components])
+                eigenvectors.append(global_pca.A)
+                eigenvalues.append(global_pca.L)
                 PCs.append(global_PCs)
                 if X_source is not None: PC_source_terms.append(global_PC_sources)
                 variable_sequence.append(variable_names[0:i_subset])
@@ -1744,8 +1744,8 @@ class SubsetPCA:
 
             # Append the current subset PCA solution:
             covariance_matrix = global_pca.S
-            eigenvectors = global_pca.A[:,0:n_components]
-            eigenvalues = global_pca.L[0:n_components]
+            eigenvectors = global_pca.A
+            eigenvalues = global_pca.L
             PCs = global_pca.transform(X[:,subset_indices], nocenter=False)
             if X_source is not None: PC_source_terms = global_pca.transform(X_source[:,subset_indices], nocenter=True)
             variable_sequence = list(variable_names[i] for i in subset_indices)
