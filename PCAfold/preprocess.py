@@ -3111,19 +3111,20 @@ def get_populations(idx):
     """
 
     if isinstance(idx, np.ndarray):
-        if not all(isinstance(i, np.integer) for i in idx):
+        try:
+            (n_observations, ) = np.shape(idx)
+            n_idx = 1
+        except:
+            (n_observations, n_idx) = np.shape(idx)
+            idx = idx.ravel()
+
+        if n_idx != 1:
+            raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
             raise ValueError("Parameter `idx` can only contain integers.")
     else:
         raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
-
-    try:
-        (n_observations, ) = np.shape(idx)
-        n_idx = 1
-    except:
-        (n_observations, n_idx) = np.shape(idx)
-
-    if n_idx != 1:
-        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     populations = []
 
@@ -3413,7 +3414,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', first_cluster_index_zero=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a three-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -3460,6 +3461,8 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         label will not be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param alphas: (optional)
+        ``list`` specifying the opacity of each cluster.
     :param first_cluster_index_zero: (optional)
         ``bool`` specifying if the first cluster should be indexed ``0`` on the plot.
         If set to ``False`` the first cluster will be indexed ``1``.
@@ -3518,19 +3521,20 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         raise ValueError("Parameters `x`, `y` and `z` have different number of observations.")
 
     if isinstance(idx, np.ndarray):
-        if not all(isinstance(i, np.integer) for i in idx):
+        try:
+            (n_observations_idx, ) = np.shape(idx)
+            n_variables = 1
+        except:
+            (n_observations_idx, n_variables) = np.shape(idx)
+            idx = idx.ravel()
+
+        if n_variables != 1:
+            raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
             raise ValueError("Parameter `idx` can only contain integers.")
     else:
         raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
-
-    try:
-        (n_observations_idx, ) = np.shape(idx)
-        n_variables = 1
-    except:
-        (n_observations_idx, n_variables) = np.shape(idx)
-
-    if n_variables != 1:
-        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
 
     if n_observations_x != n_observations_idx:
         raise ValueError("Parameter `idx` has different number of observations than parameters `x`, `y` and `z`.")
@@ -3550,6 +3554,15 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
+    if alphas is not None:
+        if not isinstance(alphas, list):
+            raise ValueError("Parameter `alphas` has to be of type `list`.")
+        else:
+            if len(alphas) != len(np.unique(idx)):
+                raise ValueError("Parameter `alphas` has to have length equal to the number of clusters.")
+    else:
+        alphas = [1 for i in range(0,len(np.unique(idx)))]
 
     if not isinstance(first_cluster_index_zero, bool):
         raise ValueError("Parameter `first_cluster_index_zero` has to be of type `bool`.")
@@ -3625,9 +3638,9 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
 
     for k in range(0,n_clusters):
         if first_cluster_index_zero:
-            ax.scatter(x[np.where(idx==k)], y[np.where(idx==k)], z[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k) + '}$ - ' + str(populations[k]))
+            ax.scatter(x[np.where(idx==k)], y[np.where(idx==k)], z[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, alpha=alphas[k], label='$k_{' + str(k) + '}$ - ' + str(populations[k]))
         else:
-            ax.scatter(x[np.where(idx==k)], y[np.where(idx==k)], z[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
+            ax.scatter(x[np.where(idx==k)], y[np.where(idx==k)], z[np.where(idx==k)], color=cluster_colors[k], marker='o', s=scatter_point_size, alpha=alphas[k], label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
 
     plt.legend(bbox_to_anchor=(1.3, 1), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
 

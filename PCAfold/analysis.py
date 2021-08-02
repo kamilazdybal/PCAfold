@@ -1920,7 +1920,7 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
 
     figure = plt.figure(figsize=figure_size)
     plt.scatter(bin_centers, r2_in_bins, c='#191b27')
-    plt.grid(alpha=0.3)
+    plt.grid(alpha=grid_opacity)
     if variable_name != None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
     plt.ylabel('$R^2$ [-]', **csfont, fontsize=font_labels)
 
