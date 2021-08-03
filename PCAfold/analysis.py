@@ -255,15 +255,15 @@ def normalized_variance_derivative(variance_data):
     x_minus = variance_data.bandwidth_values[:-2]
     x = variance_data.bandwidth_values[1:-1]
     derivative_dict = {}
-    max_derivatives = []
+    max_derivatives_dict = {}
     for key in variance_data.variable_names:
         y_plus = variance_data.normalized_variance[key][2:]
         y_minus = variance_data.normalized_variance[key][:-2]
         derivative = (y_plus-y_minus)/(np.log10(x_plus)-np.log10(x_minus)) + variance_data.normalized_variance_limit[key]
         scaled_derivative = derivative/np.max(derivative)
         derivative_dict[key] = scaled_derivative
-        max_derivatives.append(np.max(derivative))
-    return derivative_dict, x, max_derivatives
+        max_derivatives_dict[key] = np.max(derivative)
+    return derivative_dict, x, max_derivatives_dict
 
 # ------------------------------------------------------------------------------
 
