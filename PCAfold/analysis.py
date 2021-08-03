@@ -255,13 +255,15 @@ def normalized_variance_derivative(variance_data):
     x_minus = variance_data.bandwidth_values[:-2]
     x = variance_data.bandwidth_values[1:-1]
     derivative_dict = {}
+    max_derivatives = []
     for key in variance_data.variable_names:
         y_plus = variance_data.normalized_variance[key][2:]
         y_minus = variance_data.normalized_variance[key][:-2]
         derivative = (y_plus-y_minus)/(np.log10(x_plus)-np.log10(x_minus)) + variance_data.normalized_variance_limit[key]
         scaled_derivative = derivative/np.max(derivative)
         derivative_dict[key] = scaled_derivative
-    return derivative_dict, x
+        max_derivatives.append(np.max(derivative))
+    return derivative_dict, x, max_derivatives
 
 # ------------------------------------------------------------------------------
 
@@ -407,7 +409,7 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
                                                       max_bandwidth=max_bandwidth, bandwidth_values=bandwidth_values,
                                                       scale_unit_box=scale_unit_box, n_threads=n_threads)
 
-            der, xder = normalized_variance_derivative(nv_data[it])
+            der, xder, _ = normalized_variance_derivative(nv_data[it])
             for key in der.keys():
                 if it == 0:
                     avg_der[key] = der[key] / np.float(n_sample_iterations)
@@ -1736,7 +1738,7 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
 
     # Extract quantities from the VarianceData class object:
     variable_names = variance_data.variable_names
-    derivatives, bandwidth_values = normalized_variance_derivative(variance_data)
+    derivatives, bandwidth_values, _ = normalized_variance_derivative(variance_data)
 
     if len(plot_variables) != 0:
         variables_to_plot = []
@@ -1827,7 +1829,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
 
         # Extract quantities from the VarianceData class object:
         variable_names = variance_data.variable_names
-        derivatives, bandwidth_values = normalized_variance_derivative(variance_data)
+        derivatives, bandwidth_values, _ = normalized_variance_derivative(variance_data)
 
         if len(plot_variables) != 0:
             variables_to_plot = []
