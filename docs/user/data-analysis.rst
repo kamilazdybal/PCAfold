@@ -121,6 +121,16 @@ Class ``KReg``
 Regression assessment
 ***********************
 
+Class ``RegressionAssessment``
+================================================
+
+.. autoclass:: PCAfold.analysis.RegressionAssessment
+
+``RegressionAssessment.print_metrics``
+================================================
+
+.. autofunction:: PCAfold.analysis.RegressionAssessment.print_metrics
+
 ``coefficient_of_determination``
 ================================================
 
