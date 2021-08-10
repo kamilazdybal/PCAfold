@@ -517,7 +517,14 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 def coefficient_of_determination(observed, predicted):
     """
-    Computes the coefficient of determination, :math:`R^2`, value.
+    Computes the coefficient of determination, :math:`R^2`, value:
+
+    .. math::
+
+        R^2 = 1 - \\frac{\\sum_{i=1}^N (\\phi_{o,i} - \\phi_{p,i})^2}{\\sum_{i=1}^N (\\phi_{o,i} - \\mathrm{mean}(\\phi_{o,i}))^2}
+
+    where :math:`N` is the number of observations, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
 
     **Example:**
 
@@ -539,9 +546,9 @@ def coefficient_of_determination(observed, predicted):
         r2 = coefficient_of_determination(X[:,0], X_rec[:,0])
 
     :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
 
     :return:
         - **r2** - coefficient of determination, :math:`R^2`.
@@ -593,13 +600,13 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
     .. math::
 
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - mean(\\phi_o))^2}
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\mathrm{mean}(\\phi_o))^2}
 
     - If ``use_global_mean=False``, the mean of the considered :math:`j^{th}` bin is used as a reference:
 
     .. math::
 
-        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - mean(\\phi_o^{j}))^2}
+        R_j^2 = 1 - \\frac{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\phi_{p,i}^{j})^2}{\\sum_{i=1}^{N_j} (\\phi_{o,i}^{j} - \\mathrm{mean}(\\phi_o^{j}))^2}
 
     where :math:`N_j` is the number of observations in the :math:`j^{th}` bin and
     :math:`\\phi_p` is the predicted dependent variable.
@@ -739,9 +746,88 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
 # ------------------------------------------------------------------------------
 
+def mean_absolute_error(observed, predicted):
+    """
+    Computes the mean absolute error (MAE):
+
+    .. math::
+
+        \\mathrm{MAE} = \\frac{1}{N} \\sum_{i=1}^N | \\phi_{o,i} - \\phi_{p,i} |
+
+    where :math:`N` is the number of observations, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, mean_absolute_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the mean absolute error for the first variable:
+        mse = mean_absolute_error(X[:,0], X_rec[:,0])
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **mae** - mean absolute error (MAE).
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    mae = np.sum(abs(observed - predicted)) / n_observed
+
+    return mae
+
+# ------------------------------------------------------------------------------
+
 def mean_squared_error(observed, predicted):
     """
-    Computes the mean squared error.
+    Computes the mean squared error (MSE):
+
+    .. math::
+
+        \\mathrm{MSE} = \\frac{1}{N} \\sum_{i=1}^N (\\phi_{o,i} - \\phi_{p,i}) ^2
+
+    where :math:`N` is the number of observations, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
 
     **Example:**
 
@@ -763,12 +849,12 @@ def mean_squared_error(observed, predicted):
         mse = mean_squared_error(X[:,0], X_rec[:,0])
 
     :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
 
     :return:
-        - **mse** - mean squared error.
+        - **mse** - mean squared error (MSE).
     """
 
     if not isinstance(observed, np.ndarray):
@@ -806,7 +892,14 @@ def mean_squared_error(observed, predicted):
 
 def root_mean_squared_error(observed, predicted):
     """
-    Computes the root mean squared error.
+    Computes the root mean squared error (RMSE):
+
+    .. math::
+
+        \\mathrm{RMSE} = \\sqrt{\\frac{1}{N} \\sum_{i=1}^N (\\phi_{o,i} - \\phi_{p,i}) ^2}
+
+    where :math:`N` is the number of observations, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
 
     **Example:**
 
@@ -828,12 +921,12 @@ def root_mean_squared_error(observed, predicted):
         rmse = root_mean_squared_error(X[:,0], X_rec[:,0])
 
     :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
 
     :return:
-        - **rmse** - root mean squared error.
+        - **rmse** - root mean squared error (RMSE).
     """
 
     if not isinstance(observed, np.ndarray):
@@ -871,7 +964,32 @@ def root_mean_squared_error(observed, predicted):
 
 def normalized_root_mean_squared_error(observed, predicted, norm='std'):
     """
-    Computes the normalized root mean squared error.
+    Computes the normalized root mean squared error (NRMSE):
+
+    .. math::
+
+        \\mathrm{NRMSE} = \\frac{1}{d_{norm}} \\sqrt{\\frac{1}{N} \\sum_{i=1}^N (\\phi_{o,i} - \\phi_{p,i}) ^2}
+
+    where :math:`d_{norm}` is the normalization factor, :math:`N` is the number of observations, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    Various normalizations are available:
+
+    +----------------------------+--------------------------+------------------------------------------------------------------------------+
+    | Normalization              | ``norm``                 | Normalization factor :math:`d_{norm}`                                        |
+    +============================+==========================+==============================================================================+
+    | Root square mean           | ``'root_square_mean'``   | :math:`d_{norm} = \sqrt{\mathrm{mean}(\phi_o^2)}`                            |
+    +----------------------------+--------------------------+------------------------------------------------------------------------------+
+    | Std                        | ``'std'``                | :math:`d_{norm} = \mathrm{std}(\phi_o)`                                      |
+    +----------------------------+--------------------------+------------------------------------------------------------------------------+
+    | Range                      | ``'range'``              | :math:`d_{norm} = \mathrm{max}(\phi_o) - \mathrm{min}(\phi_o)`               |
+    +----------------------------+--------------------------+------------------------------------------------------------------------------+
+    | Root square range          | ``'root_square_range'``  | :math:`d_{norm} = \sqrt{\mathrm{max}(\phi_o^2) - \mathrm{min}(\phi_o^2)}``   |
+    +----------------------------+--------------------------+------------------------------------------------------------------------------+
+    | Root square std            | ``'root_square_std'``    | :math:`d_{norm} = \sqrt{\mathrm{std}(\phi_o^2)}`                             |
+    +----------------------------+--------------------------+------------------------------------------------------------------------------+
+    | Absolute mean              | ``'abs_mean'``           | :math:`d_{norm} = | \mathrm{mean}(\phi_o) |`                                 |
+    +----------------------------+--------------------------+------------------------------------------------------------------------------+
 
     **Example:**
 
@@ -893,14 +1011,14 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
         nrmse = normalized_root_mean_squared_error(X[:,0], X_rec[:,0], norm='std')
 
     :param observed:
-        ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
-        ``numpy.ndarray`` specifying the predicted values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
-    :parm norm:
-        ``str`` specifying the normalization. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param norm:
+        ``str`` specifying the normalization, :math:`d_{norm}`. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
 
     :return:
-        - **nrmse** - normalized root mean squared error.
+        - **nrmse** - normalized root mean squared error (NRMSE).
     """
 
     if not isinstance(observed, np.ndarray):

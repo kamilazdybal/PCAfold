@@ -131,6 +131,11 @@ Regression assessment
 
 .. autofunction:: PCAfold.analysis.stratified_coefficient_of_determination
 
+``mean_absolute_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.mean_absolute_error
+
 ``mean_squared_error``
 ================================================
 
