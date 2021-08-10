@@ -544,61 +544,6 @@ class RegressionAssessment:
         # Access mean absolute error values:
         MAE = regression_metrics.mean_absolute_error
 
-        # Print regression metrics:
-        regression_metrics.print_metrics(raw_table=True, tex_table=True, pandas_table=True)
-
-    .. note::
-
-        ``raw_table=True`` will result in printing:
-
-        .. code-block:: text
-
-            --------------------
-            X1
-            R2:         0.6053
-            MAE:	0.1442
-            MSE:	0.0317
-            RMSE:	0.1781
-            NRMSE:	0.6282
-            --------------------
-            X2
-            R2:         0.5234
-            MAE:	0.1625
-            MSE:	0.0403
-            RMSE:	0.2007
-            NRMSE:	0.6903
-            --------------------
-            X3
-            R2:         0.9386
-            MAE:	0.0562
-            MSE:	0.0048
-            RMSE:	0.0695
-            NRMSE:	0.2477
-
-        ``tex_table=True`` will result in printing:
-
-        .. code-block:: text
-
-            \\begin{table}[h!]
-            \\begin{center}
-            \\begin{tabular}{llll} \\toprule
-             & \\textit{X1} & \\textit{X2} & \\textit{X3} \\\\ \\midrule
-            $R^2$ & 0.6053 & 0.5234 & 0.9386 \\\\
-            MAE & 0.1442 & 0.1625 & 0.0562 \\\\
-            MSE & 0.0317 & 0.0403 & 0.0048 \\\\
-            RMSE & 0.1781 & 0.2007 & 0.0695 \\\\
-            NRMSE & 0.6282 & 0.6903 & 0.2477 \\\\
-            \\end{tabular}
-            \\caption{}\\label{}
-            \\end{center}
-            \\end{table}
-
-        ``pandas_table=True`` (works well in Jupyter notebooks) will result in printing:
-
-        .. image:: ../images/generate-pandas-table.png
-            :width: 300
-            :align: center
-
     :param observed:
         ``numpy.ndarray`` specifying the observed values of dependent variables, :math:`\\pmb{\\phi}_o`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
     :param predicted:
@@ -607,6 +552,8 @@ class RegressionAssessment:
         ``list`` of ``str`` specifying variable names.
     :param norm:
         ``str`` specifying the normalization, :math:`d_{norm}`, for NRMSE computation. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
+    :param tolerance:
+        ``float`` specifying the tolerance for GDE computation.
 
     **Attributes:**
 
@@ -615,9 +562,10 @@ class RegressionAssessment:
     - **mean_squared_error** - (read only) ``numpy.ndarray`` specifying the mean squared error (MSE) values. It has size ``(1,n_variables)``.
     - **root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
     - **normalized root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
+    - **good_direction_estimate** - (read only) ``float`` specifying the good direction estimate (GDE) value, treating the entire :math:`\\pmb{\\phi}_o` and :math:`\\pmb{\\phi}_p` as vectors.
     """
 
-    def __init__(self, observed, predicted, variable_names=None, norm='std'):
+    def __init__(self, observed, predicted, variable_names=None, norm='std', tolerance=0.05):
 
         if not isinstance(observed, np.ndarray):
             raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
@@ -665,6 +613,8 @@ class RegressionAssessment:
         self.__mean_squared_error_matrix = np.ones((1,self.__n_variables))
         self.__root_mean_squared_error_matrix = np.ones((1,self.__n_variables))
         self.__normalized_root_mean_squared_error_matrix = np.ones((1,self.__n_variables))
+        _, self.__good_direction_estimate_value = good_direction_estimate(observed, predicted, tolerance=tolerance)
+        self.__good_direction_estimate_matrix = self.__good_direction_estimate_value * np.ones((1,self.__n_variables))
 
         for i in range(0,self.__n_variables):
 
@@ -694,9 +644,93 @@ class RegressionAssessment:
     def normalized_root_mean_squared_error(self):
         return self.__normalized_root_mean_squared_error_matrix
 
+    @property
+    def good_direction_estimate(self):
+        return self.__good_direction_estimate_value
+
+# ------------------------------------------------------------------------------
+
     def print_metrics(self, raw_table=True, tex_table=False, pandas_table=False, format_displayed='%.4f'):
         """
         Prints all regression assessment metrics either as raw text or in a tex format or as ``pandas.DataFrame``.
+
+        **Example:**
+
+        .. code:: python
+
+            from PCAfold import PCA, RegressionAssessment
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,3)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+
+            # Approximate the data set:
+            X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+            # Instantiate RegressionAssessment class object:
+            regression_metrics = RegressionAssessment(X, X_rec)
+
+            # Print regression metrics:
+            regression_metrics.print_metrics(raw_table=True, tex_table=True, pandas_table=True)
+
+        .. note::
+
+            ``raw_table=True`` will result in printing:
+
+            .. code-block:: text
+
+                --------------------
+                X1
+                R2: 	0.7889
+                MAE:	0.1030
+                MSE:	0.0170
+                RMSE:	0.1305
+                NRMSE:	0.4594
+                GDE:	75.0000
+                --------------------
+                X2
+                R2: 	0.5134
+                MAE:	0.1640
+                MSE:	0.0432
+                RMSE:	0.2077
+                NRMSE:	0.6976
+                GDE:	75.0000
+                --------------------
+                X3
+                R2: 	0.8010
+                MAE:	0.0906
+                MSE:	0.0132
+                RMSE:	0.1148
+                NRMSE:	0.4461
+                GDE:	75.0000
+
+            ``tex_table=True`` will result in printing:
+
+            .. code-block:: text
+
+                \\begin{table}[h!]
+                \\begin{center}
+                \\begin{tabular}{llll} \\toprule
+                 & \\textit{X1} & \\textit{X2} & \\textit{X3} \\\\ \\midrule
+                $R^2$ & 0.7889 & 0.5134 & 0.8010 \\\\
+                MAE & 0.1030 & 0.1640 & 0.0906 \\\\
+                MSE & 0.0170 & 0.0432 & 0.0132 \\\\
+                RMSE & 0.1305 & 0.2077 & 0.1148 \\\\
+                NRMSE & 0.4594 & 0.6976 & 0.4461 \\\\
+                GDE & 75.0000 & 75.0000 & 75.0000 \\\\
+                \\end{tabular}
+                \\caption{}\\label{}
+                \\end{center}
+                \\end{table}
+
+            ``pandas_table=True`` (works well in Jupyter notebooks) will result in printing:
+
+            .. image:: ../images/generate-pandas-table.png
+                :width: 300
+                :align: center
 
         :param raw_table: (optional)
             ``bool`` specifying whether table should be printed in a raw text format.
@@ -721,8 +755,8 @@ class RegressionAssessment:
         if not isinstance(format_displayed, str):
             raise ValueError("Parameter `format_displayed` has to be of type `str`.")
 
-        metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE']
-        metrics_names_tex = ['$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE']
+        metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
+        metrics_names_tex = ['$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
 
         if raw_table:
 
@@ -732,14 +766,14 @@ class RegressionAssessment:
 
                 for j in range(0,len(metrics_names)):
 
-                    metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i]]
+                    metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
                     print(metrics_names[j] + ':\t' + format_displayed % metrics[j])
 
         if tex_table:
 
             import pandas as pd
 
-            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix))
+            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
             metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
 
             generate_tex_table(metrics_table, format_displayed=format_displayed)
@@ -751,7 +785,7 @@ class RegressionAssessment:
             pandas_format = '{:,' + format_displayed[1::] + '}'
             pd.options.display.float_format = pandas_format.format
 
-            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix))
+            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
             metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
             display(metrics_table)
 
