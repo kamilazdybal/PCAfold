@@ -121,6 +121,16 @@ Class ``KReg``
 Regression assessment
 ***********************
 
+Class ``RegressionAssessment``
+================================================
+
+.. autoclass:: PCAfold.analysis.RegressionAssessment
+
+``RegressionAssessment.print_metrics``
+================================================
+
+.. autofunction:: PCAfold.analysis.RegressionAssessment.print_metrics
+
 ``coefficient_of_determination``
 ================================================
 
@@ -130,6 +140,11 @@ Regression assessment
 ================================================
 
 .. autofunction:: PCAfold.analysis.stratified_coefficient_of_determination
+
+``mean_absolute_error``
+================================================
+
+.. autofunction:: PCAfold.analysis.mean_absolute_error
 
 ``mean_squared_error``
 ================================================

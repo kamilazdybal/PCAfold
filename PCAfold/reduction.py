@@ -677,7 +677,7 @@ class PCA:
         :param n_pcs:
             the maximum number of PCs to consider.
         :param variable_names: (optional)
-            ``list`` of strings specifying variable names. If not specified variables will be numbered.
+            ``list`` of 'str' specifying variable names. If not specified variables will be numbered.
         :param print_width: (optional)
             width of columns printed out.
         :param verbose: (optional)
