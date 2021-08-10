@@ -250,6 +250,7 @@ def normalized_variance_derivative(variance_data):
     :return:
         - a dictionary of :math:`\\hat{\\mathcal{D}}(\\sigma)` for each variable in the provided ``VarianceData`` object
         - the :math:`\\sigma` values where :math:`\\hat{\\mathcal{D}}(\\sigma)` was computed
+        - a dictionary of :math:`\\max(\\mathcal{D}(\\sigma))` values for each variable in the provided ``VarianceData`` object.
     """
     x_plus = variance_data.bandwidth_values[2:]
     x_minus = variance_data.bandwidth_values[:-2]
@@ -518,7 +519,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 class RegressionAssessment:
     """
     Wrapper class for storing all regression assessment metrics for a given
-    regression solution given by the observed dependent variables, :math:`\\pmb{\\phi}_o`
+    regression solution given by the observed dependent variables, :math:`\\pmb{\\phi}_o`,
     and the predicted dependent variables, :math:`\\pmb{\\phi}_p`.
 
     **Example:**
@@ -529,7 +530,7 @@ class RegressionAssessment:
         import numpy as np
 
         # Generate dummy data set:
-        X = np.random.rand(100,5)
+        X = np.random.rand(100,3)
 
         # Instantiate PCA class object:
         pca_X = PCA(X, scaling='auto', n_components=2)
@@ -544,7 +545,59 @@ class RegressionAssessment:
         MAE = regression_metrics.mean_absolute_error
 
         # Print regression metrics:
-        regression_metrics.print_metrics(raw_table=False, tex_table=True, pandas_table=True)
+        regression_metrics.print_metrics(raw_table=True, tex_table=True, pandas_table=True)
+
+    .. note::
+
+        ``raw_table=True`` will result in printing:
+
+        .. code-block:: text
+
+            --------------------
+            X1
+            R2:         0.6053
+            MAE:	0.1442
+            MSE:	0.0317
+            RMSE:	0.1781
+            NRMSE:	0.6282
+            --------------------
+            X2
+            R2:         0.5234
+            MAE:	0.1625
+            MSE:	0.0403
+            RMSE:	0.2007
+            NRMSE:	0.6903
+            --------------------
+            X3
+            R2:         0.9386
+            MAE:	0.0562
+            MSE:	0.0048
+            RMSE:	0.0695
+            NRMSE:	0.2477
+
+        ``tex_table=True`` will result in printing:
+
+        .. code-block:: text
+
+            \\begin{table}[h!]
+            \\begin{center}
+            \\begin{tabular}{llll} \\toprule
+             & \\textit{X1} & \\textit{X2} & \\textit{X3} \\\\ \\midrule
+            $R^2$ & 0.6053 & 0.5234 & 0.9386 \\\\
+            MAE & 0.1442 & 0.1625 & 0.0562 \\\\
+            MSE & 0.0317 & 0.0403 & 0.0048 \\\\
+            RMSE & 0.1781 & 0.2007 & 0.0695 \\\\
+            NRMSE & 0.6282 & 0.6903 & 0.2477 \\\\
+            \\end{tabular}
+            \\caption{}\\label{}
+            \\end{center}
+            \\end{table}
+
+        ``pandas_table=True`` (works well in Jupyter notebooks) will result in printing:
+
+        .. image:: ../images/generate-pandas-table.png
+            :width: 300
+            :align: center
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of dependent variables, :math:`\\pmb{\\phi}_o`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
@@ -695,6 +748,8 @@ class RegressionAssessment:
 
             import pandas as pd
             from IPython.display import display
+            pandas_format = '{:,' + format_displayed[1::] + '}'
+            pd.options.display.float_format = pandas_format.format
 
             metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix))
             metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
@@ -961,7 +1016,7 @@ def mean_absolute_error(observed, predicted):
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute the mean absolute error for the first variable:
-        mse = mean_absolute_error(X[:,0], X_rec[:,0])
+        mae = mean_absolute_error(X[:,0], X_rec[:,0])
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -1259,13 +1314,13 @@ def turning_points(observed, predicted):
     Computes the turning points percentage - the percentage of predicted outputs
     that have the opposite growth tendency to the corresponding observed growth tendency.
 
+    .. warning::
+
+        This function is under construction.
+
     :return:
         - **turning_points** - turning points percentage in %.
     """
-
-
-
-
 
     return turning_points
 
@@ -1275,6 +1330,10 @@ def good_estimate(observed, predicted, tolerance=0.05):
     """
     Computes the good estimate (GE) - the percentage of predicted values that
     are within the specified tolerance from the corresponding observed values.
+
+    .. warning::
+
+        This function is under construction.
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -1286,11 +1345,6 @@ def good_estimate(observed, predicted, tolerance=0.05):
     :return:
         - **good_estimate** - good estimate (GE) in %.
     """
-
-
-
-
-
 
     return good_estimate
 

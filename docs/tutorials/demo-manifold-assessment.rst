@@ -214,7 +214,7 @@ is demonstrated for the one-dimensional projection onto x below.
 
 .. code:: python
 
-    orig1Dx_derivative, orig1Dx_sigma = normalized_variance_derivative(orig1Dx)
+    orig1Dx_derivative, orig1Dx_sigma, _ = normalized_variance_derivative(orig1Dx)
     orig1Dx_peak_locs, orig1Dx_peak_values = find_local_maxima(orig1Dx_derivative[depvar_name], orig1Dx_sigma, show_plot=True)
     print('peak locations:', orig1Dx_peak_locs)
     print('peak values:', orig1Dx_peak_values)
@@ -412,9 +412,9 @@ We compute the locations of the peaks in :math:`\hat{\mathcal{D}}` over
 
 .. code:: python
 
-    pca2D_std_derivative, pca2D_std_sigma  = normalized_variance_derivative(pca2D_std)
-    pca2D_pareto_derivative, pca2D_pareto_sigma  = normalized_variance_derivative(pca2D_pareto)
-    orig2D_derivative,  orig2D_sigma  = normalized_variance_derivative(orig2D)
+    pca2D_std_derivative, pca2D_std_sigma, _  = normalized_variance_derivative(pca2D_std)
+    pca2D_pareto_derivative, pca2D_pareto_sigma, _ = normalized_variance_derivative(pca2D_pareto)
+    orig2D_derivative, orig2D_sigma, _ = normalized_variance_derivative(orig2D)
 
     pca2D_std_peak_locs, _ = find_local_maxima(pca2D_std_derivative[depvar_name], pca2D_std_sigma)
     pca2D_pareto_peak_locs, _ = find_local_maxima(pca2D_pareto_derivative[depvar_name], pca2D_pareto_sigma)
