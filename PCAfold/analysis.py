@@ -10,6 +10,7 @@ __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "
 __status__ = "Production"
 
 import numpy as np
+import copy as cp
 import multiprocessing as multiproc
 from PCAfold import KReg
 from scipy.spatial import KDTree
@@ -20,7 +21,9 @@ import random as rnd
 from scipy.interpolate import CubicSpline
 from PCAfold.styles import *
 from PCAfold import preprocess
+from PCAfold import reduction
 from termcolor import colored
+import time
 
 ################################################################################
 #
@@ -574,7 +577,7 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
     # Compute the area by direct integration: ----------------------------------
     if direct_integration:
 
-        derivative, sigma, _ = analysis.normalized_variance_derivative(variance_data)
+        derivative, sigma, _ = normalized_variance_derivative(variance_data)
 
         areas = []
         weight = 1.
@@ -598,7 +601,7 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
     # Computed the area from the normalized variance: --------------------------
     else:
 
-        derivative, sigma, max_derivatives = analysis.normalized_variance_derivative(variance_data)
+        derivative, sigma, max_derivatives = normalized_variance_derivative(variance_data)
         normalized_variance_limit_dict = variance_data.normalized_variance_limit
         normalized_variance = variance_data.normalized_variance
 
@@ -699,9 +702,9 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
                 depvars = cp.deepcopy(PC_sources)
                 depvar_names = ['SZ1']
 
-            bootstrap_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+            bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-            bootstrap_area = area_under_D_hat(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+            bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
             if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
             bootstrap_cost_function.append(bootstrap_area)
 
@@ -744,9 +747,9 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             depvars = cp.deepcopy(PC_sources)
             depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
 
-        bootstrap_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+        bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-        bootstrap_area = area_under_D_hat(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+        bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
         if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
         bootstrap_cost_function.append(bootstrap_area)
 
@@ -765,7 +768,6 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     remaining_variables_list = [i for i in range(0,n_variables) if i not in bootstrap_variables]
     previous_area = np.min(bootstrap_cost_function)
-    print(previous_area)
 
     loop_counter = 0
 
@@ -802,11 +804,11 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
                 depvars = cp.deepcopy(PC_sources)
                 depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
 
-            current_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
-            current_derivative, current_sigma, _ = analysis.normalized_variance_derivative(current_variance_data)
+            current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+            current_derivative, current_sigma, _ = normalized_variance_derivative(current_variance_data)
 
-            current_area = area_under_D_hat(current_variance_data, weight_area=weight_area, direct_integration=direct_integration)
-            if verbose: print('\tCost area:\t%.4f' % current_area)
+            current_area = cost_function_normalized_variance_derivative(current_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+            if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
 
             if current_area <= previous_area:
@@ -836,7 +838,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         print('-'*50 + '\n')
 
     total_toc = time.perf_counter()
-    print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+    if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
     return selected_variables
 
