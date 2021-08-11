@@ -1733,6 +1733,25 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
     direction is within the specified tolerance from the direction of the
     corresponding observed vector.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, good_direction_estimate
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the vector of good direction and good direction estimate:
+        (good_direction, good_direction_estimate) = good_direction_estimate(X, X_rec, tolerance=0.01)
+
     :param observed:
         ``numpy.ndarray`` specifying the observed vector quantity, :math:`\\vec{\\phi}_o`. It should be of size ``(n_observations,n_dimensions)``.
     :param predicted:
