@@ -982,9 +982,9 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-    def print_metrics(self, raw_table=True, tex_table=False, pandas_table=False, format_displayed='%.4f'):
+    def print_metrics(self, table_format=['raw'], float_format='%.4f'):
         """
-        Prints all regression assessment metrics either as raw text or in a tex format or as ``pandas.DataFrame``.
+        Prints all regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
         **Example:**
 
@@ -1006,11 +1006,11 @@ class RegressionAssessment:
             regression_metrics = RegressionAssessment(X, X_rec)
 
             # Print regression metrics:
-            regression_metrics.print_metrics(raw_table=True, tex_table=True, pandas_table=True)
+            regression_metrics.print_metrics(table_format=['raw', 'tex', 'pandas'], float_format='%.4f')
 
         .. note::
 
-            ``raw_table=True`` will result in printing:
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
 
             .. code-block:: text
 
@@ -1039,7 +1039,7 @@ class RegressionAssessment:
                 NRMSE:	0.4461
                 GDE:	75.0000
 
-            ``tex_table=True`` will result in printing:
+            Adding ``'tex'`` to the ``table_format`` list will result in printing:
 
             .. code-block:: text
 
@@ -1058,68 +1058,67 @@ class RegressionAssessment:
                 \\end{center}
                 \\end{table}
 
-            ``pandas_table=True`` (works well in Jupyter notebooks) will result in printing:
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
             .. image:: ../images/generate-pandas-table.png
                 :width: 300
                 :align: center
 
-        :param raw_table: (optional)
-            ``bool`` specifying whether table should be printed in a raw text format.
-        :param tex_table: (optional)
-            ``bool`` specifying whether table should be printed in a tex format.
-        :param pandas_table: (optional)
-            ``bool`` specifying whether table should be printed in as ``pandas.DataFrame`` (works well in Jupyter notebooks).
-        :param format_displayed: (optional)
+        :param table_format: (optional)
+            ``list`` of ``str`` specifying the format(s) in which the table should be printed.
+            Strings can only be ``'raw'``, ``'tex'`` and/or ``'pandas'``.
+        :param float_format: (optional)
             ``str`` specifying the display format for the numerical entries inside the
             table. By default it is set to ``'%.4f'``.
         """
 
-        if not isinstance(raw_table, bool):
-            raise ValueError("Parameter `raw_table` has to be of type `bool`.")
+        __table_formats = ['raw', 'tex', 'pandas']
 
-        if not isinstance(tex_table, bool):
-            raise ValueError("Parameter `tex_table` has to be of type `bool`.")
+        if not isinstance(table_format, list):
+            raise ValueError("Parameter `table_format` has to be of type `str`.")
 
-        if not isinstance(pandas_table, bool):
-            raise ValueError("Parameter `pandas_table` has to be of type `bool`.")
+        for item in table_format:
+            if item not in __table_formats:
+                raise ValueError("Parameter `table_format` can only contain 'raw', 'tex' and/or 'pandas'.")
 
-        if not isinstance(format_displayed, str):
-            raise ValueError("Parameter `format_displayed` has to be of type `str`.")
+        if not isinstance(float_format, str):
+            raise ValueError("Parameter `float_format` has to be of type `str`.")
 
         metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
         metrics_names_tex = ['$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
 
-        if raw_table:
+        for item in set(table_format):
 
-            for i in range(0,self.__n_variables):
+            if item=='raw':
 
-                print('-'*20 + '\n' + self.__variable_names[i])
+                for i in range(0,self.__n_variables):
 
-                for j in range(0,len(metrics_names)):
+                    print('-'*20 + '\n' + self.__variable_names[i])
 
-                    metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
-                    print(metrics_names[j] + ':\t' + format_displayed % metrics[j])
+                    for j in range(0,len(metrics_names)):
 
-        if tex_table:
+                        metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
+                        print(metrics_names[j] + ':\t' + float_format % metrics[j])
 
-            import pandas as pd
+            if item=='tex':
 
-            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-            metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                import pandas as pd
 
-            generate_tex_table(metrics_table, format_displayed=format_displayed)
+                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
 
-        if pandas_table:
+                generate_tex_table(metrics_table, float_format=float_format)
 
-            import pandas as pd
-            from IPython.display import display
-            pandas_format = '{:,' + format_displayed[1::] + '}'
-            pd.options.display.float_format = pandas_format.format
+            if item=='pandas':
 
-            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-            metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
-            display(metrics_table)
+                import pandas as pd
+                from IPython.display import display
+                pandas_format = '{:,' + float_format[1::] + '}'
+                pd.options.display.float_format = pandas_format.format
+
+                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                display(metrics_table)
 
 # ------------------------------------------------------------------------------
 
@@ -1808,7 +1807,7 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
 
 # ------------------------------------------------------------------------------
 
-def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', label=''):
+def generate_tex_table(data_frame_table, float_format='%.2f', caption='', label=''):
     """
     Generates ``tex`` code for a table stored in a ``pandas.DataFrame``. This function
     can be useful e.g. for printing regression results.
@@ -1839,7 +1838,7 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
         r2_table = pd.DataFrame(np.vstack((r2_q2, r2_q3)), columns=variable_names, index=['PCA, $q=2$', 'PCA, $q=3$'])
 
         # Generate tex code for the table:
-        generate_tex_table(r2_table, format_displayed="%.3f", caption='$R^2$ values.', label='r2-values')
+        generate_tex_table(r2_table, float_format="%.3f", caption='$R^2$ values.', label='r2-values')
 
     .. note::
 
@@ -1867,7 +1866,7 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
     :param data_frame_table:
         ``pandas.DataFrame`` specifying the table to convert to ``tex`` code. It can include column names and
         index names.
-    :param format_displayed:
+    :param float_format:
         ``str`` specifying the display format for the numerical entries inside the
         table. By default it is set to ``'%.2f'``.
     :param caption:
@@ -1889,7 +1888,7 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
     for row_i, row_label in enumerate(rows_labels):
 
         row_values = list(data_frame_table.iloc[row_i,:])
-        print(row_label + r' & '+  ' & '.join([str(format_displayed % value) for value in row_values]) + r' \\')
+        print(row_label + r' & '+  ' & '.join([str(float_format % value) for value in row_values]) + r' \\')
 
     print(r'\end{tabular}')
     print(r'\caption{' + caption + r'}\label{' + label + '}')
