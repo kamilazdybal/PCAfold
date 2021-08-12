@@ -70,6 +70,16 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.average_knn_distance
 
+``cost_function_normalized_variance_derivative``
+================================================
+
+.. autofunction:: PCAfold.analysis.cost_function_normalized_variance_derivative
+
+``manifold_informed_feature_selection``
+================================================
+
+.. autofunction:: PCAfold.analysis.manifold_informed_feature_selection
+
 --------------------------------------------------------------------------------
 
 ******************

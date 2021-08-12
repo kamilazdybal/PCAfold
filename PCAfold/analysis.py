@@ -10,16 +10,20 @@ __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "
 __status__ = "Production"
 
 import numpy as np
+import copy as cp
 import multiprocessing as multiproc
 from PCAfold import KReg
 from scipy.spatial import KDTree
 from scipy.optimize import minimize
+from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
 import random as rnd
 from scipy.interpolate import CubicSpline
 from PCAfold.styles import *
 from PCAfold import preprocess
+from PCAfold import reduction
 from termcolor import colored
+import time
 
 ################################################################################
 #
@@ -510,6 +514,334 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
     return average_distances
 
+# ------------------------------------------------------------------------------
+
+def cost_function_normalized_variance_derivative(variance_data, weight_area=False, direct_integration=True):
+    """
+    Defines a cost function for manifold optimization algorithms based on the average area under
+    the normalized variance derivatives, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
+    The area is computed in the :math:`\\log_{10}` space of bandwidths :math:`\\sigma`.
+
+    Two choices for the individual area computation can be made:
+
+    - If ``direct_integration=True``, the area is computed by directly \
+    integrating the function :math:`\\hat{\\mathcal{D}}(\\sigma)``. Integration \
+    is performed using the composite trapezoid rule. An individual area \
+    for the :math:`i^{th}` dependent variable is then defined as:
+
+    .. math::
+
+        A_i = \\int_{\\sigma_{min, i}}^{\\sigma_{peak, i}} \\hat{\\mathcal{D}}_i(\\sigma) d \\log_{10} \\sigma
+
+    - If ``direct_integration=False``, we use the fact that :math:`\\hat{\\mathcal{D}}(\\sigma)`` \
+    is a numerical derivative of :math:`\\mathcal{N}(\\sigma)`. An individual area \
+    for the :math:`i^{th}` dependent variable is then defined as:
+
+    .. math::
+
+        A_i = \\frac{\\mathcal{N}_i(\\sigma_{peak, i}) - \\mathcal{N}_i(\\sigma_{min, i})}{\\max(\\mathcal{D}_i(\\sigma))}  + \\frac{\\lim_{\\sigma \\rightarrow 0} \\mathcal{N_i(\\sigma)}}{\\max(\\mathcal{D}_i(\\sigma))}  \\big( \\log_{10} \\sigma_{peak, i} - \\log_{10} \\sigma_{min, i} \\big)
+
+    The cost, :math:`E`, can then be computed from all :math:`A_i` in two ways,
+    where :math:`n_{dep}` is the number of dependent variables stored in the ``variance_data`` object:
+
+    - If ``weight_area=False``:
+
+    .. math::
+
+        E = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i
+
+    - If ``weight_area=True``, each area is additionally weighted by the location \
+    of the rightmost peak, :math:`\\sigma_{peak, i}`, in :math:`\\hat{\\mathcal{D}}_i(\\sigma)``:
+
+    .. math::
+
+        E = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} \\frac{1}{\\sigma_{peak, i}} A_i
+
+    :param variance_data:
+        an object of ``VarianceData`` class.
+    :param weight_area: (optional)
+        ``bool`` specifying whether each computed area should be weighted by the rightmost peak location, :math:`\\sigma_{peak, i}` for the :math:`i^{th}` dependent variable.
+    :param direct_integration: (optional)
+        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed by direct integration of the :math:`\\hat{\\mathcal{D}}(\\sigma)` curve.
+
+    :return:
+        - **cost** - ``float`` specifying the cost, :math:`E`.
+    """
+
+    if not isinstance(weight_area, bool):
+        raise ValueError("Parameter `weight_area` has to be of type `bool`.")
+
+    if not isinstance(direct_integration, bool):
+        raise ValueError("Parameter `direct_integration` has to be of type `bool`.")
+
+    # Compute the area by direct integration: ----------------------------------
+    if direct_integration:
+
+        derivative, sigma, _ = normalized_variance_derivative(variance_data)
+
+        areas = []
+        weight = 1.
+
+        n_variables = 0
+
+        for variable in variance_data.variable_names:
+            n_variables += 1
+            idx_peaks, _ = find_peaks(derivative[variable], height=0)
+            peak_locations = sigma[idx_peaks]
+            peak_location = peak_locations[-1]
+
+            if weight_area:
+                weight = 1. / (peak_location)
+
+            (indices_to_the_left_of_peak, ) = np.where(sigma<=peak_location)
+            areas.append(weight * np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak])))
+
+        cost = np.sum(areas) / len(areas)
+
+    # Computed the area from the normalized variance: --------------------------
+    else:
+
+        derivative, sigma, max_derivatives = normalized_variance_derivative(variance_data)
+        normalized_variance_limit_dict = variance_data.normalized_variance_limit
+        normalized_variance = variance_data.normalized_variance
+
+        areas = []
+        weight = 1.
+
+        n_variables = 0
+
+        for variable in variance_data.variable_names:
+            n_variables += 1
+            idx_peaks, _ = find_peaks(derivative[variable], height=0)
+            peak_locations = sigma[idx_peaks]
+            peak_location = peak_locations[-1]
+
+            if weight_area:
+                weight = 1. / (sigma_peak)
+
+            sigma_min = np.min(sigma)
+
+            N_at_peak = np.interp(sigma_peak, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
+            N_at_min = np.interp(sigma_min, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
+
+            TERM_1 = (1. / max_derivatives[variable]) * (N_at_peak - N_at_min)
+            TERM_2 = (normalized_variance_limit_dict[variable])/(max_derivatives[variable]) * (np.log10(sigma_peak) - np.log10(sigma_min))
+            area = TERM_1 + TERM_2
+
+            areas.append(weight * area)
+
+        cost = np.sum(areas) / len(areas)
+
+    return cost
+
+# ------------------------------------------------------------------------------
+
+def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
+    """
+    Manifold-informed feature selection algorithm.
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param X_source:
+        ``numpy.ndarray`` specifying the source terms, :math:`\mathbf{S_X}`, corresponding to the state-space
+        variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`.
+    :param variable_names:
+        ``list`` of ``str`` specifying variable names.
+    :param scaling: (optional)
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+    :param bandwidth_values:
+        ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
+    :param d_hat_variables:
+        ``list`` specifying which state variables should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. If set to ``None``, only the PC source terms are used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
+    :param target_manifold_dimensionality: (optional)
+        ``int`` specifying the target dimensionality of the PCA manifold.
+    :param bootstrap_variables: (optional)
+        ``list`` specifying the user-selected variables to bootstrap the algorithm with. If set to ``None``, automatic bootstrapping is performed.
+    :param weight_area: (optional)
+        ``bool`` specifying whether each computed area should be weighted by the rightmost peak location, :math:`\\sigma_{peak, i}` for the :math:`i^{th}` dependent variable.
+    :param direct_integration: (optional)
+        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed by direct integration of the :math:`\\hat{\\mathcal{D}}(\\sigma)`` curve.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **selected_variables** - ``list`` specifying the indices of the selected variables (features).
+    """
+
+    (n_observations, n_variables) = np.shape(X)
+
+    variables_indices = [i for i in range(0,n_variables)]
+
+    # Automatic bootstrapping: -------------------------------------------------
+    if bootstrap_variables is None:
+
+        if verbose: print('Automatic bootstrapping...\n')
+
+        bootstrap_cost_function = []
+
+        for i_variable in variables_indices:
+
+            bootstrap_tic = time.perf_counter()
+
+            if verbose: print('\tCurrently checking variable:\t' + variable_names[i_variable])
+
+            # bootstrap_pca = reduction.PCA(X[:,[i_variable]], scaling=scaling, n_components=1)
+            # PCs = bootstrap_pca.transform(X[:,[i_variable]])
+            # PC_sources = bootstrap_pca.transform(X_source[:,[i_variable]], nocenter=True)
+
+            PCs = X[:,[i_variable]]
+            PC_sources = X_source[:,[i_variable]]
+
+            if d_hat_variables is not None:
+                depvars = np.hstack((PC_sources, X[:,d_hat_variables]))
+                depvar_names = ['SZ1'] + list(variable_names[d_hat_variables])
+            else:
+                depvars = cp.deepcopy(PC_sources)
+                depvar_names = ['SZ1']
+
+            bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+
+            bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+            if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
+            bootstrap_cost_function.append(bootstrap_area)
+
+        # Find a single best variable to bootstrap with:
+        (best_bootstrap_variable_index, ) = np.where(np.array(bootstrap_cost_function)==np.min(bootstrap_cost_function))
+        best_bootstrap_variable_index = int(best_bootstrap_variable_index)
+
+        bootstrap_variables = [best_bootstrap_variable_index]
+
+        if verbose: print('\nVariable ' + variable_names[best_bootstrap_variable_index] + ' will be used as bootstrap.')
+
+        bootstrap_toc = time.perf_counter()
+        if verbose: print(f'\nBoostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    # Use user-defined bootstrapping: ------------------------------------------
+    else:
+
+        # Manifold dimensionality needs a fix here!
+        if verbose: print('User-defined bootstrapping...\n')
+
+        bootstrap_cost_function = []
+
+        bootstrap_tic = time.perf_counter()
+
+        if len(bootstrap_variables) < target_manifold_dimensionality:
+            n_components = len(bootstrap_variables)
+        else:
+            n_components = cp.deepcopy(target_manifold_dimensionality)
+
+        if verbose: print('\tUser-defined bootstrapping will be performed for a ' + str(n_components) + '-dimensional manifold.')
+
+        bootstrap_pca = reduction.PCA(X[:,bootstrap_variables], scaling=scaling, n_components=n_components)
+        PCs = bootstrap_pca.transform(X[:,bootstrap_variables])
+        PC_sources = bootstrap_pca.transform(X_source[:,bootstrap_variables], nocenter=True)
+
+        if d_hat_variables is not None:
+            depvars = np.hstack((PC_sources, X[:,d_hat_variables]))
+            depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + list(variable_names[d_hat_variables])
+        else:
+            depvars = cp.deepcopy(PC_sources)
+            depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
+
+        bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+
+        bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+        if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
+        bootstrap_cost_function.append(bootstrap_area)
+
+        if verbose: print('\nVariable(s) ' + ', '.join(list(variable_names[bootstrap_variables])) + ' will be used as bootstrap.')
+
+        bootstrap_toc = time.perf_counter()
+        if verbose: print(f'\nBoostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    # Iterate the algorithm starting from the bootstrap selection: -------------
+
+    if verbose: print('Optimizing...\n')
+
+    total_tic = time.perf_counter()
+
+    selected_variables = [i for i in bootstrap_variables]
+
+    remaining_variables_list = [i for i in range(0,n_variables) if i not in bootstrap_variables]
+    previous_area = np.min(bootstrap_cost_function)
+
+    loop_counter = 0
+
+    while len(remaining_variables_list) > 0:
+
+        loop_counter += 1
+
+        if verbose:
+            print('Iteration No.' + str(loop_counter))
+            print('Currently adding variables from the following list: ')
+            print(variable_names[remaining_variables_list])
+
+        current_cost_function = []
+
+        for i_variable in remaining_variables_list:
+
+            if len(selected_variables) < target_manifold_dimensionality:
+                n_components = len(selected_variables) + 1
+            else:
+                n_components = cp.deepcopy(target_manifold_dimensionality)
+
+            if verbose: print('\tCurrently added variable: ' + variable_names[i_variable])
+
+            current_variables_list = selected_variables + [i_variable]
+
+            pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=n_components)
+            PCs = pca.transform(X[:,current_variables_list])
+            PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
+
+            if d_hat_variables is not None:
+                depvars = np.hstack((PC_sources, X[:,d_hat_variables]))
+                depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + list(variable_names[d_hat_variables])
+            else:
+                depvars = cp.deepcopy(PC_sources)
+                depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
+
+            current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+            current_derivative, current_sigma, _ = normalized_variance_derivative(current_variance_data)
+
+            current_area = cost_function_normalized_variance_derivative(current_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+            if verbose: print('\tCost:\t%.4f' % current_area)
+            current_cost_function.append(current_area)
+
+            if current_area <= previous_area:
+                if verbose: print(colored('\tSAME OR BETTER', 'green'))
+            else:
+                if verbose: print(colored('\tWORSE', 'red'))
+
+        min_area = np.min(current_cost_function)
+        (best_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
+        best_variable_index = int(best_variable_index)
+
+        if min_area <= previous_area:
+            if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n')
+            selected_variables.append(remaining_variables_list[best_variable_index])
+            remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
+            previous_area = min_area
+        else:
+            if verbose: print('No variable improves D-hat anymore!')
+            break
+
+    if verbose:
+        print('\n' + '-'*50)
+        print('Final subset:')
+        print(', '.join(variable_names[selected_variables]))
+        print(selected_variables)
+        print('Optimized cumulative area under the D-hat curve: %.4f' % previous_area)
+        print('-'*50 + '\n')
+
+    total_toc = time.perf_counter()
+    if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    return selected_variables
+
 ################################################################################
 #
 # Regression assessment
@@ -650,9 +982,9 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-    def print_metrics(self, raw_table=True, tex_table=False, pandas_table=False, format_displayed='%.4f'):
+    def print_metrics(self, table_format=['raw'], float_format='%.4f'):
         """
-        Prints all regression assessment metrics either as raw text or in a tex format or as ``pandas.DataFrame``.
+        Prints all regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
         **Example:**
 
@@ -674,11 +1006,11 @@ class RegressionAssessment:
             regression_metrics = RegressionAssessment(X, X_rec)
 
             # Print regression metrics:
-            regression_metrics.print_metrics(raw_table=True, tex_table=True, pandas_table=True)
+            regression_metrics.print_metrics(table_format=['raw', 'tex', 'pandas'], float_format='%.4f')
 
         .. note::
 
-            ``raw_table=True`` will result in printing:
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
 
             .. code-block:: text
 
@@ -707,7 +1039,7 @@ class RegressionAssessment:
                 NRMSE:	0.4461
                 GDE:	75.0000
 
-            ``tex_table=True`` will result in printing:
+            Adding ``'tex'`` to the ``table_format`` list will result in printing:
 
             .. code-block:: text
 
@@ -726,68 +1058,67 @@ class RegressionAssessment:
                 \\end{center}
                 \\end{table}
 
-            ``pandas_table=True`` (works well in Jupyter notebooks) will result in printing:
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
             .. image:: ../images/generate-pandas-table.png
                 :width: 300
                 :align: center
 
-        :param raw_table: (optional)
-            ``bool`` specifying whether table should be printed in a raw text format.
-        :param tex_table: (optional)
-            ``bool`` specifying whether table should be printed in a tex format.
-        :param pandas_table: (optional)
-            ``bool`` specifying whether table should be printed in as ``pandas.DataFrame`` (works well in Jupyter notebooks).
-        :param format_displayed: (optional)
+        :param table_format: (optional)
+            ``list`` of ``str`` specifying the format(s) in which the table should be printed.
+            Strings can only be ``'raw'``, ``'tex'`` and/or ``'pandas'``.
+        :param float_format: (optional)
             ``str`` specifying the display format for the numerical entries inside the
             table. By default it is set to ``'%.4f'``.
         """
 
-        if not isinstance(raw_table, bool):
-            raise ValueError("Parameter `raw_table` has to be of type `bool`.")
+        __table_formats = ['raw', 'tex', 'pandas']
 
-        if not isinstance(tex_table, bool):
-            raise ValueError("Parameter `tex_table` has to be of type `bool`.")
+        if not isinstance(table_format, list):
+            raise ValueError("Parameter `table_format` has to be of type `str`.")
 
-        if not isinstance(pandas_table, bool):
-            raise ValueError("Parameter `pandas_table` has to be of type `bool`.")
+        for item in table_format:
+            if item not in __table_formats:
+                raise ValueError("Parameter `table_format` can only contain 'raw', 'tex' and/or 'pandas'.")
 
-        if not isinstance(format_displayed, str):
-            raise ValueError("Parameter `format_displayed` has to be of type `str`.")
+        if not isinstance(float_format, str):
+            raise ValueError("Parameter `float_format` has to be of type `str`.")
 
         metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
         metrics_names_tex = ['$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
 
-        if raw_table:
+        for item in set(table_format):
 
-            for i in range(0,self.__n_variables):
+            if item=='raw':
 
-                print('-'*20 + '\n' + self.__variable_names[i])
+                for i in range(0,self.__n_variables):
 
-                for j in range(0,len(metrics_names)):
+                    print('-'*20 + '\n' + self.__variable_names[i])
 
-                    metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
-                    print(metrics_names[j] + ':\t' + format_displayed % metrics[j])
+                    for j in range(0,len(metrics_names)):
 
-        if tex_table:
+                        metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
+                        print(metrics_names[j] + ':\t' + float_format % metrics[j])
 
-            import pandas as pd
+            if item=='tex':
 
-            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-            metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                import pandas as pd
 
-            generate_tex_table(metrics_table, format_displayed=format_displayed)
+                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
 
-        if pandas_table:
+                generate_tex_table(metrics_table, float_format=float_format)
 
-            import pandas as pd
-            from IPython.display import display
-            pandas_format = '{:,' + format_displayed[1::] + '}'
-            pd.options.display.float_format = pandas_format.format
+            if item=='pandas':
 
-            metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-            metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
-            display(metrics_table)
+                import pandas as pd
+                from IPython.display import display
+                pandas_format = '{:,' + float_format[1::] + '}'
+                pd.options.display.float_format = pandas_format.format
+
+                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                display(metrics_table)
 
 # ------------------------------------------------------------------------------
 
@@ -1401,6 +1732,25 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
     direction is within the specified tolerance from the direction of the
     corresponding observed vector.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, good_direction_estimate
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the vector of good direction and good direction estimate:
+        (good_direction, good_direction_estimate) = good_direction_estimate(X, X_rec, tolerance=0.01)
+
     :param observed:
         ``numpy.ndarray`` specifying the observed vector quantity, :math:`\\vec{\\phi}_o`. It should be of size ``(n_observations,n_dimensions)``.
     :param predicted:
@@ -1457,7 +1807,7 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
 
 # ------------------------------------------------------------------------------
 
-def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', label=''):
+def generate_tex_table(data_frame_table, float_format='%.2f', caption='', label=''):
     """
     Generates ``tex`` code for a table stored in a ``pandas.DataFrame``. This function
     can be useful e.g. for printing regression results.
@@ -1488,7 +1838,7 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
         r2_table = pd.DataFrame(np.vstack((r2_q2, r2_q3)), columns=variable_names, index=['PCA, $q=2$', 'PCA, $q=3$'])
 
         # Generate tex code for the table:
-        generate_tex_table(r2_table, format_displayed="%.3f", caption='$R^2$ values.', label='r2-values')
+        generate_tex_table(r2_table, float_format="%.3f", caption='$R^2$ values.', label='r2-values')
 
     .. note::
 
@@ -1516,7 +1866,7 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
     :param data_frame_table:
         ``pandas.DataFrame`` specifying the table to convert to ``tex`` code. It can include column names and
         index names.
-    :param format_displayed:
+    :param float_format:
         ``str`` specifying the display format for the numerical entries inside the
         table. By default it is set to ``'%.2f'``.
     :param caption:
@@ -1538,7 +1888,7 @@ def generate_tex_table(data_frame_table, format_displayed='%.2f', caption='', la
     for row_i, row_label in enumerate(rows_labels):
 
         row_values = list(data_frame_table.iloc[row_i,:])
-        print(row_label + r' & '+  ' & '.join([str(format_displayed % value) for value in row_values]) + r' \\')
+        print(row_label + r' & '+  ' & '.join([str(float_format % value) for value in row_values]) + r' \\')
 
     print(r'\end{tabular}')
     print(r'\caption{' + caption + r'}\label{' + label + '}')
