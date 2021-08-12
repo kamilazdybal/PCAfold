@@ -2704,7 +2704,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold given two vectors defining the manifold.
 
@@ -2723,7 +2723,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         principal_components = pca_X.transform(X)
 
         # Plot the manifold:
-        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', figure_size=(5,5), title='2D manifold', save_filename='2d-manifold.pdf')
+        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', colorbar_range=(0,1), figure_size=(5,5), title='2D manifold', save_filename='2d-manifold.pdf')
         plt.close()
 
     :param x:
@@ -2751,6 +2751,8 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param colorbar_range: (optional)
+        ``tuple`` specifying the lower and the upper bound for the colorbar range.
     :param grid_on:
         ``bool`` specifying whether grid should be plotted.
     :param figure_size: (optional)
@@ -2826,6 +2828,12 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
+    if colorbar_range is not None:
+        if not isinstance(colorbar_range, tuple):
+            raise ValueError("Parameter `colorbar_range` has to be of type `tuple`.")
+        else:
+            (cbar_min, cbar_max) = colorbar_range
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -2848,24 +2856,25 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
-    if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
-    if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
+    if x_label is not None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
+    if y_label is not None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
     if grid_on: plt.grid(alpha=grid_opacity)
 
     if isinstance(color, np.ndarray):
         if color is not None:
             cb = fig.colorbar(scat)
             cb.ax.tick_params(labelsize=font_colorbar_axes)
-            if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+            if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+            if colorbar_range is not None: plt.clim(cbar_min, cbar_max)
 
-    if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+    if title is not None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a three-dimensional manifold given three vectors defining the manifold.
 
@@ -2884,7 +2893,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         PCs = pca_X.transform(X)
 
         # Plot the manifold:
-        plt = plot_3d_manifold(PCs[:,0], PCs[:,1], PCs[:,2], color=X[:,0], elev=30, azim=-60, x_label='PC-1', y_label='PC-2', z_label='PC-3', colorbar_label='$X_1$', figure_size=(15,7), title='3D manifold', save_filename='3d-manifold.png')
+        plt = plot_3d_manifold(PCs[:,0], PCs[:,1], PCs[:,2], color=X[:,0], elev=30, azim=-60, x_label='PC-1', y_label='PC-2', z_label='PC-3', colorbar_label='$X_1$', colorbar_range=(0,1), figure_size=(15,7), title='3D manifold', save_filename='3d-manifold.png')
         plt.close()
 
     :param x:
@@ -2922,6 +2931,8 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param colorbar_range: (optional)
+        ``tuple`` specifying the lower and the upper bound for the colorbar range.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -3013,6 +3024,12 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
+    if colorbar_range is not None:
+        if not isinstance(colorbar_range, tuple):
+            raise ValueError("Parameter `colorbar_range` has to be of type `tuple`.")
+        else:
+            (cbar_min, cbar_max) = colorbar_range
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -3034,9 +3051,9 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
     elif isinstance(color, np.ndarray):
         scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
 
-    if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-    if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-    if z_label != None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if x_label is not None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if y_label is not None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+    if z_label is not None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
 
     ax.tick_params(pad=5)
     ax.xaxis.pane.fill = False
@@ -3059,10 +3076,11 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         if color is not None:
             cb = fig.colorbar(scat, shrink=0.6)
             cb.ax.tick_params(labelsize=font_colorbar_axes)
-            if colorbar_label != None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+            if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+            if colorbar_range is not None: scat.set_clim(cbar_min, cbar_max)
 
-    if title != None: ax.set_title(title, **csfont, fontsize=font_title)
-    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+    if title is not None: ax.set_title(title, **csfont, fontsize=font_title)
+    if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
 
