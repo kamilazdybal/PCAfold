@@ -894,7 +894,7 @@ class RegressionAssessment:
     - **mean_squared_error** - (read only) ``numpy.ndarray`` specifying the mean squared error (MSE) values. It has size ``(1,n_variables)``.
     - **root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
     - **normalized root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
-    - **good_direction_estimate** - (read only) ``float`` specifying the good direction estimate (GDE) value, treating the entire :math:`\\pmb{\\phi}_o` and :math:`\\pmb{\\phi}_p` as vectors.
+    - **good_direction_estimate** - (read only) ``float`` specifying the good direction estimate (GDE) value, treating the entire :math:`\\pmb{\\phi}_o` and :math:`\\pmb{\\phi}_p` as vectors. Note that if a single dependent variable is passed, GDE cannot be computed and is set to ``NaN``.
     """
 
     def __init__(self, observed, predicted, variable_names=None, norm='std', tolerance=0.05):
@@ -945,8 +945,13 @@ class RegressionAssessment:
         self.__mean_squared_error_matrix = np.ones((1,self.__n_variables))
         self.__root_mean_squared_error_matrix = np.ones((1,self.__n_variables))
         self.__normalized_root_mean_squared_error_matrix = np.ones((1,self.__n_variables))
-        _, self.__good_direction_estimate_value = good_direction_estimate(observed, predicted, tolerance=tolerance)
-        self.__good_direction_estimate_matrix = self.__good_direction_estimate_value * np.ones((1,self.__n_variables))
+
+        if n_var_observed > 1:
+            _, self.__good_direction_estimate_value = good_direction_estimate(observed, predicted, tolerance=tolerance)
+            self.__good_direction_estimate_matrix = self.__good_direction_estimate_value * np.ones((1,self.__n_variables))
+        else:
+            self.__good_direction_estimate_value = np.NAN
+            self.__good_direction_estimate_matrix = self.__good_direction_estimate_value * np.ones((1,self.__n_variables))
 
         for i in range(0,self.__n_variables):
 

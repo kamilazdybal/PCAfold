@@ -109,6 +109,9 @@ Nonlinear regression assessment
 
 In this section we will perform few assessments of the quality of the nonlinear regression.
 
+Visual assessment
+=================
+
 We begin by visualizing the regressed (predicted) dependent variable :math:`\phi`. This can be done either in 2D:
 
 .. code:: 
@@ -197,3 +200,153 @@ This last plot lets us see that kernel regression performed very well in the
 middle range of the dependent variable values but very poorly at both edges of that range.
 This is consistent with what we have seen in a 3D plot
 that visualized the regression result.
+
+Streamplots for predicted vector quantities
+===========================================
+
+In a special case, when the predicted variable is a two-dimensional vector, a streamplot of the regressed vector field can be plotted using the function ``plot_2d_regression_streamplot``.
+
+Below, we show an example on a synthetic data set:
+
+.. code:: python
+
+    X = np.random.rand(100,5)
+    S_X = np.random.rand(100,5)
+
+    pca_X = reduction.PCA(X, n_components=2)
+    PCs = pca_X.transform(X)
+    S_Z = pca_X.transform(S_X, nocenter=True)
+
+    vector_model = analysis.KReg(PCs, S_Z)
+    
+We define the regression model function:
+
+.. code:: python
+
+    def regression_model(query):
+
+        predicted = vector_model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)
+
+        return predicted
+
+Define the bounds for the streamplot:
+
+.. code:: python
+
+    grid_bounds = ([np.min(PCs[:,0]),np.max(PCs[:,0])],[np.min(PCs[:,1]),np.max(PCs[:,1])])
+
+Plot the regression streamplot:
+
+.. code:: python
+
+    plt = analysis.plot_2d_regression_streamplot(grid_bounds,
+                                        regression_model,
+                                        x=PCs[:,0],
+                                        y=PCs[:,1],
+                                        resolution=(15,15),
+                                        extension=(20,20),
+                                        color='k',
+                                        x_label='$Z_1$',
+                                        y_label='$Z_2$',
+                                        manifold_color=X[:,0],
+                                        colorbar_label='$X_1$',
+                                        color_map='plasma',
+                                        colorbar_range=(0,1),
+                                        manifold_alpha=1,
+                                        grid_on=False,
+                                        figure_size=(10,6),
+                                        title='Streamplot',
+                                        save_filename=None)
+    
+.. image:: ../images/tutorial-regression-streamplot.svg
+    :width: 600
+    :align: center
+
+Error metrics
+=============
+
+Finally, several error metrics are available that will measure how well the dependent variable(s) were predicted. Metrics can be accessed individually, those include:
+
+- Mean absolute error
+- Mean squared error
+- Root mean squared error
+- Normalized root mean squared error
+- Turning points
+- Good estimate
+- Good direction estimate
+
+An example of computing mean absolute error is shown below:
+
+.. code:: python
+
+    MAE = analysis.mean_absolute_error(phi, phi_predicted)
+
+By instantiating an object of the ``RegressionAssessment`` class, one can compute all available metrics at once:
+
+.. code:: python
+
+    regression_metrics = analysis.RegressionAssessment(phi, phi_predicted, variable_names=['$\phi$'], norm='std')
+    
+As an example, mean absolute error can be accessed by:
+    
+.. code:: python
+    
+    regression_metrics.mean_absolute_error
+    
+All computed metrics can be printed with the use of the ``RegressionAssessment.print_metrics`` function. Few output formats are available.
+
+Raw text format:
+    
+.. code:: python
+
+    regression_metrics.print_metrics(table_format=['raw'], float_format='%.4f')
+    
+The code above will print:
+
+.. code-block:: text
+    
+    --------------------
+    $\phi$
+    R2:	0.9958
+    MAE:	98.4007
+    MSE:	37762.8664
+    RMSE:	194.3267
+    NRMSE:	0.0645
+    GDE:	nan
+
+``tex`` format:
+    
+.. code:: python
+    
+    regression_metrics.print_metrics(table_format=['tex'], float_format='%.4f')
+    
+The code above will print:
+
+.. code-block:: text
+    
+    \begin{table}[h!]
+    \begin{center}
+    \begin{tabular}{ll} \toprule
+     & \textit{$\phi$} \\ \midrule
+    $R^2$ & 0.9958 \\
+    MAE & 98.4007 \\
+    MSE & 37762.8664 \\
+    RMSE & 194.3267 \\
+    NRMSE & 0.0645 \\
+    GDE & nan \\
+    \end{tabular}
+    \caption{}\label{}
+    \end{center}
+    \end{table}
+    
+``pandas.DataFrame`` format (most recommended for Jupyter notebooks):
+
+.. code:: python
+
+    regression_metrics.print_metrics(table_format=['pandas'], float_format='%.4f')
+    
+Note that with the ``float_format`` parameter you can change the number of digits displayed:
+    
+.. code:: python
+    
+    regression_metrics.print_metrics(table_format=['pandas'], float_format='%.2f')
