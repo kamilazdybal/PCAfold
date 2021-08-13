@@ -76,6 +76,7 @@ from .analysis import good_estimate
 from .analysis import good_direction_estimate
 from .analysis import generate_tex_table
 from .analysis import plot_2d_regression
+from .analysis import plot_2d_regression_streamplot
 from .analysis import plot_3d_regression
 from .analysis import plot_normalized_variance
 from .analysis import plot_normalized_variance_comparison
