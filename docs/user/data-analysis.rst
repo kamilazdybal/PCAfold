@@ -202,6 +202,11 @@ Plotting functions
 
 .. autofunction:: PCAfold.analysis.plot_2d_regression
 
+``plot_2d_regression_streamplot``
+============================================
+
+.. autofunction:: PCAfold.analysis.plot_2d_regression_streamplot
+
 ``plot_3d_regression``
 ======================
 
