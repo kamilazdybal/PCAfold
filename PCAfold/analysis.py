@@ -23,6 +23,7 @@ from PCAfold.styles import *
 from PCAfold import preprocess
 from PCAfold import reduction
 from termcolor import colored
+from matplotlib.colors import ListedColormap
 import time
 
 ################################################################################
@@ -2147,7 +2148,7 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
     :param colorbar_range: (optional)
         ``tuple`` specifying the lower and the upper bound for the colorbar range.
     :param manifold_alpha: (optional)
-        ``float`` specifying the opacity of the plotted manifold.
+        ``float`` or ``int`` specifying the opacity of the plotted manifold.
     :param grid_on:
         ``bool`` specifying whether grid should be plotted.
     :param figure_size: (optional)
@@ -2170,12 +2171,6 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
 
     if not callable(regression_model):
         raise ValueError("Parameter `regression_model` has to be of type `function`.")
-
-    if not isinstance(resolution, tuple):
-        raise ValueError("Parameter `resolution` has to be of type `tuple`.")
-
-    if not isinstance(extension, tuple):
-        raise ValueError("Parameter `extension` has to be of type `tuple`.")
 
     if x is not None:
 
@@ -2208,6 +2203,24 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
         if n_x != n_y:
             raise ValueError("Parameter `x` has different number of elements than `y`.")
 
+    if not isinstance(resolution, tuple):
+        raise ValueError("Parameter `resolution` has to be of type `tuple`.")
+
+    if not isinstance(extension, tuple):
+        raise ValueError("Parameter `extension` has to be of type `tuple`.")
+
+    if color is not None:
+        if not isinstance(color, str):
+            raise ValueError("Parameter `color` has to be of type `str`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
     if manifold_color is not None:
         if not isinstance(manifold_color, str):
             if not isinstance(manifold_color, np.ndarray):
@@ -2222,10 +2235,14 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
             (n_color, n_var_color) = np.shape(manifold_color)
 
         if n_var_color != 1:
-            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+            raise ValueError("Parameter `manifold_color` has to be a 0D or 1D vector.")
 
         if n_color != n_x:
-            raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
+            raise ValueError("Parameter `manifold_color` has different number of elements than `x` and `y`.")
+
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
 
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
@@ -2237,13 +2254,12 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
         else:
             (cbar_min, cbar_max) = colorbar_range
 
-    if x_label is not None:
-        if not isinstance(x_label, str):
-            raise ValueError("Parameter `x_label` has to be of type `str`.")
+    if manifold_alpha is not None:
+        if not isinstance(manifold_alpha, float) and not isinstance(manifold_alpha, int):
+            raise ValueError("Parameter `manifold_alpha` has to be of type `float`.")
 
-    if y_label is not None:
-        if not isinstance(y_label, str):
-            raise ValueError("Parameter `y_label` has to be of type `str`.")
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
 
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
