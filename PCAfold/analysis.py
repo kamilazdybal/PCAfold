@@ -2595,6 +2595,17 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     from matplotlib import cm
     color_map_colors = cm.get_cmap(color_map)
 
@@ -2674,7 +2685,12 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         variance_data_Y = compute_normalized_variance(principal_components_Y, Y, depvar_names=['F', 'G', 'H', 'I', 'J'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
 
         # Plot a comparison of normalized variance quantities:
-        plt = plot_normalized_variance_comparison((variance_data_X, variance_data_Y), ([0,1,2], [0,1,2]), ('Blues', 'Reds'), title='Normalized variance comparison', save_filename='N.pdf')
+        plt = plot_normalized_variance_comparison((variance_data_X, variance_data_Y),
+                                                  ([0,1,2], [0,1,2]),
+                                                  ('Blues', 'Reds'),
+                                                  figure_size=(10,5),
+                                                  title='Normalized variance comparison',
+                                                  save_filename='N.pdf')
         plt.close()
 
     :param variance_data_tuple:
@@ -2702,6 +2718,17 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
@@ -2740,8 +2767,8 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
 
             variable_count = variable_count + 1
 
-    plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
-    plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
+    plt.xlabel(r'$\sigma$', fontsize=font_labels, **csfont)
+    plt.ylabel(r'$N(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
 
     if variable_count <=5:
@@ -2788,6 +2815,17 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
     color_map_colors = cm.get_cmap(color_map)
@@ -2872,6 +2910,17 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
@@ -2974,6 +3023,17 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     bin_length = bins_borders[1] - bins_borders[0]
     bin_centers = bins_borders[0:-1] + bin_length/2
