@@ -1929,7 +1929,14 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
         X_rec = pca_X.reconstruct(PCs)
 
         # Plot the manifold:
-        plt = plot_2d_regression(X[:,0], X[:,0], X_rec[:,0], x_label='$x$', y_label='$y$', figure_size=(10,10), title='2D regression', save_filename='2d-regression.pdf')
+        plt = plot_2d_regression(X[:,0],
+                                 X[:,0],
+                                 X_rec[:,0],
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 figure_size=(10,10),
+                                 title='2D regression',
+                                 save_filename='2d-regression.pdf')
         plt.close()
 
     :param x:
@@ -2355,7 +2362,18 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         X_rec = pca_X.reconstruct(PCs)
 
         # Plot the manifold:
-        plt = plot_3d_regression(X[:,0], X[:,1], X[:,0], X_rec[:,0], elev=45, azim=-45, x_label='$x$', y_label='$y$', z_label='$z$', figure_size=(10,10), title='3D regression', save_filename='3d-regression.pdf')
+        plt = plot_3d_regression(X[:,0],
+                                 X[:,1],
+                                 X[:,0],
+                                 X_rec[:,0],
+                                 elev=45,
+                                 azim=-45,
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 z_label='$z$',
+                                 figure_size=(10,10),
+                                 title='3D regression',
+                                 save_filename='3d-regression.pdf')
         plt.close()
 
     :param x:
@@ -2369,9 +2387,9 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         ``numpy.ndarray`` specifying the predicted values of a single dependent variable.
         It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param elev: (optional)
-        elevation angle.
+        ``float`` or ``int`` specifying the elevation angle.
     :param azim: (optional)
-        azimuth angle.
+        ``float`` or ``int`` specifying the azimuth angle.
     :param x_label: (optional)
         ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -2454,6 +2472,12 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
 
     if n_x != n_predicted:
         raise ValueError("Parameter `predicted` has different number of elements than `x`, `y` and `z`.")
+
+    if not isinstance(elev, float) and not isinstance(elev, int):
+        raise ValueError("Parameter `elev` has to be of type `int` or `float`.")
+
+    if not isinstance(azim, float) and not isinstance(azim, int):
+        raise ValueError("Parameter `azim` has to be of type `int` or `float`.")
 
     if x_label is not None:
         if not isinstance(x_label, str):

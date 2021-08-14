@@ -13,13 +13,39 @@ class Analysis(unittest.TestCase):
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         try:
-            plt = analysis.plot_3d_regression(X[:,0], X[:,1], X[:,0], X_rec[:,0], elev=45, azim=-45, x_label='$x$', y_label='$y$', z_label='$z$', figure_size=(7,7), title='3D regression')
+            plt = analysis.plot_3d_regression(X[:,0], X[:,1], X[:,0], X_rec[:,0])
             plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
-            plt = analysis.plot_3d_regression(X[:,0:1], X[:,1:2], X[:,2:3], X_rec[:,0:1], elev=45, azim=-45, x_label='$x$', y_label='$y$', z_label='$z$', figure_size=(7,7), title='3D regression')
+            plt = analysis.plot_3d_regression(X[:,0],
+                                            X[:,1],
+                                            X[:,0],
+                                            X_rec[:,0],
+                                            elev=45,
+                                            azim=-45,
+                                            x_label='$x$',
+                                            y_label='$y$',
+                                            z_label='$z$',
+                                            figure_size=(7,7),
+                                            title='3D regression')
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = analysis.plot_3d_regression(X[:,0:1],
+                                            X[:,1:2],
+                                            X[:,2:3],
+                                            X_rec[:,0:1],
+                                            elev=45,
+                                            azim=-45,
+                                            x_label='$x$',
+                                            y_label='$y$',
+                                            z_label='$z$',
+                                            figure_size=(7,7),
+                                            title='3D regression')
             plt.close()
         except Exception:
             self.assertTrue(False)
@@ -63,6 +89,14 @@ class Analysis(unittest.TestCase):
             plt.close()
 
         with self.assertRaises(ValueError):
+            plt = analysis.plot_3d_regression(X[:,0], X[:,1], X[:,2], X[:,2], elev=[1])
+            plt.close()
+
+        with self.assertRaises(ValueError):
+            plt = analysis.plot_3d_regression(X[:,0], X[:,1], X[:,2], X[:,2], azim=[1])
+            plt.close()
+
+        with self.assertRaises(ValueError):
             plt = analysis.plot_3d_regression(X[:,0], X[:,1], X[:,2], X[:,2], x_label=[1])
             plt.close()
 
@@ -80,6 +114,10 @@ class Analysis(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             plt = analysis.plot_3d_regression(X[:,0], X[:,1], X[:,2], X[:,2], title=[1])
+            plt.close()
+
+        with self.assertRaises(ValueError):
+            plt = analysis.plot_3d_regression(X[:,0], X[:,1], X[:,2], X[:,2], save_filename=[1])
             plt.close()
 
 # ------------------------------------------------------------------------------
