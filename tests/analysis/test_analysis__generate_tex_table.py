@@ -6,10 +6,14 @@ from PCAfold import analysis
 
 class Analysis(unittest.TestCase):
 
+    def test_analysis__generate_tex_table__allowed_calls(self):
+
+        pass
+
 # ------------------------------------------------------------------------------
 
+    def test_analysis__generate_tex_table__not_allowed_calls(self):
 
+        pass
 
-
-
-    pass
+# ------------------------------------------------------------------------------

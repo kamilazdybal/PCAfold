@@ -6,10 +6,14 @@ from PCAfold import analysis
 
 class Analysis(unittest.TestCase):
 
+    def test_analysis__KReg_predict__allowed_calls(self):
 
+        pass
 
+# ------------------------------------------------------------------------------
 
+    def test_analysis__KReg_predict__not_allowed_calls(self):
 
-    pass
+        pass
 
 # ------------------------------------------------------------------------------

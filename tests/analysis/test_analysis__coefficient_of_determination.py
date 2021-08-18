@@ -3,6 +3,12 @@ import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import analysis
+from sys import modules
+
+try:
+    from sklearn.metrics import r2_score
+except ImportError:
+    pass
 
 class Analysis(unittest.TestCase):
 
@@ -75,5 +81,23 @@ class Analysis(unittest.TestCase):
         expected = 1. - 0.5*(3 * offset**2)
         self.assertTrue(np.abs(analysis.coefficient_of_determination(obs, obs + offset) - expected) < 1.e-6)
         self.assertTrue(np.abs(analysis.coefficient_of_determination(obs, obs) - 1.0) < 1.e-6)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__coefficient_of_determination__check_against_sklearn(self):
+
+        n_repeat_scenario = 50
+
+        if 'sklearn' in modules:
+
+            tol = np.finfo(float).eps
+
+            for i in range(0,n_repeat_scenario):
+                X = np.random.rand(100,2)
+                r2 = analysis.coefficient_of_determination(X[:,0], X[:,1])
+                r2_sklearn = r2_score(X[:,0], X[:,1])
+
+                if np.any(abs(r2 - r2_sklearn) > tol):
+                    self.assertTrue(False)
 
 # ------------------------------------------------------------------------------

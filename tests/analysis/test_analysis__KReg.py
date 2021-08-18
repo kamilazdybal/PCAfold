@@ -15,6 +15,18 @@ class Analysis(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
+    def test_analysis__KReg__allowed_class_init(self):
+
+        pass
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__KReg__not_allowed_class_init(self):
+
+        pass
+
+# ------------------------------------------------------------------------------
+
     def test_constant_bandwidth(self):
         self.assertTrue(np.all(self._krmod.compute_constant_bandwidth(self._query, 1.5) == np.array([[1.5, 1.5]])))
 

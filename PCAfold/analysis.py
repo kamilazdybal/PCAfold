@@ -894,7 +894,7 @@ class RegressionAssessment:
     - **mean_absolute_error** - (read only) ``numpy.ndarray`` specifying the mean absolute error (MAE) values. It has size ``(1,n_variables)``.
     - **mean_squared_error** - (read only) ``numpy.ndarray`` specifying the mean squared error (MSE) values. It has size ``(1,n_variables)``.
     - **root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
-    - **normalized root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
+    - **normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
     - **good_direction_estimate** - (read only) ``float`` specifying the good direction estimate (GDE) value, treating the entire :math:`\\pmb{\\phi}_o` and :math:`\\pmb{\\phi}_p` as vectors. Note that if a single dependent variable is passed, GDE cannot be computed and is set to ``NaN``.
     """
 
@@ -1634,6 +1634,8 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
         - **nrmse** - normalized root mean squared error (NRMSE).
     """
 
+    __norms = ['root_square_mean', 'std', 'range', 'root_square_range', 'root_square_std', 'abs_mean']
+
     if not isinstance(observed, np.ndarray):
         raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
 
@@ -1660,6 +1662,9 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
 
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if norm not in __norms:
+        raise ValueError("Parameter `norm` can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.")
 
     rmse = root_mean_squared_error(observed, predicted)
 
