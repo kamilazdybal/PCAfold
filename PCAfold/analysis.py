@@ -996,7 +996,7 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-    def print_metrics(self, table_format=['raw'], float_format='%.4f'):
+    def print_metrics(self, table_format=['raw'], float_format='%.4f', comparison=None):
         """
         Prints all regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
@@ -1078,12 +1078,77 @@ class RegressionAssessment:
                 :width: 300
                 :align: center
 
+        Additionally, the current object of ``RegressionAssessment`` class can be compared with other object:
+
+        .. code:: python
+
+            from PCAfold import PCA, RegressionAssessment
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,3)
+            Y = np.random.rand(100,3)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            pca_Y = PCA(Y, scaling='auto', n_components=2)
+
+            # Approximate the data set:
+            X_rec = pca_X.reconstruct(pca_X.transform(X))
+            Y_rec = pca_Y.reconstruct(pca_Y.transform(Y))
+
+            # Instantiate RegressionAssessment class object:
+            regression_metrics_X = RegressionAssessment(X, X_rec)
+            regression_metrics_Y = RegressionAssessment(Y, Y_rec)
+
+            # Print regression metrics:
+            regression_metrics_X.print_metrics(table_format=['raw', 'pandas'], float_format='%.4f', comparison=regression_metrics_Y)
+
+        .. note::
+
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                -------------------------
+                X1
+                R2:	0.4842	WORSE
+                MAE:	0.1790	WORSE
+                MSE:	0.0471	WORSE
+                RMSE:	0.2169	WORSE
+                NRMSE:	0.7182	WORSE
+                GDE:	91.0000	BETTER
+                -------------------------
+                X2
+                R2:	0.9394	BETTER
+                MAE:	0.0577	WORSE
+                MSE:	0.0049	BETTER
+                RMSE:	0.0700	BETTER
+                NRMSE:	0.2462	BETTER
+                GDE:	91.0000	BETTER
+                -------------------------
+                X3
+                R2:	0.6531	BETTER
+                MAE:	0.1495	WORSE
+                MSE:	0.0328	WORSE
+                RMSE:	0.1812	WORSE
+                NRMSE:	0.5890	BETTER
+                GDE:	91.0000	BETTER
+
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
+
+            .. image:: ../images/generate-pandas-table-comparison.png
+                :width: 300
+                :align: center
+
         :param table_format: (optional)
             ``list`` of ``str`` specifying the format(s) in which the table should be printed.
             Strings can only be ``'raw'``, ``'tex'`` and/or ``'pandas'``.
         :param float_format: (optional)
             ``str`` specifying the display format for the numerical entries inside the
             table. By default it is set to ``'%.4f'``.
+        :param comparison: (optional)
+            object of ``RegressionAssessment`` class specifying the metrics that should be compared with the current regression metrics.
         """
 
         __table_formats = ['raw', 'tex', 'pandas']
@@ -1101,38 +1166,121 @@ class RegressionAssessment:
         metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
         metrics_names_tex = ['$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
 
-        for item in set(table_format):
+        if comparison is None:
 
-            if item=='raw':
+            for item in set(table_format):
 
-                for i in range(0,self.__n_variables):
+                if item=='raw':
 
-                    print('-'*20 + '\n' + self.__variable_names[i])
+                    for i in range(0,self.__n_variables):
 
-                    for j in range(0,len(metrics_names)):
+                        print('-'*25 + '\n' + self.__variable_names[i])
 
-                        metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
-                        print(metrics_names[j] + ':\t' + float_format % metrics[j])
+                        for j in range(0,len(metrics_names)):
 
-            if item=='tex':
+                            metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
+                            print(metrics_names[j] + ':\t' + float_format % metrics[j])
 
-                import pandas as pd
+                if item=='tex':
 
-                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    import pandas as pd
 
-                generate_tex_table(metrics_table, float_format=float_format)
+                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
 
-            if item=='pandas':
+                    generate_tex_table(metrics_table, float_format=float_format)
 
-                import pandas as pd
-                from IPython.display import display
-                pandas_format = '{:,' + float_format[1::] + '}'
-                pd.options.display.float_format = pandas_format.format
+                if item=='pandas':
 
-                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
-                display(metrics_table)
+                    import pandas as pd
+                    from IPython.display import display
+                    pandas_format = '{:,' + float_format[1::] + '}'
+                    pd.options.display.float_format = pandas_format.format
+
+                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    display(metrics_table)
+
+        else:
+
+            for item in set(table_format):
+
+                if item=='raw':
+
+                    for i in range(0,self.__n_variables):
+
+                        print('-'*25 + '\n' + self.__variable_names[i])
+
+                        for j in range(0,len(metrics_names)):
+
+                            metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
+                            comparison_metrics = [comparison.coefficient_of_determination[0,i], comparison.mean_absolute_error[0,i], comparison.mean_squared_error[0,i], comparison.root_mean_squared_error[0,i], comparison.normalized_root_mean_squared_error[0,i], comparison.good_direction_estimate]
+
+                            if j==0 or j==5:
+                                if metrics[j] > comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tBETTER', 'green'))
+                                elif metrics[j] < comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tWORSE', 'red'))
+                                elif metrics[j] == comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + '\tSAME')
+                            else:
+                                if metrics[j] > comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tWORSE', 'red'))
+                                elif metrics[j] < comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tBETTER', 'green'))
+                                elif metrics[j] == comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + '\tSAME')
+
+                if item=='pandas':
+
+                    import pandas as pd
+                    from IPython.display import display
+                    pandas_format = '{:,' + float_format[1::] + '}'
+                    pd.options.display.float_format = pandas_format.format
+
+                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                    comparison_metrics = np.vstack((comparison.coefficient_of_determination, comparison.mean_absolute_error, comparison.mean_squared_error, comparison.root_mean_squared_error, comparison.normalized_root_mean_squared_error, np.ones_like(comparison.normalized_root_mean_squared_error) * comparison.good_direction_estimate))
+
+                    def highlight_better(data, data_comparison, color='lightgreen'):
+
+                        attr = 'background-color: {}'.format(color)
+
+                        # Lower value is better (MAE, MSE, RMSE, NRMSE):
+                        is_better = data < data_comparison
+
+                        # Higher value is better (R2 and GDE):
+                        is_better.iloc[0] = data.iloc[0] > data_comparison.iloc[0]
+                        is_better.iloc[-1] = data.iloc[-1] > data_comparison.iloc[-1]
+
+                        formatting = [attr if v else '' for v in is_better]
+
+                        formatting = pd.DataFrame(np.where(is_better, attr, ''), index=data.index, columns=data.columns)
+
+                        return formatting
+
+                    def highlight_worse(data, data_comparison, color='salmon'):
+
+                        attr = 'background-color: {}'.format(color)
+
+                        # Higher value is worse (MAE, MSE, RMSE, NRMSE):
+                        is_worse = data > data_comparison
+
+                        # Lower value is worse (R2 and GDE):
+                        is_worse.iloc[0] = data.iloc[0] < data_comparison.iloc[0]
+                        is_worse.iloc[-1] = data.iloc[-1] < data_comparison.iloc[-1]
+
+                        formatting = [attr if v else '' for v in is_worse]
+
+                        formatting = pd.DataFrame(np.where(is_worse, attr, ''), index=data.index, columns=data.columns)
+
+                        return formatting
+
+                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    comparison_metrics_table = pd.DataFrame(comparison_metrics, columns=self.__variable_names, index=metrics_names_tex)
+
+                    formatted_table = metrics_table.style.apply(highlight_better, data_comparison=comparison_metrics_table, axis=None)\
+                                                         .apply(highlight_worse, data_comparison=comparison_metrics_table, axis=None)
+                    display(formatted_table)
 
 # ------------------------------------------------------------------------------
 

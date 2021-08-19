@@ -25,6 +25,12 @@ class Analysis(unittest.TestCase):
         except:
             self.assertTrue(False)
 
+        try:
+            regression_metrics = analysis.RegressionAssessment(X, X_rec, variable_names=['X1', 'X2', 'X3'], norm='range', tolerance=0.01)
+            regression_metrics.print_metrics([], float_format='%.2f', comparison=regression_metrics)
+        except:
+            self.assertTrue(False)
+
 # ------------------------------------------------------------------------------
 
     def test_analysis__RegressionAssessment_print_metrics__not_allowed_calls(self):
