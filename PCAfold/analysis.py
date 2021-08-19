@@ -430,7 +430,7 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 
 def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
     """
-    Computes average Euclidean distances to :math:`k` nearest neighbors on
+    Computes an average Euclidean distances to :math:`k` nearest neighbors on
     a manifold defined by the independent variables.
 
     **Example:**
@@ -456,9 +456,16 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
     .. code-block:: text
 
-        Minimum distance:	0.09949245121415481
-        Maximum distance:	0.5479877680240044
-        Average distance:	0.21458565264098528
+        Minimum distance:	0.1388300829487847
+        Maximum distance:	0.4689587542132183
+        Average distance:	0.20824964953425693
+        Median distance:	0.18333873029179215
+
+    .. note::
+
+        This function requires the ``scikit-learn`` module. You can install it through:
+
+        ``pip install scikit-learn``
 
     :param indepvars:
         ``numpy.ndarray`` specifying the independent variable values. It should be of size ``(n_observations,n_independent_variables)``.
@@ -491,7 +498,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
     try:
         from sklearn.neighbors import NearestNeighbors
     except:
-        raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install sklearn`.")
+        raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install scikit-learn`.")
 
     (n_observations, n_independent_variables) = np.shape(indepvars)
 
@@ -512,6 +519,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
         print('Minimum distance:\t' + str(np.min(average_distances)))
         print('Maximum distance:\t' + str(np.max(average_distances)))
         print('Average distance:\t' + str(np.mean(average_distances)))
+        print('Median distance:\t' + str(np.median(average_distances)))
 
     return average_distances
 
