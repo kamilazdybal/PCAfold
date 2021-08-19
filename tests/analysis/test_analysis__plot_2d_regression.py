@@ -13,13 +13,31 @@ class Analysis(unittest.TestCase):
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         try:
-            plt = analysis.plot_2d_regression(X[:,1], X[:,0], X_rec[:,0], x_label='$x$', y_label='$y$', figure_size=(7,7), title='2D regression')
+            plt = analysis.plot_2d_regression(X[:,1], X[:,0], X_rec[:,0])
             plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
-            plt = analysis.plot_2d_regression(X[:,1:2], X[:,0:1], X_rec[:,0:1], x_label='$x$', y_label='$y$', figure_size=(7,7), title='2D regression')
+            plt = analysis.plot_2d_regression(X[:,1],
+                                            X[:,0],
+                                            X_rec[:,0],
+                                            x_label='$x$',
+                                            y_label='$y$',
+                                            figure_size=(7,7),
+                                            title='2D regression')
+            plt.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            plt = analysis.plot_2d_regression(X[:,1:2],
+                                            X[:,0:1],
+                                            X_rec[:,0:1],
+                                            x_label='$x$',
+                                            y_label='$y$',
+                                            figure_size=(7,7),
+                                            title='2D regression')
             plt.close()
         except Exception:
             self.assertTrue(False)
@@ -68,6 +86,10 @@ class Analysis(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,1], title=[1])
+            plt.close()
+
+        with self.assertRaises(ValueError):
+            plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,1], save_filename=[1])
             plt.close()
 
 # ------------------------------------------------------------------------------

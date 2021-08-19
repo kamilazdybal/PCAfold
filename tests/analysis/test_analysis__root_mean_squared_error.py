@@ -3,6 +3,12 @@ import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import analysis
+from sys import modules
+
+try:
+    from sklearn.metrics import mean_squared_error
+except ImportError:
+    pass
 
 class Analysis(unittest.TestCase):
 
@@ -77,15 +83,20 @@ class Analysis(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    # def test_analysis__root_mean_squared_error__check_against_sklearn(self):
-    #
-    #     try:
-    #         import sys
-    #         import sklearn
-    #     except:
-    #         pass
-    #
-    #     if ('sklearn' in sys.modules):
-    #         pass
+    def test_analysis__root_mean_squared_error__check_against_sklearn(self):
+
+        n_repeat_scenario = 50
+
+        if 'sklearn' in modules:
+
+            tol = np.finfo(float).eps
+
+            for i in range(0,n_repeat_scenario):
+                X = np.random.rand(100,2)
+                rmse = analysis.root_mean_squared_error(X[:,0], X[:,1])
+                rmse_sklearn = mean_squared_error(X[:,0], X[:,1], squared=False)
+
+                if np.any(abs(rmse - rmse_sklearn) > tol):
+                    self.assertTrue(False)
 
 # ------------------------------------------------------------------------------

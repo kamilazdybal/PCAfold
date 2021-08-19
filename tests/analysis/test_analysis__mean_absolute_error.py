@@ -3,6 +3,12 @@ import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import analysis
+from sys import modules
+
+try:
+    from sklearn.metrics import mean_absolute_error
+except ImportError:
+    pass
 
 class Analysis(unittest.TestCase):
 
@@ -77,15 +83,20 @@ class Analysis(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    # def test_analysis__mean_absolute_error__check_against_sklearn(self):
-    #
-    #     try:
-    #         import sys
-    #         import sklearn
-    #     except:
-    #         pass
-    #
-    #     if ('sklearn' in sys.modules):
-    #         pass
+    def test_analysis__mean_absolute_error__check_against_sklearn(self):
+
+        n_repeat_scenario = 50
+
+        if 'sklearn' in modules:
+
+            tol = np.finfo(float).eps
+
+            for i in range(0,n_repeat_scenario):
+                X = np.random.rand(100,2)
+                mae = analysis.mean_absolute_error(X[:,0], X[:,1])
+                mae_sklearn = mean_absolute_error(X[:,0], X[:,1])
+
+                if np.any(abs(mae - mae_sklearn) > tol):
+                    self.assertTrue(False)
 
 # ------------------------------------------------------------------------------

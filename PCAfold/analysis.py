@@ -23,6 +23,7 @@ from PCAfold.styles import *
 from PCAfold import preprocess
 from PCAfold import reduction
 from termcolor import colored
+from matplotlib.colors import ListedColormap
 import time
 
 ################################################################################
@@ -429,7 +430,7 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 
 def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
     """
-    Computes average Euclidean distances to :math:`k` nearest neighbors on
+    Computes an average Euclidean distances to :math:`k` nearest neighbors on
     a manifold defined by the independent variables.
 
     **Example:**
@@ -455,9 +456,16 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
     .. code-block:: text
 
-        Minimum distance:	0.09949245121415481
-        Maximum distance:	0.5479877680240044
-        Average distance:	0.21458565264098528
+        Minimum distance:	0.1388300829487847
+        Maximum distance:	0.4689587542132183
+        Average distance:	0.20824964953425693
+        Median distance:	0.18333873029179215
+
+    .. note::
+
+        This function requires the ``scikit-learn`` module. You can install it through:
+
+        ``pip install scikit-learn``
 
     :param indepvars:
         ``numpy.ndarray`` specifying the independent variable values. It should be of size ``(n_observations,n_independent_variables)``.
@@ -490,7 +498,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
     try:
         from sklearn.neighbors import NearestNeighbors
     except:
-        raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install sklearn`.")
+        raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install scikit-learn`.")
 
     (n_observations, n_independent_variables) = np.shape(indepvars)
 
@@ -511,6 +519,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
         print('Minimum distance:\t' + str(np.min(average_distances)))
         print('Maximum distance:\t' + str(np.max(average_distances)))
         print('Average distance:\t' + str(np.mean(average_distances)))
+        print('Median distance:\t' + str(np.median(average_distances)))
 
     return average_distances
 
@@ -893,7 +902,7 @@ class RegressionAssessment:
     - **mean_absolute_error** - (read only) ``numpy.ndarray`` specifying the mean absolute error (MAE) values. It has size ``(1,n_variables)``.
     - **mean_squared_error** - (read only) ``numpy.ndarray`` specifying the mean squared error (MSE) values. It has size ``(1,n_variables)``.
     - **root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
-    - **normalized root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
+    - **normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
     - **good_direction_estimate** - (read only) ``float`` specifying the good direction estimate (GDE) value, treating the entire :math:`\\pmb{\\phi}_o` and :math:`\\pmb{\\phi}_p` as vectors. Note that if a single dependent variable is passed, GDE cannot be computed and is set to ``NaN``.
     """
 
@@ -987,7 +996,7 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-    def print_metrics(self, table_format=['raw'], float_format='%.4f'):
+    def print_metrics(self, table_format=['raw'], float_format='%.4f', comparison=None):
         """
         Prints all regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
@@ -1069,12 +1078,77 @@ class RegressionAssessment:
                 :width: 300
                 :align: center
 
+        Additionally, the current object of ``RegressionAssessment`` class can be compared with other object:
+
+        .. code:: python
+
+            from PCAfold import PCA, RegressionAssessment
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,3)
+            Y = np.random.rand(100,3)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            pca_Y = PCA(Y, scaling='auto', n_components=2)
+
+            # Approximate the data set:
+            X_rec = pca_X.reconstruct(pca_X.transform(X))
+            Y_rec = pca_Y.reconstruct(pca_Y.transform(Y))
+
+            # Instantiate RegressionAssessment class object:
+            regression_metrics_X = RegressionAssessment(X, X_rec)
+            regression_metrics_Y = RegressionAssessment(Y, Y_rec)
+
+            # Print regression metrics:
+            regression_metrics_X.print_metrics(table_format=['raw', 'pandas'], float_format='%.4f', comparison=regression_metrics_Y)
+
+        .. note::
+
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                -------------------------
+                X1
+                R2:	0.4842	WORSE
+                MAE:	0.1790	WORSE
+                MSE:	0.0471	WORSE
+                RMSE:	0.2169	WORSE
+                NRMSE:	0.7182	WORSE
+                GDE:	91.0000	BETTER
+                -------------------------
+                X2
+                R2:	0.9394	BETTER
+                MAE:	0.0577	WORSE
+                MSE:	0.0049	BETTER
+                RMSE:	0.0700	BETTER
+                NRMSE:	0.2462	BETTER
+                GDE:	91.0000	BETTER
+                -------------------------
+                X3
+                R2:	0.6531	BETTER
+                MAE:	0.1495	WORSE
+                MSE:	0.0328	WORSE
+                RMSE:	0.1812	WORSE
+                NRMSE:	0.5890	BETTER
+                GDE:	91.0000	BETTER
+
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
+
+            .. image:: ../images/generate-pandas-table-comparison.png
+                :width: 300
+                :align: center
+
         :param table_format: (optional)
             ``list`` of ``str`` specifying the format(s) in which the table should be printed.
             Strings can only be ``'raw'``, ``'tex'`` and/or ``'pandas'``.
         :param float_format: (optional)
             ``str`` specifying the display format for the numerical entries inside the
             table. By default it is set to ``'%.4f'``.
+        :param comparison: (optional)
+            object of ``RegressionAssessment`` class specifying the metrics that should be compared with the current regression metrics.
         """
 
         __table_formats = ['raw', 'tex', 'pandas']
@@ -1092,38 +1166,121 @@ class RegressionAssessment:
         metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
         metrics_names_tex = ['$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
 
-        for item in set(table_format):
+        if comparison is None:
 
-            if item=='raw':
+            for item in set(table_format):
 
-                for i in range(0,self.__n_variables):
+                if item=='raw':
 
-                    print('-'*20 + '\n' + self.__variable_names[i])
+                    for i in range(0,self.__n_variables):
 
-                    for j in range(0,len(metrics_names)):
+                        print('-'*25 + '\n' + self.__variable_names[i])
 
-                        metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
-                        print(metrics_names[j] + ':\t' + float_format % metrics[j])
+                        for j in range(0,len(metrics_names)):
 
-            if item=='tex':
+                            metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
+                            print(metrics_names[j] + ':\t' + float_format % metrics[j])
 
-                import pandas as pd
+                if item=='tex':
 
-                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    import pandas as pd
 
-                generate_tex_table(metrics_table, float_format=float_format)
+                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
 
-            if item=='pandas':
+                    generate_tex_table(metrics_table, float_format=float_format)
 
-                import pandas as pd
-                from IPython.display import display
-                pandas_format = '{:,' + float_format[1::] + '}'
-                pd.options.display.float_format = pandas_format.format
+                if item=='pandas':
 
-                metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-                metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
-                display(metrics_table)
+                    import pandas as pd
+                    from IPython.display import display
+                    pandas_format = '{:,' + float_format[1::] + '}'
+                    pd.options.display.float_format = pandas_format.format
+
+                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    display(metrics_table)
+
+        else:
+
+            for item in set(table_format):
+
+                if item=='raw':
+
+                    for i in range(0,self.__n_variables):
+
+                        print('-'*25 + '\n' + self.__variable_names[i])
+
+                        for j in range(0,len(metrics_names)):
+
+                            metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
+                            comparison_metrics = [comparison.coefficient_of_determination[0,i], comparison.mean_absolute_error[0,i], comparison.mean_squared_error[0,i], comparison.root_mean_squared_error[0,i], comparison.normalized_root_mean_squared_error[0,i], comparison.good_direction_estimate]
+
+                            if j==0 or j==5:
+                                if metrics[j] > comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tBETTER', 'green'))
+                                elif metrics[j] < comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tWORSE', 'red'))
+                                elif metrics[j] == comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + '\tSAME')
+                            else:
+                                if metrics[j] > comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tWORSE', 'red'))
+                                elif metrics[j] < comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tBETTER', 'green'))
+                                elif metrics[j] == comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + '\tSAME')
+
+                if item=='pandas':
+
+                    import pandas as pd
+                    from IPython.display import display
+                    pandas_format = '{:,' + float_format[1::] + '}'
+                    pd.options.display.float_format = pandas_format.format
+
+                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                    comparison_metrics = np.vstack((comparison.coefficient_of_determination, comparison.mean_absolute_error, comparison.mean_squared_error, comparison.root_mean_squared_error, comparison.normalized_root_mean_squared_error, np.ones_like(comparison.normalized_root_mean_squared_error) * comparison.good_direction_estimate))
+
+                    def highlight_better(data, data_comparison, color='lightgreen'):
+
+                        attr = 'background-color: {}'.format(color)
+
+                        # Lower value is better (MAE, MSE, RMSE, NRMSE):
+                        is_better = data < data_comparison
+
+                        # Higher value is better (R2 and GDE):
+                        is_better.iloc[0] = data.iloc[0] > data_comparison.iloc[0]
+                        is_better.iloc[-1] = data.iloc[-1] > data_comparison.iloc[-1]
+
+                        formatting = [attr if v else '' for v in is_better]
+
+                        formatting = pd.DataFrame(np.where(is_better, attr, ''), index=data.index, columns=data.columns)
+
+                        return formatting
+
+                    def highlight_worse(data, data_comparison, color='salmon'):
+
+                        attr = 'background-color: {}'.format(color)
+
+                        # Higher value is worse (MAE, MSE, RMSE, NRMSE):
+                        is_worse = data > data_comparison
+
+                        # Lower value is worse (R2 and GDE):
+                        is_worse.iloc[0] = data.iloc[0] < data_comparison.iloc[0]
+                        is_worse.iloc[-1] = data.iloc[-1] < data_comparison.iloc[-1]
+
+                        formatting = [attr if v else '' for v in is_worse]
+
+                        formatting = pd.DataFrame(np.where(is_worse, attr, ''), index=data.index, columns=data.columns)
+
+                        return formatting
+
+                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    comparison_metrics_table = pd.DataFrame(comparison_metrics, columns=self.__variable_names, index=metrics_names_tex)
+
+                    formatted_table = metrics_table.style.apply(highlight_better, data_comparison=comparison_metrics_table, axis=None)\
+                                                         .apply(highlight_worse, data_comparison=comparison_metrics_table, axis=None)
+                    display(formatted_table)
 
 # ------------------------------------------------------------------------------
 
@@ -1633,6 +1790,8 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
         - **nrmse** - normalized root mean squared error (NRMSE).
     """
 
+    __norms = ['root_square_mean', 'std', 'range', 'root_square_range', 'root_square_std', 'abs_mean']
+
     if not isinstance(observed, np.ndarray):
         raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
 
@@ -1659,6 +1818,9 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
 
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if norm not in __norms:
+        raise ValueError("Parameter `norm` can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.")
 
     rmse = root_mean_squared_error(observed, predicted)
 
@@ -1928,7 +2090,14 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
         X_rec = pca_X.reconstruct(PCs)
 
         # Plot the manifold:
-        plt = plot_2d_regression(X[:,0], X[:,0], X_rec[:,0], x_label='$x$', y_label='$y$', figure_size=(10,10), title='2D regression', save_filename='2d-regression.pdf')
+        plt = plot_2d_regression(X[:,0],
+                                 X[:,0],
+                                 X_rec[:,0],
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 figure_size=(10,10),
+                                 title='2D regression',
+                                 save_filename='2d-regression.pdf')
         plt.close()
 
     :param x:
@@ -2147,7 +2316,7 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
     :param colorbar_range: (optional)
         ``tuple`` specifying the lower and the upper bound for the colorbar range.
     :param manifold_alpha: (optional)
-        ``float`` specifying the opacity of the plotted manifold.
+        ``float`` or ``int`` specifying the opacity of the plotted manifold.
     :param grid_on:
         ``bool`` specifying whether grid should be plotted.
     :param figure_size: (optional)
@@ -2170,12 +2339,6 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
 
     if not callable(regression_model):
         raise ValueError("Parameter `regression_model` has to be of type `function`.")
-
-    if not isinstance(resolution, tuple):
-        raise ValueError("Parameter `resolution` has to be of type `tuple`.")
-
-    if not isinstance(extension, tuple):
-        raise ValueError("Parameter `extension` has to be of type `tuple`.")
 
     if x is not None:
 
@@ -2208,6 +2371,24 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
         if n_x != n_y:
             raise ValueError("Parameter `x` has different number of elements than `y`.")
 
+    if not isinstance(resolution, tuple):
+        raise ValueError("Parameter `resolution` has to be of type `tuple`.")
+
+    if not isinstance(extension, tuple):
+        raise ValueError("Parameter `extension` has to be of type `tuple`.")
+
+    if color is not None:
+        if not isinstance(color, str):
+            raise ValueError("Parameter `color` has to be of type `str`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
     if manifold_color is not None:
         if not isinstance(manifold_color, str):
             if not isinstance(manifold_color, np.ndarray):
@@ -2222,10 +2403,14 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
             (n_color, n_var_color) = np.shape(manifold_color)
 
         if n_var_color != 1:
-            raise ValueError("Parameter `color` has to be a 0D or 1D vector.")
+            raise ValueError("Parameter `manifold_color` has to be a 0D or 1D vector.")
 
         if n_color != n_x:
-            raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
+            raise ValueError("Parameter `manifold_color` has different number of elements than `x` and `y`.")
+
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
 
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
@@ -2237,13 +2422,12 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
         else:
             (cbar_min, cbar_max) = colorbar_range
 
-    if x_label is not None:
-        if not isinstance(x_label, str):
-            raise ValueError("Parameter `x_label` has to be of type `str`.")
+    if manifold_alpha is not None:
+        if not isinstance(manifold_alpha, float) and not isinstance(manifold_alpha, int):
+            raise ValueError("Parameter `manifold_alpha` has to be of type `float`.")
 
-    if y_label is not None:
-        if not isinstance(y_label, str):
-            raise ValueError("Parameter `y_label` has to be of type `str`.")
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
 
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
@@ -2339,7 +2523,18 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         X_rec = pca_X.reconstruct(PCs)
 
         # Plot the manifold:
-        plt = plot_3d_regression(X[:,0], X[:,1], X[:,0], X_rec[:,0], elev=45, azim=-45, x_label='$x$', y_label='$y$', z_label='$z$', figure_size=(10,10), title='3D regression', save_filename='3d-regression.pdf')
+        plt = plot_3d_regression(X[:,0],
+                                 X[:,1],
+                                 X[:,0],
+                                 X_rec[:,0],
+                                 elev=45,
+                                 azim=-45,
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 z_label='$z$',
+                                 figure_size=(10,10),
+                                 title='3D regression',
+                                 save_filename='3d-regression.pdf')
         plt.close()
 
     :param x:
@@ -2353,9 +2548,9 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         ``numpy.ndarray`` specifying the predicted values of a single dependent variable.
         It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param elev: (optional)
-        elevation angle.
+        ``float`` or ``int`` specifying the elevation angle.
     :param azim: (optional)
-        azimuth angle.
+        ``float`` or ``int`` specifying the azimuth angle.
     :param x_label: (optional)
         ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -2438,6 +2633,12 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
 
     if n_x != n_predicted:
         raise ValueError("Parameter `predicted` has different number of elements than `x`, `y` and `z`.")
+
+    if not isinstance(elev, float) and not isinstance(elev, int):
+        raise ValueError("Parameter `elev` has to be of type `int` or `float`.")
+
+    if not isinstance(azim, float) and not isinstance(azim, int):
+        raise ValueError("Parameter `azim` has to be of type `int` or `float`.")
 
     if x_label is not None:
         if not isinstance(x_label, str):
@@ -2555,6 +2756,17 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     from matplotlib import cm
     color_map_colors = cm.get_cmap(color_map)
 
@@ -2634,7 +2846,12 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         variance_data_Y = compute_normalized_variance(principal_components_Y, Y, depvar_names=['F', 'G', 'H', 'I', 'J'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
 
         # Plot a comparison of normalized variance quantities:
-        plt = plot_normalized_variance_comparison((variance_data_X, variance_data_Y), ([0,1,2], [0,1,2]), ('Blues', 'Reds'), title='Normalized variance comparison', save_filename='N.pdf')
+        plt = plot_normalized_variance_comparison((variance_data_X, variance_data_Y),
+                                                  ([0,1,2], [0,1,2]),
+                                                  ('Blues', 'Reds'),
+                                                  figure_size=(10,5),
+                                                  title='Normalized variance comparison',
+                                                  save_filename='N.pdf')
         plt.close()
 
     :param variance_data_tuple:
@@ -2662,6 +2879,17 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
@@ -2700,8 +2928,8 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
 
             variable_count = variable_count + 1
 
-    plt.xlabel('$\sigma$', fontsize=font_labels, **csfont)
-    plt.ylabel('$N(\sigma)$', fontsize=font_labels, **csfont)
+    plt.xlabel(r'$\sigma$', fontsize=font_labels, **csfont)
+    plt.ylabel(r'$N(\sigma)$', fontsize=font_labels, **csfont)
     plt.grid(alpha=grid_opacity)
 
     if variable_count <=5:
@@ -2748,6 +2976,17 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
     color_map_colors = cm.get_cmap(color_map)
@@ -2832,6 +3071,17 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
@@ -2934,6 +3184,17 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     bin_length = bins_borders[1] - bins_borders[0]
     bin_centers = bins_borders[0:-1] + bin_length/2
