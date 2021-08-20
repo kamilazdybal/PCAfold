@@ -2213,6 +2213,9 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
     :param legend_label: (optional)
         ``list`` of ``str`` specifying labels for the legend. If the list is empty,
         legend will not be plotted.
+    :param color_map: (optional)
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap
+        to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
