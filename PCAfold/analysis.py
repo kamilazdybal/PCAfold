@@ -161,7 +161,7 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
         (optional, default None) number of threads to run this computation. If None, default behavior of multiprocessing.Pool is used, which is to use all available cores on the current system.
 
     :return:
-        a ``VarianceData`` class
+        - **variance_data** - an object of the ``VarianceData`` class.
     """
     assert indepvars.ndim == 2, "independent variable array must be 2D: n_observations x n_variables."
     assert depvars.ndim == 2, "dependent variable array must be 2D: n_observations x n_variables."
@@ -249,13 +249,36 @@ def normalized_variance_derivative(variance_data):
 
     More information can be found in :cite:`Armstrong2021`.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, normalized_variance_derivative
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+
+        # Compute normalized variance derivative:
+        (derivative, bandwidth_values, max_derivative) = normalized_variance_derivative(variance_data)
+
+        # Access normalized variance derivative values for a specific variable:
+        derivative['B']
+
     :param variance_data:
         a ``VarianceData`` class returned from ``compute_normalized_variance``
 
     :return:
-        - a dictionary of :math:`\\hat{\\mathcal{D}}(\\sigma)` for each variable in the provided ``VarianceData`` object
-        - the :math:`\\sigma` values where :math:`\\hat{\\mathcal{D}}(\\sigma)` was computed
-        - a dictionary of :math:`\\max(\\mathcal{D}(\\sigma))` values for each variable in the provided ``VarianceData`` object.
+        - **derivative_dict** - a dictionary of :math:`\\hat{\\mathcal{D}}(\\sigma)` for each variable in the provided ``VarianceData`` object
+        - **x** - the :math:`\\sigma` values where :math:`\\hat{\\mathcal{D}}(\\sigma)` was computed
+        - **max_derivatives_dicts** - a dictionary of :math:`\\max(\\mathcal{D}(\\sigma))` values for each variable in the provided ``VarianceData`` object.
     """
     x_plus = variance_data.bandwidth_values[2:]
     x_minus = variance_data.bandwidth_values[:-2]
@@ -2069,7 +2092,7 @@ def generate_tex_table(data_frame_table, float_format='%.2f', caption='', label=
 #
 ################################################################################
 
-def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, color_observed=None, color_predicted=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots the result of regression of a dependent variable on top
     of a one-dimensional manifold defined by a single independent variable ``x``.
@@ -2095,6 +2118,8 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
                                  X_rec[:,0],
                                  x_label='$x$',
                                  y_label='$y$',
+                                 color_observed='k',
+                                 color_predicted='r',
                                  figure_size=(10,10),
                                  title='2D regression',
                                  save_filename='2d-regression.pdf')
@@ -2114,6 +2139,10 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
     :param y_label: (optional)
         ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
+    :param color_observed: (optional)
+        ``str`` specifying the color of the plotted observed variable.
+    :param color_predicted: (optional)
+        ``str`` specifying the color of the plotted predicted variable.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -2182,6 +2211,18 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
         if not isinstance(y_label, str):
             raise ValueError("Parameter `y_label` has to be of type `str`.")
 
+    if color_observed is not None:
+        if not isinstance(color_observed, str):
+            raise ValueError("Parameter `color_observed` has to be of type `str`.")
+    else:
+        color_observed = '#191b27'
+
+    if color_predicted is not None:
+        if not isinstance(color_predicted, str):
+            raise ValueError("Parameter `color_predicted` has to be of type `str`.")
+    else:
+        color_predicted = '#C7254E'
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -2192,9 +2233,6 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, figur
     if save_filename is not None:
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
-
-    color_observed = '#191b27'
-    color_predicted = '#C7254E'
 
     fig = plt.figure(figsize=figure_size)
 
@@ -2502,7 +2540,7 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_observed=None, color_predicted=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots the result of regression of a dependent variable on top
     of a two-dimensional manifold defined by two independent variables ``x`` and ``y``.
@@ -2532,6 +2570,8 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
                                  x_label='$x$',
                                  y_label='$y$',
                                  z_label='$z$',
+                                 color_observed='k',
+                                 color_predicted='r',
                                  figure_size=(10,10),
                                  title='3D regression',
                                  save_filename='3d-regression.pdf')
@@ -2560,6 +2600,10 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     :param z_label: (optional)
         ``str`` specifying :math:`z`-axis label annotation. If set to ``None``
         label will not be plotted.
+    :param color_observed: (optional)
+        ``str`` specifying the color of the plotted observed variable.
+    :param color_predicted: (optional)
+        ``str`` specifying the color of the plotted predicted variable.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -2652,6 +2696,18 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         if not isinstance(z_label, str):
             raise ValueError("Parameter `z_label` has to be of type `str`.")
 
+    if color_observed is not None:
+        if not isinstance(color_observed, str):
+            raise ValueError("Parameter `color_observed` has to be of type `str`.")
+    else:
+        color_observed = '#191b27'
+
+    if color_predicted is not None:
+        if not isinstance(color_predicted, str):
+            raise ValueError("Parameter `color_predicted` has to be of type `str`.")
+    else:
+        color_predicted = '#C7254E'
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -2662,9 +2718,6 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     if save_filename is not None:
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
-
-    color_observed = '#191b27'
-    color_predicted = '#C7254E'
 
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111, projection='3d')
@@ -2730,7 +2783,12 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
 
         # Plot normalized variance quantities:
-        plt = plot_normalized_variance(variance_data, plot_variables=[0,1,2], color_map='Blues', figure_size=(10,5), title='Normalized variance', save_filename='N.pdf')
+        plt = plot_normalized_variance(variance_data,
+                                       plot_variables=[0,1,2],
+                                       color_map='Blues',
+                                       figure_size=(10,5),
+                                       title='Normalized variance',
+                                       save_filename='N.pdf')
         plt.close()
 
     :param variance_data:
@@ -2952,7 +3010,31 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
     *Note:* this function can accomodate plotting up to 18 variables at once.
     You can specify which variables should be plotted using ``plot_variables`` list.
 
-    Example is similar to that found for ``plot_normalized_variance``.
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, plot_normalized_variance_derivative
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+
+        # Plot normalized variance derivative:
+        plt = plot_normalized_variance_derivative(variance_data,
+                                                  plot_variables=[0,1,2],
+                                                  color_map='Blues',
+                                                  figure_size=(10,5),
+                                                  title='Normalized variance derivative',
+                                                  save_filename='D-hat.pdf')
+        plt.close()
 
     :param variance_data:
         an object of ``VarianceData`` class objects whose normalized variance derivative quantities
@@ -3044,7 +3126,35 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
     *Note:* this function can accomodate plotting up to 18 variables at once.
     You can specify which variables should be plotted using ``plot_variables`` list.
 
-    Example is similar to that found for ``plot_normalized_variance_comparison``.
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, plot_normalized_variance_derivative_comparison
+        import numpy as np
+
+        # Generate dummy data sets:
+        X = np.random.rand(100,5)
+        Y = np.random.rand(100,5)
+
+        # Perform PCA to obtain low-dimensional manifolds:
+        pca_X = PCA(X, n_components=2)
+        pca_Y = PCA(Y, n_components=2)
+        principal_components_X = pca_X.transform(X)
+        principal_components_Y = pca_Y.transform(Y)
+
+        # Compute normalized variance quantities:
+        variance_data_X = compute_normalized_variance(principal_components_X, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+        variance_data_Y = compute_normalized_variance(principal_components_Y, Y, depvar_names=['F', 'G', 'H', 'I', 'J'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+
+        # Plot a comparison of normalized variance derivatives:
+        plt = plot_normalized_variance_derivative_comparison((variance_data_X, variance_data_Y),
+                                                             ([0,1,2], [0,1,2]),
+                                                             ('Blues', 'Reds'),
+                                                             figure_size=(10,5),
+                                                             title='Normalized variance derivative comparison',
+                                                             save_filename='D-hat.pdf')
+        plt.close()
 
     :param variance_data_tuple:
         ``tuple`` of ``VarianceData`` class objects whose normalized variance derivative quantities
@@ -3160,7 +3270,12 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
         (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
 
         # Visualize how R2 changes across bins:
-        plt = plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
+        plt = plot_stratified_coefficient_of_determination(r2_in_bins,
+                                                           bins_borders,
+                                                           variable_name='$X_1$',
+                                                           figure_size=(10,5),
+                                                           title='Stratified R2',
+                                                           save_filename='r2.pdf')
         plt.close()
 
     :param r2_in_bins:

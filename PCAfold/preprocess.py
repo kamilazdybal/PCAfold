@@ -3854,7 +3854,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     if x_label != None: ax1.set_xlabel(x_label, fontsize=font_labels, **csfont)
     if y_label != None: ax1.set_ylabel(y_label, fontsize=font_labels, **csfont)
     if grid_on: ax1.grid(alpha=grid_opacity)
-    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=4, fontsize=font_legend/2, markerscale=marker_scale_legend_clustering/2)
+    ax1.legend(bbox_to_anchor=(1.0, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/2)
 
     ax2 = plt.subplot(1,2,2)
     for k in range(0,n_clusters):
@@ -3868,7 +3868,7 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
     if x_label != None: ax2.set_xlabel(x_label, fontsize=font_labels, **csfont)
     if y_label != None: ax2.set_ylabel(y_label, fontsize=font_labels, **csfont)
     if grid_on: ax2.grid(alpha=grid_opacity)
-    ax2.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), fancybox=True, shadow=True, ncol=4, fontsize=font_legend/2, markerscale=marker_scale_legend_clustering/2)
+    ax2.legend(bbox_to_anchor=(1.0, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering/2)
 
     if title != None: figure.suptitle(title, fontsize=font_title, **csfont)
     if save_filename != None: figure.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
