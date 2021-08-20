@@ -1974,7 +1974,7 @@ def pca_on_sampled_data_set(X, idx_X_r, scaling, n_components, biasing_option, X
 
     return(eigenvalues, eigenvectors, pc_scores, pc_sources, C, D, C_r, D_r)
 
-def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], title=None, save_filename=None):
+def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], figure_size=None, title=None, save_filename=None):
     """
     Analyzes the change in normalized centers computed on the
     sampled subset of the original data set :math:`\mathbf{X_r}` with respect
@@ -2042,6 +2042,8 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         ``list`` of ``str`` specifying labels for the legend. First entry will refer
         to :math:`||\mathbf{C}||` and second entry to :math:`||\mathbf{C_r}||`.
         If the list is empty, legend will not be plotted.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -2058,6 +2060,18 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
         measuring the relative change in normalized centers.
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if figure_size is not None:
+        if not isinstance(figure_size, tuple):
+            raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     color_X = '#191b27'
     color_X_r = '#ff2f18'
@@ -2089,7 +2103,10 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     x_range = np.arange(1, n_variables+1)
 
-    fig, ax = plt.subplots(figsize=(n_variables, 4))
+    if figure_size is None:
+        fig, ax = plt.subplots(figsize=(n_variables, 4))
+    else:
+        fig, ax = plt.subplots(figsize=figure_size)
 
     plt.scatter(x_range, normalized_C, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
     plt.scatter(x_range, normalized_C_r, c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -2124,7 +2141,7 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     return(normalized_C, normalized_C_r, center_movement_percentage, plt)
 
-def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None):
+def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], color_map='viridis', figure_size=None, title=None, save_filename=None):
     """
     Analyzes the change of weights on an eigenvector obtained
     from a reduced data set as specified by the ``eigenvectors`` matrix.
@@ -2196,6 +2213,8 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
     :param legend_label: (optional)
         ``list`` of ``str`` specifying labels for the legend. If the list is empty,
         legend will not be plotted.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -2208,6 +2227,18 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if figure_size is not None:
+        if not isinstance(figure_size, tuple):
+            raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     (n_variables, n_versions) = np.shape(eigenvectors)
 
@@ -2245,7 +2276,10 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         color_X_r = '#ff2f18'
         color_link = '#bbbbbb'
 
-        fig, ax = plt.subplots(figsize=(n_variables, 4))
+        if figure_size is None:
+            fig, ax = plt.subplots(figsize=(n_variables, 4))
+        else:
+            fig, ax = plt.subplots(figsize=figure_size)
 
         plt.scatter(x_range, eigenvectors[:,0], c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
         plt.scatter(x_range, eigenvectors[:,-1], c=color_X_r, marker='>', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -2289,10 +2323,13 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
         color_range = np.arange(0, n_versions)
 
         # Plot the eigenvector weights movement:
-        fig, ax = plt.subplots(figsize=(n_variables, 4))
+        if figure_size is None:
+            fig, ax = plt.subplots(figsize=(n_variables, 4))
+        else:
+            fig, ax = plt.subplots(figsize=figure_size)
 
         for idx, variable in enumerate(variable_names):
-            scat = ax.scatter(np.repeat(idx, n_versions), eigenvectors[idx,:], c=color_range, cmap=plt.cm.Spectral)
+            scat = ax.scatter(np.repeat(idx, n_versions), eigenvectors[idx,:], c=color_range, cmap=color_map)
 
         plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
         plt.yticks(fontsize=font_axes, **csfont)
@@ -2316,7 +2353,7 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
 
     return plt
 
-def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_label=[], title=None, save_filename=None):
+def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_label=[], figure_size=None, title=None, save_filename=None):
     """
     Analyzes the normalized eigenvalue distribution when PCA is
     performed on the original data set :math:`\mathbf{X}` and on the sampled
@@ -2361,6 +2398,8 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         ``list`` of ``str`` specifying labels for the legend. First entry will refer
         to :math:`\mathbf{X}` and second entry to :math:`\mathbf{X_r}`.
         If the list is empty, legend will not be plotted.
+    :param figure_size: (optional)
+        tuple specifying figure size.
     :param title: (optional)
         ``str`` specifying plot title. If set to ``None`` title will not be
         plotted.
@@ -2373,6 +2412,18 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if figure_size is not None:
+        if not isinstance(figure_size, tuple):
+            raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     color_X = '#191b27'
     color_X_r = '#ff2f18'
@@ -2395,7 +2446,10 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     eigenvalues_original = eigenvalues_original / np.max(eigenvalues_original)
     eigenvalues_sampled = eigenvalues_sampled / np.max(eigenvalues_sampled)
 
-    fig, ax = plt.subplots(figsize=(n_variables, 4))
+    if figure_size is None:
+        fig, ax = plt.subplots(figsize=(n_variables, 4))
+    else:
+        fig, ax = plt.subplots(figsize=figure_size)
 
     # Plot the eigenvalue distribution from the full original data set X:
     original_distribution = plt.scatter(n_components_range, eigenvalues_original, c=color_X, marker='o', s=marker_size, edgecolor='none', alpha=1, zorder=2)
@@ -3501,6 +3555,14 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         - **plot_handles** - list of plot handles.
     """
 
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     if bar_color == None:
         bar_color = '#191b27'
 
@@ -3614,6 +3676,14 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
     from matplotlib import cm
 
@@ -3733,6 +3803,14 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, figure_size=None
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     color_plot = '#191b27'
 
     (n_eigenvalues, ) = np.shape(eigenvalues)
@@ -3829,6 +3907,14 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
 
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     n_sets = len(eigenvalues_tuple)
 
     (n_eigenvalues, ) = np.shape(eigenvalues_tuple[0])
@@ -3924,6 +4010,14 @@ def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, titl
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
     bar_color = '#191b27'
     line_color = '#ff2f18'
 
@@ -3939,7 +4033,7 @@ def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, titl
     if figure_size is None:
         fig, ax1 = plt.subplots(figsize=(n_retained, 4))
     else:
-        fig, ax = plt.subplots(figsize=figure_size)
+        fig, ax1 = plt.subplots(figsize=figure_size)
 
     ax1.bar(x_range, eigenvalues[0:n_retained], color=bar_color, edgecolor=bar_color, align='center', zorder=2, label='Eigenvalue')
     ax1.set_ylabel('Eigenvalue [-]', fontsize=font_labels, **csfont)

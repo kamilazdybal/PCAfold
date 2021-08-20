@@ -2502,7 +2502,7 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_observed=None, color_predicted=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots the result of regression of a dependent variable on top
     of a two-dimensional manifold defined by two independent variables ``x`` and ``y``.
@@ -2663,8 +2663,8 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    color_observed = '#191b27'
-    color_predicted = '#C7254E'
+    if color_observed is None: color_observed = '#191b27'
+    if color_predicted is None: color_predicted = '#C7254E'
 
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111, projection='3d')
@@ -2730,7 +2730,12 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
 
         # Plot normalized variance quantities:
-        plt = plot_normalized_variance(variance_data, plot_variables=[0,1,2], color_map='Blues', figure_size=(10,5), title='Normalized variance', save_filename='N.pdf')
+        plt = plot_normalized_variance(variance_data,
+                                       plot_variables=[0,1,2],
+                                       color_map='Blues',
+                                       figure_size=(10,5),
+                                       title='Normalized variance',
+                                       save_filename='N.pdf')
         plt.close()
 
     :param variance_data:
@@ -3160,7 +3165,12 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
         (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
 
         # Visualize how R2 changes across bins:
-        plt = plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name='$X_1$', figure_size=(10,5), title='Stratified R2', save_filename='r2.pdf')
+        plt = plot_stratified_coefficient_of_determination(r2_in_bins,
+                                                           bins_borders,
+                                                           variable_name='$X_1$',
+                                                           figure_size=(10,5),
+                                                           title='Stratified R2',
+                                                           save_filename='r2.pdf')
         plt.close()
 
     :param r2_in_bins:
