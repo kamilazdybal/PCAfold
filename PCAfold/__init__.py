@@ -67,6 +67,10 @@ from .analysis import manifold_informed_feature_selection
 from .analysis import RegressionAssessment
 from .analysis import coefficient_of_determination
 from .analysis import stratified_coefficient_of_determination
+from .analysis import stratified_mean_absolute_error
+from .analysis import stratified_mean_squared_error
+from .analysis import stratified_root_mean_squared_error
+from .analysis import stratified_normalized_root_mean_squared_error
 from .analysis import mean_absolute_error
 from .analysis import mean_squared_error
 from .analysis import root_mean_squared_error
