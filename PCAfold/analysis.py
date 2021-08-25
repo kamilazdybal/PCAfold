@@ -1632,7 +1632,7 @@ def stratified_mean_absolute_error(observed, predicted, idx, verbose=False):
 
     .. math::
 
-        \\mathrm{MAE}_j = \\frac{1}{N_j} \\sum_{i=1}^N_j | \\phi_{o,i}^j - \\phi_{p,i}^j |
+        \\mathrm{MAE}_j = \\frac{1}{N_j} \\sum_{i=1}^{N_j} | \\phi_{o,i}^j - \\phi_{p,i}^j |
 
     where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
     :math:`\\phi_p` is the predicted dependent variable.
@@ -1827,7 +1827,7 @@ def stratified_mean_squared_error(observed, predicted, idx, verbose=False):
 
     .. math::
 
-        \\mathrm{MSE}_j = \\frac{1}{N_j} \\sum_{i=1}^N_j | \\phi_{o,i}^j - \\phi_{p,i}^j |
+        \\mathrm{MSE}_j = \\frac{1}{N_j} \\sum_{i=1}^{N_j} (\\phi_{o,i}^j - \\phi_{p,i}^j) ^2
 
     where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
     :math:`\\phi_p` is the predicted dependent variable.
@@ -2013,10 +2013,126 @@ def root_mean_squared_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_root_mean_squared_error(observed, predicted):
+def stratified_root_mean_squared_error(observed, predicted, idx, verbose=False):
+    """
+    Computes the stratified root mean squared error (RMSE) values. Stratified RMSE is computed separately in each
+    bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
 
+    RMSE in the :math:`j^{th}` bin can be computed as:
 
-    pass
+    .. math::
+
+        \\mathrm{RMSE}_j = \\sqrt{\\frac{1}{N_j} \\sum_{i=1}^{N_j} (\\phi_{o,i}^j - \\phi_{p,i}^j) ^2}
+
+    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, variable_bins, stratified_root_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
+        # Compute stratified RMSE in 10 bins of the first variable in a data set:
+        rmse_in_bins = stratified_root_mean_squared_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param verbose: (optional)
+        ``bool`` for printing sizes (number of observations) and RMSE values in each bin.
+
+    :return:
+        - **rmse_in_bins** - ``list`` specifying the mean squared error (RMSE) in each bin. It has length ``k``.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_idx != n_observed:
+        raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    rmse_in_bins = []
+
+    for cl in np.unique(idx):
+
+        (idx_bin,) = np.where(idx==cl)
+
+        rmse = root_mean_squared_error(__observed[idx_bin], __predicted[idx_bin])
+
+        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
+        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
+
+        if verbose:
+            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| RMSE\t' + str(round(rmse,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+            else:
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| RMSE\t' + str(round(rmse,6)))
+
+        rmse_in_bins.append(rmse)
+
+    return rmse_in_bins
 
 # ------------------------------------------------------------------------------
 
