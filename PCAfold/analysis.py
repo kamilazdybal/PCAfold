@@ -1381,11 +1381,11 @@ def coefficient_of_determination(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_coefficient_of_determination(observed, predicted, n_bins, use_global_mean=True, verbose=False):
+def stratified_coefficient_of_determination(observed, predicted, idx=None, use_global_mean=True, verbose=False):
     """
     Computes the stratified coefficient of determination,
     :math:`R^2`, values. Stratified :math:`R^2` is computed separately in each
-    of the ``n_bins`` of an observed dependent variable, :math:`\\phi_o`.
+    of the bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
 
     :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
 
@@ -1417,7 +1417,7 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
         composed of lines of points that have uniform spacing on the :math:`x` axis
         but become more and more sparse in the direction of increasing :math:`\\phi`
         due to an increasing gradient of :math:`\\phi`.
-        If bins are narrow enough (``n_bins`` is high enough), a single bin
+        If bins are narrow enough (number of bins is high enough), a single bin
         (like the bin bounded by the red dashed lines) can contain only one of
         those lines of points for high value of :math:`\\phi`. :math:`R^2` will then be computed
         for constant, or almost constant observations, even though globally those
@@ -1431,7 +1431,7 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
     .. code:: python
 
-        from PCAfold import PCA, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
+        from PCAfold import PCA, variable_bins, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
         import numpy as np
 
         # Generate dummy data set:
@@ -1443,8 +1443,11 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
         # Approximate the data set:
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
+        r2_in_bins = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], idx=idx, use_global_mean=True, verbose=True)
 
         # Plot the stratified R2 values:
         plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)
@@ -1453,16 +1456,15 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
         ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
-    :param n_bins:
-        ``int`` specifying the number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
+    :param idx: (optional)
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param use_global_mean: (optional)
-        ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
+            ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
     :param verbose: (optional)
         ``bool`` for printing sizes (number of observations) and :math:`R^2` values in each bin.
 
     :return:
         - **r2_in_bins** - ``list`` specifying the coefficients of determination :math:`R^2` in each bin. It has length ``n_bins``.
-        - **bins_borders** - ``list`` specifying the bins borders that were created to stratify the dependent variable. It has length ``n_bins+1``.
     """
 
     if not isinstance(observed, np.ndarray):
@@ -1492,11 +1494,23 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
-    if not isinstance(n_bins, int):
-        raise ValueError("Parameter `n_bins` has to be an integer.")
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
 
-    if n_bins < 1:
-        raise ValueError("Parameter `n_bins` has to be an integer larger than 0.")
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_idx != n_observed:
+        raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
 
     if not isinstance(use_global_mean, bool):
         raise ValueError("Parameter `use_global_mean` has to be a boolean.")
@@ -1506,8 +1520,6 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
     __observed = observed.ravel()
     __predicted = predicted.ravel()
-
-    (idx, bins_borders) = preprocess.variable_bins(__observed, n_bins, verbose=False)
 
     r2_in_bins = []
 
@@ -1535,7 +1547,7 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
         r2_in_bins.append(r2)
 
-    return (r2_in_bins, bins_borders)
+    return r2_in_bins
 
 # ------------------------------------------------------------------------------
 
@@ -1611,6 +1623,17 @@ def mean_absolute_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
+def stratified_mean_absolute_error(observed, predicted):
+
+
+    pass
+
+
+
+
+
+# ------------------------------------------------------------------------------
+
 def mean_squared_error(observed, predicted):
     """
     Computes the mean squared error (MSE):
@@ -1683,6 +1706,13 @@ def mean_squared_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
+def stratified_mean_squared_error(observed, predicted):
+
+
+    pass
+
+# ------------------------------------------------------------------------------
+
 def root_mean_squared_error(observed, predicted):
     """
     Computes the root mean squared error (RMSE):
@@ -1752,6 +1782,13 @@ def root_mean_squared_error(observed, predicted):
     rmse = (mean_squared_error(observed, predicted))**0.5
 
     return rmse
+
+# ------------------------------------------------------------------------------
+
+def stratified_root_mean_squared_error(observed, predicted):
+
+
+    pass
 
 # ------------------------------------------------------------------------------
 
@@ -1862,6 +1899,13 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
         nrmse = rmse/abs(np.mean(observed))
 
     return nrmse
+
+# ------------------------------------------------------------------------------
+
+def stratified_normalized_root_mean_squared_error(observed, predicted):
+
+
+    pass
 
 # ------------------------------------------------------------------------------
 
