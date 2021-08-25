@@ -1259,7 +1259,6 @@ class RegressionAssessment:
                     import pandas as pd
                     from IPython.display import display
                     pandas_format = '{:,' + float_format[1::] + '}'
-                    pd.options.display.float_format = pandas_format.format
 
                     metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
                     comparison_metrics = np.vstack((comparison.coefficient_of_determination, comparison.mean_absolute_error, comparison.mean_squared_error, comparison.root_mean_squared_error, comparison.normalized_root_mean_squared_error, np.ones_like(comparison.normalized_root_mean_squared_error) * comparison.good_direction_estimate))
@@ -1302,7 +1301,9 @@ class RegressionAssessment:
                     comparison_metrics_table = pd.DataFrame(comparison_metrics, columns=self.__variable_names, index=metrics_names_tex)
 
                     formatted_table = metrics_table.style.apply(highlight_better, data_comparison=comparison_metrics_table, axis=None)\
-                                                         .apply(highlight_worse, data_comparison=comparison_metrics_table, axis=None)
+                                                         .apply(highlight_worse, data_comparison=comparison_metrics_table, axis=None)\
+                                                         .format(pandas_format)
+
                     display(formatted_table)
 
 # ------------------------------------------------------------------------------
