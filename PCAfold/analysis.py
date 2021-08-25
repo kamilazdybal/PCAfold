@@ -908,14 +908,35 @@ class RegressionAssessment:
         # Access mean absolute error values:
         MAE = regression_metrics.mean_absolute_error
 
+    In addition, all stratified regression metrics can be computed on a single variable:
+
+    .. code:: python
+
+        from PCAfold import variable_bins
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=5, verbose=False)
+
+        # Instantiate RegressionAssessment class object:
+        stratified_regression_metrics = RegressionAssessment(X[:,0], X_rec[:,0], idx=idx)
+
+        # Access stratified mean absolute error values:
+        stratified_MAE = stratified_regression_metrics.stratified_mean_absolute_error
+
     :param observed:
         ``numpy.ndarray`` specifying the observed values of dependent variables, :math:`\\pmb{\\phi}_o`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
     :param predicted:
         ``numpy.ndarray`` specifying the predicted values of dependent variables, :math:`\\pmb{\\phi}_p`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param variable_names: (optional)
         ``list`` of ``str`` specifying variable names.
+    :param use_global_mean: (optional)
+        ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
     :param norm:
         ``str`` specifying the normalization, :math:`d_{norm}`, for NRMSE computation. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
+    :param use_global_norm: (optional)
+        ``bool`` specifying if global norm of the observed variable should be used in NRMSE calculation.
     :param tolerance:
         ``float`` specifying the tolerance for GDE computation.
 
@@ -927,9 +948,17 @@ class RegressionAssessment:
     - **root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
     - **normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
     - **good_direction_estimate** - (read only) ``float`` specifying the good direction estimate (GDE) value, treating the entire :math:`\\pmb{\\phi}_o` and :math:`\\pmb{\\phi}_p` as vectors. Note that if a single dependent variable is passed, GDE cannot be computed and is set to ``NaN``.
+
+    If ``idx`` has been specified:
+
+    - **stratified_coefficient_of_determination** - (read only) ``numpy.ndarray`` specifying the coefficient of determination, :math:`R^2`, values. It has size ``(1,n_variables)``.
+    - **stratified_mean_absolute_error** - (read only) ``numpy.ndarray`` specifying the mean absolute error (MAE) values. It has size ``(1,n_variables)``.
+    - **stratified_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the mean squared error (MSE) values. It has size ``(1,n_variables)``.
+    - **stratified_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
+    - **stratified_normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
     """
 
-    def __init__(self, observed, predicted, variable_names=None, norm='std', tolerance=0.05):
+    def __init__(self, observed, predicted, idx=None, variable_names=None, use_global_mean=False, norm='std', use_global_norm=False, tolerance=0.05):
 
         if not isinstance(observed, np.ndarray):
             raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
@@ -958,6 +987,32 @@ class RegressionAssessment:
             raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
         self.__n_variables = n_var_observed
+
+        if idx is not None:
+
+            if isinstance(idx, np.ndarray):
+                if not all(isinstance(i, np.integer) for i in idx.ravel()):
+                    raise ValueError("Parameter `idx` can only contain integers.")
+            else:
+                raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+            try:
+                (n_observations_idx, ) = np.shape(idx)
+                n_idx = 1
+            except:
+                (n_observations_idx, n_idx) = np.shape(idx)
+
+            if n_idx != 1:
+                raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+            if n_observations_idx != n_observed:
+                raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+            if n_var_observed != 1:
+                raise ValueError('Stratified regression metrics can only be computed on a single vector.')
+
+        if not isinstance(use_global_mean, bool):
+            raise ValueError("Parameter `use_global_mean` has to be a boolean.")
 
         if variable_names is not None:
             if not isinstance(variable_names, list):
@@ -993,6 +1048,22 @@ class RegressionAssessment:
             self.__root_mean_squared_error_matrix[0,i] = root_mean_squared_error(observed[:,i], predicted[:,i])
             self.__normalized_root_mean_squared_error_matrix[0,i] = normalized_root_mean_squared_error(observed[:,i], predicted[:,i], norm=norm)
 
+        if idx is not None:
+
+            self.__stratified_coefficient_of_determination = stratified_coefficient_of_determination(observed, predicted, idx=idx, use_global_mean=use_global_mean)
+            self.__stratified_mean_absolute_error = stratified_mean_absolute_error(observed, predicted, idx=idx)
+            self.__stratified_mean_squared_error = stratified_mean_squared_error(observed, predicted, idx=idx)
+            self.__stratified_root_mean_squared_error = stratified_root_mean_squared_error(observed, predicted, idx=idx)
+            self.__stratified_normalized_root_mean_squared_error = stratified_normalized_root_mean_squared_error(observed, predicted, idx=idx, norm=norm, use_global_norm=use_global_norm)
+
+        else:
+
+            self.__stratified_coefficient_of_determination = None
+            self.__stratified_mean_absolute_error = None
+            self.__stratified_mean_squared_error = None
+            self.__stratified_root_mean_squared_error = None
+            self.__stratified_normalized_root_mean_squared_error = None
+
     @property
     def coefficient_of_determination(self):
         return self.__coefficient_of_determination_matrix
@@ -1016,6 +1087,26 @@ class RegressionAssessment:
     @property
     def good_direction_estimate(self):
         return self.__good_direction_estimate_value
+
+    @property
+    def stratified_coefficient_of_determination(self):
+        return self.__stratified_coefficient_of_determination
+
+    @property
+    def stratified_mean_absolute_error(self):
+        return self.__stratified_mean_absolute_error
+
+    @property
+    def stratified_mean_squared_error(self):
+        return self.__stratified_mean_squared_error
+
+    @property
+    def stratified_root_mean_squared_error(self):
+        return self.__stratified_root_mean_squared_error
+
+    @property
+    def stratified_normalized_root_mean_squared_error(self):
+        return self.__stratified_normalized_root_mean_squared_error
 
 # ------------------------------------------------------------------------------
 
@@ -1305,6 +1396,15 @@ class RegressionAssessment:
                                                          .format(pandas_format)
 
                     display(formatted_table)
+
+# ------------------------------------------------------------------------------
+
+    def print_stratified_metrics(self, table_format=['raw'], float_format='%.4f', comparison=None):
+        """
+        Prints all stratified regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
+        """
+
+        pass
 
 # ------------------------------------------------------------------------------
 
@@ -2255,7 +2355,7 @@ def stratified_normalized_root_mean_squared_error(observed, predicted, idx, norm
 
     .. math::
 
-        \\mathrm{NRMSE}_j = \\frac{1}{d_{norm}} \\sqrt{\\frac{1}{N_j} \\sum_{i=1}^{N_} (\\phi_{o,i}^j - \\phi_{p,i}^j) ^2}
+        \\mathrm{NRMSE}_j = \\frac{1}{d_{norm}} \\sqrt{\\frac{1}{N_j} \\sum_{i=1}^{N_j} (\\phi_{o,i}^j - \\phi_{p,i}^j) ^2}
 
     where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
     :math:`\\phi_p` is the predicted dependent variable.

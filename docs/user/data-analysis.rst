@@ -141,6 +141,11 @@ Class ``RegressionAssessment``
 
 .. autofunction:: PCAfold.analysis.RegressionAssessment.print_metrics
 
+``RegressionAssessment.print_stratified_metrics``
+=================================================
+
+.. autofunction:: PCAfold.analysis.RegressionAssessment.print_stratified_metrics
+
 ``coefficient_of_determination``
 ================================
 
