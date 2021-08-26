@@ -155,36 +155,38 @@ We will compute the stratified :math:`R^2` in 20 bins of :math:`\phi`:
 
 .. code:: python
 
-  n_bins = 20
-  use_global_mean = False
-  verbose = True
+    n_bins = 20
+    use_global_mean = False
+    verbose = True
 
-  (r2_in_bins, bins_borders) = analysis.stratified_coefficient_of_determination(phi, phi_predicted, n_bins=n_bins, use_global_mean=use_global_mean, verbose=verbose)
+    (idx, bins_borders) = preprocess.variable_bins(phi, k=n_bins, verbose=False)
+
+    r2_in_bins = analysis.stratified_coefficient_of_determination(phi, phi_predicted, idx=idx, use_global_mean=use_global_mean, verbose=verbose)
 
 The code above will print:
 
 .. code-block:: text
 
-  Bin	1	| size	 500	| R2	-8.083554
-  Bin	2	| size	 500	| R2	-1.012664
-  Bin	3	| size	 500	| R2	0.74316
-  Bin	4	| size	 500	| R2	0.979256
-  Bin	5	| size	 500	| R2	0.995444
-  Bin	6	| size	 500	| R2	0.992669
-  Bin	7	| size	 500	| R2	0.993084
-  Bin	8	| size	 500	| R2	0.995499
-  Bin	9	| size	 500	| R2	0.994835
-  Bin	10	| size	 500	| R2	0.994202
-  Bin	11	| size	 500	| R2	0.997531
-  Bin	12	| size	 500	| R2	0.995191
-  Bin	13	| size	 500	| R2	0.988946
-  Bin	14	| size	 500	| R2	0.993118
-  Bin	15	| size	 500	| R2	0.995184
-  Bin	16	| size	 500	| R2	0.980076
-  Bin	17	| size	 500	| R2	0.955785
-  Bin	18	| size	 500	| R2	0.776274
-  Bin	19	| size	 500	| R2	-0.711611
-  Bin	20	| size	 500	| R2	-7.413988
+    Bin	1	| size	 2300	| R2	0.868336
+    Bin	2	| size	 900	| R2	0.870357
+    Bin	3	| size	 700	| R2	0.863821
+    Bin	4	| size	 600	| R2	0.880655
+    Bin	5	| size	 500	| R2	0.875764
+    Bin	6	| size	 500	| R2	0.889148
+    Bin	7	| size	 400	| R2	0.797888
+    Bin	8	| size	 400	| R2	0.773907
+    Bin	9	| size	 400	| R2	0.79479
+    Bin	10	| size	 400	| R2	0.862069
+    Bin	11	| size	 300	| R2	0.864022
+    Bin	12	| size	 300	| R2	0.93599
+    Bin	13	| size	 300	| R2	0.972185
+    Bin	14	| size	 300	| R2	0.988894
+    Bin	15	| size	 300	| R2	0.979975
+    Bin	16	| size	 300	| R2	0.766598
+    Bin	17	| size	 300	| R2	-0.46525
+    Bin	18	| size	 200	| R2	-11.158072
+    Bin	19	| size	 300	| R2	-10.94865
+    Bin	20	| size	 300	| R2	-28.00655
 
 Finally, we can plot the stratified :math:`R^2` values across bins centers:
 
@@ -299,7 +301,7 @@ Raw text format:
     
 .. code:: python
 
-    regression_metrics.print_metrics(table_format=['raw'], float_format='%.4f')
+    regression_metrics.print_metrics(table_format=['raw'], float_format='.4f')
     
 The code above will print:
 
@@ -318,7 +320,7 @@ The code above will print:
     
 .. code:: python
     
-    regression_metrics.print_metrics(table_format=['tex'], float_format='%.4f')
+    regression_metrics.print_metrics(table_format=['tex'], float_format='.4f')
     
 The code above will print:
 
@@ -343,10 +345,18 @@ The code above will print:
 
 .. code:: python
 
-    regression_metrics.print_metrics(table_format=['pandas'], float_format='%.4f')
+    regression_metrics.print_metrics(table_format=['pandas'], float_format='.4f')
+    
+.. image:: ../images/tutorial-regression-metrics-4f.png
+    :width: 400
+    :align: center
     
 Note that with the ``float_format`` parameter you can change the number of digits displayed:
     
 .. code:: python
     
-    regression_metrics.print_metrics(table_format=['pandas'], float_format='%.2f')
+    regression_metrics.print_metrics(table_format=['pandas'], float_format='.2f')
+    
+.. image:: ../images/tutorial-regression-metrics-2f.png
+    :width: 400
+    :align: center

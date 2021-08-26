@@ -908,14 +908,35 @@ class RegressionAssessment:
         # Access mean absolute error values:
         MAE = regression_metrics.mean_absolute_error
 
+    In addition, all stratified regression metrics can be computed on a single variable:
+
+    .. code:: python
+
+        from PCAfold import variable_bins
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=5, verbose=False)
+
+        # Instantiate RegressionAssessment class object:
+        stratified_regression_metrics = RegressionAssessment(X[:,0], X_rec[:,0], idx=idx)
+
+        # Access stratified mean absolute error values:
+        stratified_MAE = stratified_regression_metrics.stratified_mean_absolute_error
+
     :param observed:
         ``numpy.ndarray`` specifying the observed values of dependent variables, :math:`\\pmb{\\phi}_o`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
     :param predicted:
         ``numpy.ndarray`` specifying the predicted values of dependent variables, :math:`\\pmb{\\phi}_p`. It should be of size ``(n_observations,)`` or ``(n_observations,n_variables)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param variable_names: (optional)
         ``list`` of ``str`` specifying variable names.
+    :param use_global_mean: (optional)
+        ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
     :param norm:
         ``str`` specifying the normalization, :math:`d_{norm}`, for NRMSE computation. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
+    :param use_global_norm: (optional)
+        ``bool`` specifying if global norm of the observed variable should be used in NRMSE calculation.
     :param tolerance:
         ``float`` specifying the tolerance for GDE computation.
 
@@ -927,9 +948,17 @@ class RegressionAssessment:
     - **root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
     - **normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
     - **good_direction_estimate** - (read only) ``float`` specifying the good direction estimate (GDE) value, treating the entire :math:`\\pmb{\\phi}_o` and :math:`\\pmb{\\phi}_p` as vectors. Note that if a single dependent variable is passed, GDE cannot be computed and is set to ``NaN``.
+
+    If ``idx`` has been specified:
+
+    - **stratified_coefficient_of_determination** - (read only) ``numpy.ndarray`` specifying the coefficient of determination, :math:`R^2`, values. It has size ``(1,n_variables)``.
+    - **stratified_mean_absolute_error** - (read only) ``numpy.ndarray`` specifying the mean absolute error (MAE) values. It has size ``(1,n_variables)``.
+    - **stratified_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the mean squared error (MSE) values. It has size ``(1,n_variables)``.
+    - **stratified_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
+    - **stratified_normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
     """
 
-    def __init__(self, observed, predicted, variable_names=None, norm='std', tolerance=0.05):
+    def __init__(self, observed, predicted, idx=None, variable_names=None, use_global_mean=False, norm='std', use_global_norm=False, tolerance=0.05):
 
         if not isinstance(observed, np.ndarray):
             raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
@@ -958,6 +987,35 @@ class RegressionAssessment:
             raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
         self.__n_variables = n_var_observed
+
+        if idx is not None:
+
+            if isinstance(idx, np.ndarray):
+                if not all(isinstance(i, np.integer) for i in idx.ravel()):
+                    raise ValueError("Parameter `idx` can only contain integers.")
+            else:
+                raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+            try:
+                (n_observations_idx, ) = np.shape(idx)
+                n_idx = 1
+            except:
+                (n_observations_idx, n_idx) = np.shape(idx)
+
+            if n_idx != 1:
+                raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+            if n_observations_idx != n_observed:
+                raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+            if n_var_observed != 1:
+                raise ValueError('Stratified regression metrics can only be computed on a single vector.')
+
+            self.__n_clusters = len(np.unique(idx))
+            self.__cluster_populations = preprocess.get_populations(idx)
+
+        if not isinstance(use_global_mean, bool):
+            raise ValueError("Parameter `use_global_mean` has to be a boolean.")
 
         if variable_names is not None:
             if not isinstance(variable_names, list):
@@ -993,6 +1051,22 @@ class RegressionAssessment:
             self.__root_mean_squared_error_matrix[0,i] = root_mean_squared_error(observed[:,i], predicted[:,i])
             self.__normalized_root_mean_squared_error_matrix[0,i] = normalized_root_mean_squared_error(observed[:,i], predicted[:,i], norm=norm)
 
+        if idx is not None:
+
+            self.__stratified_coefficient_of_determination = stratified_coefficient_of_determination(observed, predicted, idx=idx, use_global_mean=use_global_mean)
+            self.__stratified_mean_absolute_error = stratified_mean_absolute_error(observed, predicted, idx=idx)
+            self.__stratified_mean_squared_error = stratified_mean_squared_error(observed, predicted, idx=idx)
+            self.__stratified_root_mean_squared_error = stratified_root_mean_squared_error(observed, predicted, idx=idx)
+            self.__stratified_normalized_root_mean_squared_error = stratified_normalized_root_mean_squared_error(observed, predicted, idx=idx, norm=norm, use_global_norm=use_global_norm)
+
+        else:
+
+            self.__stratified_coefficient_of_determination = None
+            self.__stratified_mean_absolute_error = None
+            self.__stratified_mean_squared_error = None
+            self.__stratified_root_mean_squared_error = None
+            self.__stratified_normalized_root_mean_squared_error = None
+
     @property
     def coefficient_of_determination(self):
         return self.__coefficient_of_determination_matrix
@@ -1017,9 +1091,29 @@ class RegressionAssessment:
     def good_direction_estimate(self):
         return self.__good_direction_estimate_value
 
+    @property
+    def stratified_coefficient_of_determination(self):
+        return self.__stratified_coefficient_of_determination
+
+    @property
+    def stratified_mean_absolute_error(self):
+        return self.__stratified_mean_absolute_error
+
+    @property
+    def stratified_mean_squared_error(self):
+        return self.__stratified_mean_squared_error
+
+    @property
+    def stratified_root_mean_squared_error(self):
+        return self.__stratified_root_mean_squared_error
+
+    @property
+    def stratified_normalized_root_mean_squared_error(self):
+        return self.__stratified_normalized_root_mean_squared_error
+
 # ------------------------------------------------------------------------------
 
-    def print_metrics(self, table_format=['raw'], float_format='%.4f', comparison=None):
+    def print_metrics(self, table_format=['raw'], float_format='.4f', comparison=None):
         """
         Prints all regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
@@ -1043,7 +1137,7 @@ class RegressionAssessment:
             regression_metrics = RegressionAssessment(X, X_rec)
 
             # Print regression metrics:
-            regression_metrics.print_metrics(table_format=['raw', 'tex', 'pandas'], float_format='%.4f')
+            regression_metrics.print_metrics(table_format=['raw', 'tex', 'pandas'], float_format='.4f')
 
         .. note::
 
@@ -1051,29 +1145,29 @@ class RegressionAssessment:
 
             .. code-block:: text
 
-                --------------------
+                -------------------------
                 X1
-                R2: 	0.7889
-                MAE:	0.1030
-                MSE:	0.0170
-                RMSE:	0.1305
-                NRMSE:	0.4594
+                R2:	0.8440
+                MAE:	0.0863
+                MSE:	0.0113
+                RMSE:	0.1061
+                NRMSE:	0.3949
                 GDE:	75.0000
-                --------------------
+                -------------------------
                 X2
-                R2: 	0.5134
-                MAE:	0.1640
-                MSE:	0.0432
-                RMSE:	0.2077
-                NRMSE:	0.6976
+                R2:	0.6577
+                MAE:	0.1341
+                MSE:	0.0271
+                RMSE:	0.1648
+                NRMSE:	0.5851
                 GDE:	75.0000
-                --------------------
+                -------------------------
                 X3
-                R2: 	0.8010
-                MAE:	0.0906
-                MSE:	0.0132
-                RMSE:	0.1148
-                NRMSE:	0.4461
+                R2:	0.6928
+                MAE:	0.1279
+                MSE:	0.0247
+                RMSE:	0.1572
+                NRMSE:	0.5542
                 GDE:	75.0000
 
             Adding ``'tex'`` to the ``table_format`` list will result in printing:
@@ -1084,11 +1178,11 @@ class RegressionAssessment:
                 \\begin{center}
                 \\begin{tabular}{llll} \\toprule
                  & \\textit{X1} & \\textit{X2} & \\textit{X3} \\\\ \\midrule
-                $R^2$ & 0.7889 & 0.5134 & 0.8010 \\\\
-                MAE & 0.1030 & 0.1640 & 0.0906 \\\\
-                MSE & 0.0170 & 0.0432 & 0.0132 \\\\
-                RMSE & 0.1305 & 0.2077 & 0.1148 \\\\
-                NRMSE & 0.4594 & 0.6976 & 0.4461 \\\\
+                $R^2$ & 0.8440 & 0.6577 & 0.6928 \\\\
+                MAE & 0.0863 & 0.1341 & 0.1279 \\\\
+                MSE & 0.0113 & 0.0271 & 0.0247 \\\\
+                RMSE & 0.1061 & 0.1648 & 0.1572 \\\\
+                NRMSE & 0.3949 & 0.5851 & 0.5542 \\\\
                 GDE & 75.0000 & 75.0000 & 75.0000 \\\\
                 \\end{tabular}
                 \\caption{}\\label{}
@@ -1101,7 +1195,7 @@ class RegressionAssessment:
                 :width: 300
                 :align: center
 
-        Additionally, the current object of ``RegressionAssessment`` class can be compared with other object:
+        Additionally, the current object of ``RegressionAssessment`` class can be compared with another object:
 
         .. code:: python
 
@@ -1125,7 +1219,7 @@ class RegressionAssessment:
             regression_metrics_Y = RegressionAssessment(Y, Y_rec)
 
             # Print regression metrics:
-            regression_metrics_X.print_metrics(table_format=['raw', 'pandas'], float_format='%.4f', comparison=regression_metrics_Y)
+            regression_metrics_X.print_metrics(table_format=['raw', 'pandas'], float_format='.4f', comparison=regression_metrics_Y)
 
         .. note::
 
@@ -1135,28 +1229,28 @@ class RegressionAssessment:
 
                 -------------------------
                 X1
-                R2:	0.4842	WORSE
-                MAE:	0.1790	WORSE
-                MSE:	0.0471	WORSE
-                RMSE:	0.2169	WORSE
-                NRMSE:	0.7182	WORSE
-                GDE:	91.0000	BETTER
+                R2:	0.8286	BETTER
+                MAE:	0.0973	BETTER
+                MSE:	0.0147	BETTER
+                RMSE:	0.1213	BETTER
+                NRMSE:	0.4140	BETTER
+                GDE:	66.0000	WORSE
                 -------------------------
                 X2
-                R2:	0.9394	BETTER
-                MAE:	0.0577	WORSE
-                MSE:	0.0049	BETTER
-                RMSE:	0.0700	BETTER
-                NRMSE:	0.2462	BETTER
-                GDE:	91.0000	BETTER
+                R2:	0.7442	WORSE
+                MAE:	0.1176	WORSE
+                MSE:	0.0215	WORSE
+                RMSE:	0.1465	WORSE
+                NRMSE:	0.5057	WORSE
+                GDE:	66.0000	WORSE
                 -------------------------
                 X3
-                R2:	0.6531	BETTER
-                MAE:	0.1495	WORSE
-                MSE:	0.0328	WORSE
-                RMSE:	0.1812	WORSE
-                NRMSE:	0.5890	BETTER
-                GDE:	91.0000	BETTER
+                R2:	0.5860	BETTER
+                MAE:	0.1675	WORSE
+                MSE:	0.0436	WORSE
+                RMSE:	0.2088	WORSE
+                NRMSE:	0.6434	BETTER
+                GDE:	66.0000	WORSE
 
             Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
@@ -1169,7 +1263,7 @@ class RegressionAssessment:
             Strings can only be ``'raw'``, ``'tex'`` and/or ``'pandas'``.
         :param float_format: (optional)
             ``str`` specifying the display format for the numerical entries inside the
-            table. By default it is set to ``'%.4f'``.
+            table. By default it is set to ``'.4f'``.
         :param comparison: (optional)
             object of ``RegressionAssessment`` class specifying the metrics that should be compared with the current regression metrics.
         """
@@ -1198,17 +1292,27 @@ class RegressionAssessment:
                     for i in range(0,self.__n_variables):
 
                         print('-'*25 + '\n' + self.__variable_names[i])
+                        metrics = [self.__coefficient_of_determination_matrix[0,i],
+                                   self.__mean_absolute_error_matrix[0,i],
+                                   self.__mean_squared_error_matrix[0,i],
+                                   self.__root_mean_squared_error_matrix[0,i],
+                                   self.__normalized_root_mean_squared_error_matrix[0,i],
+                                   self.__good_direction_estimate_matrix[0,i]]
 
                         for j in range(0,len(metrics_names)):
 
-                            metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
-                            print(metrics_names[j] + ':\t' + float_format % metrics[j])
+                            print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j])
 
                 if item=='tex':
 
                     import pandas as pd
 
-                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
+                    metrics = np.vstack((self.__coefficient_of_determination_matrix,
+                                         self.__mean_absolute_error_matrix,
+                                         self.__mean_squared_error_matrix,
+                                         self.__root_mean_squared_error_matrix,
+                                         self.__normalized_root_mean_squared_error_matrix,
+                                         self.__good_direction_estimate_matrix))
                     metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
 
                     generate_tex_table(metrics_table, float_format=float_format)
@@ -1217,12 +1321,17 @@ class RegressionAssessment:
 
                     import pandas as pd
                     from IPython.display import display
-                    pandas_format = '{:,' + float_format[1::] + '}'
-                    pd.options.display.float_format = pandas_format.format
+                    pandas_format = '{:,' + float_format + '}'
 
-                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
-                    display(metrics_table)
+                    metrics = np.hstack((self.__coefficient_of_determination_matrix.T,
+                                         self.__mean_absolute_error_matrix.T,
+                                         self.__mean_squared_error_matrix.T,
+                                         self.__root_mean_squared_error_matrix.T,
+                                         self.__normalized_root_mean_squared_error_matrix.T,
+                                         self.__good_direction_estimate_matrix.T))
+                    metrics_table = pd.DataFrame(metrics, columns=metrics_names_tex, index=self.__variable_names)
+                    formatted_table = metrics_table.style.format(pandas_format)
+                    display(formatted_table)
 
         else:
 
@@ -1236,44 +1345,68 @@ class RegressionAssessment:
 
                         for j in range(0,len(metrics_names)):
 
-                            metrics = [self.__coefficient_of_determination_matrix[0,i], self.__mean_absolute_error_matrix[0,i], self.__mean_squared_error_matrix[0,i], self.__root_mean_squared_error_matrix[0,i], self.__normalized_root_mean_squared_error_matrix[0,i], self.__good_direction_estimate_matrix[0,i]]
-                            comparison_metrics = [comparison.coefficient_of_determination[0,i], comparison.mean_absolute_error[0,i], comparison.mean_squared_error[0,i], comparison.root_mean_squared_error[0,i], comparison.normalized_root_mean_squared_error[0,i], comparison.good_direction_estimate]
+                            metrics = [self.__coefficient_of_determination_matrix[0,i],
+                                       self.__mean_absolute_error_matrix[0,i],
+                                       self.__mean_squared_error_matrix[0,i],
+                                       self.__root_mean_squared_error_matrix[0,i],
+                                       self.__normalized_root_mean_squared_error_matrix[0,i],
+                                       self.__good_direction_estimate_matrix[0,i]]
+                            comparison_metrics = [comparison.coefficient_of_determination[0,i],
+                                                  comparison.mean_absolute_error[0,i],
+                                                  comparison.mean_squared_error[0,i],
+                                                  comparison.root_mean_squared_error[0,i],
+                                                  comparison.normalized_root_mean_squared_error[0,i],
+                                                  comparison.good_direction_estimate]
 
                             if j==0 or j==5:
                                 if metrics[j] > comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tBETTER', 'green'))
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tBETTER', 'green'))
                                 elif metrics[j] < comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tWORSE', 'red'))
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tWORSE', 'red'))
                                 elif metrics[j] == comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + '\tSAME')
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + '\tSAME')
                             else:
                                 if metrics[j] > comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tWORSE', 'red'))
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tWORSE', 'red'))
                                 elif metrics[j] < comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + colored('\tBETTER', 'green'))
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tBETTER', 'green'))
                                 elif metrics[j] == comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + float_format % metrics[j] + '\tSAME')
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + '\tSAME')
 
                 if item=='pandas':
 
                     import pandas as pd
                     from IPython.display import display
-                    pandas_format = '{:,' + float_format[1::] + '}'
-                    pd.options.display.float_format = pandas_format.format
+                    pandas_format = '{:,' + float_format + '}'
 
-                    metrics = np.vstack((self.__coefficient_of_determination_matrix, self.__mean_absolute_error_matrix, self.__mean_squared_error_matrix, self.__root_mean_squared_error_matrix, self.__normalized_root_mean_squared_error_matrix, self.__good_direction_estimate_matrix))
-                    comparison_metrics = np.vstack((comparison.coefficient_of_determination, comparison.mean_absolute_error, comparison.mean_squared_error, comparison.root_mean_squared_error, comparison.normalized_root_mean_squared_error, np.ones_like(comparison.normalized_root_mean_squared_error) * comparison.good_direction_estimate))
+                    metrics = np.hstack((self.__coefficient_of_determination_matrix.T,
+                                         self.__mean_absolute_error_matrix.T,
+                                         self.__mean_squared_error_matrix.T,
+                                         self.__root_mean_squared_error_matrix.T,
+                                         self.__normalized_root_mean_squared_error_matrix.T,
+                                         self.__good_direction_estimate_matrix.T))
+                    comparison_metrics = np.hstack((comparison.coefficient_of_determination.T,
+                                                    comparison.mean_absolute_error.T,
+                                                    comparison.mean_squared_error.T,
+                                                    comparison.root_mean_squared_error.T,
+                                                    comparison.normalized_root_mean_squared_error.T,
+                                                    np.ones_like(comparison.normalized_root_mean_squared_error.T) * comparison.good_direction_estimate))
 
                     def highlight_better(data, data_comparison, color='lightgreen'):
 
                         attr = 'background-color: {}'.format(color)
 
+                        is_better = False * data
+
                         # Lower value is better (MAE, MSE, RMSE, NRMSE):
-                        is_better = data < data_comparison
+                        is_better['MAE'] = data['MAE'].astype(float) < data_comparison['MAE']
+                        is_better['MSE'] = data['MSE'].astype(float) < data_comparison['MSE']
+                        is_better['RMSE'] = data['RMSE'].astype(float) < data_comparison['RMSE']
+                        is_better['NRMSE'] = data['NRMSE'].astype(float) < data_comparison['NRMSE']
 
                         # Higher value is better (R2 and GDE):
-                        is_better.iloc[0] = data.iloc[0] > data_comparison.iloc[0]
-                        is_better.iloc[-1] = data.iloc[-1] > data_comparison.iloc[-1]
+                        is_better['$R^2$'] = data['$R^2$'].astype(float) > data_comparison['$R^2$']
+                        is_better['GDE'] = data['GDE'].astype(float) > data_comparison['GDE']
 
                         formatting = [attr if v else '' for v in is_better]
 
@@ -1285,12 +1418,17 @@ class RegressionAssessment:
 
                         attr = 'background-color: {}'.format(color)
 
+                        is_worse = False * data
+
                         # Higher value is worse (MAE, MSE, RMSE, NRMSE):
-                        is_worse = data > data_comparison
+                        is_worse['MAE'] = data['MAE'].astype(float) > data_comparison['MAE']
+                        is_worse['MSE'] = data['MSE'].astype(float) > data_comparison['MSE']
+                        is_worse['RMSE'] = data['RMSE'].astype(float) > data_comparison['RMSE']
+                        is_worse['NRMSE'] = data['NRMSE'].astype(float) > data_comparison['NRMSE']
 
                         # Lower value is worse (R2 and GDE):
-                        is_worse.iloc[0] = data.iloc[0] < data_comparison.iloc[0]
-                        is_worse.iloc[-1] = data.iloc[-1] < data_comparison.iloc[-1]
+                        is_worse['$R^2$'] = data['$R^2$'].astype(float) < data_comparison['$R^2$']
+                        is_worse['GDE'] = data['GDE'].astype(float) < data_comparison['GDE']
 
                         formatting = [attr if v else '' for v in is_worse]
 
@@ -1298,11 +1436,367 @@ class RegressionAssessment:
 
                         return formatting
 
-                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
-                    comparison_metrics_table = pd.DataFrame(comparison_metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    metrics_table = pd.DataFrame(metrics, columns=metrics_names_tex, index=self.__variable_names)
+                    comparison_metrics_table = pd.DataFrame(comparison_metrics, columns=metrics_names_tex, index=self.__variable_names)
+
+                    formatted_table = metrics_table.style.apply(highlight_better, data_comparison=comparison_metrics_table, axis=None)\
+                                                         .apply(highlight_worse, data_comparison=comparison_metrics_table, axis=None)\
+                                                         .format(pandas_format)
+
+                    display(formatted_table)
+
+# ------------------------------------------------------------------------------
+
+    def print_stratified_metrics(self, table_format=['raw'], float_format='.4f', comparison=None):
+        """
+        Prints all stratified regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
+
+        **Example:**
+
+        .. code:: python
+
+            from PCAfold import PCA, variable_bins, RegressionAssessment
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,3)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+
+            # Approximate the data set:
+            X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+            # Generate bins:
+            (idx, bins_borders) = variable_bins(X[:,0], k=3, verbose=False)
+
+            # Instantiate RegressionAssessment class object:
+            stratified_regression_metrics = RegressionAssessment(X[:,0], X_rec[:,0], idx=idx)
+
+            # Print regression metrics:
+            stratified_regression_metrics.print_stratified_metrics(table_format=['raw', 'pandas'], float_format='.4f')
+
+        .. note::
+
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                -------------------------
+                k1
+                N. samples:	31
+                R2:	-3.5915
+                MAE:	0.1550
+                MSE:	0.0340
+                RMSE:	0.1843
+                NRMSE:	2.1428
+                -------------------------
+                k2
+                N. samples:	30
+                R2:	-1.8599
+                MAE:	0.1207
+                MSE:	0.0217
+                RMSE:	0.1473
+                NRMSE:	1.6911
+                -------------------------
+                k3
+                N. samples:	39
+                R2:	-2.8406
+                MAE:	0.1577
+                MSE:	0.0359
+                RMSE:	0.1894
+                NRMSE:	1.9598
+
+            Adding ``'tex'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                \\begin{table}[h!]
+                \\begin{center}
+                \\begin{tabular}{llll} \\toprule
+                 & \\textit{k1} & \\textit{k2} & \\textit{k3} \\\\ \\midrule
+                N. samples & 31.0000 & 30.0000 & 39.0000 \\\\
+                $R^2$ & -3.5915 & -1.8599 & -2.8406 \\\\
+                MAE & 0.1550 & 0.1207 & 0.1577 \\\\
+                MSE & 0.0340 & 0.0217 & 0.0359 \\\\
+                RMSE & 0.1843 & 0.1473 & 0.1894 \\\\
+                NRMSE & 2.1428 & 1.6911 & 1.9598 \\\\
+                \\end{tabular}
+                \\caption{}\\label{}
+                \\end{center}
+                \\end{table}
+
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
+
+            .. image:: ../images/generate-pandas-table-stratified.png
+                :width: 300
+                :align: center
+
+        Additionally, the current object of ``RegressionAssessment`` class can be compared with another object:
+
+        .. code:: python
+
+            from PCAfold import PCA, variable_bins, RegressionAssessment
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,3)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+
+            # Approximate the data set:
+            X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+            # Generate bins:
+            (idx, bins_borders) = variable_bins(X[:,0], k=3, verbose=False)
+
+            # Instantiate RegressionAssessment class object:
+            stratified_regression_metrics_0 = RegressionAssessment(X[:,0], X_rec[:,0], idx=idx)
+            stratified_regression_metrics_1 = RegressionAssessment(X[:,1], X_rec[:,1], idx=idx)
+
+            # Print regression metrics:
+            stratified_regression_metrics_0.print_stratified_metrics(table_format=['raw', 'pandas'], float_format='.4f', comparison=stratified_regression_metrics_1)
+
+        .. note::
+
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                -------------------------
+                k1
+                N. samples:	32
+                R2:	-2.2858	WORSE
+                MAE:	0.1560	BETTER
+                MSE:	0.0348	BETTER
+                RMSE:	0.1866	BETTER
+                NRMSE:	1.8127	WORSE
+                -------------------------
+                k2
+                N. samples:	32
+                R2:	-1.2248	WORSE
+                MAE:	0.1241	BETTER
+                MSE:	0.0210	BETTER
+                RMSE:	0.1448	BETTER
+                NRMSE:	1.4916	WORSE
+                -------------------------
+                k3
+                N. samples:	36
+                R2:	-1.7086	WORSE
+                MAE:	0.1208	BETTER
+                MSE:	0.0251	BETTER
+                RMSE:	0.1586	BETTER
+                NRMSE:	1.6458	WORSE
+
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
+
+            .. image:: ../images/generate-pandas-table-comparison-stratified.png
+                :width: 300
+                :align: center
+
+        :param table_format: (optional)
+            ``list`` of ``str`` specifying the format(s) in which the table should be printed.
+            Strings can only be ``'raw'``, ``'tex'`` and/or ``'pandas'``.
+        :param float_format: (optional)
+            ``str`` specifying the display format for the numerical entries inside the
+            table. By default it is set to ``'.4f'``.
+        :param comparison: (optional)
+            object of ``RegressionAssessment`` class specifying the metrics that should be compared with the current regression metrics.
+        """
+
+        __table_formats = ['raw', 'tex', 'pandas']
+
+        if not isinstance(table_format, list):
+            raise ValueError("Parameter `table_format` has to be of type `str`.")
+
+        for item in table_format:
+            if item not in __table_formats:
+                raise ValueError("Parameter `table_format` can only contain 'raw', 'tex' and/or 'pandas'.")
+
+        if not isinstance(float_format, str):
+            raise ValueError("Parameter `float_format` has to be of type `str`.")
+
+        metrics_names = ['N. samples', 'R2', 'MAE', 'MSE', 'RMSE', 'NRMSE']
+        metrics_names_tex = ['N. samples', '$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE']
+
+        clusters_names = ['k' + str(i) for i in range(1,self.__n_clusters+1)]
+
+        if comparison is None:
+
+            for item in set(table_format):
+
+                if item=='raw':
+
+                    for i in range(0,self.__n_clusters):
+
+                        print('-'*25 + '\n' + clusters_names[i])
+                        metrics = [self.__cluster_populations[i],
+                                   self.__stratified_coefficient_of_determination[i],
+                                   self.__stratified_mean_absolute_error[i],
+                                   self.__stratified_mean_squared_error[i],
+                                   self.__stratified_root_mean_squared_error[i],
+                                   self.__stratified_normalized_root_mean_squared_error[i]]
+
+                        for j in range(0,len(metrics_names)):
+
+                            if j==0:
+                                print(metrics_names[j] + ':\t' + str(metrics[j]))
+                            else:
+                                print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j])
+
+
+                if item=='tex':
+
+                    import pandas as pd
+
+                    metrics = np.vstack((self.__cluster_populations,
+                                         self.__stratified_coefficient_of_determination,
+                                         self.__stratified_mean_absolute_error,
+                                         self.__stratified_mean_squared_error,
+                                         self.__stratified_root_mean_squared_error,
+                                         self.__stratified_normalized_root_mean_squared_error))
+                    metrics_table = pd.DataFrame(metrics, columns=clusters_names, index=metrics_names_tex)
+                    generate_tex_table(metrics_table, float_format=float_format)
+
+                if item=='pandas':
+
+                    import pandas as pd
+                    from IPython.display import display
+                    pandas_format = '{:,' + float_format + '}'
+
+                    metrics = np.hstack((np.array(self.__cluster_populations)[:,None],
+                                         np.array(self.__stratified_coefficient_of_determination)[:,None],
+                                         np.array(self.__stratified_mean_absolute_error)[:,None],
+                                         np.array(self.__stratified_mean_squared_error)[:,None],
+                                         np.array(self.__stratified_root_mean_squared_error)[:,None],
+                                         np.array(self.__stratified_normalized_root_mean_squared_error)[:,None]))
+                    metrics_table = pd.DataFrame(metrics, columns=metrics_names_tex, index=clusters_names)
+
+                    metrics_table['N. samples'] = metrics_table['N. samples'].astype(int)
+                    metrics_table['$R^2$'] = metrics_table['$R^2$'].map(pandas_format.format)
+                    metrics_table['MAE'] = metrics_table['MAE'].map(pandas_format.format)
+                    metrics_table['MSE'] = metrics_table['MSE'].map(pandas_format.format)
+                    metrics_table['RMSE'] = metrics_table['RMSE'].map(pandas_format.format)
+                    metrics_table['NRMSE'] = metrics_table['NRMSE'].map(pandas_format.format)
+
+                    display(metrics_table)
+
+        else:
+
+            for item in set(table_format):
+
+                if item=='raw':
+
+                    for i in range(0,self.__n_clusters):
+
+                        print('-'*25 + '\n' + clusters_names[i])
+                        metrics = [self.__cluster_populations[i],
+                                   self.__stratified_coefficient_of_determination[i],
+                                   self.__stratified_mean_absolute_error[i],
+                                   self.__stratified_mean_squared_error[i],
+                                   self.__stratified_root_mean_squared_error[i],
+                                   self.__stratified_normalized_root_mean_squared_error[i]]
+                        comparison_metrics = [self.__cluster_populations[i],
+                                              comparison.stratified_coefficient_of_determination[i],
+                                              comparison.stratified_mean_absolute_error[i],
+                                              comparison.stratified_mean_squared_error[i],
+                                              comparison.stratified_root_mean_squared_error[i],
+                                              comparison.stratified_normalized_root_mean_squared_error[i]]
+
+                        for j in range(0,len(metrics_names)):
+
+                            if j==1:
+                                if metrics[j] > comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tBETTER', 'green'))
+                                elif metrics[j] < comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tWORSE', 'red'))
+                                elif metrics[j] == comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + '\tSAME')
+                            elif j==2 or j==3 or j==4 or j==5:
+                                if metrics[j] > comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tWORSE', 'red'))
+                                elif metrics[j] < comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tBETTER', 'green'))
+                                elif metrics[j] == comparison_metrics[j]:
+                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + '\tSAME')
+                            elif j==0:
+                                print(metrics_names[j] + ':\t' + str(metrics[j]))
+
+                if item=='pandas':
+
+                    import pandas as pd
+                    from IPython.display import display
+                    pandas_format = '{:,' + float_format + '}'
+
+                    metrics = np.hstack((np.array(self.__cluster_populations)[:,None],
+                                         np.array(self.__stratified_coefficient_of_determination)[:,None],
+                                         np.array(self.__stratified_mean_absolute_error)[:,None],
+                                         np.array(self.__stratified_mean_squared_error)[:,None],
+                                         np.array(self.__stratified_root_mean_squared_error)[:,None],
+                                         np.array(self.__stratified_normalized_root_mean_squared_error)[:,None]))
+                    comparison_metrics = np.hstack((np.array(self.__cluster_populations)[:,None],
+                                                    np.array(comparison.stratified_coefficient_of_determination)[:,None],
+                                                    np.array(comparison.stratified_mean_absolute_error)[:,None],
+                                                    np.array(comparison.stratified_mean_squared_error)[:,None],
+                                                    np.array(comparison.stratified_root_mean_squared_error)[:,None],
+                                                    np.array(comparison.stratified_normalized_root_mean_squared_error)[:,None]))
+
+                    def highlight_better(data, data_comparison, color='lightgreen'):
+
+                        attr = 'background-color: {}'.format(color)
+
+                        is_better = False * data
+
+                        # Lower value is better (MAE, MSE, RMSE, NRMSE):
+                        is_better['MAE'] = data['MAE'].astype(float) < data_comparison['MAE']
+                        is_better['MSE'] = data['MSE'].astype(float) < data_comparison['MSE']
+                        is_better['RMSE'] = data['RMSE'].astype(float) < data_comparison['RMSE']
+                        is_better['NRMSE'] = data['NRMSE'].astype(float) < data_comparison['NRMSE']
+
+                        # Higher value is better (R2):
+                        is_better['$R^2$'] = data['$R^2$'].astype(float) > data_comparison['$R^2$']
+
+                        formatting = [attr if v else '' for v in is_better]
+
+                        formatting = pd.DataFrame(np.where(is_better, attr, ''), index=data.index, columns=data.columns)
+
+                        return formatting
+
+                    def highlight_worse(data, data_comparison, color='salmon'):
+
+                        attr = 'background-color: {}'.format(color)
+
+                        is_worse = False * data
+
+                        # Higher value is worse (MAE, MSE, RMSE, NRMSE):
+                        is_worse['MAE'] = data['MAE'].astype(float) > data_comparison['MAE']
+                        is_worse['MSE'] = data['MSE'].astype(float) > data_comparison['MSE']
+                        is_worse['RMSE'] = data['RMSE'].astype(float) > data_comparison['RMSE']
+                        is_worse['NRMSE'] = data['NRMSE'].astype(float) > data_comparison['NRMSE']
+
+                        # Lower value is worse (R2):
+                        is_worse['$R^2$'] = data['$R^2$'].astype(float) < data_comparison['$R^2$']
+
+                        formatting = [attr if v else '' for v in is_worse]
+
+                        formatting = pd.DataFrame(np.where(is_worse, attr, ''), index=data.index, columns=data.columns)
+
+                        return formatting
+
+                    metrics_table = pd.DataFrame(metrics, columns=metrics_names_tex, index=clusters_names)
+                    comparison_metrics_table = pd.DataFrame(comparison_metrics, columns=metrics_names_tex, index=clusters_names)
+
+                    metrics_table['N. samples'] = metrics_table['N. samples'].astype(int)
+                    metrics_table['$R^2$'] = metrics_table['$R^2$'].map(pandas_format.format)
+                    metrics_table['MAE'] = metrics_table['MAE'].map(pandas_format.format)
+                    metrics_table['MSE'] = metrics_table['MSE'].map(pandas_format.format)
+                    metrics_table['RMSE'] = metrics_table['RMSE'].map(pandas_format.format)
+                    metrics_table['NRMSE'] = metrics_table['NRMSE'].map(pandas_format.format)
 
                     formatted_table = metrics_table.style.apply(highlight_better, data_comparison=comparison_metrics_table, axis=None)\
                                                          .apply(highlight_worse, data_comparison=comparison_metrics_table, axis=None)
+
                     display(formatted_table)
 
 # ------------------------------------------------------------------------------
@@ -1380,11 +1874,11 @@ def coefficient_of_determination(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_coefficient_of_determination(observed, predicted, n_bins, use_global_mean=True, verbose=False):
+def stratified_coefficient_of_determination(observed, predicted, idx, use_global_mean=True, verbose=False):
     """
     Computes the stratified coefficient of determination,
     :math:`R^2`, values. Stratified :math:`R^2` is computed separately in each
-    of the ``n_bins`` of an observed dependent variable, :math:`\\phi_o`.
+    bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
 
     :math:`R_j^2` in the :math:`j^{th}` bin can be computed in two ways:
 
@@ -1416,7 +1910,7 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
         composed of lines of points that have uniform spacing on the :math:`x` axis
         but become more and more sparse in the direction of increasing :math:`\\phi`
         due to an increasing gradient of :math:`\\phi`.
-        If bins are narrow enough (``n_bins`` is high enough), a single bin
+        If bins are narrow enough (number of bins is high enough), a single bin
         (like the bin bounded by the red dashed lines) can contain only one of
         those lines of points for high value of :math:`\\phi`. :math:`R^2` will then be computed
         for constant, or almost constant observations, even though globally those
@@ -1430,7 +1924,7 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
     .. code:: python
 
-        from PCAfold import PCA, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
+        from PCAfold import PCA, variable_bins, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
         import numpy as np
 
         # Generate dummy data set:
@@ -1442,8 +1936,11 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
         # Approximate the data set:
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
+        r2_in_bins = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], idx=idx, use_global_mean=True, verbose=True)
 
         # Plot the stratified R2 values:
         plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)
@@ -1452,16 +1949,15 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
     :param predicted:
         ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
-    :param n_bins:
-        ``int`` specifying the number of bins to consider in a dependent variable (uses the ``preprocess.variable_bins`` function to generate bins).
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param use_global_mean: (optional)
-        ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
+            ``bool`` specifying if global mean of the observed variable should be used as a reference in :math:`R^2` calculation.
     :param verbose: (optional)
         ``bool`` for printing sizes (number of observations) and :math:`R^2` values in each bin.
 
     :return:
-        - **r2_in_bins** - ``list`` specifying the coefficients of determination :math:`R^2` in each bin. It has length ``n_bins``.
-        - **bins_borders** - ``list`` specifying the bins borders that were created to stratify the dependent variable. It has length ``n_bins+1``.
+        - **r2_in_bins** - ``list`` specifying the coefficients of determination :math:`R^2` in each bin. It has length ``k``.
     """
 
     if not isinstance(observed, np.ndarray):
@@ -1491,11 +1987,23 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
-    if not isinstance(n_bins, int):
-        raise ValueError("Parameter `n_bins` has to be an integer.")
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
 
-    if n_bins < 1:
-        raise ValueError("Parameter `n_bins` has to be an integer larger than 0.")
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_idx != n_observed:
+        raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
 
     if not isinstance(use_global_mean, bool):
         raise ValueError("Parameter `use_global_mean` has to be a boolean.")
@@ -1505,8 +2013,6 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
     __observed = observed.ravel()
     __predicted = predicted.ravel()
-
-    (idx, bins_borders) = preprocess.variable_bins(__observed, n_bins, verbose=False)
 
     r2_in_bins = []
 
@@ -1534,7 +2040,7 @@ def stratified_coefficient_of_determination(observed, predicted, n_bins, use_glo
 
         r2_in_bins.append(r2)
 
-    return (r2_in_bins, bins_borders)
+    return r2_in_bins
 
 # ------------------------------------------------------------------------------
 
@@ -1610,6 +2116,129 @@ def mean_absolute_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
+def stratified_mean_absolute_error(observed, predicted, idx, verbose=False):
+    """
+    Computes the stratified mean absolute error (MAE) values. Stratified MAE is computed separately in each
+    bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
+
+    MAE in the :math:`j^{th}` bin can be computed as:
+
+    .. math::
+
+        \\mathrm{MAE}_j = \\frac{1}{N_j} \\sum_{i=1}^{N_j} | \\phi_{o,i}^j - \\phi_{p,i}^j |
+
+    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, variable_bins, stratified_mean_absolute_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
+        # Compute stratified MAE in 10 bins of the first variable in a data set:
+        mae_in_bins = stratified_mean_absolute_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param verbose: (optional)
+        ``bool`` for printing sizes (number of observations) and MAE values in each bin.
+
+    :return:
+        - **mae_in_bins** - ``list`` specifying the mean absolute error (MAE) in each bin. It has length ``k``.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_idx != n_observed:
+        raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    mae_in_bins = []
+
+    for cl in np.unique(idx):
+
+        (idx_bin,) = np.where(idx==cl)
+
+        mae = mean_absolute_error(__observed[idx_bin], __predicted[idx_bin])
+
+        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
+        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
+
+        if verbose:
+            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MAE\t' + str(round(mae,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+            else:
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MAE\t' + str(round(mae,6)))
+
+        mae_in_bins.append(mae)
+
+    return mae_in_bins
+
+# ------------------------------------------------------------------------------
+
 def mean_squared_error(observed, predicted):
     """
     Computes the mean squared error (MSE):
@@ -1682,6 +2311,129 @@ def mean_squared_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
+def stratified_mean_squared_error(observed, predicted, idx, verbose=False):
+    """
+    Computes the stratified mean squared error (MSE) values. Stratified MSE is computed separately in each
+    bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
+
+    MSE in the :math:`j^{th}` bin can be computed as:
+
+    .. math::
+
+        \\mathrm{MSE}_j = \\frac{1}{N_j} \\sum_{i=1}^{N_j} (\\phi_{o,i}^j - \\phi_{p,i}^j) ^2
+
+    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, variable_bins, stratified_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
+        # Compute stratified MSE in 10 bins of the first variable in a data set:
+        mse_in_bins = stratified_mean_squared_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param verbose: (optional)
+        ``bool`` for printing sizes (number of observations) and MSE values in each bin.
+
+    :return:
+        - **mse_in_bins** - ``list`` specifying the mean squared error (MSE) in each bin. It has length ``k``.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_idx != n_observed:
+        raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    mse_in_bins = []
+
+    for cl in np.unique(idx):
+
+        (idx_bin,) = np.where(idx==cl)
+
+        mse = mean_squared_error(__observed[idx_bin], __predicted[idx_bin])
+
+        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
+        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
+
+        if verbose:
+            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MSE\t' + str(round(mse,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+            else:
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MSE\t' + str(round(mse,6)))
+
+        mse_in_bins.append(mse)
+
+    return mse_in_bins
+
+# ------------------------------------------------------------------------------
+
 def root_mean_squared_error(observed, predicted):
     """
     Computes the root mean squared error (RMSE):
@@ -1751,6 +2503,129 @@ def root_mean_squared_error(observed, predicted):
     rmse = (mean_squared_error(observed, predicted))**0.5
 
     return rmse
+
+# ------------------------------------------------------------------------------
+
+def stratified_root_mean_squared_error(observed, predicted, idx, verbose=False):
+    """
+    Computes the stratified root mean squared error (RMSE) values. Stratified RMSE is computed separately in each
+    bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
+
+    RMSE in the :math:`j^{th}` bin can be computed as:
+
+    .. math::
+
+        \\mathrm{RMSE}_j = \\sqrt{\\frac{1}{N_j} \\sum_{i=1}^{N_j} (\\phi_{o,i}^j - \\phi_{p,i}^j) ^2}
+
+    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, variable_bins, stratified_root_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
+        # Compute stratified RMSE in 10 bins of the first variable in a data set:
+        rmse_in_bins = stratified_root_mean_squared_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param verbose: (optional)
+        ``bool`` for printing sizes (number of observations) and RMSE values in each bin.
+
+    :return:
+        - **rmse_in_bins** - ``list`` specifying the mean squared error (RMSE) in each bin. It has length ``k``.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_idx != n_observed:
+        raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    rmse_in_bins = []
+
+    for cl in np.unique(idx):
+
+        (idx_bin,) = np.where(idx==cl)
+
+        rmse = root_mean_squared_error(__observed[idx_bin], __predicted[idx_bin])
+
+        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
+        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
+
+        if verbose:
+            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| RMSE\t' + str(round(rmse,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+            else:
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| RMSE\t' + str(round(rmse,6)))
+
+        rmse_in_bins.append(rmse)
+
+    return rmse_in_bins
 
 # ------------------------------------------------------------------------------
 
@@ -1861,6 +2736,133 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
         nrmse = rmse/abs(np.mean(observed))
 
     return nrmse
+
+# ------------------------------------------------------------------------------
+
+def stratified_normalized_root_mean_squared_error(observed, predicted, idx, norm='std', use_global_norm=False, verbose=False):
+    """
+    Computes the stratified normalized root mean squared error (NRMSE) values. Stratified NRMSE is computed separately in each
+    bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
+
+    NRMSE in the :math:`j^{th}` bin can be computed as:
+
+    .. math::
+
+        \\mathrm{NRMSE}_j = \\frac{1}{d_{norm}} \\sqrt{\\frac{1}{N_j} \\sum_{i=1}^{N_j} (\\phi_{o,i}^j - \\phi_{p,i}^j) ^2}
+
+    where :math:`N_j` is the number of observations in the :math:`j^{th}` bin, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, variable_bins, stratified_normalized_root_mean_squared_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
+        # Compute stratified NRMSE in 10 bins of the first variable in a data set:
+        nrmse_in_bins = stratified_normalized_root_mean_squared_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param norm:
+        ``str`` specifying the normalization, :math:`d_{norm}`. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
+    :param use_global_norm: (optional)
+            ``bool`` specifying if global norm of the observed variable should be used in NRMSE calculation.
+    :param verbose: (optional)
+        ``bool`` for printing sizes (number of observations) and NRMSE values in each bin.
+
+    :return:
+        - **nrmse_in_bins** - ``list`` specifying the mean squared error (NRMSE) in each bin. It has length ``k``.
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if isinstance(idx, np.ndarray):
+        if not all(isinstance(i, np.integer) for i in idx.ravel()):
+            raise ValueError("Parameter `idx` can only contain integers.")
+    else:
+        raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_idx, ) = np.shape(idx)
+        n_idx = 1
+    except:
+        (n_observations_idx, n_idx) = np.shape(idx)
+
+    if n_idx != 1:
+        raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations_idx != n_observed:
+        raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    nrmse_in_bins = []
+
+    for cl in np.unique(idx):
+
+        (idx_bin,) = np.where(idx==cl)
+
+        nrmse = normalized_root_mean_squared_error(__observed[idx_bin], __predicted[idx_bin], norm=norm)
+
+        constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
+        constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
+
+        if verbose:
+            if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| NRMSE\t' + str(round(nrmse,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+            else:
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| NRMSE\t' + str(round(nrmse,6)))
+
+        nrmse_in_bins.append(nrmse)
+
+    return nrmse_in_bins
 
 # ------------------------------------------------------------------------------
 
@@ -1997,7 +2999,7 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
 
 # ------------------------------------------------------------------------------
 
-def generate_tex_table(data_frame_table, float_format='%.2f', caption='', label=''):
+def generate_tex_table(data_frame_table, float_format='.2f', caption='', label=''):
     """
     Generates ``tex`` code for a table stored in a ``pandas.DataFrame``. This function
     can be useful e.g. for printing regression results.
@@ -2028,7 +3030,7 @@ def generate_tex_table(data_frame_table, float_format='%.2f', caption='', label=
         r2_table = pd.DataFrame(np.vstack((r2_q2, r2_q3)), columns=variable_names, index=['PCA, $q=2$', 'PCA, $q=3$'])
 
         # Generate tex code for the table:
-        generate_tex_table(r2_table, float_format="%.3f", caption='$R^2$ values.', label='r2-values')
+        generate_tex_table(r2_table, float_format=".3f", caption='$R^2$ values.', label='r2-values')
 
     .. note::
 
@@ -2058,7 +3060,7 @@ def generate_tex_table(data_frame_table, float_format='%.2f', caption='', label=
         index names.
     :param float_format:
         ``str`` specifying the display format for the numerical entries inside the
-        table. By default it is set to ``'%.2f'``.
+        table. By default it is set to ``'.2f'``.
     :param caption:
         ``str`` specifying caption for the table.
     :param label:
@@ -2078,7 +3080,7 @@ def generate_tex_table(data_frame_table, float_format='%.2f', caption='', label=
     for row_i, row_label in enumerate(rows_labels):
 
         row_values = list(data_frame_table.iloc[row_i,:])
-        print(row_label + r' & '+  ' & '.join([str(float_format % value) for value in row_values]) + r' \\')
+        print(row_label + r' & '+  ' & '.join([str(('%' + float_format) % value) for value in row_values]) + r' \\')
 
     print(r'\end{tabular}')
     print(r'\caption{' + caption + r'}\label{' + label + '}')
