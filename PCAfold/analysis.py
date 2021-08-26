@@ -1145,29 +1145,29 @@ class RegressionAssessment:
 
             .. code-block:: text
 
-                --------------------
+                -------------------------
                 X1
-                R2: 	0.7889
-                MAE:	0.1030
-                MSE:	0.0170
-                RMSE:	0.1305
-                NRMSE:	0.4594
+                R2:	0.8440
+                MAE:	0.0863
+                MSE:	0.0113
+                RMSE:	0.1061
+                NRMSE:	0.3949
                 GDE:	75.0000
-                --------------------
+                -------------------------
                 X2
-                R2: 	0.5134
-                MAE:	0.1640
-                MSE:	0.0432
-                RMSE:	0.2077
-                NRMSE:	0.6976
+                R2:	0.6577
+                MAE:	0.1341
+                MSE:	0.0271
+                RMSE:	0.1648
+                NRMSE:	0.5851
                 GDE:	75.0000
-                --------------------
+                -------------------------
                 X3
-                R2: 	0.8010
-                MAE:	0.0906
-                MSE:	0.0132
-                RMSE:	0.1148
-                NRMSE:	0.4461
+                R2:	0.6928
+                MAE:	0.1279
+                MSE:	0.0247
+                RMSE:	0.1572
+                NRMSE:	0.5542
                 GDE:	75.0000
 
             Adding ``'tex'`` to the ``table_format`` list will result in printing:
@@ -1178,11 +1178,11 @@ class RegressionAssessment:
                 \\begin{center}
                 \\begin{tabular}{llll} \\toprule
                  & \\textit{X1} & \\textit{X2} & \\textit{X3} \\\\ \\midrule
-                $R^2$ & 0.7889 & 0.5134 & 0.8010 \\\\
-                MAE & 0.1030 & 0.1640 & 0.0906 \\\\
-                MSE & 0.0170 & 0.0432 & 0.0132 \\\\
-                RMSE & 0.1305 & 0.2077 & 0.1148 \\\\
-                NRMSE & 0.4594 & 0.6976 & 0.4461 \\\\
+                $R^2$ & 0.8440 & 0.6577 & 0.6928 \\\\
+                MAE & 0.0863 & 0.1341 & 0.1279 \\\\
+                MSE & 0.0113 & 0.0271 & 0.0247 \\\\
+                RMSE & 0.1061 & 0.1648 & 0.1572 \\\\
+                NRMSE & 0.3949 & 0.5851 & 0.5542 \\\\
                 GDE & 75.0000 & 75.0000 & 75.0000 \\\\
                 \\end{tabular}
                 \\caption{}\\label{}
@@ -1229,28 +1229,28 @@ class RegressionAssessment:
 
                 -------------------------
                 X1
-                R2:	0.4842	WORSE
-                MAE:	0.1790	WORSE
-                MSE:	0.0471	WORSE
-                RMSE:	0.2169	WORSE
-                NRMSE:	0.7182	WORSE
-                GDE:	91.0000	BETTER
+                R2:	0.8286	BETTER
+                MAE:	0.0973	BETTER
+                MSE:	0.0147	BETTER
+                RMSE:	0.1213	BETTER
+                NRMSE:	0.4140	BETTER
+                GDE:	66.0000	WORSE
                 -------------------------
                 X2
-                R2:	0.9394	BETTER
-                MAE:	0.0577	WORSE
-                MSE:	0.0049	BETTER
-                RMSE:	0.0700	BETTER
-                NRMSE:	0.2462	BETTER
-                GDE:	91.0000	BETTER
+                R2:	0.7442	WORSE
+                MAE:	0.1176	WORSE
+                MSE:	0.0215	WORSE
+                RMSE:	0.1465	WORSE
+                NRMSE:	0.5057	WORSE
+                GDE:	66.0000	WORSE
                 -------------------------
                 X3
-                R2:	0.6531	BETTER
-                MAE:	0.1495	WORSE
-                MSE:	0.0328	WORSE
-                RMSE:	0.1812	WORSE
-                NRMSE:	0.5890	BETTER
-                GDE:	91.0000	BETTER
+                R2:	0.5860	BETTER
+                MAE:	0.1675	WORSE
+                MSE:	0.0436	WORSE
+                RMSE:	0.2088	WORSE
+                NRMSE:	0.6434	BETTER
+                GDE:	66.0000	WORSE
 
             Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
@@ -1476,6 +1476,62 @@ class RegressionAssessment:
             # Print regression metrics:
             stratified_regression_metrics.print_stratified_metrics(table_format=['raw', 'pandas'], float_format='.4f')
 
+        .. note::
+
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                -------------------------
+                k1
+                N. samples:	31
+                R2:	-3.5915
+                MAE:	0.1550
+                MSE:	0.0340
+                RMSE:	0.1843
+                NRMSE:	2.1428
+                -------------------------
+                k2
+                N. samples:	30
+                R2:	-1.8599
+                MAE:	0.1207
+                MSE:	0.0217
+                RMSE:	0.1473
+                NRMSE:	1.6911
+                -------------------------
+                k3
+                N. samples:	39
+                R2:	-2.8406
+                MAE:	0.1577
+                MSE:	0.0359
+                RMSE:	0.1894
+                NRMSE:	1.9598
+
+            Adding ``'tex'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                \\begin{table}[h!]
+                \\begin{center}
+                \\begin{tabular}{llll} \\toprule
+                 & \\textit{k1} & \\textit{k2} & \\textit{k3} \\\\ \\midrule
+                N. samples & 31.0000 & 30.0000 & 39.0000 \\\\
+                $R^2$ & -3.5915 & -1.8599 & -2.8406 \\\\
+                MAE & 0.1550 & 0.1207 & 0.1577 \\\\
+                MSE & 0.0340 & 0.0217 & 0.0359 \\\\
+                RMSE & 0.1843 & 0.1473 & 0.1894 \\\\
+                NRMSE & 2.1428 & 1.6911 & 1.9598 \\\\
+                \\end{tabular}
+                \\caption{}\\label{}
+                \\end{center}
+                \\end{table}
+
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
+
+            .. image:: ../images/generate-pandas-table-stratified.png
+                :width: 300
+                :align: center
+
         Additionally, the current object of ``RegressionAssessment`` class can be compared with another object:
 
         .. code:: python
@@ -1501,6 +1557,43 @@ class RegressionAssessment:
 
             # Print regression metrics:
             stratified_regression_metrics_0.print_stratified_metrics(table_format=['raw', 'pandas'], float_format='.4f', comparison=stratified_regression_metrics_1)
+
+        .. note::
+
+            Adding ``'raw'`` to the ``table_format`` list will result in printing:
+
+            .. code-block:: text
+
+                -------------------------
+                k1
+                N. samples:	32
+                R2:	-2.2858	WORSE
+                MAE:	0.1560	BETTER
+                MSE:	0.0348	BETTER
+                RMSE:	0.1866	BETTER
+                NRMSE:	1.8127	WORSE
+                -------------------------
+                k2
+                N. samples:	32
+                R2:	-1.2248	WORSE
+                MAE:	0.1241	BETTER
+                MSE:	0.0210	BETTER
+                RMSE:	0.1448	BETTER
+                NRMSE:	1.4916	WORSE
+                -------------------------
+                k3
+                N. samples:	36
+                R2:	-1.7086	WORSE
+                MAE:	0.1208	BETTER
+                MSE:	0.0251	BETTER
+                RMSE:	0.1586	BETTER
+                NRMSE:	1.6458	WORSE
+
+            Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
+
+            .. image:: ../images/generate-pandas-table-comparison-stratified.png
+                :width: 300
+                :align: center
 
         :param table_format: (optional)
             ``list`` of ``str`` specifying the format(s) in which the table should be printed.
