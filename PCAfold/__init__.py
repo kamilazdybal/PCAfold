@@ -86,4 +86,4 @@ from .analysis import plot_normalized_variance
 from .analysis import plot_normalized_variance_comparison
 from .analysis import plot_normalized_variance_derivative
 from .analysis import plot_normalized_variance_derivative_comparison
-from .analysis import plot_stratified_coefficient_of_determination
+from .analysis import plot_stratified_metric

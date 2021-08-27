@@ -373,7 +373,13 @@ We can plot the stratified :math:`R^2` values across bins centers:
 
 .. code:: python
 
-  plt = analysis.plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name='$\phi$', figure_size=(10,2), save_filename=None)
+    plt = analysis.plot_stratified_metric(r2_in_bins, 
+                                          bins_borders, 
+                                          variable_name='$\phi$', 
+                                          metric_name='$R^2$', 
+                                          yscale='linear',
+                                          figure_size=(10,2), 
+                                          save_filename=save_filename)
 
 .. image:: ../images/tutorial-regression-stratified-r2.svg
     :width: 500

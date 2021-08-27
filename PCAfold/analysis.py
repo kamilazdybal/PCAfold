@@ -4247,16 +4247,15 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
 
 # ------------------------------------------------------------------------------
 
-def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, variable_name=None, figure_size=(10,5), title=None, save_filename=None):
+def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, metric_name=None, yscale='linear', figure_size=(10,5), title=None, save_filename=None):
     """
-    This function plots the stratified coefficient of determination :math:`R^2`
-    across bins of a dependent variable.
+    This function plots a stratified metric across bins of a dependent variable.
 
     **Example:**
 
     .. code:: python
 
-        from PCAfold import PCA, stratified_coefficient_of_determination, plot_stratified_coefficient_of_determination
+        from PCAfold import PCA, variable_bins, stratified_coefficient_of_determination, plot_stratified_metric
         import numpy as np
 
         # Generate dummy data set:
@@ -4268,25 +4267,35 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
         # Approximate the data set:
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        (r2_in_bins, bins_borders) = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], n_bins=10, use_global_mean=True, verbose=True)
+        r2_in_bins = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], idx=idx, use_global_mean=True, verbose=True)
 
         # Visualize how R2 changes across bins:
-        plt = plot_stratified_coefficient_of_determination(r2_in_bins,
-                                                           bins_borders,
-                                                           variable_name='$X_1$',
-                                                           figure_size=(10,5),
-                                                           title='Stratified R2',
-                                                           save_filename='r2.pdf')
+        plt = plot_stratified_metric(r2_in_bins,
+                                      bins_borders,
+                                      variable_name='$X_1$',
+                                      metric_name='$R^2$',
+                                      yscale='log',
+                                      figure_size=(10,5),
+                                      title='Stratified $R^2$',
+                                      save_filename='r2.pdf')
         plt.close()
 
-    :param r2_in_bins:
-        list of coefficients of determination :math:`R^2` in each bin as per ``analysis.stratified_coefficient_of_determination`` function.
+    :param metric_in_bins:
+        ``list`` of metric values in each bin.
     :param bins_borders:
-        list of bins borders that were created to stratify the dependent variable as per ``analysis.stratified_coefficient_of_determination`` function.
+        ``list`` of bins borders that were created to stratify the dependent variable.
     :param variable_name: (optional)
-        string specifying the name of the variable for which :math:`R^2` were computed. If set to ``None``
+        ``str`` specifying the name of the variable for which the metric was computed. If set to ``None``
         label on the x-axis will not be plotted.
+    :param metric_name: (optional)
+        ``str`` specifying the name of the metric to be plotted on the y-axis. If set to ``None``
+        label on the x-axis will not be plotted.
+    :param yscale: (optional)
+        ``str`` specifying the scale for the y-axis.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -4317,12 +4326,13 @@ def plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders, varia
     bin_centers = bins_borders[0:-1] + bin_length/2
 
     figure = plt.figure(figsize=figure_size)
-    plt.scatter(bin_centers, r2_in_bins, c='#191b27')
+    plt.scatter(bin_centers, metric_in_bins, c='#191b27')
     plt.grid(alpha=grid_opacity)
-    if variable_name != None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
-    plt.ylabel('$R^2$ [-]', **csfont, fontsize=font_labels)
+    plt.yscale(yscale)
+    if variable_name is not None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
+    if metric_name is not None: plt.ylabel(metric_name, **csfont, fontsize=font_labels)
 
-    if title != None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+    if title is not None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
