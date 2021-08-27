@@ -257,10 +257,10 @@ Plotting functions
 
 .. autofunction:: PCAfold.analysis.plot_normalized_variance_derivative_comparison
 
-``plot_stratified_coefficient_of_determination``
+``plot_stratified_metric``
 ===================================================
 
-.. autofunction:: PCAfold.analysis.plot_stratified_coefficient_of_determination
+.. autofunction:: PCAfold.analysis.plot_stratified_metric
 
 --------------------------------------------------------------------------------
 
