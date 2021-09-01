@@ -728,7 +728,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     try:
         (n_observations, n_d_hat_variables) = np.shape(d_hat_variables)
-    else:
+    except:
         raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
 
     if not isinstance(d_hat_variables_names, list):
