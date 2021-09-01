@@ -668,7 +668,7 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, d_hat_variables_names=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
+def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
     """
     Manifold-informed feature selection algorithm.
 
@@ -688,8 +688,6 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
     :param d_hat_variables: (optional)
         ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
-    :param d_hat_variables_names:
-        ``list`` of ``str`` specifying the dependent variables names.
     :param add_transformed_source: (optional)
         ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
     :param target_manifold_dimensionality: (optional)
@@ -728,22 +726,16 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     try:
         (n_observations, n_d_hat_variables) = np.shape(d_hat_variables)
+        d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
     except:
         raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
-
-    if not isinstance(d_hat_variables_names, list):
-        raise ValueError("Parameter `d_hat_variables_names` has to be of type `list`.")
-
-    if d_hat_variables is not None:
-        if d_hat_variables_names is None:
-            raise ValueError("Parameter `d_hat_variables_names` has to be specified when `d_hat_variables` is specified.")
 
     if not isinstance(add_transformed_source, bool):
         raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
 
     if d_hat_variables is None:
         if not add_transformed_source:
-            raise ValueError("When `d_hat_variables` is not specified, `add_transformed_source` has to be set to True.")
+            raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
 
     if not isinstance(weight_area, bool):
         raise ValueError("Parameter `weight_area` has to be of type `bool`.")
