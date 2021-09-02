@@ -649,15 +649,15 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
             peak_location = peak_locations[-1]
 
             if weight_area:
-                weight = 1. / (sigma_peak)
+                weight = 1. / (peak_location)
 
             sigma_min = np.min(sigma)
 
-            N_at_peak = np.interp(sigma_peak, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
+            N_at_peak = np.interp(peak_location, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
             N_at_min = np.interp(sigma_min, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
 
             TERM_1 = (1. / max_derivatives[variable]) * (N_at_peak - N_at_min)
-            TERM_2 = (normalized_variance_limit_dict[variable])/(max_derivatives[variable]) * (np.log10(sigma_peak) - np.log10(sigma_min))
+            TERM_2 = (normalized_variance_limit_dict[variable])/(max_derivatives[variable]) * (np.log10(peak_location) - np.log10(sigma_min))
             area = TERM_1 + TERM_2
 
             areas.append(weight * area)
@@ -668,26 +668,28 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
+def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
     """
     Manifold-informed feature selection algorithm.
 
     :param X:
-        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+        ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param X_source:
-        ``numpy.ndarray`` specifying the source terms, :math:`\mathbf{S_X}`, corresponding to the state-space
-        variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
-        representing reactive flows. More information can be found in :cite:`Sutherland2009`.
+        ``numpy.ndarray`` specifying the source terms, :math:`\\mathbf{S_X}`, corresponding to the state-space
+        variables in :math:`\\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`. It should be of size ``(n_observations,n_variables)``.
     :param variable_names:
-        ``list`` of ``str`` specifying variable names.
+        ``list`` of ``str`` specifying variables names.
     :param scaling: (optional)
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param bandwidth_values:
         ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
-    :param d_hat_variables:
-        ``list`` specifying which state variables should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. If set to ``None``, only the PC source terms are used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
+    :param d_hat_variables: (optional)
+        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
+    :param add_transformed_source: (optional)
+        ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
     :param target_manifold_dimensionality: (optional)
         ``int`` specifying the target dimensionality of the PCA manifold.
     :param bootstrap_variables: (optional)
@@ -701,11 +703,62 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     :return:
         - **selected_variables** - ``list`` specifying the indices of the selected variables (features).
+        - **costs** - ``list`` specifying the costs, :math:`E`, from each iteration.
     """
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(X_source, np.ndarray):
+        raise ValueError("Parameter `X_source` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(variable_names, list):
+        raise ValueError("Parameter `variable_names` has to be of type `list`.")
+
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be of type `str`.")
+
+    if not isinstance(bandwidth_values, np.ndarray):
+        raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
+
+    if d_hat_variables is not None:
+        if not isinstance(d_hat_variables, np.ndarray):
+            raise ValueError("Parameter `d_hat_variables` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations, n_d_hat_variables) = np.shape(d_hat_variables)
+            d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
+        except:
+            raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
+
+    if not isinstance(add_transformed_source, bool):
+        raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
+
+    if d_hat_variables is None:
+        if not add_transformed_source:
+            raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
+
+    if not isinstance(weight_area, bool):
+        raise ValueError("Parameter `weight_area` has to be of type `bool`.")
+
+    if not isinstance(target_manifold_dimensionality, int):
+        raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
+
+    if bootstrap_variables is not None:
+        if not isinstance(bootstrap_variables, list):
+            raise ValueError("Parameter `bootstrap_variables` has to be of type `list`.")
+
+    if not isinstance(direct_integration, bool):
+        raise ValueError("Parameter `direct_integration` has to be of type `bool`.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be of type `bool`.")
 
     (n_observations, n_variables) = np.shape(X)
 
     variables_indices = [i for i in range(0,n_variables)]
+
+    costs = []
 
     # Automatic bootstrapping: -------------------------------------------------
     if bootstrap_variables is None:
@@ -720,19 +773,19 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
             if verbose: print('\tCurrently checking variable:\t' + variable_names[i_variable])
 
-            # bootstrap_pca = reduction.PCA(X[:,[i_variable]], scaling=scaling, n_components=1)
-            # PCs = bootstrap_pca.transform(X[:,[i_variable]])
-            # PC_sources = bootstrap_pca.transform(X_source[:,[i_variable]], nocenter=True)
-
             PCs = X[:,[i_variable]]
             PC_sources = X_source[:,[i_variable]]
 
-            if d_hat_variables is not None:
-                depvars = np.hstack((PC_sources, X[:,d_hat_variables]))
-                depvar_names = ['SZ1'] + list(variable_names[d_hat_variables])
-            else:
+            if d_hat_variables is None:
                 depvars = cp.deepcopy(PC_sources)
                 depvar_names = ['SZ1']
+            else:
+                if add_transformed_source:
+                    depvars = np.hstack((PC_sources, d_hat_variables))
+                    depvar_names = ['SZ1'] + d_hat_variables_names
+                else:
+                    depvars = d_hat_variables
+                    depvar_names = d_hat_variables_names
 
             bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
@@ -743,6 +796,8 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         # Find a single best variable to bootstrap with:
         (best_bootstrap_variable_index, ) = np.where(np.array(bootstrap_cost_function)==np.min(bootstrap_cost_function))
         best_bootstrap_variable_index = int(best_bootstrap_variable_index)
+
+        costs.append(np.min(bootstrap_cost_function))
 
         bootstrap_variables = [best_bootstrap_variable_index]
 
@@ -772,18 +827,23 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         PCs = bootstrap_pca.transform(X[:,bootstrap_variables])
         PC_sources = bootstrap_pca.transform(X_source[:,bootstrap_variables], nocenter=True)
 
-        if d_hat_variables is not None:
-            depvars = np.hstack((PC_sources, X[:,d_hat_variables]))
-            depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + list(variable_names[d_hat_variables])
-        else:
+        if d_hat_variables is None:
             depvars = cp.deepcopy(PC_sources)
             depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
+        else:
+            if add_transformed_source:
+                depvars = np.hstack((PC_sources, d_hat_variables))
+                depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + d_hat_variables_names
+            else:
+                depvars = d_hat_variables
+                depvar_names = d_hat_variables_names
 
         bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
         bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
         if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
         bootstrap_cost_function.append(bootstrap_area)
+        costs.append(bootstrap_area)
 
         if verbose: print('\nVariable(s) ' + ', '.join(list(variable_names[bootstrap_variables])) + ' will be used as bootstrap.')
 
@@ -810,7 +870,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         if verbose:
             print('Iteration No.' + str(loop_counter))
             print('Currently adding variables from the following list: ')
-            print(variable_names[remaining_variables_list])
+            print([variable_names[i] for i in remaining_variables_list])
 
         current_cost_function = []
 
@@ -829,12 +889,16 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             PCs = pca.transform(X[:,current_variables_list])
             PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
 
-            if d_hat_variables is not None:
-                depvars = np.hstack((PC_sources, X[:,d_hat_variables]))
-                depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + list(variable_names[d_hat_variables])
-            else:
+            if d_hat_variables is None:
                 depvars = cp.deepcopy(PC_sources)
                 depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
+            else:
+                if add_transformed_source:
+                    depvars = np.hstack((PC_sources, d_hat_variables))
+                    depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + d_hat_variables_names
+                else:
+                    depvars = d_hat_variables
+                    depvar_names = d_hat_variables_names
 
             current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
             current_derivative, current_sigma, _ = normalized_variance_derivative(current_variance_data)
@@ -857,6 +921,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             selected_variables.append(remaining_variables_list[best_variable_index])
             remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
             previous_area = min_area
+            costs.append(min_area)
         else:
             if verbose: print('No variable improves D-hat anymore!')
             break
@@ -864,7 +929,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     if verbose:
         print('\n' + '-'*50)
         print('Final subset:')
-        print(', '.join(variable_names[selected_variables]))
+        print(', '.join([variable_names[i] for i in selected_variables]))
         print(selected_variables)
         print('Optimized cumulative area under the D-hat curve: %.4f' % previous_area)
         print('-'*50 + '\n')
@@ -872,7 +937,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     total_toc = time.perf_counter()
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    return selected_variables
+    return selected_variables, costs
 
 ################################################################################
 #
