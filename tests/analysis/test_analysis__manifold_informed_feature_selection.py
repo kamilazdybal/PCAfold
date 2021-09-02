@@ -16,7 +16,12 @@ class Analysis(unittest.TestCase):
 
         # Direct integration:
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, direct_integration=True)
+            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=True, direct_integration=True)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=False, direct_integration=True)
         except Exception:
             self.assertTrue(False)
 
@@ -39,7 +44,12 @@ class Analysis(unittest.TestCase):
 
         # From normalized variance:
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, direct_integration=False)
+            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=True, direct_integration=False)
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=False, direct_integration=False)
         except Exception:
             self.assertTrue(False)
 
