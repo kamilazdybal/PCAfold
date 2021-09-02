@@ -703,6 +703,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     :return:
         - **selected_variables** - ``list`` specifying the indices of the selected variables (features).
+        - **costs** - ``list`` specifying the costs, :math:`E`, from each iteration.
     """
 
     if not isinstance(X, np.ndarray):
@@ -757,6 +758,8 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     variables_indices = [i for i in range(0,n_variables)]
 
+    costs = []
+
     # Automatic bootstrapping: -------------------------------------------------
     if bootstrap_variables is None:
 
@@ -793,6 +796,8 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         # Find a single best variable to bootstrap with:
         (best_bootstrap_variable_index, ) = np.where(np.array(bootstrap_cost_function)==np.min(bootstrap_cost_function))
         best_bootstrap_variable_index = int(best_bootstrap_variable_index)
+
+        costs.append(np.min(bootstrap_cost_function))
 
         bootstrap_variables = [best_bootstrap_variable_index]
 
@@ -838,6 +843,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
         if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
         bootstrap_cost_function.append(bootstrap_area)
+        costs.append(bootstrap_area)
 
         if verbose: print('\nVariable(s) ' + ', '.join(list(variable_names[bootstrap_variables])) + ' will be used as bootstrap.')
 
@@ -915,6 +921,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             selected_variables.append(remaining_variables_list[best_variable_index])
             remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
             previous_area = min_area
+            costs.append(min_area)
         else:
             if verbose: print('No variable improves D-hat anymore!')
             break
@@ -930,7 +937,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     total_toc = time.perf_counter()
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    return selected_variables
+    return selected_variables, costs
 
 ################################################################################
 #
