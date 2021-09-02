@@ -649,15 +649,15 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
             peak_location = peak_locations[-1]
 
             if weight_area:
-                weight = 1. / (sigma_peak)
+                weight = 1. / (peak_location)
 
             sigma_min = np.min(sigma)
 
-            N_at_peak = np.interp(sigma_peak, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
+            N_at_peak = np.interp(peak_location, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
             N_at_min = np.interp(sigma_min, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
 
             TERM_1 = (1. / max_derivatives[variable]) * (N_at_peak - N_at_min)
-            TERM_2 = (normalized_variance_limit_dict[variable])/(max_derivatives[variable]) * (np.log10(sigma_peak) - np.log10(sigma_min))
+            TERM_2 = (normalized_variance_limit_dict[variable])/(max_derivatives[variable]) * (np.log10(peak_location) - np.log10(sigma_min))
             area = TERM_1 + TERM_2
 
             areas.append(weight * area)
