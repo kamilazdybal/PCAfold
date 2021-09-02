@@ -725,11 +725,11 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         if not isinstance(d_hat_variables, np.ndarray):
             raise ValueError("Parameter `d_hat_variables` has to be of type `numpy.ndarray`.")
 
-    try:
-        (n_observations, n_d_hat_variables) = np.shape(d_hat_variables)
-        d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
-    except:
-        raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
+        try:
+            (n_observations, n_d_hat_variables) = np.shape(d_hat_variables)
+            d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
+        except:
+            raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
 
     if not isinstance(add_transformed_source, bool):
         raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
