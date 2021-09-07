@@ -668,7 +668,7 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
+def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, order_variables=False, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
     """
     Manifold-informed feature selection algorithm.
 
@@ -686,6 +686,8 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param bandwidth_values:
         ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
+    :param order_variables: (optional)
+        ``bool`` specifying whether an algorithm should be ran for manifold-informed ordering of variables in a data set.
     :param d_hat_variables: (optional)
         ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
     :param add_transformed_source: (optional)
@@ -720,6 +722,9 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     if not isinstance(bandwidth_values, np.ndarray):
         raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(order_variables, bool):
+        raise ValueError("Parameter `order_variables` has to be of type `bool`.")
 
     if d_hat_variables is not None:
         if not isinstance(d_hat_variables, np.ndarray):
@@ -790,7 +795,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
             bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
-            if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
+            if verbose: print('\tCost:\t%.4f' % bootstrap_area)
             bootstrap_cost_function.append(bootstrap_area)
 
         # Find a single best variable to bootstrap with:
@@ -841,11 +846,11 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
         bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
-        if verbose: print('\tCost area:\t%.4f' % bootstrap_area)
+        if verbose: print('\tCost:\t%.4f' % bootstrap_area)
         bootstrap_cost_function.append(bootstrap_area)
         costs.append(bootstrap_area)
 
-        if verbose: print('\nVariable(s) ' + ', '.join(list(variable_names[bootstrap_variables])) + ' will be used as bootstrap.')
+        if verbose: print('\nVariable(s) ' + ', '.join([variable_names[i] for i in bootstrap_variables]) + ' will be used as bootstrap.')
 
         bootstrap_toc = time.perf_counter()
         if verbose: print(f'\nBoostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
@@ -916,23 +921,39 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         (best_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
         best_variable_index = int(best_variable_index)
 
-        if min_area <= previous_area:
+        if order_variables:
             if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n')
             selected_variables.append(remaining_variables_list[best_variable_index])
             remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
-            previous_area = min_area
+            if min_area <= previous_area:
+                previous_area = min_area
             costs.append(min_area)
         else:
-            if verbose: print('No variable improves D-hat anymore!')
-            break
+            if min_area <= previous_area:
+                if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n')
+                selected_variables.append(remaining_variables_list[best_variable_index])
+                remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
+                previous_area = min_area
+                costs.append(min_area)
+            else:
+                if verbose: print('No variable improves the manifold topology anymore!')
+                break
 
-    if verbose:
+    if order_variables:
         print('\n' + '-'*50)
-        print('Final subset:')
+        print('Ordered variables:')
         print(', '.join([variable_names[i] for i in selected_variables]))
         print(selected_variables)
-        print('Optimized cumulative area under the D-hat curve: %.4f' % previous_area)
+        print('Final cost: %.4f' % previous_area)
         print('-'*50 + '\n')
+    else:
+        if verbose:
+            print('\n' + '-'*50)
+            print('Final subset:')
+            print(', '.join([variable_names[i] for i in selected_variables]))
+            print(selected_variables)
+            print('Optimized cost: %.4f' % previous_area)
+            print('-'*50 + '\n')
 
     total_toc = time.perf_counter()
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
