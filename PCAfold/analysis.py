@@ -589,6 +589,37 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
         E = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} \\frac{1}{\\sigma_{peak, i}} A_i
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, cost_function_normalized_variance_derivative
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Specify variables names
+        variable_names = ['X_' + str(i) for i in range(0,10)]
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=variable_names,
+                                                    bandwidth_values=bandwidth_values)
+
+        # Compute the cost for the current manifold:
+        cost = cost_function_normalized_variance_derivative(variance_data,
+                                                            weight_area=False,
+                                                            direct_integration=True)
+
     :param variance_data:
         an object of ``VarianceData`` class.
     :param weight_area: (optional)
@@ -670,7 +701,70 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
 def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, order_variables=False, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
     """
-    Manifold-informed feature selection algorithm.
+    Manifold-informed feature selection algorithm. The goal of the algorithm is to
+    select a meaningful subset of the original variables such that
+    undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
+    The algorithm uses the cost function, :math:`E`,
+    based on minimizing the average area under the normalized variance derivatives, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
+    for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
+    The algorithm can be bootstrapped in two ways:
+
+    - Automatic bootstrap when ``bootstrap_variables=None``: the first best variable is selected automatically as the one that gives the lowest cost.
+
+    - User-defined bootstrap when ``bootstrap_variables`` is set to a user-defined list of the bootstrap variables.
+
+    Two modes of this algorithm are available:
+
+    - When ``order_variables=False``, the best subset of the original variables will be selected. \
+    The output is a list of indices representing the selected subset of the original variables. \
+    In this mode, the algorithm iterates, adding a new variable that still lowers the previous cost at each iteration. \
+    Assuming that the original data set is composed of :math:`Q` variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`, \
+    the algorithm will return a subset of :math:`n` selected variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_n]`, \
+    that is the optimal subset for PCA in terms of manifold topology.
+
+    - When ``order_variables=True``, the original variables in a data set will be \
+    ordered according to their effect on the manifold topology. The output is an ordered list of the original variables. \
+    In this mode, the algorithm iterates, adding a new variable that exhibits the lowest cost at that iteration.
+
+    .. note::
+
+        The algorithm can be very expensive (for large data sets) due to multiple computations of the normalized variance derivative.
+        Try running it on multiple cores or on a sampled data set.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import manifold_informed_feature_selection
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+        X_source = np.random.rand(100,10)
+
+        # Define original variables to add to the optimization:
+        d_hat_variables = X[:,0:3]
+
+        # Specify variables names
+        variable_names = ['X_' + str(i) for i in range(0,10)]
+
+        # Specify the bandwidth values to compute the optimization on:
+        bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Run the subset selection algorithm:
+        (selected_variables, costs) = manifold_informed_feature_selection(X,
+                                                                          X_source,
+                                                                          variable_names,
+                                                                          scaling='auto',
+                                                                          bandwidth_values=bandwidth_values,
+                                                                          order_variables=False,
+                                                                          d_hat_variables=d_hat_variables,
+                                                                          add_transformed_source=True,
+                                                                          target_manifold_dimensionality=2,
+                                                                          bootstrap_variables=None,
+                                                                          weight_area=True,
+                                                                          direct_integration=True,
+                                                                          verbose=True)
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -944,7 +1038,8 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         print('Ordered variables:')
         print(', '.join([variable_names[i] for i in selected_variables]))
         print(selected_variables)
-        print('Final cost: %.4f' % previous_area)
+        print('Lowest cost: %.4f' % previous_area)
+        print('Final cost: %.4f' % min_area)
         print('-'*50 + '\n')
     else:
         if verbose:
