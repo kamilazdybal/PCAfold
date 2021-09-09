@@ -2904,13 +2904,21 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
     fig, axs = plt.subplots(1, 1, figsize=figure_size)
 
-    if color is None:
-        scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
-    elif isinstance(color, str):
-        scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
-    elif isinstance(color, np.ndarray):
-        scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
-
+    if colorbar range is not None:
+        if color is None:
+            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+        elif isinstance(color, str):
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+        elif isinstance(color, np.ndarray):
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+    else:
+        if color is None:
+            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        elif isinstance(color, str):
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        elif isinstance(color, np.ndarray):
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+    
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
     if x_label is not None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
@@ -3101,12 +3109,20 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111, projection='3d')
 
-    if color is None:
-        scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=scatter_point_size, alpha=1)
-    elif isinstance(color, str):
-        scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
-    elif isinstance(color, np.ndarray):
-        scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
+    if colorbar_range is not None:
+        if color is None:
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=scatter_point_size, alpha=1, vmin=cbar_min, vmax=cbar_max)
+        elif isinstance(color, str):
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, alpha=1, vmin=cbar_min, vmax=cbar_max)
+        elif isinstance(color, np.ndarray):
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, alpha=1, vmin=cbar_min, vmax=cbar_max)
+    else:
+        if color is None:
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=scatter_point_size, alpha=1)
+        elif isinstance(color, str):
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
+        elif isinstance(color, np.ndarray):
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
 
     if x_label is not None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
     if y_label is not None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
