@@ -1452,7 +1452,7 @@ class RegressionAssessment:
         __table_formats = ['raw', 'tex', 'pandas']
 
         if not isinstance(table_format, list):
-            raise ValueError("Parameter `table_format` has to be of type `str`.")
+            raise ValueError("Parameter `table_format` has to be of type `list`.")
 
         for item in table_format:
             if item not in __table_formats:
