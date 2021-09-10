@@ -2904,7 +2904,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
     fig, axs = plt.subplots(1, 1, figsize=figure_size)
 
-    if colorbar range is not None:
+    if colorbar_range is not None:
         if color is None:
             scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, str):
@@ -2918,7 +2918,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
             scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
         elif isinstance(color, np.ndarray):
             scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
-    
+
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
     if x_label is not None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
