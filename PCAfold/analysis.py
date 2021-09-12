@@ -866,9 +866,9 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
         bootstrap_cost_function = []
 
-        for i_variable in variables_indices:
+        bootstrap_tic = time.perf_counter()
 
-            bootstrap_tic = time.perf_counter()
+        for i_variable in variables_indices:
 
             if verbose: print('\tCurrently checking variable:\t' + variable_names[i_variable])
 
