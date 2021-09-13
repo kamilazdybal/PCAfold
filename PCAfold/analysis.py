@@ -731,6 +731,9 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         The algorithm can be very expensive (for large data sets) due to multiple computations of the normalized variance derivative.
         Try running it on multiple cores or on a sampled data set.
 
+        In case the algorithm breaks when not being able to determine the peak
+        location, try increasing the range in the ``bandwidth_values`` parameter.
+
     **Example:**
 
     .. code:: python
