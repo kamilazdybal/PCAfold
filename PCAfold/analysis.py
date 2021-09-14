@@ -903,10 +903,10 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
         bootstrap_variables = [best_bootstrap_variable_index]
 
-        if verbose: print('\nVariable ' + variable_names[best_bootstrap_variable_index] + ' will be used as bootstrap.')
+        if verbose: print('\n\tVariable ' + variable_names[best_bootstrap_variable_index] + ' will be used as bootstrap.\n\tCost:\t%.4f' % np.min(bootstrap_cost_function) + '\n')
 
         bootstrap_toc = time.perf_counter()
-        if verbose: print(f'\nBoostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+        if verbose: print(f'Boostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
     # Use user-defined bootstrapping: ------------------------------------------
     else:
@@ -943,14 +943,13 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
         bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
-        if verbose: print('\tCost:\t%.4f' % bootstrap_area)
         bootstrap_cost_function.append(bootstrap_area)
         costs.append(bootstrap_area)
 
-        if verbose: print('\nVariable(s) ' + ', '.join([variable_names[i] for i in bootstrap_variables]) + ' will be used as bootstrap.')
+        if verbose: print('\n\tVariable(s) ' + ', '.join([variable_names[i] for i in bootstrap_variables]) + ' will be used as bootstrap\n\tCost:\t%.4f' % np.min(bootstrap_area) + '\n')
 
         bootstrap_toc = time.perf_counter()
-        if verbose: print(f'\nBoostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+        if verbose: print(f'Boostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
     # Iterate the algorithm starting from the bootstrap selection: -------------
 
@@ -966,6 +965,8 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     loop_counter = 0
 
     while len(remaining_variables_list) > 0:
+
+        iteration_tic = time.perf_counter()
 
         loop_counter += 1
 
@@ -1019,7 +1020,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         best_variable_index = int(best_variable_index)
 
         if order_variables:
-            if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n')
+            if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
             selected_variables.append(remaining_variables_list[best_variable_index])
             remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
             if min_area <= previous_area:
@@ -1027,7 +1028,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             costs.append(min_area)
         else:
             if min_area <= previous_area:
-                if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n')
+                if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
                 selected_variables.append(remaining_variables_list[best_variable_index])
                 remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
                 previous_area = min_area
@@ -1036,14 +1037,15 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
                 if verbose: print('No variable improves the manifold topology anymore!')
                 break
 
+        iteration_toc = time.perf_counter()
+        if verbose: print(f'\tIteration time: {(iteration_toc - iteration_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
     if order_variables:
-        print('\n' + '-'*50)
-        print('Ordered variables:')
+        print('\nOrdered variables:')
         print(', '.join([variable_names[i] for i in selected_variables]))
         print(selected_variables)
-        print('Lowest cost: %.4f' % previous_area)
+        print('\nLowest cost: %.4f' % previous_area)
         print('Final cost: %.4f' % min_area)
-        print('-'*50 + '\n')
     else:
         if verbose:
             print('\n' + '-'*50)
@@ -1051,7 +1053,6 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             print(', '.join([variable_names[i] for i in selected_variables]))
             print(selected_variables)
             print('Optimized cost: %.4f' % previous_area)
-            print('-'*50 + '\n')
 
     total_toc = time.perf_counter()
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
