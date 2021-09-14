@@ -2908,15 +2908,15 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
     rmse = root_mean_squared_error(observed, predicted)
 
     if norm == 'root_square_mean':
-        nrmse = rmse/sqrt(np.mean(observed**2))
+        nrmse = rmse/np.sqrt(np.mean(observed**2))
     elif norm == 'std':
         nrmse = rmse/(np.std(observed))
     elif norm == 'range':
         nrmse = rmse/(np.max(observed) - np.min(observed))
     elif norm == 'root_square_range':
-        nrmse = rmse/sqrt(np.max(observed**2) - np.min(observed**2))
+        nrmse = rmse/np.sqrt(np.max(observed**2) - np.min(observed**2))
     elif norm == 'root_square_std':
-        nrmse = rmse/sqrt(np.std(observed**2))
+        nrmse = rmse/np.sqrt(np.std(observed**2))
     elif norm == 'abs_mean':
         nrmse = rmse/abs(np.mean(observed))
 
@@ -2958,7 +2958,12 @@ def stratified_normalized_root_mean_squared_error(observed, predicted, idx, norm
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified NRMSE in 10 bins of the first variable in a data set:
-        nrmse_in_bins = stratified_normalized_root_mean_squared_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+        nrmse_in_bins = stratified_normalized_root_mean_squared_error(X[:,0],
+                                                                      X_rec[:,0],
+                                                                      idx=idx,
+                                                                      norm='std',
+                                                                      use_global_norm=True,
+                                                                      verbose=True)
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -2969,7 +2974,7 @@ def stratified_normalized_root_mean_squared_error(observed, predicted, idx, norm
     :param norm:
         ``str`` specifying the normalization, :math:`d_{norm}`. It can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.
     :param use_global_norm: (optional)
-            ``bool`` specifying if global norm of the observed variable should be used in NRMSE calculation.
+            ``bool`` specifying if global norm of the observed variable should be used in NRMSE calculation. If set to ``False``, norms are computed on samples from the the corresponding bin.
     :param verbose: (optional)
         ``bool`` for printing sizes (number of observations) and NRMSE values in each bin.
 
@@ -3034,7 +3039,26 @@ def stratified_normalized_root_mean_squared_error(observed, predicted, idx, norm
 
         (idx_bin,) = np.where(idx==cl)
 
-        nrmse = normalized_root_mean_squared_error(__observed[idx_bin], __predicted[idx_bin], norm=norm)
+        if use_global_norm:
+
+            rmse = root_mean_squared_error(__observed[idx_bin], __predicted[idx_bin])
+
+            if norm == 'root_square_mean':
+                nrmse = rmse/np.sqrt(np.mean(__observed**2))
+            elif norm == 'std':
+                nrmse = rmse/(np.std(__observed))
+            elif norm == 'range':
+                nrmse = rmse/(np.max(__observed) - np.min(__observed))
+            elif norm == 'root_square_range':
+                nrmse = rmse/np.sqrt(np.max(__observed**2) - np.min(__observed**2))
+            elif norm == 'root_square_std':
+                nrmse = rmse/np.sqrt(np.std(__observed**2))
+            elif norm == 'abs_mean':
+                nrmse = rmse/abs(np.mean(__observed))
+
+        else:
+
+            nrmse = normalized_root_mean_squared_error(__observed[idx_bin], __predicted[idx_bin], norm=norm)
 
         constant_bin_metric_min = np.min(__observed[idx_bin])/np.mean(__observed[idx_bin])
         constant_bin_metric_max = np.max(__observed[idx_bin])/np.mean(__observed[idx_bin])
