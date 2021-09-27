@@ -548,7 +548,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def cost_function_normalized_variance_derivative(variance_data, weight_area=False, direct_integration=True):
+def cost_function_normalized_variance_derivative(variance_data, weight_area=False, norm='average', direct_integration=True):
     """
     Defines a cost function for manifold optimization algorithms based on the average area under
     the normalized variance derivatives, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
@@ -576,18 +576,30 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
     The cost, :math:`E`, can then be computed from all :math:`A_i` in two ways,
     where :math:`n_{dep}` is the number of dependent variables stored in the ``variance_data`` object:
 
-    - If ``weight_area=False``:
+    - If ``weight_area=False`` and ``norm='arithmetic'``:
 
     .. math::
 
         E = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i
 
-    - If ``weight_area=True``, each area is additionally weighted by the location \
-    of the rightmost peak, :math:`\\sigma_{peak, i}`, in :math:`\\hat{\\mathcal{D}}_i(\\sigma)``:
+    - If ``weight_area=False`` and ``norm='Linf'``:
+
+    .. math::
+
+        E = \\text{max} (A_i)
+
+    - If ``weight_area=True``, each area is additionally weighted by the inverse location \
+    of the rightmost peak, :math:`\\sigma_{peak, i}`, in :math:`\\hat{\\mathcal{D}}_i(\\sigma)``. For ``norm='arithmetic'``:
 
     .. math::
 
         E = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} \\frac{1}{\\sigma_{peak, i}} A_i
+
+    - If ``weight_area=True`` and ``norm='Linf'``:
+
+    .. math::
+
+        E = \\text{max} \\Big( \\frac{1}{\\sigma_{peak, i}} A_i \\Big)
 
     **Example:**
 
@@ -618,12 +630,15 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
         # Compute the cost for the current manifold:
         cost = cost_function_normalized_variance_derivative(variance_data,
                                                             weight_area=False,
+                                                            norm='Linf',
                                                             direct_integration=True)
 
     :param variance_data:
         an object of ``VarianceData`` class.
     :param weight_area: (optional)
         ``bool`` specifying whether each computed area should be weighted by the rightmost peak location, :math:`\\sigma_{peak, i}` for the :math:`i^{th}` dependent variable.
+    :param norm: (optional)
+        ``str`` specifying the norm to apply for all areas :math:`A_i`. Set ``norm='average'`` to use the arithmetic average or ``norm='Linf'`` to use the :math:`L_{\\infty}` norm.
     :param direct_integration: (optional)
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed by direct integration of the :math:`\\hat{\\mathcal{D}}(\\sigma)` curve.
 
@@ -659,7 +674,10 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
             (indices_to_the_left_of_peak, ) = np.where(sigma<=peak_location)
             areas.append(weight * np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak])))
 
-        cost = np.sum(areas) / len(areas)
+        if norm == 'average':
+            cost = np.sum(areas) / len(areas)
+        elif norm == 'Linf':
+            cost = np.max(areas)
 
     # Computed the area from the normalized variance: --------------------------
     else:
@@ -693,7 +711,10 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
             areas.append(weight * area)
 
-        cost = np.sum(areas) / len(areas)
+        if norm == 'average':
+            cost = np.sum(areas) / len(areas)
+        elif norm == 'Linf':
+            cost = np.max(areas)
 
     return cost
 
