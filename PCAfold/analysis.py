@@ -646,21 +646,28 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
         - **cost** - ``float`` specifying the cost, :math:`E`.
     """
 
+    __norms = ['average', 'Linf', 'cumulative']
+
     if not isinstance(weight_area, bool):
         raise ValueError("Parameter `weight_area` has to be of type `bool`.")
 
+    if not isinstance(norm, str):
+        raise ValueError("Parameter `norm` has to be of type `str`.")
+
+    if norm not in __norms:
+        raise ValueError("Parameter `norm` has to be one of the following: 'average', 'Linf' or 'cumulative'.")
+
     if not isinstance(direct_integration, bool):
         raise ValueError("Parameter `direct_integration` has to be of type `bool`.")
+
+    areas = []
+    weight = 1.
+    n_variables = 0
 
     # Compute the area by direct integration: ----------------------------------
     if direct_integration:
 
         derivative, sigma, _ = normalized_variance_derivative(variance_data)
-
-        areas = []
-        weight = 1.
-
-        n_variables = 0
 
         for variable in variance_data.variable_names:
             n_variables += 1
@@ -674,22 +681,12 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
             (indices_to_the_left_of_peak, ) = np.where(sigma<=peak_location)
             areas.append(weight * np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak])))
 
-        if norm == 'average':
-            cost = np.sum(areas) / len(areas)
-        elif norm == 'Linf':
-            cost = np.max(areas)
-
     # Computed the area from the normalized variance: --------------------------
     else:
 
         derivative, sigma, max_derivatives = normalized_variance_derivative(variance_data)
         normalized_variance_limit_dict = variance_data.normalized_variance_limit
         normalized_variance = variance_data.normalized_variance
-
-        areas = []
-        weight = 1.
-
-        n_variables = 0
 
         for variable in variance_data.variable_names:
             n_variables += 1
@@ -711,10 +708,12 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
             areas.append(weight * area)
 
-        if norm == 'average':
-            cost = np.sum(areas) / len(areas)
-        elif norm == 'Linf':
-            cost = np.max(areas)
+    if norm == 'average':
+        cost = np.sum(areas) / len(areas)
+    elif norm == 'Linf':
+        cost = np.max(areas)
+    elif norm == 'cumulative':
+        cost = np.sum(areas)
 
     return cost
 
@@ -1319,7 +1318,7 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-    def print_metrics(self, table_format=['raw'], float_format='.4f', comparison=None):
+    def print_metrics(self, table_format=['raw'], float_format='.4f', metrics=None, comparison=None):
         """
         Prints all regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
@@ -1470,11 +1469,29 @@ class RegressionAssessment:
         :param float_format: (optional)
             ``str`` specifying the display format for the numerical entries inside the
             table. By default it is set to ``'.4f'``.
+        :param metrics: (optional)
+            ``list`` of ``str`` specifying which metrics should be printed. Strings can only be ``'R2'``, ``'MAE'``, ``'MSE'``, ``'RMSE'``, ``'NRMSE'``, ``'GDE'``.
+            If metrics is set to ``None``, all available metrics will be printed.
         :param comparison: (optional)
             object of ``RegressionAssessment`` class specifying the metrics that should be compared with the current regression metrics.
         """
 
         __table_formats = ['raw', 'tex', 'pandas']
+        __metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
+        __metrics_dict = {'R2': self.__coefficient_of_determination_matrix,
+                          'MAE': self.__mean_absolute_error_matrix,
+                          'MSE': self.__mean_squared_error_matrix,
+                          'RMSE': self.__root_mean_squared_error_matrix,
+                          'NRMSE': self.__normalized_root_mean_squared_error_matrix,
+                          'GDE': self.__good_direction_estimate_matrix}
+
+        if comparison is not None:
+            __comparison_metrics_dict = {'R2': comparison.coefficient_of_determination,
+                                         'MAE': comparison.mean_absolute_error,
+                                         'MSE': comparison.mean_squared_error,
+                                         'RMSE': comparison.root_mean_squared_error,
+                                         'NRMSE': comparison.normalized_root_mean_squared_error,
+                                         'GDE': comparison.good_direction_estimate * np.ones_like(comparison.coefficient_of_determination)}
 
         if not isinstance(table_format, list):
             raise ValueError("Parameter `table_format` has to be of type `list`.")
@@ -1486,8 +1503,15 @@ class RegressionAssessment:
         if not isinstance(float_format, str):
             raise ValueError("Parameter `float_format` has to be of type `str`.")
 
-        metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
-        metrics_names_tex = ['$R^2$', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
+        if metrics is not None:
+            if not isinstance(metrics, list):
+                raise ValueError("Parameter `metrics` has to be of type `list`.")
+
+            for item in metrics:
+                if item not in __metrics_names:
+                    raise ValueError("Parameter `metrics` can only be: 'R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE'.")
+        else:
+            metrics = __metrics_names
 
         if comparison is None:
 
@@ -1498,29 +1522,24 @@ class RegressionAssessment:
                     for i in range(0,self.__n_variables):
 
                         print('-'*25 + '\n' + self.__variable_names[i])
-                        metrics = [self.__coefficient_of_determination_matrix[0,i],
-                                   self.__mean_absolute_error_matrix[0,i],
-                                   self.__mean_squared_error_matrix[0,i],
-                                   self.__root_mean_squared_error_matrix[0,i],
-                                   self.__normalized_root_mean_squared_error_matrix[0,i],
-                                   self.__good_direction_estimate_matrix[0,i]]
 
-                        for j in range(0,len(metrics_names)):
+                        metrics_to_print = []
+                        for metric in metrics:
+                            metrics_to_print.append(__metrics_dict[metric][0,i])
 
-                            print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j])
+                        for j in range(0,len(metrics)):
+                            print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j])
 
                 if item=='tex':
 
                     import pandas as pd
 
-                    metrics = np.vstack((self.__coefficient_of_determination_matrix,
-                                         self.__mean_absolute_error_matrix,
-                                         self.__mean_squared_error_matrix,
-                                         self.__root_mean_squared_error_matrix,
-                                         self.__normalized_root_mean_squared_error_matrix,
-                                         self.__good_direction_estimate_matrix))
-                    metrics_table = pd.DataFrame(metrics, columns=self.__variable_names, index=metrics_names_tex)
+                    metrics_to_print = np.zeros_like(self.__coefficient_of_determination_matrix)
+                    for metric in metrics:
+                        metrics_to_print = np.vstack((metrics_to_print, __metrics_dict[metric]))
+                    metrics_to_print = metrics_to_print[1::,:]
 
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=self.__variable_names, index=metrics)
                     generate_tex_table(metrics_table, float_format=float_format)
 
                 if item=='pandas':
@@ -1529,13 +1548,12 @@ class RegressionAssessment:
                     from IPython.display import display
                     pandas_format = '{:,' + float_format + '}'
 
-                    metrics = np.hstack((self.__coefficient_of_determination_matrix.T,
-                                         self.__mean_absolute_error_matrix.T,
-                                         self.__mean_squared_error_matrix.T,
-                                         self.__root_mean_squared_error_matrix.T,
-                                         self.__normalized_root_mean_squared_error_matrix.T,
-                                         self.__good_direction_estimate_matrix.T))
-                    metrics_table = pd.DataFrame(metrics, columns=metrics_names_tex, index=self.__variable_names)
+                    metrics_to_print = np.zeros_like(self.__coefficient_of_determination_matrix.T)
+                    for metric in metrics:
+                        metrics_to_print = np.hstack((metrics_to_print, __metrics_dict[metric].T))
+                    metrics_to_print = metrics_to_print[:,1::]
+
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=metrics, index=self.__variable_names)
                     formatted_table = metrics_table.style.format(pandas_format)
                     display(formatted_table)
 
@@ -1549,35 +1567,28 @@ class RegressionAssessment:
 
                         print('-'*25 + '\n' + self.__variable_names[i])
 
-                        for j in range(0,len(metrics_names)):
+                        metrics_to_print = []
+                        comparison_metrics_to_print = []
+                        for metric in metrics:
+                            metrics_to_print.append(__metrics_dict[metric][0,i])
+                            comparison_metrics_to_print.append(__comparison_metrics_dict[metric][0,i])
 
-                            metrics = [self.__coefficient_of_determination_matrix[0,i],
-                                       self.__mean_absolute_error_matrix[0,i],
-                                       self.__mean_squared_error_matrix[0,i],
-                                       self.__root_mean_squared_error_matrix[0,i],
-                                       self.__normalized_root_mean_squared_error_matrix[0,i],
-                                       self.__good_direction_estimate_matrix[0,i]]
-                            comparison_metrics = [comparison.coefficient_of_determination[0,i],
-                                                  comparison.mean_absolute_error[0,i],
-                                                  comparison.mean_squared_error[0,i],
-                                                  comparison.root_mean_squared_error[0,i],
-                                                  comparison.normalized_root_mean_squared_error[0,i],
-                                                  comparison.good_direction_estimate]
+                        for j, metric in enumerate(metrics):
 
-                            if j==0 or j==5:
-                                if metrics[j] > comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tBETTER', 'green'))
-                                elif metrics[j] < comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tWORSE', 'red'))
-                                elif metrics[j] == comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + '\tSAME')
+                            if metric == 'R2' or metric == 'GDE':
+                                if metrics_to_print[j] > comparison_metrics_to_print[j]:
+                                    print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j] + colored('\tBETTER', 'green'))
+                                elif metrics_to_print[j] < comparison_metrics_to_print[j]:
+                                    print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j] + colored('\tWORSE', 'red'))
+                                elif metrics_to_print[j] == comparison_metrics_to_print[j]:
+                                    print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j] + '\tSAME')
                             else:
-                                if metrics[j] > comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tWORSE', 'red'))
-                                elif metrics[j] < comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + colored('\tBETTER', 'green'))
-                                elif metrics[j] == comparison_metrics[j]:
-                                    print(metrics_names[j] + ':\t' + ('%' + float_format) % metrics[j] + '\tSAME')
+                                if metrics_to_print[j] > comparison_metrics_to_print[j]:
+                                    print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j] + colored('\tWORSE', 'red'))
+                                elif metrics_to_print[j] < comparison_metrics_to_print[j]:
+                                    print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j] + colored('\tBETTER', 'green'))
+                                elif metrics_to_print[j] == comparison_metrics_to_print[j]:
+                                    print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j] + '\tSAME')
 
                 if item=='pandas':
 
@@ -1585,18 +1596,13 @@ class RegressionAssessment:
                     from IPython.display import display
                     pandas_format = '{:,' + float_format + '}'
 
-                    metrics = np.hstack((self.__coefficient_of_determination_matrix.T,
-                                         self.__mean_absolute_error_matrix.T,
-                                         self.__mean_squared_error_matrix.T,
-                                         self.__root_mean_squared_error_matrix.T,
-                                         self.__normalized_root_mean_squared_error_matrix.T,
-                                         self.__good_direction_estimate_matrix.T))
-                    comparison_metrics = np.hstack((comparison.coefficient_of_determination.T,
-                                                    comparison.mean_absolute_error.T,
-                                                    comparison.mean_squared_error.T,
-                                                    comparison.root_mean_squared_error.T,
-                                                    comparison.normalized_root_mean_squared_error.T,
-                                                    np.ones_like(comparison.normalized_root_mean_squared_error.T) * comparison.good_direction_estimate))
+                    metrics_to_print = np.zeros_like(self.__coefficient_of_determination_matrix.T)
+                    comparison_metrics_to_print = np.zeros_like(comparison.coefficient_of_determination.T)
+                    for metric in metrics:
+                        metrics_to_print = np.hstack((metrics_to_print, __metrics_dict[metric].T))
+                        comparison_metrics_to_print = np.hstack((comparison_metrics_to_print, __comparison_metrics_dict[metric].T))
+                    metrics_to_print = metrics_to_print[:,1::]
+                    comparison_metrics_to_print = comparison_metrics_to_print[:,1::]
 
                     def highlight_better(data, data_comparison, color='lightgreen'):
 
@@ -1605,14 +1611,32 @@ class RegressionAssessment:
                         is_better = False * data
 
                         # Lower value is better (MAE, MSE, RMSE, NRMSE):
-                        is_better['MAE'] = data['MAE'].astype(float) < data_comparison['MAE']
-                        is_better['MSE'] = data['MSE'].astype(float) < data_comparison['MSE']
-                        is_better['RMSE'] = data['RMSE'].astype(float) < data_comparison['RMSE']
-                        is_better['NRMSE'] = data['NRMSE'].astype(float) < data_comparison['NRMSE']
+                        try:
+                            is_better['MAE'] = data['MAE'].astype(float) < data_comparison['MAE']
+                        except:
+                            pass
+                        try:
+                            is_better['MSE'] = data['MSE'].astype(float) < data_comparison['MSE']
+                        except:
+                            pass
+                        try:
+                            is_better['RMSE'] = data['RMSE'].astype(float) < data_comparison['RMSE']
+                        except:
+                            pass
+                        try:
+                            is_better['NRMSE'] = data['NRMSE'].astype(float) < data_comparison['NRMSE']
+                        except:
+                            pass
 
                         # Higher value is better (R2 and GDE):
-                        is_better['$R^2$'] = data['$R^2$'].astype(float) > data_comparison['$R^2$']
-                        is_better['GDE'] = data['GDE'].astype(float) > data_comparison['GDE']
+                        try:
+                            is_better['R2'] = data['R2'].astype(float) > data_comparison['R2']
+                        except:
+                            pass
+                        try:
+                            is_better['GDE'] = data['GDE'].astype(float) > data_comparison['GDE']
+                        except:
+                            pass
 
                         formatting = [attr if v else '' for v in is_better]
 
@@ -1627,14 +1651,32 @@ class RegressionAssessment:
                         is_worse = False * data
 
                         # Higher value is worse (MAE, MSE, RMSE, NRMSE):
-                        is_worse['MAE'] = data['MAE'].astype(float) > data_comparison['MAE']
-                        is_worse['MSE'] = data['MSE'].astype(float) > data_comparison['MSE']
-                        is_worse['RMSE'] = data['RMSE'].astype(float) > data_comparison['RMSE']
-                        is_worse['NRMSE'] = data['NRMSE'].astype(float) > data_comparison['NRMSE']
+                        try:
+                            is_worse['MAE'] = data['MAE'].astype(float) > data_comparison['MAE']
+                        except:
+                            pass
+                        try:
+                            is_worse['MSE'] = data['MSE'].astype(float) > data_comparison['MSE']
+                        except:
+                            pass
+                        try:
+                            is_worse['RMSE'] = data['RMSE'].astype(float) > data_comparison['RMSE']
+                        except:
+                            pass
+                        try:
+                            is_worse['NRMSE'] = data['NRMSE'].astype(float) > data_comparison['NRMSE']
+                        except:
+                            pass
 
                         # Lower value is worse (R2 and GDE):
-                        is_worse['$R^2$'] = data['$R^2$'].astype(float) < data_comparison['$R^2$']
-                        is_worse['GDE'] = data['GDE'].astype(float) < data_comparison['GDE']
+                        try:
+                            is_worse['R2'] = data['R2'].astype(float) < data_comparison['R2']
+                        except:
+                            pass
+                        try:
+                            is_worse['GDE'] = data['GDE'].astype(float) < data_comparison['GDE']
+                        except:
+                            pass
 
                         formatting = [attr if v else '' for v in is_worse]
 
@@ -1642,8 +1684,8 @@ class RegressionAssessment:
 
                         return formatting
 
-                    metrics_table = pd.DataFrame(metrics, columns=metrics_names_tex, index=self.__variable_names)
-                    comparison_metrics_table = pd.DataFrame(comparison_metrics, columns=metrics_names_tex, index=self.__variable_names)
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=metrics, index=self.__variable_names)
+                    comparison_metrics_table = pd.DataFrame(comparison_metrics_to_print, columns=metrics, index=self.__variable_names)
 
                     formatted_table = metrics_table.style.apply(highlight_better, data_comparison=comparison_metrics_table, axis=None)\
                                                          .apply(highlight_worse, data_comparison=comparison_metrics_table, axis=None)\
