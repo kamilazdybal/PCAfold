@@ -1327,7 +1327,7 @@ class RegressionAssessment:
 
     def print_metrics(self, table_format=['raw'], float_format='.4f', metrics=None, comparison=None):
         """
-        Prints all regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
+        Prints regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
         **Example:**
 
@@ -1349,7 +1349,9 @@ class RegressionAssessment:
             regression_metrics = RegressionAssessment(X, X_rec)
 
             # Print regression metrics:
-            regression_metrics.print_metrics(table_format=['raw', 'tex', 'pandas'], float_format='.4f')
+            regression_metrics.print_metrics(table_format=['raw', 'tex', 'pandas'],
+                                             float_format='.4f',
+                                             metrics=['R2', 'NRMSE', 'GDE'])
 
         .. note::
 
@@ -1359,28 +1361,19 @@ class RegressionAssessment:
 
                 -------------------------
                 X1
-                R2:	0.8440
-                MAE:	0.0863
-                MSE:	0.0113
-                RMSE:	0.1061
-                NRMSE:	0.3949
-                GDE:	75.0000
+                R2:	0.9900
+                NRMSE:	0.0999
+                GDE:	70.0000
                 -------------------------
                 X2
-                R2:	0.6577
-                MAE:	0.1341
-                MSE:	0.0271
-                RMSE:	0.1648
-                NRMSE:	0.5851
-                GDE:	75.0000
+                R2:	0.6126
+                NRMSE:	0.6224
+                GDE:	70.0000
                 -------------------------
                 X3
-                R2:	0.6928
-                MAE:	0.1279
-                MSE:	0.0247
-                RMSE:	0.1572
-                NRMSE:	0.5542
-                GDE:	75.0000
+                R2:	0.6368
+                NRMSE:	0.6026
+                GDE:	70.0000
 
             Adding ``'tex'`` to the ``table_format`` list will result in printing:
 
@@ -1390,12 +1383,9 @@ class RegressionAssessment:
                 \\begin{center}
                 \\begin{tabular}{llll} \\toprule
                  & \\textit{X1} & \\textit{X2} & \\textit{X3} \\\\ \\midrule
-                $R^2$ & 0.8440 & 0.6577 & 0.6928 \\\\
-                MAE & 0.0863 & 0.1341 & 0.1279 \\\\
-                MSE & 0.0113 & 0.0271 & 0.0247 \\\\
-                RMSE & 0.1061 & 0.1648 & 0.1572 \\\\
-                NRMSE & 0.3949 & 0.5851 & 0.5542 \\\\
-                GDE & 75.0000 & 75.0000 & 75.0000 \\\\
+                R2 & 0.9900 & 0.6126 & 0.6368 \\\\
+                NRMSE & 0.0999 & 0.6224 & 0.6026 \\\\
+                GDE & 70.0000 & 70.0000 & 70.0000 \\\\
                 \\end{tabular}
                 \\caption{}\\label{}
                 \\end{center}
@@ -1431,7 +1421,10 @@ class RegressionAssessment:
             regression_metrics_Y = RegressionAssessment(Y, Y_rec)
 
             # Print regression metrics:
-            regression_metrics_X.print_metrics(table_format=['raw', 'pandas'], float_format='.4f', comparison=regression_metrics_Y)
+            regression_metrics_X.print_metrics(table_format=['raw', 'pandas'],
+                                               float_format='.4f',
+                                               metrics=['R2', 'NRMSE', 'GDE'],
+                                               comparison=regression_metrics_Y)
 
         .. note::
 
@@ -1441,28 +1434,19 @@ class RegressionAssessment:
 
                 -------------------------
                 X1
-                R2:	0.8286	BETTER
-                MAE:	0.0973	BETTER
-                MSE:	0.0147	BETTER
-                RMSE:	0.1213	BETTER
-                NRMSE:	0.4140	BETTER
-                GDE:	66.0000	WORSE
+                R2:	0.9133	BETTER
+                NRMSE:	0.2944	BETTER
+                GDE:	67.0000	WORSE
                 -------------------------
                 X2
-                R2:	0.7442	WORSE
-                MAE:	0.1176	WORSE
-                MSE:	0.0215	WORSE
-                RMSE:	0.1465	WORSE
-                NRMSE:	0.5057	WORSE
-                GDE:	66.0000	WORSE
+                R2:	0.5969	WORSE
+                NRMSE:	0.6349	WORSE
+                GDE:	67.0000	WORSE
                 -------------------------
                 X3
-                R2:	0.5860	BETTER
-                MAE:	0.1675	WORSE
-                MSE:	0.0436	WORSE
-                RMSE:	0.2088	WORSE
-                NRMSE:	0.6434	BETTER
-                GDE:	66.0000	WORSE
+                R2:	0.6175	WORSE
+                NRMSE:	0.6185	WORSE
+                GDE:	67.0000	WORSE
 
             Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
@@ -1703,7 +1687,9 @@ class RegressionAssessment:
 
     def print_stratified_metrics(self, table_format=['raw'], float_format='.4f', metrics=None, comparison=None):
         """
-        Prints all stratified regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
+        Prints stratified regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
+        In each cluster, in addition to the regression metrics, number of observations is printed,
+        along with the minimum and maximum values of the observed variable in that cluster.
 
         **Example:**
 
@@ -1740,7 +1726,7 @@ class RegressionAssessment:
 
                 -------------------------
                 k1
-                N. samples:	31
+                Observations:	31
                 Min:	0.0120
                 Max:	0.3311
                 R2:	-3.3271
@@ -1748,7 +1734,7 @@ class RegressionAssessment:
                 NRMSE:	2.0802
                 -------------------------
                 k2
-                N. samples:	38
+                Observations:	38
                 Min:	0.3425
                 Max:	0.6665
                 R2:	-1.4608
@@ -1756,7 +1742,7 @@ class RegressionAssessment:
                 NRMSE:	1.5687
                 -------------------------
                 k3
-                N. samples:	31
+                Observations:	31
                 Min:	0.6853
                 Max:	0.9959
                 R2:	-3.7319
@@ -1771,7 +1757,7 @@ class RegressionAssessment:
                 \\begin{center}
                 \\begin{tabular}{llll} \\toprule
                  & \\textit{k1} & \\textit{k2} & \\textit{k3} \\\\ \\midrule
-                N. samples & 31.0000 & 38.0000 & 31.0000 \\\\
+                Observations & 31.0000 & 38.0000 & 31.0000 \\\\
                 Min & 0.0120 & 0.3425 & 0.6853 \\\\
                 Max & 0.3311 & 0.6665 & 0.9959 \\\\
                 R2 & -3.3271 & -1.4608 & -3.7319 \\\\
@@ -1785,7 +1771,7 @@ class RegressionAssessment:
             Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
             .. image:: ../images/generate-pandas-table-stratified.png
-                :width: 400
+                :width: 500
                 :align: center
 
         Additionally, the current object of ``RegressionAssessment`` class can be compared with another object:
@@ -1825,7 +1811,7 @@ class RegressionAssessment:
 
                 -------------------------
                 k1
-                N. samples:	39
+                Observations:	39
                 Min:	0.0013
                 Max:	0.3097
                 R2:	0.9236	BETTER
@@ -1833,7 +1819,7 @@ class RegressionAssessment:
                 NRMSE:	0.2764	BETTER
                 -------------------------
                 k2
-                N. samples:	29
+                Observations:	29
                 Min:	0.3519
                 Max:	0.6630
                 R2:	0.9380	BETTER
@@ -1841,7 +1827,7 @@ class RegressionAssessment:
                 NRMSE:	0.2491	BETTER
                 -------------------------
                 k3
-                N. samples:	32
+                Observations:	32
                 Min:	0.6663
                 Max:	0.9943
                 R2:	0.9343	BETTER
@@ -1851,7 +1837,7 @@ class RegressionAssessment:
             Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
             .. image:: ../images/generate-pandas-table-comparison-stratified.png
-                :width: 300
+                :width: 500
                 :align: center
 
         :param table_format: (optional)
@@ -1916,7 +1902,7 @@ class RegressionAssessment:
                         for metric in metrics:
                             metrics_to_print.append(__metrics_dict[metric][i])
 
-                        print('N. samples' + ':\t' + str(metrics_to_print[0]))
+                        print('Observations' + ':\t' + str(metrics_to_print[0]))
                         print('Min' + ':\t' + ('%' + float_format) % metrics_to_print[1])
                         print('Max' + ':\t' + ('%' + float_format) % metrics_to_print[2])
                         for j in range(0,len(metrics)):
@@ -1931,7 +1917,7 @@ class RegressionAssessment:
                     for metric in metrics:
                         metrics_to_print = np.vstack((metrics_to_print, __metrics_dict[metric]))
 
-                    metrics_table = pd.DataFrame(metrics_to_print, columns=__clusters_names, index=['N. samples', 'Min', 'Max'] +  metrics)
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=__clusters_names, index=['Observations', 'Min', 'Max'] +  metrics)
                     generate_tex_table(metrics_table, float_format=float_format)
 
                 if item=='pandas':
@@ -1945,9 +1931,9 @@ class RegressionAssessment:
                     for metric in metrics:
                         metrics_to_print = np.hstack((metrics_to_print, np.array(__metrics_dict[metric])[:,None]))
 
-                    metrics_table = pd.DataFrame(metrics_to_print, columns=['N. samples', 'Min', 'Max'] + metrics, index=__clusters_names)
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=['Observations', 'Min', 'Max'] + metrics, index=__clusters_names)
 
-                    metrics_table['N. samples'] = metrics_table['N. samples'].astype(int)
+                    metrics_table['Observations'] = metrics_table['Observations'].astype(int)
                     metrics_table['Min'] = metrics_table['Min'].map(pandas_format.format)
                     metrics_table['Max'] = metrics_table['Max'].map(pandas_format.format)
                     for metric in metrics:
@@ -1971,7 +1957,7 @@ class RegressionAssessment:
                             metrics_to_print.append(__metrics_dict[metric][i])
                             comparison_metrics_to_print.append(__comparison_metrics_dict[metric][i])
 
-                        print('N. samples' + ':\t' + str(metrics_to_print[0]))
+                        print('Observations' + ':\t' + str(metrics_to_print[0]))
                         print('Min' + ':\t' + ('%' + float_format) % metrics_to_print[1])
                         print('Max' + ':\t' + ('%' + float_format) % metrics_to_print[2])
                         for j, metric in enumerate(metrics):
@@ -2075,10 +2061,10 @@ class RegressionAssessment:
 
                         return formatting
 
-                    metrics_table = pd.DataFrame(metrics_to_print, columns=['N. samples', 'Min', 'Max'] + metrics, index=__clusters_names)
-                    comparison_metrics_table = pd.DataFrame(comparison_metrics_to_print, columns=['N. samples', 'Min', 'Max'] + metrics, index=__clusters_names)
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=['Observations', 'Min', 'Max'] + metrics, index=__clusters_names)
+                    comparison_metrics_table = pd.DataFrame(comparison_metrics_to_print, columns=['Observations', 'Min', 'Max'] + metrics, index=__clusters_names)
 
-                    metrics_table['N. samples'] = metrics_table['N. samples'].astype(int)
+                    metrics_table['Observations'] = metrics_table['Observations'].astype(int)
                     metrics_table['Min'] = metrics_table['Min'].map(pandas_format.format)
                     metrics_table['Max'] = metrics_table['Max'].map(pandas_format.format)
                     for metric in metrics:
