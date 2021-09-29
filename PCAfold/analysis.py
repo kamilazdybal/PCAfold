@@ -1219,6 +1219,13 @@ class RegressionAssessment:
             self.__n_clusters = len(np.unique(idx))
             self.__cluster_populations = preprocess.get_populations(idx)
 
+            self.__cluster_min = []
+            self.__cluster_max = []
+            for i in range(0,self.__n_clusters):
+                (cluster_indices, ) = np.where(idx==i)
+                self.__cluster_min.append(np.min(observed[cluster_indices,:]))
+                self.__cluster_max.append(np.max(observed[cluster_indices,:]))
+
         if not isinstance(use_global_mean, bool):
             raise ValueError("Parameter `use_global_mean` has to be a boolean.")
 
@@ -1721,7 +1728,9 @@ class RegressionAssessment:
             stratified_regression_metrics = RegressionAssessment(X[:,0], X_rec[:,0], idx=idx)
 
             # Print regression metrics:
-            stratified_regression_metrics.print_stratified_metrics(table_format=['raw', 'pandas'], float_format='.4f')
+            stratified_regression_metrics.print_stratified_metrics(table_format=['raw', 'tex', 'pandas'],
+                                                                   float_format='.4f',
+                                                                   metrics=['R2', 'MAE', 'NRMSE'])
 
         .. note::
 
@@ -1732,27 +1741,27 @@ class RegressionAssessment:
                 -------------------------
                 k1
                 N. samples:	31
-                R2:	-3.5915
-                MAE:	0.1550
-                MSE:	0.0340
-                RMSE:	0.1843
-                NRMSE:	2.1428
+                Min:	0.0120
+                Max:	0.3311
+                R2:	-3.3271
+                MAE:	0.1774
+                NRMSE:	2.0802
                 -------------------------
                 k2
-                N. samples:	30
-                R2:	-1.8599
-                MAE:	0.1207
-                MSE:	0.0217
-                RMSE:	0.1473
-                NRMSE:	1.6911
+                N. samples:	38
+                Min:	0.3425
+                Max:	0.6665
+                R2:	-1.4608
+                MAE:	0.1367
+                NRMSE:	1.5687
                 -------------------------
                 k3
-                N. samples:	39
-                R2:	-2.8406
-                MAE:	0.1577
-                MSE:	0.0359
-                RMSE:	0.1894
-                NRMSE:	1.9598
+                N. samples:	31
+                Min:	0.6853
+                Max:	0.9959
+                R2:	-3.7319
+                MAE:	0.1743
+                NRMSE:	2.1753
 
             Adding ``'tex'`` to the ``table_format`` list will result in printing:
 
@@ -1762,12 +1771,12 @@ class RegressionAssessment:
                 \\begin{center}
                 \\begin{tabular}{llll} \\toprule
                  & \\textit{k1} & \\textit{k2} & \\textit{k3} \\\\ \\midrule
-                N. samples & 31.0000 & 30.0000 & 39.0000 \\\\
-                $R^2$ & -3.5915 & -1.8599 & -2.8406 \\\\
-                MAE & 0.1550 & 0.1207 & 0.1577 \\\\
-                MSE & 0.0340 & 0.0217 & 0.0359 \\\\
-                RMSE & 0.1843 & 0.1473 & 0.1894 \\\\
-                NRMSE & 2.1428 & 1.6911 & 1.9598 \\\\
+                N. samples & 31.0000 & 38.0000 & 31.0000 \\\\
+                Min & 0.0120 & 0.3425 & 0.6853 \\\\
+                Max & 0.3311 & 0.6665 & 0.9959 \\\\
+                R2 & -3.3271 & -1.4608 & -3.7319 \\\\
+                MAE & 0.1774 & 0.1367 & 0.1743 \\\\
+                NRMSE & 2.0802 & 1.5687 & 2.1753 \\\\
                 \\end{tabular}
                 \\caption{}\\label{}
                 \\end{center}
@@ -1776,7 +1785,7 @@ class RegressionAssessment:
             Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
             .. image:: ../images/generate-pandas-table-stratified.png
-                :width: 300
+                :width: 400
                 :align: center
 
         Additionally, the current object of ``RegressionAssessment`` class can be compared with another object:
@@ -1803,7 +1812,10 @@ class RegressionAssessment:
             stratified_regression_metrics_1 = RegressionAssessment(X[:,1], X_rec[:,1], idx=idx)
 
             # Print regression metrics:
-            stratified_regression_metrics_0.print_stratified_metrics(table_format=['raw', 'pandas'], float_format='.4f', comparison=stratified_regression_metrics_1)
+            stratified_regression_metrics_0.print_stratified_metrics(table_format=['raw', 'pandas'],
+                                                                     float_format='.4f',
+                                                                     metrics=['R2', 'MAE', 'NRMSE'],
+                                                                     comparison=stratified_regression_metrics_1)
 
         .. note::
 
@@ -1813,28 +1825,28 @@ class RegressionAssessment:
 
                 -------------------------
                 k1
-                N. samples:	32
-                R2:	-2.2858	WORSE
-                MAE:	0.1560	BETTER
-                MSE:	0.0348	BETTER
-                RMSE:	0.1866	BETTER
-                NRMSE:	1.8127	WORSE
+                N. samples:	39
+                Min:	0.0013
+                Max:	0.3097
+                R2:	0.9236	BETTER
+                MAE:	0.0185	BETTER
+                NRMSE:	0.2764	BETTER
                 -------------------------
                 k2
-                N. samples:	32
-                R2:	-1.2248	WORSE
-                MAE:	0.1241	BETTER
-                MSE:	0.0210	BETTER
-                RMSE:	0.1448	BETTER
-                NRMSE:	1.4916	WORSE
+                N. samples:	29
+                Min:	0.3519
+                Max:	0.6630
+                R2:	0.9380	BETTER
+                MAE:	0.0179	BETTER
+                NRMSE:	0.2491	BETTER
                 -------------------------
                 k3
-                N. samples:	36
-                R2:	-1.7086	WORSE
-                MAE:	0.1208	BETTER
-                MSE:	0.0251	BETTER
-                RMSE:	0.1586	BETTER
-                NRMSE:	1.6458	WORSE
+                N. samples:	32
+                Min:	0.6663
+                Max:	0.9943
+                R2:	0.9343	BETTER
+                MAE:	0.0194	BETTER
+                NRMSE:	0.2563	BETTER
 
             Adding ``'pandas'`` to the ``table_format`` list (works well in Jupyter notebooks) will result in printing:
 
@@ -1900,26 +1912,26 @@ class RegressionAssessment:
 
                         print('-'*25 + '\n' + __clusters_names[i])
 
-                        metrics_to_print = [self.__cluster_populations[i]]
+                        metrics_to_print = [self.__cluster_populations[i], self.__cluster_min[i], self.__cluster_max[i]]
                         for metric in metrics:
                             metrics_to_print.append(__metrics_dict[metric][i])
 
                         print('N. samples' + ':\t' + str(metrics_to_print[0]))
+                        print('Min' + ':\t' + ('%' + float_format) % metrics_to_print[1])
+                        print('Max' + ':\t' + ('%' + float_format) % metrics_to_print[2])
                         for j in range(0,len(metrics)):
-                            print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j+1])
+                            print(metrics[j] + ':\t' + ('%' + float_format) % metrics_to_print[j+3])
 
                 if item=='tex':
 
                     import pandas as pd
 
-                    metrics_to_print = self.__cluster_populations
+                    metrics_to_print = np.vstack((self.__cluster_populations, self.__cluster_min, self.__cluster_max))
 
                     for metric in metrics:
                         metrics_to_print = np.vstack((metrics_to_print, __metrics_dict[metric]))
 
-                    print(metrics_to_print.shape)
-
-                    metrics_table = pd.DataFrame(metrics_to_print, columns=__clusters_names, index=['N. samples'] + metrics)
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=__clusters_names, index=['N. samples', 'Min', 'Max'] +  metrics)
                     generate_tex_table(metrics_table, float_format=float_format)
 
                 if item=='pandas':
@@ -1928,14 +1940,16 @@ class RegressionAssessment:
                     from IPython.display import display
                     pandas_format = '{:,' + float_format + '}'
 
-                    metrics_to_print = np.array(self.__cluster_populations)[:,None]
+                    metrics_to_print = np.hstack((np.array(self.__cluster_populations)[:,None], np.array(self.__cluster_min)[:,None], np.array(self.__cluster_max)[:,None]))
 
                     for metric in metrics:
                         metrics_to_print = np.hstack((metrics_to_print, np.array(__metrics_dict[metric])[:,None]))
 
-                    metrics_table = pd.DataFrame(metrics_to_print, columns=['N. samples'] + metrics, index=__clusters_names)
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=['N. samples', 'Min', 'Max'] + metrics, index=__clusters_names)
 
                     metrics_table['N. samples'] = metrics_table['N. samples'].astype(int)
+                    metrics_table['Min'] = metrics_table['Min'].map(pandas_format.format)
+                    metrics_table['Max'] = metrics_table['Max'].map(pandas_format.format)
                     for metric in metrics:
                         metrics_table[metric] = metrics_table[metric].map(pandas_format.format)
 
@@ -1951,29 +1965,31 @@ class RegressionAssessment:
 
                         print('-'*25 + '\n' + __clusters_names[i])
 
-                        metrics_to_print = [self.__cluster_populations[i]]
-                        comparison_metrics_to_print = [self.__cluster_populations[i]]
+                        metrics_to_print = [self.__cluster_populations[i], self.__cluster_min[i], self.__cluster_max[i]]
+                        comparison_metrics_to_print = [self.__cluster_populations[i], self.__cluster_min[i], self.__cluster_max[i]]
                         for metric in metrics:
                             metrics_to_print.append(__metrics_dict[metric][i])
                             comparison_metrics_to_print.append(__comparison_metrics_dict[metric][i])
 
                         print('N. samples' + ':\t' + str(metrics_to_print[0]))
+                        print('Min' + ':\t' + ('%' + float_format) % metrics_to_print[1])
+                        print('Max' + ':\t' + ('%' + float_format) % metrics_to_print[2])
                         for j, metric in enumerate(metrics):
 
                             if metric=='R2':
-                                if metrics_to_print[j+1] > comparison_metrics_to_print[j+1]:
-                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+1] + colored('\tBETTER', 'green'))
-                                elif metrics_to_print[j+1] < comparison_metrics_to_print[j+1]:
-                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+1] + colored('\tWORSE', 'red'))
-                                elif metrics_to_print[j+1] == comparison_metrics_to_print[j+1]:
-                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+1] + '\tSAME')
+                                if metrics_to_print[j+3] > comparison_metrics_to_print[j+3]:
+                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+3] + colored('\tBETTER', 'green'))
+                                elif metrics_to_print[j+3] < comparison_metrics_to_print[j+3]:
+                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+3] + colored('\tWORSE', 'red'))
+                                elif metrics_to_print[j+3] == comparison_metrics_to_print[j+3]:
+                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+3] + '\tSAME')
                             else:
-                                if metrics_to_print[j+1] > comparison_metrics_to_print[j+1]:
-                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+1] + colored('\tWORSE', 'red'))
-                                elif metrics_to_print[j+1] < comparison_metrics_to_print[j+1]:
-                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+1] + colored('\tBETTER', 'green'))
-                                elif metrics_to_print[j+1] == comparison_metrics_to_print[j+1]:
-                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+1] + '\tSAME')
+                                if metrics_to_print[j+3] > comparison_metrics_to_print[j+3]:
+                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+3] + colored('\tWORSE', 'red'))
+                                elif metrics_to_print[j+3] < comparison_metrics_to_print[j+3]:
+                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+3] + colored('\tBETTER', 'green'))
+                                elif metrics_to_print[j+3] == comparison_metrics_to_print[j+3]:
+                                    print(metric + ':\t' + ('%' + float_format) % metrics_to_print[j+3] + '\tSAME')
 
                 if item=='pandas':
 
@@ -1981,8 +1997,8 @@ class RegressionAssessment:
                     from IPython.display import display
                     pandas_format = '{:,' + float_format + '}'
 
-                    metrics_to_print = np.array(self.__cluster_populations)[:,None]
-                    comparison_metrics_to_print = np.array(self.__cluster_populations)[:,None]
+                    metrics_to_print = np.hstack((np.array(self.__cluster_populations)[:,None], np.array(self.__cluster_min)[:,None], np.array(self.__cluster_max)[:,None]))
+                    comparison_metrics_to_print = np.hstack((np.array(self.__cluster_populations)[:,None], np.array(self.__cluster_min)[:,None], np.array(self.__cluster_max)[:,None]))
                     for metric in metrics:
                         metrics_to_print = np.hstack((metrics_to_print, np.array(__metrics_dict[metric])[:,None]))
                         comparison_metrics_to_print = np.hstack((comparison_metrics_to_print, np.array(__comparison_metrics_dict[metric])[:,None]))
@@ -2059,10 +2075,12 @@ class RegressionAssessment:
 
                         return formatting
 
-                    metrics_table = pd.DataFrame(metrics_to_print, columns=['N. samples'] + metrics, index=__clusters_names)
-                    comparison_metrics_table = pd.DataFrame(comparison_metrics_to_print, columns=['N. samples'] + metrics, index=__clusters_names)
+                    metrics_table = pd.DataFrame(metrics_to_print, columns=['N. samples', 'Min', 'Max'] + metrics, index=__clusters_names)
+                    comparison_metrics_table = pd.DataFrame(comparison_metrics_to_print, columns=['N. samples', 'Min', 'Max'] + metrics, index=__clusters_names)
 
                     metrics_table['N. samples'] = metrics_table['N. samples'].astype(int)
+                    metrics_table['Min'] = metrics_table['Min'].map(pandas_format.format)
+                    metrics_table['Max'] = metrics_table['Max'].map(pandas_format.format)
                     for metric in metrics:
                         metrics_table[metric] = metrics_table[metric].map(pandas_format.format)
 
