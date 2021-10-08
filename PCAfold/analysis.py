@@ -548,58 +548,84 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def cost_function_normalized_variance_derivative(variance_data, weight_area=False, norm='average', direct_integration=True):
+def cost_function_normalized_variance_derivative(variance_data, weight=None, norm=None, integrate_to_peak=False):
     """
-    Defines a cost function for manifold optimization algorithms based on the average area under
-    the normalized variance derivatives, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
-    The area is computed in the :math:`\\log_{10}` space of bandwidths :math:`\\sigma`.
+    Defines a cost function for manifold optimization algorithms based on the areas, or weighted areas under
+    the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
 
-    Two choices for the individual area computation can be made:
+    An individual area, :math:`A_i`, for the :math:`i^{th}` dependent variable, is computed by directly integrating the function :math:`\\hat{\\mathcal{D}}_i(\\sigma)``
+    in the :math:`\\log_{10}` space of bandwidths :math:`\\sigma`. Integration is performed using the composite trapezoid rule.
 
-    - If ``direct_integration=True``, the area is computed by directly \
-    integrating the function :math:`\\hat{\\mathcal{D}}(\\sigma)``. Integration \
-    is performed using the composite trapezoid rule. An individual area \
-    for the :math:`i^{th}` dependent variable is then defined as:
+    When ``integrate_to_peak=False``, the bounds of integration go from the minimum bandwidth, :math:`\\sigma_{min, i}`,
+    to the maximum bandwidth, :math:`\\sigma_{max, i}`:
+
+    .. math::
+
+        A_i = \\int_{\\sigma_{min, i}}^{\\sigma_{max, i}} \\hat{\\mathcal{D}}_i(\\sigma) d \\log_{10} \\sigma
+
+    When ``integrate_to_peak=True``, the bounds of integration go from the minimum bandwidth, :math:`\\sigma_{min, i}`,
+    to the bandwidth for which the rightmost peak happens in :math:`\\hat{\\mathcal{D}}_i(\\sigma)``, :math:`\\sigma_{peak, i}`:
 
     .. math::
 
         A_i = \\int_{\\sigma_{min, i}}^{\\sigma_{peak, i}} \\hat{\\mathcal{D}}_i(\\sigma) d \\log_{10} \\sigma
 
-    - If ``direct_integration=False``, we use the fact that :math:`\\hat{\\mathcal{D}}(\\sigma)`` \
-    is a numerical derivative of :math:`\\mathcal{N}(\\sigma)`. An individual area \
-    for the :math:`i^{th}` dependent variable is then defined as:
+    In addition, each individual area, :math:`A_i`, can be weighted. Three weighting options are available:
+
+    - If ``weight='peak'``, :math:`A_i` is weighted by the inverse of the rightmost peak location:
 
     .. math::
 
-        A_i = \\frac{\\mathcal{N}_i(\\sigma_{peak, i}) - \\mathcal{N}_i(\\sigma_{min, i})}{\\max(\\mathcal{D}_i(\\sigma))}  + \\frac{\\lim_{\\sigma \\rightarrow 0} \\mathcal{N_i(\\sigma)}}{\\max(\\mathcal{D}_i(\\sigma))}  \\big( \\log_{10} \\sigma_{peak, i} - \\log_{10} \\sigma_{min, i} \\big)
+        A_i = \\frac{1}{\\sigma_{peak, i}} \\cdot  \\int \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
 
-    The cost, :math:`E`, can then be computed from all :math:`A_i` in two ways,
+    - If ``weight='sigma'``, :math:`A_i` is weighted continuously by the bandwidth:
+
+    .. math::
+
+        A_i = \\int \\frac{\\hat{\\mathcal{D}}_i(\\sigma)}{\\sigma} d(\\log_{10} \\sigma)
+
+    - If ``weight='log-sigma-over-peak'``, :math:`A_i` is weighted continuously by the :math:`\\log_{10}` -transformed bandwidth\
+    and takes into account information about the rightmost peak location:
+
+    .. math::
+
+        A_i = \\int \\Big(  \\big| \\log_{10} \\big( \\frac{\\sigma}{\\sigma_{peak, i}} \\big) \\big| + \\frac{1}{||\\sigma_{peak, i}||_{0-1}} \\Big) \\cdot \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
+
+    where :math:`||\\sigma_{peak, i}||_{0-1}` is the normalized rightmost peak location. The normalization is performed so that :math:`||\\sigma_{min, i}||_{0-1} = 0.0` and :math:`||\\sigma_{max, i}||_{0-1} = 1.0`.
+
+    If ``norm=None``, a list of costs for all dependent variables is returned.
+    Otherwise, the final cost, :math:`\\mathcal{L}`, can be computed from all :math:`A_i` in few ways,
     where :math:`n_{dep}` is the number of dependent variables stored in the ``variance_data`` object:
 
-    - If ``weight_area=False`` and ``norm='arithmetic'``:
+    - If ``norm='average'``:
 
     .. math::
 
-        E = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i
+        \\mathcal{L} = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i
 
-    - If ``weight_area=False`` and ``norm='Linf'``:
-
-    .. math::
-
-        E = \\text{max} (A_i)
-
-    - If ``weight_area=True``, each area is additionally weighted by the inverse location \
-    of the rightmost peak, :math:`\\sigma_{peak, i}`, in :math:`\\hat{\\mathcal{D}}_i(\\sigma)``. For ``norm='arithmetic'``:
+    - If ``norm='cumulative'``:
 
     .. math::
 
-        E = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} \\frac{1}{\\sigma_{peak, i}} A_i
+        \\mathcal{L} = \\sum_{i = 1}^{n_{dep}} A_i
 
-    - If ``weight_area=True`` and ``norm='Linf'``:
+    - If ``norm='max'``:
 
     .. math::
 
-        E = \\text{max} \\Big( \\frac{1}{\\sigma_{peak, i}} A_i \\Big)
+        \\mathcal{L} = \\text{max} (A_i)
+
+    - If ``norm='median'``:
+
+    .. math::
+
+        \\mathcal{L} = \\text{median} (A_i)
+
+    - If ``norm='min'``:
+
+    .. math::
+
+        \\mathcal{L} = \\text{min} (A_i)
 
     **Example:**
 
@@ -629,93 +655,136 @@ def cost_function_normalized_variance_derivative(variance_data, weight_area=Fals
 
         # Compute the cost for the current manifold:
         cost = cost_function_normalized_variance_derivative(variance_data,
-                                                            weight_area=False,
-                                                            norm='Linf',
-                                                            direct_integration=True)
+                                                            weight='peak',
+                                                            norm='max',
+                                                            integrate_to_peak=True)
 
     :param variance_data:
         an object of ``VarianceData`` class.
-    :param weight_area: (optional)
-        ``bool`` specifying whether each computed area should be weighted by the rightmost peak location, :math:`\\sigma_{peak, i}` for the :math:`i^{th}` dependent variable.
+    :param weight: (optional)
+        ``str`` specifying the weighting applied to each area. If ``weight=None``, the area is not weighted.
+        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}` for the :math:`i^{th}` dependent variable.
+        Set ``weight='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``weight='log-sigma-over-peak' to weight each area continuously by a log and right most peak location normalized bandwidth.
     :param norm: (optional)
-        ``str`` specifying the norm to apply for all areas :math:`A_i`. Set ``norm='average'`` to use the arithmetic average or ``norm='Linf'`` to use the :math:`L_{\\infty}` norm.
-    :param direct_integration: (optional)
-        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed by direct integration of the :math:`\\hat{\\mathcal{D}}(\\sigma)` curve.
+        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses the arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area. If ``norm=None``, a list of costs for all depedent variables is returned.
+    :param integrate_to_peak: (optional)
+        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
 
     :return:
-        - **cost** - ``float`` specifying the cost, :math:`E`.
+        - **cost** - ``float`` specifying the normalized cost, :math:`E`, or, if ``norm=None``, a list of costs for each dependent variable, :math:`E_i`.
     """
 
-    __norms = ['average', 'Linf', 'cumulative']
+    __weights = ['peak', 'sigma', 'log-sigma-over-peak']
+    __norms = ['average', 'cumulative', 'max', 'median', 'min']
 
-    if not isinstance(weight_area, bool):
-        raise ValueError("Parameter `weight_area` has to be of type `bool`.")
+    if weight is not None:
 
-    if not isinstance(norm, str):
-        raise ValueError("Parameter `norm` has to be of type `str`.")
+        if not isinstance(weight, str):
+            raise ValueError("Parameter `weight` has to be of type `str`.")
 
-    if norm not in __norms:
-        raise ValueError("Parameter `norm` has to be one of the following: 'average', 'Linf' or 'cumulative'.")
+        if weight not in __weights:
+            raise ValueError("Parameter `weight` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
 
-    if not isinstance(direct_integration, bool):
-        raise ValueError("Parameter `direct_integration` has to be of type `bool`.")
+    if norm is not None:
 
-    areas = []
-    weight = 1.
-    n_variables = 0
+        if not isinstance(norm, str):
+            raise ValueError("Parameter `norm` has to be of type `str`.")
 
-    # Compute the area by direct integration: ----------------------------------
-    if direct_integration:
+        if norm not in __norms:
+            raise ValueError("Parameter `norm` has to be one of the following: 'average', 'cumulative', 'max', 'median', 'min'.")
 
-        derivative, sigma, _ = normalized_variance_derivative(variance_data)
+    if not isinstance(integrate_to_peak, bool):
+        raise ValueError("Parameter `integrate_to_peak` has to be of type `bool`.")
 
-        for variable in variance_data.variable_names:
-            n_variables += 1
-            idx_peaks, _ = find_peaks(derivative[variable], height=0)
-            peak_locations = sigma[idx_peaks]
-            peak_location = peak_locations[-1]
+    derivative, sigma, _ = normalized_variance_derivative(variance_data)
 
-            if weight_area:
-                weight = 1. / (peak_location)
+    costs = []
 
-            (indices_to_the_left_of_peak, ) = np.where(sigma<=peak_location)
-            areas.append(weight * np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak])))
+    for variable in variance_data.variable_names:
 
-    # Computed the area from the normalized variance: --------------------------
+        idx_peaks, _ = find_peaks(derivative[variable], height=0)
+        idx_rightmost_peak = idx_peaks[-1]
+        rightmost_peak_location = sigma[idx_rightmost_peak]
+
+        (indices_to_the_left_of_peak, ) = np.where(sigma<=rightmost_peak_location)
+
+        if integrate_to_peak:
+
+            if weight is None:
+                cost = np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak]))
+                costs.append(cost)
+
+            elif weight == 'peak':
+                cost = 1. / (rightmost_peak_location) * np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak]))
+                costs.append(cost)
+
+            elif weight == 'sigma':
+                penalty_sigma = 1./sigma[indices_to_the_left_of_peak]
+                cost = np.trapz(derivative[variable][indices_to_the_left_of_peak]*penalty_sigma, np.log10(sigma[indices_to_the_left_of_peak]))
+                costs.append(cost)
+
+            elif weight == 'log-sigma-over-peak':
+                penalty_log_sigma_peak = abs(np.log10(sigma[indices_to_the_left_of_peak]/rightmost_peak_location)) + 1
+                cost = np.trapz(derivative[variable][indices_to_the_left_of_peak]*penalty_log_sigma_peak, np.log10(sigma[indices_to_the_left_of_peak]))
+                costs.append(cost)
+
+        else:
+
+            if weight is None:
+                cost = np.trapz(derivative[variable], np.log10(sigma))
+                costs.append(cost)
+
+            elif weight == 'peak':
+                cost = 1. / (rightmost_peak_location) * np.trapz(derivative[variable], np.log10(sigma))
+                costs.append(cost)
+
+            elif weight == 'sigma':
+                penalty_sigma = 1./sigma
+                cost = np.trapz(derivative[variable]*penalty_sigma, np.log10(sigma))
+                costs.append(cost)
+
+            elif weight == 'log-sigma-over-peak':
+
+                normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
+                addition = normalized_sigma[idx_rightmost_peak][0]
+                penalty_log_sigma_peak = abs(np.log10(sigma/rightmost_peak_location)) + 1./addition
+                cost = np.trapz(derivative[variable]*penalty_log_sigma_peak, np.log10(sigma))
+                costs.append(cost)
+
+    if norm is None:
+
+        return costs
+
     else:
 
-        derivative, sigma, max_derivatives = normalized_variance_derivative(variance_data)
-        normalized_variance_limit_dict = variance_data.normalized_variance_limit
-        normalized_variance = variance_data.normalized_variance
+        if norm == 'max':
 
-        for variable in variance_data.variable_names:
-            n_variables += 1
-            idx_peaks, _ = find_peaks(derivative[variable], height=0)
-            peak_locations = sigma[idx_peaks]
-            peak_location = peak_locations[-1]
+            # Take L-infinity norm over all costs:
+            normalized_cost = np.max(costs)
 
-            if weight_area:
-                weight = 1. / (peak_location)
+        elif norm == 'average':
 
-            sigma_min = np.min(sigma)
+            # Take the arithmetic average norm over all costs:
+            normalized_cost = np.mean(costs)
 
-            N_at_peak = np.interp(peak_location, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
-            N_at_min = np.interp(sigma_min, variance_data.bandwidth_values, variance_data.normalized_variance[variable])
+        elif norm == 'min':
 
-            TERM_1 = (1. / max_derivatives[variable]) * (N_at_peak - N_at_min)
-            TERM_2 = (normalized_variance_limit_dict[variable])/(max_derivatives[variable]) * (np.log10(peak_location) - np.log10(sigma_min))
-            area = TERM_1 + TERM_2
+            # Take the minimum norm over all costs:
+            normalized_cost = np.min(costs)
 
-            areas.append(weight * area)
+        elif norm == 'median':
 
-    if norm == 'average':
-        cost = np.sum(areas) / len(areas)
-    elif norm == 'Linf':
-        cost = np.max(areas)
-    elif norm == 'cumulative':
-        cost = np.sum(areas)
+            # Take the median norm over all costs:
+            normalized_cost = np.median(costs)
 
-    return cost
+        elif norm == 'cumulative':
+
+            # Take the cumulative sum over all costs:
+            normalized_cost = np.sum(costs)
+
+        return normalized_cost
 
 # ------------------------------------------------------------------------------
 
