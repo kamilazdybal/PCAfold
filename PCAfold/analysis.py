@@ -550,7 +550,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 def cost_function_normalized_variance_derivative(variance_data, weight=None, norm=None, integrate_to_peak=False):
     """
-    Defines a cost function for manifold optimization algorithms based on the areas, or weighted areas under
+    Defines a cost function for manifold topology optimization based on the areas, or weighted areas, under
     the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
 
     An individual area, :math:`A_i`, for the :math:`i^{th}` dependent variable, is computed by directly integrating the function :math:`\\hat{\\mathcal{D}}_i(\\sigma)``
@@ -563,12 +563,20 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
         A_i = \\int_{\\sigma_{min, i}}^{\\sigma_{max, i}} \\hat{\\mathcal{D}}_i(\\sigma) d \\log_{10} \\sigma
 
+    .. image:: ../images/cost-function-D-hat.svg
+        :width: 600
+        :align: center
+
     When ``integrate_to_peak=True``, the bounds of integration go from the minimum bandwidth, :math:`\\sigma_{min, i}`,
     to the bandwidth for which the rightmost peak happens in :math:`\\hat{\\mathcal{D}}_i(\\sigma)``, :math:`\\sigma_{peak, i}`:
 
     .. math::
 
         A_i = \\int_{\\sigma_{min, i}}^{\\sigma_{peak, i}} \\hat{\\mathcal{D}}_i(\\sigma) d \\log_{10} \\sigma
+
+    .. image:: ../images/cost-function-D-hat-to-peak.svg
+        :width: 600
+        :align: center
 
     In addition, each individual area, :math:`A_i`, can be weighted. Three weighting options are available:
 
@@ -584,6 +592,10 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
         A_i = \\int \\frac{\\hat{\\mathcal{D}}_i(\\sigma)}{\\sigma} d(\\log_{10} \\sigma)
 
+    .. image:: ../images/cost-function-sigma-penalty.svg
+        :width: 600
+        :align: center
+
     - If ``weight='log-sigma-over-peak'``, :math:`A_i` is weighted continuously by the :math:`\\log_{10}` -transformed bandwidth\
     and takes into account information about the rightmost peak location:
 
@@ -593,39 +605,23 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
     where :math:`||\\sigma_{peak, i}||_{0-1}` is the normalized rightmost peak location. The normalization is performed so that :math:`||\\sigma_{min, i}||_{0-1} = 0.0` and :math:`||\\sigma_{max, i}||_{0-1} = 1.0`.
 
+    .. image:: ../images/cost-function-log-sigma-over-peak-penalty.svg
+        :width: 600
+        :align: center
+
     If ``norm=None``, a list of costs for all dependent variables is returned.
     Otherwise, the final cost, :math:`\\mathcal{L}`, can be computed from all :math:`A_i` in few ways,
     where :math:`n_{dep}` is the number of dependent variables stored in the ``variance_data`` object:
 
-    - If ``norm='average'``:
+    - If ``norm='average'``: :math:`\\mathcal{L} = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i`.
 
-    .. math::
+    - If ``norm='cumulative'``: :math:`\\mathcal{L} = \\sum_{i = 1}^{n_{dep}} A_i`.
 
-        \\mathcal{L} = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i
+    - If ``norm='max'``: :math:`\\mathcal{L} = \\text{max} (A_i)`.
 
-    - If ``norm='cumulative'``:
+    - If ``norm='median'``: :math:`\\mathcal{L} = \\text{median} (A_i)`.
 
-    .. math::
-
-        \\mathcal{L} = \\sum_{i = 1}^{n_{dep}} A_i
-
-    - If ``norm='max'``:
-
-    .. math::
-
-        \\mathcal{L} = \\text{max} (A_i)
-
-    - If ``norm='median'``:
-
-    .. math::
-
-        \\mathcal{L} = \\text{median} (A_i)
-
-    - If ``norm='min'``:
-
-    .. math::
-
-        \\mathcal{L} = \\text{min} (A_i)
+    - If ``norm='min'``: :math:`\\mathcal{L} = \\text{min} (A_i)`.
 
     **Example:**
 
@@ -673,7 +669,7 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
 
     :return:
-        - **cost** - ``float`` specifying the normalized cost, :math:`E`, or, if ``norm=None``, a list of costs for each dependent variable, :math:`E_i`.
+        - **cost** - ``float`` specifying the normalized cost, :math:`\\mathcal{L}`, or, if ``norm=None``, a list of costs for each dependent variable, :math:`A_i`.
     """
 
     __weights = ['peak', 'sigma', 'log-sigma-over-peak']
