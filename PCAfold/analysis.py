@@ -789,13 +789,12 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, order_variables=False, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight_area=False, direct_integration=False, verbose=False):
+def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight=None, norm='max', integrate_to_peak=False, verbose=False):
     """
     Manifold-informed feature selection algorithm. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
-    The algorithm uses the cost function, :math:`E`,
-    based on minimizing the average area under the normalized variance derivatives, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
+    The algorithm uses a cost function based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
     for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
     The algorithm can be bootstrapped in two ways:
 
@@ -803,18 +802,12 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     - User-defined bootstrap when ``bootstrap_variables`` is set to a user-defined list of the bootstrap variables.
 
-    Two modes of this algorithm are available:
-
-    - When ``order_variables=False``, the best subset of the original variables will be selected. \
-    The output is a list of indices representing the selected subset of the original variables. \
-    In this mode, the algorithm iterates, adding a new variable that still lowers the previous cost at each iteration. \
-    Assuming that the original data set is composed of :math:`Q` variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`, \
-    the algorithm will return a subset of :math:`n` selected variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_n]`, \
-    that is the optimal subset for PCA in terms of manifold topology.
-
-    - When ``order_variables=True``, the original variables in a data set will be \
-    ordered according to their effect on the manifold topology. The output is an ordered list of the original variables. \
-    In this mode, the algorithm iterates, adding a new variable that exhibits the lowest cost at that iteration.
+    The algorithm iterates, adding a new variable that exhibits the lowest cost at each iteration.
+    The original variables in a data set get ordered according to their effect
+    on the manifold topology. Assuming that the original data set is composed of :math:`Q` variables,
+    the first output is a list of indices of the ordered
+    original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`. The second output is a list of indices of the selected
+    subset of the original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
 
     .. note::
 
@@ -845,19 +838,19 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         bandwidth_values = np.logspace(-4, 2, 50)
 
         # Run the subset selection algorithm:
-        (selected_variables, costs) = manifold_informed_feature_selection(X,
-                                                                          X_source,
-                                                                          variable_names,
-                                                                          scaling='auto',
-                                                                          bandwidth_values=bandwidth_values,
-                                                                          order_variables=False,
-                                                                          d_hat_variables=d_hat_variables,
-                                                                          add_transformed_source=True,
-                                                                          target_manifold_dimensionality=2,
-                                                                          bootstrap_variables=None,
-                                                                          weight_area=True,
-                                                                          direct_integration=True,
-                                                                          verbose=True)
+        (ordered, selected, costs) = manifold_informed_feature_selection(X,
+                                                                         X_source,
+                                                                         variable_names,
+                                                                         scaling='auto',
+                                                                         bandwidth_values=bandwidth_values,
+                                                                         d_hat_variables=d_hat_variables,
+                                                                         add_transformed_source=True,
+                                                                         target_manifold_dimensionality=2,
+                                                                         bootstrap_variables=None,
+                                                                         weight='peak',
+                                                                         norm='max',
+                                                                         integrate_to_peak=True,
+                                                                         verbose=True)
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -873,8 +866,6 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param bandwidth_values:
         ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
-    :param order_variables: (optional)
-        ``bool`` specifying whether an algorithm should be ran for manifold-informed ordering of variables in a data set.
     :param d_hat_variables: (optional)
         ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
     :param add_transformed_source: (optional)
@@ -883,17 +874,28 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         ``int`` specifying the target dimensionality of the PCA manifold.
     :param bootstrap_variables: (optional)
         ``list`` specifying the user-selected variables to bootstrap the algorithm with. If set to ``None``, automatic bootstrapping is performed.
-    :param weight_area: (optional)
-        ``bool`` specifying whether each computed area should be weighted by the rightmost peak location, :math:`\\sigma_{peak, i}` for the :math:`i^{th}` dependent variable.
-    :param direct_integration: (optional)
-        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed by direct integration of the :math:`\\hat{\\mathcal{D}}(\\sigma)`` curve.
+    :param weight: (optional)
+        ``str`` specifying the weighting applied to each area.
+        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
+        Set ``weight='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``weight='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``weight=None``, the area is not weighted.
+    :param norm: (optional)
+        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
+    :param integrate_to_peak: (optional)
+        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
     :param verbose: (optional)
         ``bool`` for printing verbose details.
 
     :return:
-        - **selected_variables** - ``list`` specifying the indices of the selected variables (features).
-        - **costs** - ``list`` specifying the costs, :math:`E`, from each iteration.
+        - **ordered_variables** - ``list`` specifying the indices of the ordered variables.
+        - **selected_variables** - ``list`` specifying the indices of the selected variables that correspond to the minimum cost :math:`\\mathcal{L}`.
+        - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
     """
+
+    __weights = ['peak', 'sigma', 'log-sigma-over-peak']
+    __norms = ['average', 'cumulative', 'max', 'median', 'min']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -909,9 +911,6 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     if not isinstance(bandwidth_values, np.ndarray):
         raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
-
-    if not isinstance(order_variables, bool):
-        raise ValueError("Parameter `order_variables` has to be of type `bool`.")
 
     if d_hat_variables is not None:
         if not isinstance(d_hat_variables, np.ndarray):
@@ -930,9 +929,6 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         if not add_transformed_source:
             raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
 
-    if not isinstance(weight_area, bool):
-        raise ValueError("Parameter `weight_area` has to be of type `bool`.")
-
     if not isinstance(target_manifold_dimensionality, int):
         raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
 
@@ -940,8 +936,22 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         if not isinstance(bootstrap_variables, list):
             raise ValueError("Parameter `bootstrap_variables` has to be of type `list`.")
 
-    if not isinstance(direct_integration, bool):
-        raise ValueError("Parameter `direct_integration` has to be of type `bool`.")
+    if weight is not None:
+
+        if not isinstance(weight, str):
+            raise ValueError("Parameter `weight` has to be of type `str`.")
+
+        if weight not in __weights:
+            raise ValueError("Parameter `weight` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+
+    if not isinstance(norm, str):
+        raise ValueError("Parameter `norm` has to be of type `str`.")
+
+    if norm not in __norms:
+        raise ValueError("Parameter `norm` has to be one of the following: 'average', 'cumulative', 'max', 'median', 'min'.")
+
+    if not isinstance(integrate_to_peak, bool):
+        raise ValueError("Parameter `integrate_to_peak` has to be of type `bool`.")
 
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be of type `bool`.")
@@ -981,7 +991,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
             bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-            bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+            bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % bootstrap_area)
             bootstrap_cost_function.append(bootstrap_area)
 
@@ -998,7 +1008,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         bootstrap_toc = time.perf_counter()
         if verbose: print(f'Boostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    # Use user-defined bootstrapping: ------------------------------------------
+    # Use user-defined bootstrapping: -----------------------------------------
     else:
 
         # Manifold dimensionality needs a fix here!
@@ -1032,7 +1042,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
         bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-        bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+        bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
         bootstrap_cost_function.append(bootstrap_area)
         costs.append(bootstrap_area)
 
@@ -1042,12 +1052,11 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         if verbose: print(f'Boostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
     # Iterate the algorithm starting from the bootstrap selection: -------------
-
     if verbose: print('Optimizing...\n')
 
     total_tic = time.perf_counter()
 
-    selected_variables = [i for i in bootstrap_variables]
+    ordered_variables = [i for i in bootstrap_variables]
 
     remaining_variables_list = [i for i in range(0,n_variables) if i not in bootstrap_variables]
     previous_area = np.min(bootstrap_cost_function)
@@ -1069,14 +1078,14 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
         for i_variable in remaining_variables_list:
 
-            if len(selected_variables) < target_manifold_dimensionality:
-                n_components = len(selected_variables) + 1
+            if len(ordered_variables) < target_manifold_dimensionality:
+                n_components = len(ordered_variables) + 1
             else:
                 n_components = cp.deepcopy(target_manifold_dimensionality)
 
             if verbose: print('\tCurrently added variable: ' + variable_names[i_variable])
 
-            current_variables_list = selected_variables + [i_variable]
+            current_variables_list = ordered_variables + [i_variable]
 
             pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=n_components)
             PCs = pca.transform(X[:,current_variables_list])
@@ -1096,7 +1105,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
             current_derivative, current_sigma, _ = normalized_variance_derivative(current_variance_data)
 
-            current_area = cost_function_normalized_variance_derivative(current_variance_data, weight_area=weight_area, direct_integration=direct_integration)
+            current_area = cost_function_normalized_variance_derivative(current_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
 
@@ -1109,45 +1118,37 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         (best_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
         best_variable_index = int(best_variable_index)
 
-        if order_variables:
-            if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
-            selected_variables.append(remaining_variables_list[best_variable_index])
-            remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
-            if min_area <= previous_area:
-                previous_area = min_area
-            costs.append(min_area)
-        else:
-            if min_area <= previous_area:
-                if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
-                selected_variables.append(remaining_variables_list[best_variable_index])
-                remaining_variables_list = [i for i in range(0,n_variables) if i not in selected_variables]
-                previous_area = min_area
-                costs.append(min_area)
-            else:
-                if verbose: print('No variable improves the manifold topology anymore!')
-                break
+        if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
+        ordered_variables.append(remaining_variables_list[best_variable_index])
+        remaining_variables_list = [i for i in range(0,n_variables) if i not in ordered_variables]
+        if min_area <= previous_area:
+            previous_area = min_area
+        costs.append(min_area)
 
         iteration_toc = time.perf_counter()
         if verbose: print(f'\tIteration time: {(iteration_toc - iteration_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    if order_variables:
-        print('\nOrdered variables:')
+    # Compute the optimal subset where the cost is minimized: ------------------
+    (min_cost_function_index, ) = np.where(costs==np.min(costs))
+    min_cost_function_index = int(min_cost_function_index)
+    selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index+1])
+
+    if verbose:
+
+        print('Ordered variables:')
+        print(', '.join([variable_names[i] for i in ordered_variables]))
+        print(ordered_variables)
+        print('Final cost: %.4f' % min_area)
+
+        print('\nSelected variables:')
         print(', '.join([variable_names[i] for i in selected_variables]))
         print(selected_variables)
-        print('\nLowest cost: %.4f' % previous_area)
-        print('Final cost: %.4f' % min_area)
-    else:
-        if verbose:
-            print('\n' + '-'*50)
-            print('Final subset:')
-            print(', '.join([variable_names[i] for i in selected_variables]))
-            print(selected_variables)
-            print('Optimized cost: %.4f' % previous_area)
+        print('Lowest cost: %.4f' % previous_area)
 
     total_toc = time.perf_counter()
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    return selected_variables, costs
+    return ordered_variables, selected_variables, costs
 
 ################################################################################
 #

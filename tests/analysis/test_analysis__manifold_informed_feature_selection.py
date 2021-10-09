@@ -13,60 +13,30 @@ class Analysis(unittest.TestCase):
         variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
         scaling='auto'
         bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
-
-        # Direct integration:
-        try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=True, direct_integration=True)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=False, direct_integration=True)
-        except Exception:
-            self.assertTrue(False)
-
         d_hat_variables = X[:,0:4]
 
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=False, target_manifold_dimensionality=2, direct_integration=True)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=True, target_manifold_dimensionality=2, direct_integration=True)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=2, bootstrap_variables=None, weight=None, norm='max', integrate_to_peak=False)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=False, target_manifold_dimensionality=3, direct_integration=True)
-        except Exception:
-            self.assertTrue(False)
-
-        # From normalized variance:
-        try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=True, direct_integration=False)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, weight_area=False, direct_integration=False)
-        except Exception:
-            self.assertTrue(False)
-
-        d_hat_variables = X[:,0:4]
-
-        try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=False, target_manifold_dimensionality=2, direct_integration=False)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight='peak', norm='cumulative', integrate_to_peak=True)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=True, target_manifold_dimensionality=2, direct_integration=False)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=False, target_manifold_dimensionality=3, direct_integration=False)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=False, target_manifold_dimensionality=3, bootstrap_variables=[0,1], weight='peak', norm='cumulative', integrate_to_peak=True)
         except Exception:
             self.assertTrue(False)
 
@@ -82,47 +52,47 @@ class Analysis(unittest.TestCase):
 
         # Need to specify d_hat_variables or set add_transformed_source to True:
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, add_transformed_source=False, direct_integration=True)
-
-        with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, add_transformed_source=False, direct_integration=False)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, add_transformed_source=False)
 
         # Wrong type:
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=[1])
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, add_transformed_source=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, add_transformed_source=[1])
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=[1])
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, bootstrap_variables=1)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, bootstrap_variables=1)
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, weight_area=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, weight=[1])
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, direct_integration=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, norm=[1])
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, verbose=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, integrate_to_peak=[1])
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection([1], X_source, variable_names, scaling, bandwidth_values)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, verbose=[1])
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, [1], variable_names, scaling, bandwidth_values)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection([1], X_source, variable_names, scaling, bandwidth_values)
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, 'A', scaling, bandwidth_values)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, [1], variable_names, scaling, bandwidth_values)
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, [1], bandwidth_values)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, 'A', scaling, bandwidth_values)
 
         with self.assertRaises(ValueError):
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, [1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, [1], bandwidth_values)
+
+        with self.assertRaises(ValueError):
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, [1])
 
 # ------------------------------------------------------------------------------
 
@@ -134,9 +104,19 @@ class Analysis(unittest.TestCase):
         scaling='auto'
         bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
 
+        # Make sure that the ordered_variables entries are reasonable:
+        try:
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3)
+            self.assertTrue(len(ordered_variables) > 0)
+            self.assertTrue(isinstance(ordered_variables, list))
+            for i in ordered_variables:
+                self.assertTrue(i >=0 and i <= 5)
+        except Exception:
+            self.assertTrue(False)
+
         # Make sure that the selected_variables entries are reasonable:
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3, direct_integration=True)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3)
             self.assertTrue(len(selected_variables) > 0)
             self.assertTrue(isinstance(selected_variables, list))
             for i in selected_variables:
@@ -146,33 +126,23 @@ class Analysis(unittest.TestCase):
 
         # Make sure that the costs entries are reasonable:
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3, direct_integration=True)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3)
             self.assertTrue(len(costs) > 0)
             self.assertTrue(isinstance(costs, list))
             for i in costs:
                 self.assertTrue(i > 0)
-            self.assertTrue(len(costs) == len(selected_variables))
+            self.assertTrue(len(costs) == len(ordered_variables))
         except Exception:
             self.assertTrue(False)
 
-        # Make sure that the selected_variables entries are reasonable:
+        # Make sure that the selected_variables entries correspond to the minimal cost:
         try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3, direct_integration=False)
-            self.assertTrue(len(selected_variables) > 0)
-            self.assertTrue(isinstance(selected_variables, list))
-            for i in selected_variables:
-                self.assertTrue(i >=0 and i <= 5)
-        except Exception:
-            self.assertTrue(False)
-
-        # Make sure that the costs entries are reasonable:
-        try:
-            (selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3, direct_integration=False)
-            self.assertTrue(len(costs) > 0)
-            self.assertTrue(isinstance(costs, list))
-            for i in costs:
-                self.assertTrue(i > 0)
-            self.assertTrue(len(costs) == len(selected_variables))
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3)
+            (min_cost_function_index, ) = np.where(costs==np.min(costs))
+            min_cost_function_index = int(min_cost_function_index)
+            selected_costs = costs[0:min_cost_function_index+1]
+            self.assertTrue(selected_variables[-1] == ordered_variables[min_cost_function_index])
+            self.assertTrue(len(selected_variables) == len(selected_costs))
         except Exception:
             self.assertTrue(False)
 
