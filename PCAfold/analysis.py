@@ -592,6 +592,8 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
         A_i = \\int \\frac{\\hat{\\mathcal{D}}_i(\\sigma)}{\\sigma} d(\\log_{10} \\sigma)
 
+    This type of weighting *strongly* penalizes the area happening at lower bandwidth values:
+
     .. image:: ../images/cost-function-sigma-penalty.svg
         :width: 600
         :align: center
@@ -603,25 +605,27 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
         A_i = \\int \\Big(  \\big| \\log_{10} \\big( \\frac{\\sigma}{\\sigma_{peak, i}} \\big) \\big| + \\frac{1}{||\\sigma_{peak, i}||_{0-1}} \\Big) \\cdot \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
 
-    where :math:`||\\sigma_{peak, i}||_{0-1}` is the normalized rightmost peak location. The normalization is performed so that :math:`||\\sigma_{min, i}||_{0-1} = 0.0` and :math:`||\\sigma_{max, i}||_{0-1} = 1.0`.
+    where :math:`||\\sigma_{peak, i}||_{0-1}` is the rightmost peak location expressed in a normalized 0-1 range. The normalization is performed so that :math:`||\\sigma_{min, i}||_{0-1} = 0.0` and :math:`||\\sigma_{max, i}||_{0-1} = 1.0`.
+
+    This type of weighting creates a more gentle penalty for the area happening further from the rightmost peak location:
 
     .. image:: ../images/cost-function-log-sigma-over-peak-penalty.svg
         :width: 600
         :align: center
 
     If ``norm=None``, a list of costs for all dependent variables is returned.
-    Otherwise, the final cost, :math:`\\mathcal{L}`, can be computed from all :math:`A_i` in few ways,
+    Otherwise, the final cost, :math:`\\mathcal{L}`, can be computed from all :math:`A_i` in a few ways,
     where :math:`n_{dep}` is the number of dependent variables stored in the ``variance_data`` object:
 
-    - If ``norm='average'``: :math:`\\mathcal{L} = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i`.
+    - If ``norm='average'``, :math:`\\mathcal{L} = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i`.
 
-    - If ``norm='cumulative'``: :math:`\\mathcal{L} = \\sum_{i = 1}^{n_{dep}} A_i`.
+    - If ``norm='cumulative'``, :math:`\\mathcal{L} = \\sum_{i = 1}^{n_{dep}} A_i`.
 
-    - If ``norm='max'``: :math:`\\mathcal{L} = \\text{max} (A_i)`.
+    - If ``norm='max'``, :math:`\\mathcal{L} = \\text{max} (A_i)`.
 
-    - If ``norm='median'``: :math:`\\mathcal{L} = \\text{median} (A_i)`.
+    - If ``norm='median'``, :math:`\\mathcal{L} = \\text{median} (A_i)`.
 
-    - If ``norm='min'``: :math:`\\mathcal{L} = \\text{min} (A_i)`.
+    - If ``norm='min'``, :math:`\\mathcal{L} = \\text{min} (A_i)`.
 
     **Example:**
 
@@ -658,18 +662,19 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
     :param variance_data:
         an object of ``VarianceData`` class.
     :param weight: (optional)
-        ``str`` specifying the weighting applied to each area. If ``weight=None``, the area is not weighted.
-        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}` for the :math:`i^{th}` dependent variable.
+        ``str`` specifying the weighting applied to each area.
+        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
         Set ``weight='sigma'`` to weight each area continuously by the bandwidth.
-        Set ``weight='log-sigma-over-peak' to weight each area continuously by a log and right most peak location normalized bandwidth.
+        Set ``weight='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``weight=None``, the area is not weighted.
     :param norm: (optional)
-        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses the arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area. If ``norm=None``, a list of costs for all depedent variables is returned.
     :param integrate_to_peak: (optional)
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
 
     :return:
-        - **cost** - ``float`` specifying the normalized cost, :math:`\\mathcal{L}`, or, if ``norm=None``, a list of costs for each dependent variable, :math:`A_i`.
+        - **cost** - ``float`` specifying the normalized cost, :math:`\\mathcal{L}`, or, if ``norm=None``, a list of costs, :math:`A_i`, for each dependent variable.
     """
 
     __weights = ['peak', 'sigma', 'log-sigma-over-peak']
