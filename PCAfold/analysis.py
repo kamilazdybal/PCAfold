@@ -727,7 +727,9 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
                 costs.append(cost)
 
             elif weight == 'log-sigma-over-peak':
-                penalty_log_sigma_peak = abs(np.log10(sigma[indices_to_the_left_of_peak]/rightmost_peak_location)) + 1
+                normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
+                addition = normalized_sigma[idx_rightmost_peak][0]
+                penalty_log_sigma_peak = abs(np.log10(sigma[indices_to_the_left_of_peak]/rightmost_peak_location)) + 1./addition
                 cost = np.trapz(derivative[variable][indices_to_the_left_of_peak]*penalty_log_sigma_peak, np.log10(sigma[indices_to_the_left_of_peak]))
                 costs.append(cost)
 
@@ -747,7 +749,6 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
                 costs.append(cost)
 
             elif weight == 'log-sigma-over-peak':
-
                 normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
                 addition = normalized_sigma[idx_rightmost_peak][0]
                 penalty_log_sigma_peak = abs(np.log10(sigma/rightmost_peak_location)) + 1./addition
