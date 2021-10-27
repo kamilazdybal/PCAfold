@@ -2761,7 +2761,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, grid_on=True, s=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold given two vectors defining the manifold.
 
@@ -2812,6 +2812,8 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         ``tuple`` specifying the lower and the upper bound for the colorbar range.
     :param grid_on:
         ``bool`` specifying whether grid should be plotted.
+    :param s: (optional)
+        ``int`` or ``float`` specifying the scatter point size.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
@@ -2891,6 +2893,12 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         else:
             (cbar_min, cbar_max) = colorbar_range
 
+    if s is None:
+        s = scatter_point_size
+    else:
+        if not isinstance(s, int) and not isinstance(s, float):
+            raise ValueError("Parameter `s` has to be of type `int` or `float`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -2906,18 +2914,18 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
     if colorbar_range is not None:
         if color is None:
-            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, str):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, np.ndarray):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
     else:
         if color is None:
-            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s, edgecolor='none', alpha=1)
         elif isinstance(color, str):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1)
         elif isinstance(color, np.ndarray):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1)
 
     plt.xticks(fontsize=font_axes, **csfont)
     plt.yticks(fontsize=font_axes, **csfont)
@@ -2939,7 +2947,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, s=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a three-dimensional manifold given three vectors defining the manifold.
 
@@ -2998,6 +3006,8 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
     :param colorbar_range: (optional)
         ``tuple`` specifying the lower and the upper bound for the colorbar range.
+    :param s: (optional)
+        ``int`` or ``float`` specifying the scatter point size.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -3095,6 +3105,12 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         else:
             (cbar_min, cbar_max) = colorbar_range
 
+    if s is None:
+        s = scatter_point_size
+    else:
+        if not isinstance(s, int) and not isinstance(s, float):
+            raise ValueError("Parameter `s` has to be of type `int` or `float`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -3111,18 +3127,18 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
 
     if colorbar_range is not None:
         if color is None:
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=scatter_point_size, alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=s, alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, str):
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=s, alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, np.ndarray):
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, alpha=1, vmin=cbar_min, vmax=cbar_max)
     else:
         if color is None:
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=scatter_point_size, alpha=1)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=s, alpha=1)
         elif isinstance(color, str):
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=s, alpha=1)
         elif isinstance(color, np.ndarray):
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, alpha=1)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, alpha=1)
 
     if x_label is not None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
     if y_label is not None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
