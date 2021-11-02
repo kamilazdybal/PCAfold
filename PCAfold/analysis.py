@@ -1171,6 +1171,212 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     return ordered_variables, selected_variables, costs
 
+# ------------------------------------------------------------------------------
+
+def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight=None, norm='max', integrate_to_peak=False, verbose=False):
+
+    __weights = ['peak', 'sigma', 'log-sigma-over-peak']
+    __norms = ['average', 'cumulative', 'max', 'median', 'min']
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have shape `(n_observations,n_variables)`.")
+
+    if not isinstance(X_source, np.ndarray):
+        raise ValueError("Parameter `X_source` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_source, n_variables_source) = np.shape(X_source)
+    except:
+        raise ValueError("Parameter `X_source` has to have shape `(n_observations,n_variables)`.")
+
+    if n_variables_source != n_variables:
+        raise ValueError("Parameter `X_source` has different number of variables than `X`.")
+
+    if n_observations_source != n_observations:
+        raise ValueError("Parameter `X_source` has different number of observations than `X`.")
+
+    if not isinstance(variable_names, list):
+        raise ValueError("Parameter `variable_names` has to be of type `list`.")
+
+    if len(variable_names) != n_variables:
+        raise ValueError("Parameter `variable_names` has different number of variables than `X`.")
+
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be of type `str`.")
+
+    if not isinstance(bandwidth_values, np.ndarray):
+        raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
+
+    if d_hat_variables is not None:
+        if not isinstance(d_hat_variables, np.ndarray):
+            raise ValueError("Parameter `d_hat_variables` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_d_hat_observations, n_d_hat_variables) = np.shape(d_hat_variables)
+            d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
+        except:
+            raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
+
+        if n_d_hat_observations != n_observations_source:
+            raise ValueError("Parameter `d_hat_variables` has different number of observations than `X_source`.")
+
+    if not isinstance(add_transformed_source, bool):
+        raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
+
+    if d_hat_variables is None:
+        if not add_transformed_source:
+            raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
+
+    if not isinstance(target_manifold_dimensionality, int):
+        raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
+
+    if bootstrap_variables is not None:
+        if not isinstance(bootstrap_variables, list):
+            raise ValueError("Parameter `bootstrap_variables` has to be of type `list`.")
+
+    if weight is not None:
+
+        if not isinstance(weight, str):
+            raise ValueError("Parameter `weight` has to be of type `str`.")
+
+        if weight not in __weights:
+            raise ValueError("Parameter `weight` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+
+    if not isinstance(norm, str):
+        raise ValueError("Parameter `norm` has to be of type `str`.")
+
+    if norm not in __norms:
+        raise ValueError("Parameter `norm` has to be one of the following: 'average', 'cumulative', 'max', 'median', 'min'.")
+
+    if not isinstance(integrate_to_peak, bool):
+        raise ValueError("Parameter `integrate_to_peak` has to be of type `bool`.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be of type `bool`.")
+
+    (_, n_variables) = np.shape(X)
+
+    variables_indices = [i for i in range(0,n_variables)]
+
+    costs = []
+
+    # Iterate the algorithm: -------------
+    if verbose: print('Optimizing...\n')
+
+    total_tic = time.perf_counter()
+
+    remaining_variables_list = [i for i in range(0,n_variables)]
+
+    ordered_variables = []
+
+    loop_counter = 0
+
+    while len(remaining_variables_list) > target_manifold_dimensionality:
+
+        iteration_tic = time.perf_counter()
+
+        loop_counter += 1
+
+        if verbose:
+            print('Iteration No.' + str(loop_counter))
+            print('Currently eliminating variable from the following list: ')
+            print([variable_names[i] for i in remaining_variables_list])
+
+        current_cost_function = []
+
+        for i_variable in remaining_variables_list:
+
+            if verbose: print('\tCurrently eliminated variable: ' + variable_names[i_variable])
+
+            current_variables_list = [i for i in remaining_variables_list if i != i_variable]
+
+            print('\tRunning PCA for a subset:')
+            print('\t' + ', '.join([variable_names[i] for i in current_variables_list]))
+
+            pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=target_manifold_dimensionality)
+            PCs = pca.transform(X[:,current_variables_list])
+            PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
+
+            if d_hat_variables is None:
+                depvars = cp.deepcopy(PC_sources)
+                depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
+            else:
+                if add_transformed_source:
+                    depvars = np.hstack((PC_sources, d_hat_variables))
+                    depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
+                else:
+                    depvars = d_hat_variables
+                    depvar_names = d_hat_variables_names
+
+            current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+            current_derivative, current_sigma, _ = normalized_variance_derivative(current_variance_data)
+
+            current_area = cost_function_normalized_variance_derivative(current_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
+            if verbose: print('\tCost:\t%.4f' % current_area)
+            current_cost_function.append(current_area)
+
+            if loop_counter > 1:
+
+                if current_area <= previous_area:
+                    if verbose: print(colored('\tSAME OR BETTER', 'green'))
+                else:
+                    if verbose: print(colored('\tWORSE', 'red'))
+
+        min_area = np.min(current_cost_function)
+        (worst_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
+        worst_variable_index = int(worst_variable_index)
+
+        if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[worst_variable_index]] + ' is removed.\n\tCost:\t%.4f' % min_area + '\n')
+        ordered_variables.append(remaining_variables_list[worst_variable_index])
+        remaining_variables_list = [i for i in range(0,n_variables) if i not in ordered_variables]
+        if loop_counter > 1:
+            if min_area <= previous_area:
+                previous_area = min_area
+        else:
+            previous_area = min_area
+        costs.append(min_area)
+
+        iteration_toc = time.perf_counter()
+        if verbose: print(f'\tIteration time: {(iteration_toc - iteration_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    # Compute the optimal subset where the cost is minimized: ------------------
+
+    for i in remaining_variables_list:
+        ordered_variables.append(i)
+
+    for i in range(0,len(remaining_variables_list)):
+        costs.append(current_cost_function[i])
+
+    ordered_variables = ordered_variables[::-1]
+    costs = costs[::-1]
+
+    (min_cost_function_index, ) = np.where(costs==np.min(costs))
+    min_cost_function_index = int(min_cost_function_index)
+
+    selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index])
+
+    if verbose:
+
+        print('Ordered variables:')
+        print(', '.join([variable_names[i] for i in ordered_variables]))
+        print(ordered_variables)
+        print('Final cost: %.4f' % min_area)
+
+        print('\nSelected variables:')
+        print(', '.join([variable_names[i] for i in selected_variables]))
+        print(selected_variables)
+        print('Lowest cost: %.4f' % previous_area)
+
+    total_toc = time.perf_counter()
+    if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    return ordered_variables, selected_variables, costs
+
 ################################################################################
 #
 # Regression assessment

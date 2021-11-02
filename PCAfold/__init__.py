@@ -64,6 +64,7 @@ from .analysis import random_sampling_normalized_variance
 from .analysis import average_knn_distance
 from .analysis import cost_function_normalized_variance_derivative
 from .analysis import manifold_informed_feature_selection
+from .analysis import manifold_informed_backward_elimination
 from .analysis import RegressionAssessment
 from .analysis import coefficient_of_determination
 from .analysis import stratified_coefficient_of_determination
