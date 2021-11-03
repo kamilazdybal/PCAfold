@@ -2441,8 +2441,11 @@ def coefficient_of_determination(observed, predicted):
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
-    r2 = 1. - np.sum((observed - predicted) * (observed - predicted)) / np.sum(
-        (observed - np.mean(observed)) * (observed - np.mean(observed)))
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    r2 = 1. - np.sum((__observed - __predicted) * (__observed - __predicted)) / np.sum(
+        (__observed - np.mean(__observed)) * (__observed - np.mean(__observed)))
 
     return r2
 
@@ -2684,7 +2687,10 @@ def mean_absolute_error(observed, predicted):
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
-    mae = np.sum(abs(observed - predicted)) / n_observed
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    mae = np.sum(abs(__observed - __predicted)) / n_observed
 
     return mae
 
@@ -2879,7 +2885,10 @@ def mean_squared_error(observed, predicted):
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
-    mse = 1.0 / n_observed * np.sum((observed - predicted) * (observed - predicted))
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    mse = 1.0 / n_observed * np.sum((__observed - __predicted) * (__observed - __predicted))
 
     return mse
 
@@ -3074,7 +3083,10 @@ def root_mean_squared_error(observed, predicted):
     if n_observed != n_predicted:
         raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
 
-    rmse = (mean_squared_error(observed, predicted))**0.5
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    rmse = (mean_squared_error(__observed, __predicted))**0.5
 
     return rmse
 
@@ -3294,20 +3306,23 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
     if norm not in __norms:
         raise ValueError("Parameter `norm` can be one of the following: ``std``, ``range``, ``root_square_mean``, ``root_square_range``, ``root_square_std``, ``abs_mean``.")
 
-    rmse = root_mean_squared_error(observed, predicted)
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    rmse = root_mean_squared_error(__observed, __predicted)
 
     if norm == 'root_square_mean':
-        nrmse = rmse/np.sqrt(np.mean(observed**2))
+        nrmse = rmse/np.sqrt(np.mean(__observed**2))
     elif norm == 'std':
-        nrmse = rmse/(np.std(observed))
+        nrmse = rmse/(np.std(__observed))
     elif norm == 'range':
-        nrmse = rmse/(np.max(observed) - np.min(observed))
+        nrmse = rmse/(np.max(__observed) - np.min(__observed))
     elif norm == 'root_square_range':
-        nrmse = rmse/np.sqrt(np.max(observed**2) - np.min(observed**2))
+        nrmse = rmse/np.sqrt(np.max(__observed**2) - np.min(__observed**2))
     elif norm == 'root_square_std':
-        nrmse = rmse/np.sqrt(np.std(observed**2))
+        nrmse = rmse/np.sqrt(np.std(__observed**2))
     elif norm == 'abs_mean':
-        nrmse = rmse/abs(np.mean(observed))
+        nrmse = rmse/abs(np.mean(__observed))
 
     return nrmse
 
