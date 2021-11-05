@@ -1137,7 +1137,10 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
         min_area = np.min(current_cost_function)
         (best_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
-        best_variable_index = int(best_variable_index)
+        try:
+            best_variable_index = int(best_variable_index)
+        except:
+            best_variable_index = int(best_variable_index[0])
 
         if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
         ordered_variables.append(remaining_variables_list[best_variable_index])
@@ -1151,7 +1154,10 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
     # Compute the optimal subset where the cost is minimized: ------------------
     (min_cost_function_index, ) = np.where(costs==np.min(costs))
-    min_cost_function_index = int(min_cost_function_index)
+    try:
+        min_cost_function_index = int(min_cost_function_index)
+    except:
+        min_cost_function_index = int(min_cost_function_index[0])
     selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index+1])
 
     if verbose:
@@ -1295,8 +1301,9 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
             current_variables_list = [i for i in remaining_variables_list if i != i_variable]
 
-            print('\tRunning PCA for a subset:')
-            print('\t' + ', '.join([variable_names[i] for i in current_variables_list]))
+            if verbose:
+                print('\tRunning PCA for a subset:')
+                print('\t' + ', '.join([variable_names[i] for i in current_variables_list]))
 
             pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=target_manifold_dimensionality)
             PCs = pca.transform(X[:,current_variables_list])
@@ -1356,7 +1363,10 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     costs = costs[::-1]
 
     (min_cost_function_index, ) = np.where(costs==np.min(costs))
-    min_cost_function_index = int(min_cost_function_index)
+    try:
+        min_cost_function_index = int(min_cost_function_index)
+    except:
+        min_cost_function_index = int(min_cost_function_index[0])
 
     selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index])
 
