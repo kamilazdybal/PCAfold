@@ -1158,7 +1158,11 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         min_cost_function_index = int(min_cost_function_index)
     except:
         min_cost_function_index = int(min_cost_function_index[0])
-    selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index+1])
+
+    if min_cost_function_index+1 < target_manifold_dimensionality:
+        selected_variables = list(np.array(ordered_variables)[0:target_manifold_dimensionality])
+    else:
+        selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index+1])
 
     if verbose:
 
