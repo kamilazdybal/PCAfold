@@ -1353,6 +1353,8 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
     # Compute the optimal subset where the cost is minimized: ------------------
 
+    del current_cost_function[worst_variable_index]
+
     for i in remaining_variables_list:
         ordered_variables.append(i)
 
