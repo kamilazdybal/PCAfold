@@ -43,7 +43,7 @@ You can also download the `poster <https://gitlab.multiscale.utah.edu/common/PCA
 
 .. image:: outreach/PCAfold-poster.png
   :width: 300
-  :align: center
+  :align: left
 
 --------------------------------------------------------------------------------
 
