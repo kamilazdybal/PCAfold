@@ -39,6 +39,11 @@ this software, such as K-Means algorithm or Artificial Neural Networks.
 
 Reach out to the `Getting started <https://pcafold.readthedocs.io/en/latest/user/getting-started.html>`_
 section for more information on installing the software and for possible workflows that can be achieved with **PCAfold**.
+You can also download the `poster <https://gitlab.multiscale.utah.edu/common/PCAfold/-/raw/master/docs/outreach/PCAfold-poster.pdf>`_ below for a condensed overview of the available functionalities.
+
+.. image:: outreach/PCAfold-poster.png
+  :width: 300
+  :align: center
 
 --------------------------------------------------------------------------------
 
