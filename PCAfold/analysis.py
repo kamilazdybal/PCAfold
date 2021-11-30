@@ -1340,7 +1340,10 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
         min_area = np.min(current_cost_function)
         (worst_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
-        worst_variable_index = int(worst_variable_index)
+        try:
+            worst_variable_index = int(worst_variable_index)
+        except:
+            worst_variable_index = int(worst_variable_index[0])
 
         if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[worst_variable_index]] + ' is removed.\n\tCost:\t%.4f' % min_area + '\n')
         ordered_variables.append(remaining_variables_list[worst_variable_index])
