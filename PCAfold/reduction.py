@@ -2780,7 +2780,16 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         principal_components = pca_X.transform(X)
 
         # Plot the manifold:
-        plt = plot_2d_manifold(principal_components[:,0], principal_components[:,1], color=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', colorbar_range=(0,1), figure_size=(5,5), title='2D manifold', save_filename='2d-manifold.pdf')
+        plt = plot_2d_manifold(principal_components[:,0],
+                               principal_components[:,1],
+                               color=X[:,0],
+                               x_label='PC-1',
+                               y_label='PC-2',
+                               colorbar_label='$X_1$',
+                               colorbar_range=(0,1),
+                               figure_size=(5,5),
+                               title='2D manifold',
+                               save_filename='2d-manifold.pdf')
         plt.close()
 
     :param x:
@@ -2966,7 +2975,20 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         PCs = pca_X.transform(X)
 
         # Plot the manifold:
-        plt = plot_3d_manifold(PCs[:,0], PCs[:,1], PCs[:,2], color=X[:,0], elev=30, azim=-60, x_label='PC-1', y_label='PC-2', z_label='PC-3', colorbar_label='$X_1$', colorbar_range=(0,1), figure_size=(15,7), title='3D manifold', save_filename='3d-manifold.png')
+        plt = plot_3d_manifold(PCs[:,0],
+                               PCs[:,1],
+                               PCs[:,2],
+                               color=X[:,0],
+                               elev=30,
+                               azim=-60,
+                               x_label='PC-1',
+                               y_label='PC-2',
+                               z_label='PC-3',
+                               colorbar_label='$X_1$',
+                               colorbar_range=(0,1),
+                               figure_size=(15,7),
+                               title='3D manifold',
+                               save_filename='3d-manifold.png')
         plt.close()
 
     :param x:
@@ -3194,7 +3216,14 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         principal_components = subset_PCA.principal_components
 
         # Plot the manifold:
-        plt = plot_2d_manifold_sequence(principal_components, color=X[:,0], x_label='PC-1', y_label='PC-2', colorbar_label='$X_1$', figure_size=(7,3), title=['First', 'Second', 'Third'], save_filename='2d-manifold-sequence.pdf')
+        plt = plot_2d_manifold_sequence(principal_components,
+                                        color=X[:,0],
+                                        x_label='PC-1',
+                                        y_label='PC-2',
+                                        colorbar_label='$X_1$',
+                                        figure_size=(7,3),
+                                        title=['First', 'Second', 'Third'],
+                                        save_filename='2d-manifold-sequence.pdf')
         plt.close()
 
     :param xy:
@@ -3386,7 +3415,16 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
         X_rec = pca_X.reconstruct(principal_components)
 
         # Parity plot for the reconstruction of the first variable:
-        plt = plot_parity(X[:,0], X_rec[:,0], color=X[:,0], x_label='Observed $X_1$', y_label='Reconstructed $X_1$', colorbar_label='X_1', color_map='inferno', figure_size=(5,5), title='Parity plot', save_filename='parity-plot.pdf')
+        plt = plot_parity(X[:,0],
+                          X_rec[:,0],
+                          color=X[:,0],
+                          x_label='Observed $X_1$',
+                          y_label='Reconstructed $X_1$',
+                          colorbar_label='X_1',
+                          color_map='inferno',
+                          figure_size=(5,5),
+                          title='Parity plot',
+                          save_filename='parity-plot.pdf')
         plt.close()
 
     :param variable:
@@ -3556,7 +3594,13 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         eigenvectors = pca_X.A
 
         # Plot second and third eigenvector:
-        plts = plot_eigenvectors(eigenvectors[:,[1,2]], eigenvectors_indices=[1,2], variable_names=['$a_1$', '$a_2$', '$a_3$'], plot_absolute=False, bar_color=None, title='PCA on X', save_filename='PCA-X.pdf')
+        plts = plot_eigenvectors(eigenvectors[:,[1,2]],
+                                 eigenvectors_indices=[1,2],
+                                 variable_names=['$a_1$', '$a_2$', '$a_3$'],
+                                 plot_absolute=False,
+                                 bar_color=None,
+                                 title='PCA on X',
+                                 save_filename='PCA-X.pdf')
         plts[0].close()
         plts[1].close()
 
@@ -3683,7 +3727,14 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         eigenvectors = pca_X.A
 
         # Plot comparaison of first and second eigenvector:
-        plt = plot_eigenvectors_comparison((eigenvectors[:,0], eigenvectors[:,1]), legend_labels=['PC-1', 'PC-2'], variable_names=['$a_1$', '$a_2$', '$a_3$'], plot_absolute=False, color_map='coolwarm', title='PCA on X', save_filename='PCA-X.pdf')
+        plt = plot_eigenvectors_comparison((eigenvectors[:,0],
+                                            eigenvectors[:,1]),
+                                           legend_labels=['PC-1', 'PC-2'],
+                                           variable_names=['$a_1$', '$a_2$', '$a_3$'],
+                                           plot_absolute=False,
+                                           color_map='coolwarm',
+                                           title='PCA on X',
+                                           save_filename='PCA-X.pdf')
         plt.close()
 
     :param eigenvectors_tuple:
@@ -3815,7 +3866,10 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, figure_size=None
         eigenvalues = pca_X.L
 
         # Plot eigenvalue distribution:
-        plt = plot_eigenvalue_distribution(eigenvalues, normalized=True, title='PCA on X', save_filename='PCA-X.pdf')
+        plt = plot_eigenvalue_distribution(eigenvalues,
+                                           normalized=True,
+                                           title='PCA on X',
+                                           save_filename='PCA-X.pdf')
         plt.close()
 
     :param eigenvalues:
@@ -3908,7 +3962,11 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         eigenvalues_Y = pca_Y.L
 
         # Plot eigenvalue distribution comparison:
-        plt = plot_eigenvalue_distribution_comparison((eigenvalues_X, eigenvalues_Y), legend_labels=['PCA on X', 'PCA on Y'], normalized=True, title='PCA on X and Y', save_filename='PCA-X-Y.pdf')
+        plt = plot_eigenvalue_distribution_comparison((eigenvalues_X, eigenvalues_Y),
+                                                      legend_labels=['PCA on X', 'PCA on Y'],
+                                                      normalized=True,
+                                                      title='PCA on X and Y',
+                                                      save_filename='PCA-X-Y.pdf')
         plt.close()
 
     :param eigenvalues_tuple:
@@ -4022,7 +4080,10 @@ def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, titl
         eigenvalues = pca_X.L
 
         # Plot the cumulative variance from eigenvalues:
-        plt = plot_cumulative_variance(eigenvalues, n_components=0, title='PCA on X', save_filename='PCA-X.pdf')
+        plt = plot_cumulative_variance(eigenvalues,
+                                       n_components=0,
+                                       title='PCA on X',
+                                       save_filename='PCA-X.pdf')
         plt.close()
 
     :param eigenvalues:
@@ -4117,7 +4178,14 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_t
         ticks = ['A', 'B', 'C', 'D', 'E']
 
         # Plot a heatmap of the covariance matrix:
-        plt = plot_heatmap(covariance_matrix, annotate=True, text_color='w', format_displayed='%.1f', x_ticks=ticks, y_ticks=ticks, title='Covariance', save_filename='covariance.pdf')
+        plt = plot_heatmap(covariance_matrix,
+                           annotate=True,
+                           text_color='w',
+                           format_displayed='%.1f',
+                           x_ticks=ticks,
+                           y_ticks=ticks,
+                           title='Covariance',
+                           save_filename='covariance.pdf')
         plt.close()
 
     :param M:
@@ -4277,7 +4345,15 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
         titles = ['Auto', 'Range', 'VAST']
 
         # Plot a sequence of heatmaps of the covariance matrices:
-        plt = plot_heatmap_sequence(covariance_matrices, annotate=True, text_color='w', format_displayed='%.1f', color_map='viridis', cbar=True, title=titles, figure_size=(12,3), save_filename='covariance-matrices.pdf')
+        plt = plot_heatmap_sequence(covariance_matrices,
+                                    annotate=True,
+                                    text_color='w',
+                                    format_displayed='%.1f',
+                                    color_map='viridis',
+                                    cbar=True,
+                                    title=titles,
+                                    figure_size=(12,3),
+                                    save_filename='covariance-matrices.pdf')
         plt.close()
 
     :param M:
@@ -4364,7 +4440,6 @@ def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%
     if save_filename is not None:
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
-
 
     fig = plt.figure(figsize=figure_size)
     spec = fig.add_gridspec(ncols=n_subplots, nrows=1)
