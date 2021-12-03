@@ -1340,7 +1340,7 @@ class LPCA:
     - **L** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvalues, :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
     - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     - **loadings** - (read only) ``list`` of ``numpy.ndarray`` specifying the local loadings, :math:`\mathbf{l}`. Each list element corresponds to loadings in a single cluster.
-    - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for each variable, :math:`\mathbf{t_q}}`. Each list element corresponds to variance metric in a single cluster.
+    - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for each variable, :math:`\mathbf{t_q}`. Each list element corresponds to variance metric in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
