@@ -792,10 +792,10 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
 def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight=None, norm='max', integrate_to_peak=False, verbose=False):
     """
-    Manifold-informed feature selection algorithm. The goal of the algorithm is to
+    Manifold-informed feature selection algorithm based on forward feature addition. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
-    The algorithm uses a cost function based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
+    The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
     for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
     The algorithm can be bootstrapped in two ways:
 
@@ -808,7 +808,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     on the manifold topology. Assuming that the original data set is composed of :math:`Q` variables,
     the first output is a list of indices of the ordered
     original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`. The second output is a list of indices of the selected
-    subset of the original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
+    subset of the original variables, :math:`\\mathbf{X}_S = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
 
     .. note::
 
@@ -1183,7 +1183,102 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight=None, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, weight=None, norm='max', integrate_to_peak=False, verbose=False):
+    """
+    Manifold-informed feature selection algorithm based on backward elimination. The goal of the algorithm is to
+    select a meaningful subset of the original variables such that
+    undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
+    The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
+    for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
+
+    The algorithm iterates, removing another variable that has an effect of decreasing the cost the most at each iteration.
+    The original variables in a data set get ordered according to their effect
+    on the manifold topology. Assuming that the original data set is composed of :math:`Q` variables,
+    the first output is a list of indices of the ordered
+    original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`. The second output is a list of indices of the selected
+    subset of the original variables, :math:`\\mathbf{X}_S = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
+
+    .. note::
+
+        The algorithm can be very expensive (for large data sets) due to multiple computations of the normalized variance derivative.
+        Try running it on multiple cores or on a sampled data set.
+
+        In case the algorithm breaks when not being able to determine the peak
+        location, try increasing the range in the ``bandwidth_values`` parameter.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import manifold_informed_backward_elimination
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+        X_source = np.random.rand(100,10)
+
+        # Define original variables to add to the optimization:
+        d_hat_variables = X[:,0:3]
+
+        # Specify variables names
+        variable_names = ['X_' + str(i) for i in range(0,10)]
+
+        # Specify the bandwidth values to compute the optimization on:
+        bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Run the subset selection algorithm:
+        (ordered, selected, costs) = manifold_informed_backward_elimination(X,
+                                                                            X_source,
+                                                                            variable_names,
+                                                                            scaling='auto',
+                                                                            bandwidth_values=bandwidth_values,
+                                                                            d_hat_variables=d_hat_variables,
+                                                                            add_transformed_source=True,
+                                                                            target_manifold_dimensionality=2,
+                                                                            weight='peak',
+                                                                            norm='max',
+                                                                            integrate_to_peak=True,
+                                                                            verbose=True)
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param X_source:
+        ``numpy.ndarray`` specifying the source terms, :math:`\\mathbf{S_X}`, corresponding to the state-space
+        variables in :math:`\\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`. It should be of size ``(n_observations,n_variables)``.
+    :param variable_names:
+        ``list`` of ``str`` specifying variables names.
+    :param scaling: (optional)
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+    :param bandwidth_values:
+        ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
+    :param d_hat_variables: (optional)
+        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
+    :param add_transformed_source: (optional)
+        ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
+    :param target_manifold_dimensionality: (optional)
+        ``int`` specifying the target dimensionality of the PCA manifold.
+    :param weight: (optional)
+        ``str`` specifying the weighting applied to each area.
+        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
+        Set ``weight='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``weight='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``weight=None``, the area is not weighted.
+    :param norm: (optional)
+        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
+    :param integrate_to_peak: (optional)
+        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **ordered_variables** - ``list`` specifying the indices of the ordered variables.
+        - **selected_variables** - ``list`` specifying the indices of the selected variables that correspond to the minimum cost :math:`\\mathcal{L}`.
+        - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
+    """
 
     __weights = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
@@ -1244,10 +1339,6 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
     if not isinstance(target_manifold_dimensionality, int):
         raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
-
-    if bootstrap_variables is not None:
-        if not isinstance(bootstrap_variables, list):
-            raise ValueError("Parameter `bootstrap_variables` has to be of type `list`.")
 
     if weight is not None:
 

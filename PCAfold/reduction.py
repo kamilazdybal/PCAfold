@@ -3736,11 +3736,10 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
         ``str`` specifying plot save location/filename. If set to ``None``
         plot will not be saved. You can also set a desired file extension,
         for instance ``.pdf``. If the file extension is not specified, the default
-        is ``.png``. Note that a prefix ``eigenvector-#`` will be added out front
-        the filename, where ``#`` is the number of the currently plotted eigenvector.
+        is ``.png``.
 
     :return:
-        - **plot_handle** - plot handle.
+        - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
     try:

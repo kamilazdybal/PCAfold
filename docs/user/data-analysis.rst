@@ -80,6 +80,11 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.manifold_informed_feature_selection
 
+``manifold_informed_backward_elimination``
+================================================
+
+.. autofunction:: PCAfold.analysis.manifold_informed_backward_elimination
+
 --------------------------------------------------------------------------------
 
 ******************
