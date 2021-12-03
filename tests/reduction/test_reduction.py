@@ -76,7 +76,7 @@ class TestReduction(unittest.TestCase):
         if np.any(abs(eta - eta_new) > tol):
             self.assertTrue(False)
 
-# Test if 10 PCA class attributes cannot be set by the user after `PCA` object has been created:
+# Test if some PCA class attributes cannot be set by the user after `PCA` object has been created:
     def test_PCA_not_allowed_attribute_setting(self):
 
         X = np.random.rand(100,20)
@@ -97,13 +97,15 @@ class TestReduction(unittest.TestCase):
         with self.assertRaises(AttributeError):
             pca.loadings = 1
         with self.assertRaises(AttributeError):
+            pca.tq = 1
+        with self.assertRaises(AttributeError):
             pca.scaling = 1
         with self.assertRaises(AttributeError):
             pca.n_variables = 1
         with self.assertRaises(AttributeError):
             pca.n_components_init = 1
 
-# Test if all 11 available PCA class attributes can be accessed without error:
+# Test if all available PCA class attributes can be accessed without error:
     def test_PCA_class_getting_attributes(self):
 
         X = np.random.rand(100,20)
@@ -117,6 +119,7 @@ class TestReduction(unittest.TestCase):
             pca.A
             pca.L
             pca.loadings
+            pca.tq
             pca.scaling
             pca.n_variables
             pca.n_components_init

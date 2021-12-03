@@ -64,7 +64,7 @@ class PCA:
 
     where :math:`N` is the number of observations in the original data set, :math:`\mathbf{X}`.
 
-    Loadings matrix, :math:`\mathbf{l}`, is computed at the class initialization as well
+    Loadings matrix, :math:`\mathbf{l}`, is computed at the class initialization
     such that the element :math:`\mathbf{l}_{ij}` is the corresponding scaled element
     of the eigenvectors matrix, :math:`\mathbf{A}_{ij}`:
 
@@ -74,6 +74,15 @@ class PCA:
 
     where :math:`\mathbf{L}_j` is the :math:`j^{th}` eigenvalue and :math:`\mathbf{S}_{ii}`
     is the :math:`i^{th}` element on the diagonal of the covariance matrix, :math:`\mathbf{S}`.
+
+    The variance accounted for by each variable, :math:`\mathbf{t_q}`, is computed at the class initialization:
+
+    .. math::
+
+        \mathbf{t}_{\mathbf{q}i} = \\sum_{j=1}^{q} \\Bigg( \\frac{\mathbf{A}_{ij} \\sqrt{\mathbf{L}_j}}{ s_i } \\Bigg)^2
+
+    where :math:`q` is the number of retained principal components
+    and :math:`s_i` is the standard deviation of the :math:`i^{th}` variable in the data set.
 
     **Example:**
 
@@ -106,17 +115,18 @@ class PCA:
 
     **Attributes:**
 
-    - **n_components** - (can be re-set) number of retained principal components :math:`q`.
-    - **n_components_init** - (read only) number of retained principal components :math:`q` with which ``PCA`` class object was initialized.
+    - **n_components** - (can be re-set) number of retained principal components, :math:`q`.
+    - **n_components_init** - (read only) number of retained principal components, :math:`q`, with which ``PCA`` class object was initialized.
     - **scaling** - (read only) scaling criteria with which ``PCA`` class object was initialized.
     - **n_variables** - (read only) number of variables of the original data set on which ``PCA`` class object was initialized.
     - **X_cs** - (read only) centered and scaled data set :math:`\mathbf{X_{cs}}`.
-    - **X_center** - (read only) vector of centers :math:`\mathbf{C}` applied on the original data set :math:`\mathbf{X}`.
-    - **X_scale** - (read only) vector of scales :math:`\mathbf{D}` applied on the original data set :math:`\mathbf{X}`.
-    - **S** - (read only) covariance matrix :math:`\mathbf{S}`.
-    - **L** - (read only) vector of eigenvalues :math:`\mathbf{L}`.
-    - **A** - (read only) matrix of eigenvectors :math:`\mathbf{A}` (vectors are stored in columns, rows correspond to weights).
-    - **loadings** - (read only) loadings :math:`\mathbf{l}` (vectors are stored in columns, rows correspond to weights).
+    - **X_center** - (read only) vector of centers, :math:`\mathbf{C}`, applied on the original data set :math:`\mathbf{X}`.
+    - **X_scale** - (read only) vector of scales, :math:`\mathbf{D}`, applied on the original data set :math:`\mathbf{X}`.
+    - **S** - (read only) covariance matrix, :math:`\mathbf{S}`.
+    - **L** - (read only) vector of eigenvalues, :math:`\mathbf{L}`.
+    - **A** - (read only) matrix of eigenvectors, :math:`\mathbf{A}`, (vectors are stored in columns, rows correspond to weights).
+    - **loadings** - (read only) loadings, :math:`\mathbf{l}`, (vectors are stored in columns, rows correspond to weights).
+    - **tq** - (read only) variance accounted for by each variable, :math:`\mathbf{t_q}`.
     """
 
     def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -197,6 +207,21 @@ class PCA:
 
         self.__loadings = loadings_matrix
 
+        # Compute the variance accounted for by each variable:
+        tq = np.zeros((self.n_variables,))
+
+        for i in range(0,self.n_variables):
+
+            variance_sum = 0
+
+            for j in range(0,self.n_components):
+
+                variance_sum += ( (self.__A[i,j] * self.__L[j]**0.5) / (np.std(X[:,i])) )**2
+
+            tq[i] = variance_sum
+
+        self.__tq = tq
+
     @property
     def n_components(self):
         return self.__n_components
@@ -240,6 +265,10 @@ class PCA:
     @property
     def loadings(self):
         return self.__loadings
+
+    @property
+    def tq(self):
+        return self.__tq
 
     @n_components.setter
     def n_components(self, new_n_components):
