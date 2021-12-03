@@ -75,7 +75,7 @@ class PCA:
     where :math:`\mathbf{L}_j` is the :math:`j^{th}` eigenvalue and :math:`\mathbf{S}_{ii}`
     is the :math:`i^{th}` element on the diagonal of the covariance matrix, :math:`\mathbf{S}`.
 
-    The variance accounted for by each variable, :math:`\mathbf{t_q}`, is computed at the class initialization:
+    The variance accounted for each variable, :math:`\mathbf{t_q}`, is computed at the class initialization:
 
     .. math::
 
@@ -96,6 +96,18 @@ class PCA:
 
         # Instantiate PCA class object:
         pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
+
+        # Access the eigenvectors:
+        A = pca_X.A
+
+        # Access the eigenvalues:
+        L = pca_X.L
+
+        # Access the loadings:
+        l = pca_X.loadings
+
+        # Access the variance accounted for each variable:
+        tq = pca_X.tq
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -126,7 +138,7 @@ class PCA:
     - **L** - (read only) vector of eigenvalues, :math:`\mathbf{L}`.
     - **A** - (read only) matrix of eigenvectors, :math:`\mathbf{A}`, (vectors are stored in columns, rows correspond to weights).
     - **loadings** - (read only) loadings, :math:`\mathbf{l}`, (vectors are stored in columns, rows correspond to weights).
-    - **tq** - (read only) variance accounted for by each variable, :math:`\mathbf{t_q}`.
+    - **tq** - (read only) variance accounted for each variable, :math:`\mathbf{t_q}`.
     """
 
     def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -207,7 +219,7 @@ class PCA:
 
         self.__loadings = loadings_matrix
 
-        # Compute the variance accounted for by each variable:
+        # Compute the variance accounted for each variable:
         tq = np.zeros((self.n_variables,))
 
         for i in range(0,self.n_variables):
@@ -1285,6 +1297,9 @@ class LPCA:
         # Instantiate LPCA class object:
         lpca_X = LPCA(X, idx, scaling='none', n_components=2)
 
+        # Access the local covariance matrix in the first cluster:
+        S_k1 = lpca_X.S[0]
+
         # Access the local eigenvectors in the first cluster:
         A_k1 = lpca_X.A[0]
 
@@ -1293,6 +1308,12 @@ class LPCA:
 
         # Access the local principal components in the first cluster:
         Z_k1 = lpca_X.principal_components[0]
+
+        # Access the local loadings in the first cluster:
+        l_k1 = lpca_X.loadings[0]
+
+        # Access the local variance accounted for each variable in the first cluster:
+        tq_k1 = lpca_X.tq[0]
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -1314,9 +1335,12 @@ class LPCA:
 
     **Attributes:**
 
+    - **S** - (read only) ``list`` of ``numpy.ndarray`` specifying the local covariance matrix, :math:`\mathbf{S}`. Each list element corresponds to the covariance matrix in a single cluster.
     - **A** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvectors, :math:`\mathbf{A}`. Each list element corresponds to eigenvectors in a single cluster.
     - **L** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvalues, :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
     - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
+    - **loadings** - (read only) ``list`` of ``numpy.ndarray`` specifying the local loadings, :math:`\mathbf{l}`. Each list element corresponds to loadings in a single cluster.
+    - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for each variable, :math:`\mathbf{t_q}}`. Each list element corresponds to variance metric in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1328,6 +1352,9 @@ class LPCA:
             (n_observations, n_variables) = np.shape(X)
         except:
             raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        # Set number of variables in a data set:
+        self.__n_variables = n_variables
 
         try:
             (n_observations_idx, ) = np.shape(idx)
@@ -1380,9 +1407,12 @@ class LPCA:
         n_clusters = len(np.unique(idx))
 
         # Initialize the outputs:
+        covariance_matrix = []
         eigenvectors = []
         eigenvalues = []
         PCs = []
+        loadings = []
+        variance_accounted = []
 
         for k in range(0, n_clusters):
 
@@ -1396,14 +1426,58 @@ class LPCA:
             pca = PCA(X_removed, scaling=scaling, n_components=self.__n_components, use_eigendec=use_eigendec, nocenter=nocenter)
             Z = pca.transform(X_removed, nocenter=False)
 
-            # Append the local eigenvectors, eigenvalues and PCs:
+            # Append the local covariance matrix, eigenvectors, eigenvalues and PCs:
+            covariance_matrix.append(pca.S)
             eigenvectors.append(pca.A[:,0:self.__n_components])
             eigenvalues.append(pca.L[0:self.__n_components])
             PCs.append(Z)
 
+            # Compute loadings:
+            loadings_matrix = np.zeros((self.__n_variables, self.__n_components))
+
+            for i in range(self.__n_components):
+                for j in range(self.__n_variables):
+                    loadings_matrix[j, i] = (pca.A[j, i] * np.sqrt(pca.L[i])) / np.sqrt(pca.S[j, j])
+
+            loadings.append(loadings_matrix)
+
+            # Compute the variance accounted for each variable:
+            tq = np.zeros((self.__n_variables,))
+
+            for i in range(0,self.__n_variables):
+
+                variance_sum = 0
+
+                for j in range(0,self.__n_components):
+
+                    variance_sum += ( (pca.A[i,j] * pca.L[j]**0.5) / (np.std(X_k[:,i])) )**2
+
+                tq[i] = variance_sum
+
+            variance_accounted.append(tq)
+
+        self.__S = covariance_matrix
         self.__A = eigenvectors
         self.__L = eigenvalues
         self.__principal_components = PCs
+        self.__loadings = loadings
+        self.__tq = variance_accounted
+
+    @property
+    def n_components(self):
+        return self.__n_components
+
+    @property
+    def scaling(self):
+        return self.__scaling
+
+    @property
+    def n_variables(self):
+        return self.__n_variables
+
+    @property
+    def S(self):
+        return self.__S
 
     @property
     def A(self):
@@ -1416,6 +1490,14 @@ class LPCA:
     @property
     def principal_components(self):
         return self.__principal_components
+
+    @property
+    def loadings(self):
+        return self.__loadings
+
+    @property
+    def tq(self):
+        return self.__tq
 
     def local_correlation(self, variable, index=0, metric='pearson', verbose=False):
         """
