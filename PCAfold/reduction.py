@@ -3574,7 +3574,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, bar_color=None, figure_size=None, title=None, save_filename=None):
+def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, rotate_label=False, bar_color=None, figure_size=None, title=None, save_filename=None):
     """
     Plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
@@ -3598,6 +3598,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
                                  eigenvectors_indices=[1,2],
                                  variable_names=['$a_1$', '$a_2$', '$a_3$'],
                                  plot_absolute=False,
+                                 rotate_label=True,
                                  bar_color=None,
                                  title='PCA on X',
                                  save_filename='PCA-X.pdf')
@@ -3614,8 +3615,11 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         is the number of eigenvectors provided.
     :param variable_names: (optional)
         ``list`` of ``str`` specifying variable names.
-    :param plot_absolute:
+    :param plot_absolute: (optional)
         ``bool`` specifying whether absolute values of eigenvectors should be plotted.
+    :param rotate_label: (optional)
+        ``bool`` specifying whether the labels on the x-axis should be rotated by 90 degrees.
+        It is recommended to set it to ``True`` for data sets with many variables for viewing clarity.
     :param bar_color: (optional)
         ``str`` specifying color of bars.
     :param figure_size: (optional)
@@ -3641,6 +3645,12 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
     if save_filename is not None:
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    if not isinstance(plot_absolute, bool):
+        raise ValueError("Parameter `plot_absolute` has to be of type `bool`.")
+
+    if not isinstance(rotate_label, bool):
+        raise ValueError("Parameter `rotate_label` has to be of type `bool`.")
 
     if bar_color == None:
         bar_color = '#191b27'
@@ -3674,7 +3684,11 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], 
         else:
             plt.bar(x_range, eigenvectors[:,n_pc], width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
 
-        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+        if rotate_label:
+            plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont, rotation=90)
+        else:
+            plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+
         if plot_absolute:
             plt.ylabel('PC-' + str(eigenvectors_indices[n_pc] + 1) + ' absolute weight [-]', fontsize=font_labels, **csfont)
         else:

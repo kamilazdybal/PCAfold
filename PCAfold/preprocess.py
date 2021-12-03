@@ -3270,7 +3270,17 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         (idx, _) = variable_bins(x, 4, verbose=False)
 
         # Plot the clustering result:
-        plt = plot_2d_clustering(x, y, idx, x_label='$x$', y_label='$y$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(10,6), title='x-y data set', save_filename='clustering.pdf')
+        plt = plot_2d_clustering(x,
+                             y,
+                             idx,
+                             x_label='$x$',
+                             y_label='$y$',
+                             color_map='viridis',
+                             first_cluster_index_zero=False,
+                             grid_on=True,
+                             figure_size=(10,6),
+                             title='x-y data set',
+                             save_filename='clustering.pdf')
         plt.close()
 
     :param x:
@@ -3454,7 +3464,18 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         (idx, _) = variable_bins(x, 4, verbose=False)
 
         # Plot the clustering result:
-        plt = plot_3d_clustering(x, y, z, idx, x_label='$x$', y_label='$y$', z_label='$z$', color_map='viridis', first_cluster_index_zero=False, figure_size=(10,6), title='x-y-z data set', save_filename='clustering.pdf')
+        plt = plot_3d_clustering(x,
+                                 y,
+                                 z,
+                                 idx,
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 z_label='$z$',
+                                 color_map='viridis',
+                                 first_cluster_index_zero=False,
+                                 figure_size=(10,6),
+                                 title='x-y-z data set',
+                                 save_filename='clustering.pdf')
         plt.close()
 
     :param x:
@@ -3720,11 +3741,23 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         (idx, borders) = variable_bins(x, 4, verbose=False)
 
         # Generate dummy sampling of the data set:
-        sample = DataSampler(idx, idx_test=[], random_seed=None, verbose=True)
+        sample = DataSampler(idx, random_seed=None, verbose=True)
         (idx_train, idx_test) = sample.number(40, test_selection_option=1)
 
         # Plot the sampling result:
-        plt = plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label='$x$', y_label='$y$', color_map='viridis', first_cluster_index_zero=False, grid_on=True, figure_size=(12,6), title='x-y data set', save_filename='sampling.pdf')
+        plt = plot_2d_train_test_samples(x,
+                                         y,
+                                         idx,
+                                         idx_train,
+                                         idx_test,
+                                         x_label='$x$',
+                                         y_label='$y$',
+                                         color_map='viridis',
+                                         first_cluster_index_zero=False,
+                                         grid_on=True,
+                                         figure_size=(12,6),
+                                         title='x-y data set',
+                                         save_filename='sampling.pdf')
         plt.close()
 
     :param x:
@@ -3910,7 +3943,14 @@ def plot_conditional_statistics(variable, conditioning_variable, k=20, split_val
         y = -conditioning_variable**2 + 1
 
         # Plot the conditional statistics:
-        plt = plot_conditional_statistics(y, conditioning_variable, k=10, x_label='$x$', y_label='$y$', figure_size=(10,3), title='Conditional mean', save_filename='conditional-mean.pdf')
+        plt = plot_conditional_statistics(y,
+                                          conditioning_variable,
+                                          k=10,
+                                          x_label='$x$',
+                                          y_label='$y$',
+                                          figure_size=(10,3),
+                                          title='Conditional mean',
+                                          save_filename='conditional-mean.pdf')
         plt.close()
 
     :param variable:
