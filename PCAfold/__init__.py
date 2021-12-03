@@ -47,6 +47,7 @@ from .reduction import plot_2d_manifold
 from .reduction import plot_3d_manifold
 from .reduction import plot_2d_manifold_sequence
 from .reduction import plot_parity
+from .reduction import plot_mode
 from .reduction import plot_eigenvectors
 from .reduction import plot_eigenvectors_comparison
 from .reduction import plot_eigenvalue_distribution

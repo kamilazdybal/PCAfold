@@ -3685,7 +3685,150 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=[], plot_absolute=False, rotate_label=False, bar_color=None, figure_size=None, title=None, save_filename=None):
+def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, figure_size=None, title=None, save_filename=None):
+    """
+    Plots weights on a generic mode.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_mode
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Perform PCA and obtain eigenvectors:
+        pca_X = PCA(X, n_components=2)
+        eigenvectors = pca_X.A
+
+        # Plot second and third eigenvector:
+        plt = plot_mode(eigenvectors[:,0],
+                         variable_names=['$a_1$', '$a_2$', '$a_3$'],
+                         plot_absolute=False,
+                         rotate_label=True,
+                         bar_color=None,
+                         figure_size=(5,3),
+                         title='PCA on X',
+                         save_filename='PCA-X.pdf')
+        plt.close()
+
+    :param mode:
+        ``numpy.ndarray`` specifying the mode to plot. It should be of size ``(n_variables,)`` or ``(n_variables,1)``.
+    :param mode_name:
+        ``str`` specifying the mode name.
+    :param variable_names: (optional)
+        ``list`` of ``str`` specifying variable names.
+    :param plot_absolute: (optional)
+        ``bool`` specifying whether absolute values of eigenvectors should be plotted.
+    :param rotate_label: (optional)
+        ``bool`` specifying whether the labels on the x-axis should be rotated by 90 degrees.
+        It is recommended to set it to ``True`` for data sets with many variables for viewing clarity.
+    :param bar_color: (optional)
+        ``str`` specifying color of bars.
+    :param figure_size: (optional)
+        tuple specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``. Note that a prefix ``eigenvector-#`` will be added out front
+        the filename, where ``#`` is the number of the currently plotted eigenvector.
+
+    :return:
+        - **plot_handle** - plot handle.
+    """
+
+    try:
+        (n_variables,) = np.shape(mode)
+        n_modes = 1
+    except:
+        (n_variables,n_modes) = np.shape(mode)
+
+    if n_modes != 1:
+        raise ValueError("Parameter `mode` should be of size `(n_variables,)` or `(n_variables,1)`.")
+
+    if mode_name is not None:
+        if not isinstance(mode_name, str):
+            raise ValueError("Parameter `mode_name` has to be of type `str`.")
+    else:
+        mode_name = 'Mode'
+
+    if variable_names is not None:
+        if not isinstance(variable_names, list):
+            raise ValueError("Parameter `variable_names` has to be of type `list`.")
+    else:
+        variable_names = ['$X_{' + str(i+1) + '}$' for i in range(0, n_variables)]
+
+    if not isinstance(plot_absolute, bool):
+        raise ValueError("Parameter `plot_absolute` has to be of type `bool`.")
+
+    if not isinstance(rotate_label, bool):
+        raise ValueError("Parameter `rotate_label` has to be of type `bool`.")
+
+    if bar_color is not None:
+        if not isinstance(bar_color, str):
+            raise ValueError("Parameter `bar_color` has to be of type `str`.")
+    else:
+        bar_color = '#191b27'
+
+    if figure_size is not None:
+        if not isinstance(figure_size, tuple):
+            raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    x_range = np.arange(1, n_variables+1)
+
+    if figure_size is None:
+        fig, ax = plt.subplots(figsize=(n_variables, 4))
+    else:
+        fig, ax = plt.subplots(figsize=figure_size)
+
+    if plot_absolute:
+        plt.bar(x_range, abs(mode.ravel()), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
+    else:
+        plt.bar(x_range, mode.ravel(), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
+
+    if rotate_label:
+        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont, rotation=90)
+    else:
+        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+
+    if plot_absolute:
+        plt.ylabel('Absolute ' + mode_name + ' [-]', fontsize=font_labels, **csfont)
+    else:
+        plt.ylabel(mode_name + ' [-]', fontsize=font_labels, **csfont)
+
+    plt.grid(alpha=grid_opacity, zorder=0)
+    plt.xlim(0, n_variables+1)
+
+    ax.spines["top"].set_visible(True)
+    ax.spines["bottom"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    ax.spines["left"].set_visible(True)
+
+    if title != None:
+        plt.title(title, fontsize=font_title, **csfont)
+
+    if save_filename != None:
+        plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, figure_size=None, title=None, save_filename=None):
     """
     Plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.

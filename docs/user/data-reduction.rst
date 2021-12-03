@@ -293,6 +293,11 @@ Plotting functions
 
 .. autofunction:: PCAfold.reduction.plot_parity
 
+``plot_mode``
+=====================
+
+.. autofunction:: PCAfold.reduction.plot_mode
+
 ``plot_eigenvectors``
 =====================
 

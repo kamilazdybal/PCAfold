@@ -2338,6 +2338,24 @@ class TestReduction(unittest.TestCase):
             plt = reduction.plot_parity(X[:,0], X_rec[:,0], color=X[0:10,0])
             plt.close()
 
+    def test_plot_mode_allowed_calls(self):
+
+        X = np.random.rand(100,5)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt_handle = reduction.plot_mode(pca_X.A[:,0])
+            plt_handle.close()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=2)
+            plt_handle = reduction.plot_mode(pca_X.A[:,0], mode_name='PC', plot_absolute=True, rotate_label=True, bar_color='r', figure_size=(10,2), title='A', save_filename=None)
+            plt_handle.close()
+        except Exception:
+            self.assertTrue(False)
+
     def test_plot_eigenvectors_allowed_calls(self):
 
         X = np.random.rand(100,5)
