@@ -12,10 +12,10 @@ class Preprocess(unittest.TestCase):
 
         try:
             X_log = preprocess.log_transform(X)
-            X_symlog = preprocess.log_transform(X, type='ln')
-            X_symlog = preprocess.log_transform(X, type='symlog', threshold=1)
-            X_symlog = preprocess.log_transform(X, type='symlog', threshold=1.e-2)
-            X_symlog = preprocess.log_transform(X, type='symlog', threshold=1.e-4)
+            X_symlog = preprocess.log_transform(X, method='ln')
+            X_symlog = preprocess.log_transform(X, method='symlog', threshold=1)
+            X_symlog = preprocess.log_transform(X, method='symlog', threshold=1.e-2)
+            X_symlog = preprocess.log_transform(X, method='symlog', threshold=1.e-4)
         except Exception:
             self.assertTrue(False)
 
@@ -26,7 +26,7 @@ class Preprocess(unittest.TestCase):
         X = np.random.rand(100,20) + 1
 
         with self.assertRaises(ValueError):
-            X_log = preprocess.log_transform(X, type='l')
+            X_log = preprocess.log_transform(X, method='l')
             X_log = preprocess.log_transform(X, threshold=[])
             X_log = preprocess.log_transform([1,2,3])
 # ------------------------------------------------------------------------------

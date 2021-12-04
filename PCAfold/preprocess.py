@@ -298,7 +298,7 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
 # ------------------------------------------------------------------------------
 
-def log_transform(X, type='log', threshold=1.e-6):
+def log_transform(X, method='log', threshold=1.e-6):
     """
     Performs log transformation of the original data set, :math:`\mathbf{X}`.
 
@@ -316,11 +316,11 @@ def log_transform(X, type='log', threshold=1.e-6):
         X_log = log_transform(X)
 
         # Perform symlog transformation:
-        X_symlog = log_transform(X, type='symlog', threshold='1.e-4')
+        X_symlog = log_transform(X, method='symlog', threshold='1.e-4')
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
-    :param type: (optional)
+    :param method: (optional)
         ``str`` specifying the log-transformation method. It can be one of the following: ``log``, ``ln``, ``symlog``.
     :param threshold: (optional)
         ``float`` or ``int`` specifying the threshold for symlog transformation.
@@ -329,7 +329,7 @@ def log_transform(X, type='log', threshold=1.e-6):
         - **X_transformed** - ``numpy.ndarray`` specifying the log-transformed data set. It has size ``(n_observations,n_variables)``.
     """
 
-    __types = ['log', 'ln', 'symlog']
+    __methods = ['log', 'ln', 'symlog']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -339,10 +339,10 @@ def log_transform(X, type='log', threshold=1.e-6):
     except:
         raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
 
-    if not isinstance(type, str):
-        raise ValueError("Parameter `type` has to be a string.")
+    if not isinstance(method, str):
+        raise ValueError("Parameter `method` has to be a string.")
     else:
-        if type.lower() not in __types:
+        if method.lower() not in __methods:
             raise ValueError("Unrecognized transformation method.")
 
     if not isinstance(threshold, float):
@@ -351,17 +351,17 @@ def log_transform(X, type='log', threshold=1.e-6):
 
     X_transformed = np.zeros_like(X)
 
-    if type == 'log':
+    if method == 'log':
 
         for j in range(0, n_variables):
             X_transformed[:,j] = np.log10(X[:,j])
 
-    elif type == 'ln':
+    elif method == 'ln':
 
         for j in range(0, n_variables):
             X_transformed[:,j] = np.log(X[:,j])
 
-    elif type == 'symlog':
+    elif method == 'symlog':
 
         for j in range(0, n_variables):
             for i in range(0,n_observations):
