@@ -12,6 +12,7 @@ __status__ = "Production"
 # Module: `preprocess`
 from .preprocess import center_scale
 from .preprocess import invert_center_scale
+from .preprocess import log_transform
 from .preprocess import remove_constant_vars
 from .preprocess import order_variables
 from .preprocess import PreProcessing

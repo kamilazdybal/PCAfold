@@ -298,6 +298,82 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
 # ------------------------------------------------------------------------------
 
+def log_transform(X, type='log', threshold=1.e-6):
+    """
+    Performs log transformation of the original data set, :math:`\mathbf{X}`.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import log_transform
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20) + 1
+
+        # Perform log transformation:
+        X_log = log_transform(X)
+
+        # Perform symlog transformation:
+        X_symlog = log_transform(X, type='symlog', threshold='1.e-4')
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param type: (optional)
+        ``str`` specifying the log-transformation method. It can be one of the following: ``log``, ``ln``, ``symlog``.
+    :param threshold: (optional)
+        ``float`` or ``int`` specifying the threshold for symlog transformation.
+
+    :return:
+        - **X_transformed** - ``numpy.ndarray`` specifying the log-transformed data set. It has size ``(n_observations,n_variables)``.
+    """
+
+    __types = ['log', 'ln', 'symlog']
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+    if not isinstance(type, str):
+        raise ValueError("Parameter `type` has to be a string.")
+    else:
+        if type.lower() not in __types:
+            raise ValueError("Unrecognized transformation method.")
+
+    if not isinstance(threshold, float):
+        if not isinstance(threshold, int):
+            raise ValueError("Parameter `threshold` has to be of type `float` or `int`.")
+
+    X_transformed = np.zeros_like(X)
+
+    if type == 'log':
+
+        for j in range(0, n_variables):
+            X_transformed[:,j] = np.log10(X[:,j])
+
+    elif type == 'ln':
+
+        for j in range(0, n_variables):
+            X_transformed[:,j] = np.log(X[:,j])
+
+    elif type == 'symlog':
+
+        for j in range(0, n_variables):
+            for i in range(0,n_observations):
+                if np.abs(X[i,j]) > threshold:
+                    X_transformed[i,j] = np.sign(X[i,j]) * np.log10(np.abs(X[i,j]))
+                else:
+                    X_transformed[i,j] = X[i,j]
+
+    return(X_transformed)
+
+# ------------------------------------------------------------------------------
+
 class PreProcessing:
     """
     Performs a composition of data manipulation done by ``remove_constant_vars``

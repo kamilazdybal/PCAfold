@@ -52,6 +52,11 @@ as centering and scaling and outlier detection and removal.
 
 .. autofunction:: PCAfold.preprocess.invert_center_scale
 
+``log_transform``
+=================
+
+.. autofunction:: PCAfold.preprocess.log_transform
+
 ``remove_constant_vars``
 ==========================
 
