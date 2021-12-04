@@ -228,7 +228,7 @@ class PCA:
 
             for j in range(0,self.n_components):
 
-                variance_sum += ( (self.__A[i,j] * self.__L[j]**0.5) / (np.std(X[:,i])) )**2
+                variance_sum += ( (self.__A[i,j] * self.__L[j]**0.5) / (np.std(self.__X_cs[:,i])) )**2
 
             tq[i] = variance_sum
 
@@ -1450,7 +1450,7 @@ class LPCA:
 
                 for j in range(0,self.__n_components):
 
-                    variance_sum += ( (pca.A[i,j] * pca.L[j]**0.5) / (np.std(X_k[:,i])) )**2
+                    variance_sum += ( (pca.A[i,j] * pca.L[j]**0.5) / (np.std(pca.X_cs[:,i])) )**2
 
                 tq[i] = variance_sum
 
