@@ -75,7 +75,7 @@ class PCA:
     where :math:`\mathbf{L}_j` is the :math:`j^{th}` eigenvalue and :math:`\mathbf{S}_{ii}`
     is the :math:`i^{th}` element on the diagonal of the covariance matrix, :math:`\mathbf{S}`.
 
-    The variance accounted for each variable, :math:`\mathbf{t_q}`, is computed at the class initialization:
+    The variance accounted for in each individual variable by the first :math:`q` PCs, :math:`\mathbf{t_q}`, is computed at the class initialization:
 
     .. math::
 
@@ -213,26 +213,27 @@ class PCA:
         # Compute loadings:
         loadings_matrix = np.zeros((self.n_variables, self.n_components))
 
-        for i in range(self.n_components):
-            for j in range(self.n_variables):
-                loadings_matrix[j, i] = (self.A[j, i] * np.sqrt(self.L[i])) / np.sqrt(self.S[j, j])
+        for i in range(self.n_variables):
+            for j in range(self.n_components):
+                loadings_matrix[i,j] = (self.A[i,j] * np.sqrt(self.L[j])) / np.sqrt(self.S[i,i])
 
         self.__loadings = loadings_matrix
 
-        # Compute the variance accounted for each variable:
+        # Compute the variance accounted for in each individual variable:
         tq = np.zeros((self.n_variables,))
 
         for i in range(0,self.n_variables):
-
             variance_sum = 0
-
             for j in range(0,self.n_components):
-
-                variance_sum += ( (self.__A[i,j] * self.__L[j]**0.5) / (np.std(self.__X_cs[:,i])) )**2
-
+                variance_sum += ( (self.A[i,j] * np.sqrt(self.L[j])) / (np.sqrt(self.S[i,i])) )**2
             tq[i] = variance_sum
 
-        self.__tq = tq
+        for i in range(0,self.n_variables):
+            constant_factor = 0
+            for j in range(0,self.n_variables):
+                constant_factor += ( (self.A[i,j] * np.sqrt(self.L[j])) / (np.sqrt(self.S[i,i])) )**2
+
+        self.__tq = tq / constant_factor
 
     @property
     def n_components(self):
@@ -1312,7 +1313,7 @@ class LPCA:
         # Access the local loadings in the first cluster:
         l_k1 = lpca_X.loadings[0]
 
-        # Access the local variance accounted for each variable in the first cluster:
+        # Access the local variance accounted for in each individual variable in the first cluster:
         tq_k1 = lpca_X.tq[0]
 
     :param X:
@@ -1340,7 +1341,7 @@ class LPCA:
     - **L** - (read only) ``list`` of ``numpy.ndarray`` specifying the local eigenvalues, :math:`\mathbf{L}`. Each list element corresponds to eigenvalues in a single cluster.
     - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     - **loadings** - (read only) ``list`` of ``numpy.ndarray`` specifying the local loadings, :math:`\mathbf{l}`. Each list element corresponds to loadings in a single cluster.
-    - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for each variable, :math:`\mathbf{t_q}`. Each list element corresponds to variance metric in a single cluster.
+    - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for in each individual variable by the first :math:`q` PCs, :math:`\mathbf{t_q}`. Each list element corresponds to variance metric in a single cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1435,26 +1436,27 @@ class LPCA:
             # Compute loadings:
             loadings_matrix = np.zeros((self.__n_variables, self.__n_components))
 
-            for i in range(self.__n_components):
-                for j in range(self.__n_variables):
-                    loadings_matrix[j, i] = (pca.A[j, i] * np.sqrt(pca.L[i])) / np.sqrt(pca.S[j, j])
+            for i in range(self.__n_variables):
+                for j in range(self.__n_components):
+                    loadings_matrix[i,j] = (pca.A[i,j] * np.sqrt(pca.L[j])) / np.sqrt(pca.S[i,i])
 
             loadings.append(loadings_matrix)
 
             # Compute the variance accounted for each variable:
             tq = np.zeros((self.__n_variables,))
 
-            for i in range(0,self.__n_variables):
-
+            for i in range(0,self.n_variables):
                 variance_sum = 0
-
-                for j in range(0,self.__n_components):
-
-                    variance_sum += ( (pca.A[i,j] * pca.L[j]**0.5) / (np.std(pca.X_cs[:,i])) )**2
-
+                for j in range(0,self.n_components):
+                    variance_sum += ( (pca.A[i,j] * np.sqrt(pca.L[j])) / (np.sqrt(pca.S[i,i])) )**2
                 tq[i] = variance_sum
 
-            variance_accounted.append(tq)
+            for i in range(0,self.n_variables):
+                constant_factor = 0
+                for j in range(0,self.n_variables):
+                    constant_factor += ( (pca.A[i,j] * np.sqrt(pca.L[j])) / (np.sqrt(pca.S[i,i])) )**2
+
+            variance_accounted.append(tq / constant_factor)
 
         self.__S = covariance_matrix
         self.__A = eigenvectors
