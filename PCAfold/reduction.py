@@ -232,10 +232,7 @@ class PCA:
             constant_factor = 0
             for j in range(0,self.n_variables):
                 if not np.isnan(self.L[j]):
-                    if self.L[j] < 0:
-                        constant_factor += ( (self.A[i,j] * np.sqrt(-self.L[j])) / (np.sqrt(self.S[i,i])) )**2
-                    else:
-                        constant_factor += ( (self.A[i,j] * np.sqrt(self.L[j])) / (np.sqrt(self.S[i,i])) )**2
+                    constant_factor += ( (self.A[i,j] * np.sqrt(np.abs(self.L[j]))) / (np.sqrt(self.S[i,i])) )**2
 
         self.__tq = tq / constant_factor
 
@@ -1458,7 +1455,8 @@ class LPCA:
             for i in range(0,self.n_variables):
                 constant_factor = 0
                 for j in range(0,self.n_variables):
-                    constant_factor += ( (pca.A[i,j] * np.sqrt(pca.L[j])) / (np.sqrt(pca.S[i,i])) )**2
+                    if not np.isnan(pca.L[j]):
+                        constant_factor += ( (pca.A[i,j] * np.sqrt(np.abs(pca.L[j]))) / (np.sqrt(pca.S[i,i])) )**2
 
             variance_accounted.append(tq / constant_factor)
 
