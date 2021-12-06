@@ -302,6 +302,24 @@ def log_transform(X, method='log', threshold=1.e-6):
     """
     Performs log transformation of the original data set, :math:`\mathbf{X}`.
 
+    For an example original function:
+
+    .. image:: ../images/log_transform-original-function.svg
+        :width: 700
+        :align: center
+
+    The symlog transformation can be obtained with ``method='symlog'``:
+
+    .. image:: ../images/log_transform-symlog.svg
+        :width: 700
+        :align: center
+
+    The continuous symlog transformation can be obtained with ``method='continuous-symlog'``:
+
+    .. image:: ../images/log_transform-continuous-symlog.svg
+        :width: 700
+        :align: center
+
     **Example:**
 
     .. code:: python
@@ -321,7 +339,7 @@ def log_transform(X, method='log', threshold=1.e-6):
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param method: (optional)
-        ``str`` specifying the log-transformation method. It can be one of the following: ``log``, ``ln``, ``symlog``.
+        ``str`` specifying the log-transformation method. It can be one of the following: ``log``, ``ln``, ``symlog``, ``continuous-symlog``.
     :param threshold: (optional)
         ``float`` or ``int`` specifying the threshold for symlog transformation.
 
@@ -329,7 +347,7 @@ def log_transform(X, method='log', threshold=1.e-6):
         - **X_transformed** - ``numpy.ndarray`` specifying the log-transformed data set. It has size ``(n_observations,n_variables)``.
     """
 
-    __methods = ['log', 'ln', 'symlog']
+    __methods = ['log', 'ln', 'symlog', 'continuous-symlog']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -369,6 +387,12 @@ def log_transform(X, method='log', threshold=1.e-6):
                     X_transformed[i,j] = np.sign(X[i,j]) * np.log10(np.abs(X[i,j]))
                 else:
                     X_transformed[i,j] = X[i,j]
+
+    elif method == 'continuous-symlog':
+
+        for j in range(0, n_variables):
+            for i in range(0,n_observations):
+                    X_transformed[i,j] = np.sign(X[i,j]) * np.log10(1. + np.abs(X[i,j]/threshold))
 
     return(X_transformed)
 
