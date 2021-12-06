@@ -3687,7 +3687,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, figure_size=None, title=None, save_filename=None):
+def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, ylim=None, figure_size=None, title=None, save_filename=None):
     """
     Plots weights on a generic mode.
 
@@ -3729,6 +3729,8 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
         It is recommended to set it to ``True`` for data sets with many variables for viewing clarity.
     :param bar_color: (optional)
         ``str`` specifying color of bars.
+    :param ylim: (optional)
+        ``list`` specifying limits on the y-axis.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
@@ -3777,6 +3779,10 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
     else:
         bar_color = '#191b27'
 
+    if ylim is not None:
+        if not isinstance(ylim, list):
+            raise ValueError("Parameter `ylim` has to be of type `list`.")
+
     if figure_size is not None:
         if not isinstance(figure_size, tuple):
             raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
@@ -3813,6 +3819,7 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
 
     plt.grid(alpha=grid_opacity, zorder=0)
     plt.xlim(0, n_variables+1)
+    if ylim is not None: plt.ylim(ylim)
 
     ax.spines["top"].set_visible(True)
     ax.spines["bottom"].set_visible(True)
