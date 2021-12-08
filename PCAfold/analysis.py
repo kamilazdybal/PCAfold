@@ -1247,7 +1247,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
         variables in :math:`\\mathbf{X}`. This parameter is applicable to data sets
         representing reactive flows. More information can be found in :cite:`Sutherland2009`. It should be of size ``(n_observations,n_variables)``.
     :param variable_names:
-        ``list`` of ``str`` specifying variables names.
+        ``list`` of ``str`` specifying variables names. Order of names in the ``variable_names`` list should match the order of variables (columns) in ``X``.
     :param scaling: (optional)
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
@@ -1305,6 +1305,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     if n_variables_source != n_variables:
         raise ValueError("Parameter `X_source` has different number of variables than `X`.")
 
+    # TODO: In the future, we might want to allow different number of observations, there is no reason why they should be equal.
     if n_observations_source != n_observations:
         raise ValueError("Parameter `X_source` has different number of observations than `X`.")
 
@@ -1323,7 +1324,6 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     if d_hat_variables is not None:
         if not isinstance(d_hat_variables, np.ndarray):
             raise ValueError("Parameter `d_hat_variables` has to be of type `numpy.ndarray`.")
-
         try:
             (n_d_hat_observations, n_d_hat_variables) = np.shape(d_hat_variables)
             d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
@@ -1336,24 +1336,22 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     if not isinstance(add_transformed_source, bool):
         raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
 
+    if d_hat_variables is None:
+        if not add_transformed_source:
+            raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
+
     if source_space is not None:
         if not isinstance(source_space, str):
             raise ValueError("Parameter `source_space` has to be of type `str`.")
         if source_space.lower() not in __source_spaces:
-            raise ValueError("Parameter `source_space` can only be `symlog` or `continuous-symlog`.")
-
-    if d_hat_variables is None:
-        if not add_transformed_source:
-            raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
+            raise ValueError("Parameter `source_space` has to be one of the following: symlog`, `continuous-symlog`.")
 
     if not isinstance(target_manifold_dimensionality, int):
         raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
 
     if weight is not None:
-
         if not isinstance(weight, str):
             raise ValueError("Parameter `weight` has to be of type `str`.")
-
         if weight not in __weights:
             raise ValueError("Parameter `weight` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
 
@@ -1369,13 +1367,8 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be of type `bool`.")
 
-    (_, n_variables) = np.shape(X)
-
-    variables_indices = [i for i in range(0,n_variables)]
-
     costs = []
 
-    # Iterate the algorithm: -------------
     if verbose: print('Optimizing...\n')
 
     if verbose:
@@ -1391,6 +1384,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
     loop_counter = 0
 
+    # Iterate the algorithm: ---------------------------------------------------
     while len(remaining_variables_list) > target_manifold_dimensionality:
 
         iteration_tic = time.perf_counter()
@@ -1408,6 +1402,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
             if verbose: print('\tCurrently eliminated variable: ' + variable_names[i_variable])
 
+            # Consider a subset with all variables but the currently eliminated one:
             current_variables_list = [i for i in remaining_variables_list if i != i_variable]
 
             if verbose:
@@ -1430,45 +1425,53 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
                     depvars = np.hstack((PC_sources, d_hat_variables))
                     depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
                 else:
-                    depvars = d_hat_variables
-                    depvar_names = d_hat_variables_names
+                    depvars = cp.deepcopy(d_hat_variables)
+                    depvar_names = cp.deepcopy(d_hat_variables_names)
 
             current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
-            current_derivative, current_sigma, _ = normalized_variance_derivative(current_variance_data)
-
             current_area = cost_function_normalized_variance_derivative(current_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
 
+            # Starting from the second iteration, we can make a comparison with the previous iteration's results:
             if loop_counter > 1:
-
                 if current_area <= previous_area:
                     if verbose: print(colored('\tSAME OR BETTER', 'green'))
                 else:
                     if verbose: print(colored('\tWORSE', 'red'))
 
         min_area = np.min(current_cost_function)
+        costs.append(min_area)
+
+        # Search for the variable whose removal will decrease the cost the most:
         (worst_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
+
+        # This handles cases where there are multiple minima with the same minimum cost value:
         try:
             worst_variable_index = int(worst_variable_index)
         except:
             worst_variable_index = int(worst_variable_index[0])
 
         if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[worst_variable_index]] + ' is removed.\n\tCost:\t%.4f' % min_area + '\n')
+
+        # Append removed variable in the ascending order, this list is later flipped to have variables ordered from most to least important:
         ordered_variables.append(remaining_variables_list[worst_variable_index])
+
+        # Create a new list of variables to loop over at the next iteration:
         remaining_variables_list = [i for i in range(0,n_variables) if i not in ordered_variables]
+
         if loop_counter > 1:
             if min_area <= previous_area:
                 previous_area = min_area
         else:
             previous_area = min_area
-        costs.append(min_area)
 
         iteration_toc = time.perf_counter()
         if verbose: print(f'\tIteration time: {(iteration_toc - iteration_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    # Compute the optimal subset where the cost is minimized: ------------------
+    # Compute the optimal subset where the overal cost from all iterations is minimized: ------------------
 
+    # One last time remove the worst variable:
     del current_cost_function[worst_variable_index]
 
     for i in remaining_variables_list:
@@ -1477,10 +1480,13 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     for i in range(0,len(remaining_variables_list)):
         costs.append(current_cost_function[i])
 
+    # Invert lists to have variables ordered from most to least important:
     ordered_variables = ordered_variables[::-1]
     costs = costs[::-1]
 
     (min_cost_function_index, ) = np.where(costs==np.min(costs))
+
+    # This handles cases where there are multiple minima with the same minimum cost value:
     try:
         min_cost_function_index = int(min_cost_function_index)
     except:
