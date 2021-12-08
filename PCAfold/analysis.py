@@ -1427,7 +1427,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
                     depvars = np.hstack((PC_sources, transformed_PC_sources))
                     depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
                 elif source_space == 'symlog' or source_space == 'continuous-symlog':
-                    depvars = np.deepcopy(transformed_PC_sources)
+                    depvars = cp.deepcopy(transformed_PC_sources)
                     depvar_names = ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
                 else:
                     depvars = cp.deepcopy(PC_sources)
