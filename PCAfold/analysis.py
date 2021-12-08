@@ -1259,7 +1259,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     :param add_transformed_source: (optional)
         ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
     :param source_space: (optional)
-        ``str`` specifying the space to which the PC source terms should be transformed before computing the cost. It can be one of the following: ``symlog``, ``continuous-symlog``. If set to ``None``, PC source terms are kept in their original PCA-space.
+        ``str`` specifying the space to which the PC source terms should be transformed before computing the cost. It can be one of the following: ``symlog``, ``continuous-symlog``, ``original-and-symlog``, ``original-and-continuous-symlog``. If set to ``None``, PC source terms are kept in their original PCA-space.
     :param target_manifold_dimensionality: (optional)
         ``int`` specifying the target dimensionality of the PCA manifold.
     :param weight: (optional)
@@ -1284,7 +1284,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
     __weights = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
-    __source_spaces = ['symlog', 'continuous-symlog']
+    __source_spaces = ['symlog', 'continuous-symlog', 'original-and-symlog', 'original-and-continuous-symlog']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -1415,15 +1415,34 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
             if add_transformed_source:
                 PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
                 if source_space is not None:
-                    PC_sources = preprocess.log_transform(PC_sources, method=source_space, threshold=1.e-4)
+                    if source_space == 'original-and-symlog':
+                        transformed_PC_sources = preprocess.log_transform(PC_sources, method='symlog', threshold=1.e-4)
+                    elif source_space == 'original-and-continuous-symlog':
+                        transformed_PC_sources = preprocess.log_transform(PC_sources, method='continuous-symlog', threshold=1.e-4)
+                    else:
+                        transformed_PC_sources = preprocess.log_transform(PC_sources, method=source_space, threshold=1.e-4)
 
             if d_hat_variables is None:
-                depvars = cp.deepcopy(PC_sources)
-                depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
+                if source_space == 'original-and-symlog' or source_space == 'original-and-continuous-symlog':
+                    depvars = np.hstack((PC_sources, transformed_PC_sources))
+                    depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
+                elif source_space == 'symlog' or source_space == 'continuous-symlog':
+                    depvars = np.deepcopy(transformed_PC_sources)
+                    depvar_names = ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
+                else:
+                    depvars = cp.deepcopy(PC_sources)
+                    depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
             else:
                 if add_transformed_source:
-                    depvars = np.hstack((PC_sources, d_hat_variables))
-                    depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
+                    if source_space == 'original-and-symlog' or source_space == 'original-and-continuous-symlog':
+                        depvars = np.hstack((PC_sources, transformed_PC_sources, d_hat_variables))
+                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
+                    elif source_space == 'symlog' or source_space == 'continuous-symlog':
+                        depvars = np.hstack((transformed_PC_sources, d_hat_variables))
+                        depvar_names = ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
+                    else:
+                        depvars = np.hstack((PC_sources, d_hat_variables))
+                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
                 else:
                     depvars = cp.deepcopy(d_hat_variables)
                     depvar_names = cp.deepcopy(d_hat_variables_names)
