@@ -1183,7 +1183,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, weight=None, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, weight=None, norm='max', integrate_to_peak=False, verbose=False):
     """
     Manifold-informed feature selection algorithm based on backward elimination. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
@@ -1258,6 +1258,8 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
         ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
     :param add_transformed_source: (optional)
         ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
+    :param source_space: (optional)
+        ``str`` specifying the space to which the PC source terms should be transformed before computing the cost. It can be one of the following: ``symlog``, ``continuous-symlog``. If set to ``None``, PC source terms are kept in their original PCA-space.
     :param target_manifold_dimensionality: (optional)
         ``int`` specifying the target dimensionality of the PCA manifold.
     :param weight: (optional)
@@ -1282,6 +1284,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
     __weights = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
+    __source_spaces = ['symlog', 'continuous-symlog']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -1333,6 +1336,12 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     if not isinstance(add_transformed_source, bool):
         raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
 
+    if source_space is not None:
+        if not isinstance(source_space, str):
+            raise ValueError("Parameter `source_space` has to be of type `str`.")
+        if source_space.lower() not in __source_spaces:
+            raise ValueError("Parameter `source_space` can only be `symlog` or `continuous-symlog`.")
+
     if d_hat_variables is None:
         if not add_transformed_source:
             raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
@@ -1369,6 +1378,11 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     # Iterate the algorithm: -------------
     if verbose: print('Optimizing...\n')
 
+    if verbose:
+        if add_transformed_source is not None:
+            if source_space is not None:
+                print('PC source terms will be assessed in the ' + source_space + ' space.\n')
+
     total_tic = time.perf_counter()
 
     remaining_variables_list = [i for i in range(0,n_variables)]
@@ -1402,7 +1416,11 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
             pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=target_manifold_dimensionality)
             PCs = pca.transform(X[:,current_variables_list])
-            PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
+
+            if add_transformed_source:
+                PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
+                if source_space is not None:
+                    PC_sources = preprocess.log_transform(PC_sources, method=source_space, threshold=1.e-4)
 
             if d_hat_variables is None:
                 depvars = cp.deepcopy(PC_sources)
