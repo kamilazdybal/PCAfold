@@ -334,7 +334,7 @@ def log_transform(X, method='log', threshold=1.e-6):
         X_log = log_transform(X)
 
         # Perform symlog transformation:
-        X_symlog = log_transform(X, method='symlog', threshold='1.e-4')
+        X_symlog = log_transform(X, method='symlog', threshold=1.e-4)
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
