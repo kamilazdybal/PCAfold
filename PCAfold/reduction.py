@@ -211,6 +211,12 @@ class PCA:
         # Set number of variables in a data set (equal to the number of eigenvalues):
         self.__n_variables = len(self.L)
 
+        # Compute a constant factor to scale the eigenvalues:
+        constant_factor = 0
+        for j in range(0,self.n_variables):
+            if not np.isnan(self.L[j]):
+                constant_factor += ( (self.A[0,j] * np.sqrt(np.abs(self.L[j]))) / (np.sqrt(self.S[0,0])) )**2
+
         # Compute loadings:
         loadings_matrix = np.zeros((self.n_variables, self.n_components))
 
@@ -218,16 +224,10 @@ class PCA:
             for j in range(self.n_components):
                 loadings_matrix[i,j] = (self.A[i,j] * np.sqrt(self.L[j])) / np.sqrt(self.S[i,i])
 
-        self.__loadings = loadings_matrix
+        self.__loadings = loadings_matrix / np.sqrt(constant_factor)
 
         # Compute the variance accounted for each individual variable in each PC:
         tqj = np.zeros((self.n_variables, self.n_components))
-
-        for i in range(0,self.n_variables):
-            constant_factor = 0
-            for j in range(0,self.n_variables):
-                if not np.isnan(self.L[j]):
-                    constant_factor += ( (self.A[i,j] * np.sqrt(np.abs(self.L[j]))) / (np.sqrt(self.S[i,i])) )**2
 
         for i in range(0,self.n_variables):
             for j in range(0,self.n_components):
@@ -1441,6 +1441,12 @@ class LPCA:
             eigenvalues.append(pca.L[0:self.__n_components])
             PCs.append(Z)
 
+            # Compute a constant factor to scale the eigenvalues:
+            constant_factor = 0
+            for j in range(0,self.__n_variables):
+                if not np.isnan(pca.L[j]):
+                    constant_factor += ( (pca.A[0,j] * np.sqrt(np.abs(pca.L[j]))) / (np.sqrt(pca.S[0,0])) )**2
+
             # Compute loadings:
             loadings_matrix = np.zeros((self.__n_variables, self.__n_components))
 
@@ -1448,7 +1454,7 @@ class LPCA:
                 for j in range(self.__n_components):
                     loadings_matrix[i,j] = (pca.A[i,j] * np.sqrt(pca.L[j])) / np.sqrt(pca.S[i,i])
 
-            loadings.append(loadings_matrix)
+            loadings.append(loadings_matrix / np.sqrt(constant_factor))
 
             # Compute the variance accounted for each variable in each individual PC:
             tqj = np.zeros((self.__n_variables, self.__n_components))
@@ -1456,12 +1462,6 @@ class LPCA:
             for i in range(0,self.__n_variables):
                 for j in range(0,self.__n_components):
                     tqj[i,j] = ( (pca.A[i,j] * np.sqrt(pca.L[j])) / (np.sqrt(pca.S[i,i])) )**2
-
-            for i in range(0,self.__n_variables):
-                constant_factor = 0
-                for j in range(0,self.__n_variables):
-                    if not np.isnan(pca.L[j]):
-                        constant_factor += ( (pca.A[i,j] * np.sqrt(np.abs(pca.L[j]))) / (np.sqrt(pca.S[i,i])) )**2
 
             variance_accounted_individually.append(tqj / constant_factor)
 
