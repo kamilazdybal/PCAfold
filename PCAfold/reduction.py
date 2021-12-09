@@ -138,7 +138,8 @@ class PCA:
     - **L** - (read only) vector of eigenvalues, :math:`\mathbf{L}`.
     - **A** - (read only) matrix of eigenvectors, :math:`\mathbf{A}`, (vectors are stored in columns, rows correspond to weights).
     - **loadings** - (read only) loadings, :math:`\mathbf{l}`, (vectors are stored in columns, rows correspond to weights).
-    - **tq** - (read only) variance accounted for each variable, :math:`\mathbf{t_q}`.
+    - **tq** - (read only) variance accounted for in each individual variable, :math:`\mathbf{t_q}`.
+    - **tq** - (read only) variance accounted for in each individual variable in each PC, :math:`\mathbf{t_{q,j}}`.
     """
 
     def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -219,14 +220,8 @@ class PCA:
 
         self.__loadings = loadings_matrix
 
-        # Compute the variance accounted for in each individual variable:
-        tq = np.zeros((self.n_variables,))
-
-        for i in range(0,self.n_variables):
-            variance_sum = 0
-            for j in range(0,self.n_components):
-                variance_sum += ( (self.A[i,j] * np.sqrt(self.L[j])) / (np.sqrt(self.S[i,i])) )**2
-            tq[i] = variance_sum
+        # Compute the variance accounted for each individual variable in each PC:
+        tqj = np.zeros((self.n_variables, self.n_components))
 
         for i in range(0,self.n_variables):
             constant_factor = 0
@@ -234,7 +229,14 @@ class PCA:
                 if not np.isnan(self.L[j]):
                     constant_factor += ( (self.A[i,j] * np.sqrt(np.abs(self.L[j]))) / (np.sqrt(self.S[i,i])) )**2
 
-        self.__tq = tq / constant_factor
+        for i in range(0,self.n_variables):
+            for j in range(0,self.n_components):
+                tqj[i,j] = ( (self.A[i,j] * np.sqrt(self.L[j])) / (np.sqrt(self.S[i,i])) )**2 / constant_factor
+
+        self.__tqj = tqj
+
+        # Compute the variance accounted for in each individual variable:
+        self.__tq = np.sum(self.tqj, axis=1)
 
     @property
     def n_components(self):
@@ -283,6 +285,10 @@ class PCA:
     @property
     def tq(self):
         return self.__tq
+
+    @property
+    def tqj(self):
+        return self.__tqj
 
     @n_components.setter
     def n_components(self, new_n_components):
@@ -1415,6 +1421,7 @@ class LPCA:
         PCs = []
         loadings = []
         variance_accounted = []
+        variance_accounted_individually = []
 
         for k in range(0, n_clusters):
 
@@ -1443,22 +1450,23 @@ class LPCA:
 
             loadings.append(loadings_matrix)
 
-            # Compute the variance accounted for each variable:
-            tq = np.zeros((self.__n_variables,))
+            # Compute the variance accounted for each variable in each individual PC:
+            tqj = np.zeros((self.__n_variables, self.__n_components))
 
-            for i in range(0,self.n_variables):
-                variance_sum = 0
-                for j in range(0,self.n_components):
-                    variance_sum += ( (pca.A[i,j] * np.sqrt(pca.L[j])) / (np.sqrt(pca.S[i,i])) )**2
-                tq[i] = variance_sum
+            for i in range(0,self.__n_variables):
+                for j in range(0,self.__n_components):
+                    tqj[i,j] = ( (pca.A[i,j] * np.sqrt(pca.L[j])) / (np.sqrt(pca.S[i,i])) )**2
 
-            for i in range(0,self.n_variables):
+            for i in range(0,self.__n_variables):
                 constant_factor = 0
-                for j in range(0,self.n_variables):
+                for j in range(0,self.__n_variables):
                     if not np.isnan(pca.L[j]):
                         constant_factor += ( (pca.A[i,j] * np.sqrt(np.abs(pca.L[j]))) / (np.sqrt(pca.S[i,i])) )**2
 
-            variance_accounted.append(tq / constant_factor)
+            variance_accounted_individually.append(tqj / constant_factor)
+
+            # Compute the variance accounted for each variable:
+            variance_accounted.append(np.sum(tqj / constant_factor, axis=1))
 
         self.__S = covariance_matrix
         self.__A = eigenvectors
@@ -1466,6 +1474,7 @@ class LPCA:
         self.__principal_components = PCs
         self.__loadings = loadings
         self.__tq = variance_accounted
+        self.__tqj = variance_accounted_individually
 
     @property
     def n_components(self):
@@ -1502,6 +1511,10 @@ class LPCA:
     @property
     def tq(self):
         return self.__tq
+
+    @property
+    def tqj(self):
+        return self.__tqj
 
     def local_correlation(self, variable, index=0, metric='pearson', verbose=False):
         """
@@ -3986,7 +3999,7 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=None
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, color_map='coolwarm', figure_size=None, title=None, save_filename=None):
+def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, rotate_label=False, ylim=None, color_map='coolwarm', figure_size=None, title=None, save_filename=None):
     """
     Plots a comparison of weights on eigenvectors.
 
@@ -4024,6 +4037,9 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         ``list`` of ``str`` specifying variable names.
     :param plot_absolute:
         ``bool`` specifying whether absolute values of eigenvectors should be plotted.
+    :param rotate_label: (optional)
+        ``bool`` specifying whether the labels on the x-axis should be rotated by 90 degrees.
+        It is recommended to set it to ``True`` for data sets with many variables for viewing clarity.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'coolwarm'``.
     :param figure_size: (optional)
@@ -4040,6 +4056,9 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
     :return:
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
+
+    if not isinstance(rotate_label, bool):
+        raise ValueError("Parameter `rotate_label` has to be of type `bool`.")
 
     if title is not None:
         if not isinstance(title, str):
@@ -4095,20 +4114,21 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         else:
             plt.bar(x_range + n_set*updated_bar_width, eigenvectors_tuple[n_set], width=updated_bar_width, color=sets_colors[n_set], edgecolor=sets_colors[n_set], align='center', zorder=2, label=legend_labels[n_set])
 
-    plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+    if rotate_label:
+        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont, rotation=90)
+    else:
+        plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
+
     if plot_absolute:
         plt.ylabel('Absolute weight [-]', fontsize=font_labels, **csfont)
     else:
         plt.ylabel('Weight [-]', fontsize=font_labels, **csfont)
 
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=True, shadow=True, ncol=n_sets, fontsize=font_legend, markerscale=marker_scale_legend)
+    plt.legend(loc='best', fancybox=True, shadow=True, ncol=n_sets, fontsize=font_legend, markerscale=marker_scale_legend)
 
     plt.grid(alpha=grid_opacity, zorder=0)
     plt.xlim(0, n_variables+1)
-    if plot_absolute == True:
-        plt.ylim(-0.05,1.05)
-    else:
-        plt.ylim(-1.05,1.05)
+    if ylim is not None: plt.ylim(ylim)
 
     ax.spines["top"].set_visible(True)
     ax.spines["bottom"].set_visible(True)
