@@ -99,6 +99,8 @@ class TestReduction(unittest.TestCase):
         with self.assertRaises(AttributeError):
             pca.tq = 1
         with self.assertRaises(AttributeError):
+            pca.tqj = 1
+        with self.assertRaises(AttributeError):
             pca.scaling = 1
         with self.assertRaises(AttributeError):
             pca.n_variables = 1
@@ -120,6 +122,7 @@ class TestReduction(unittest.TestCase):
             pca.L
             pca.loadings
             pca.tq
+            pca.tqj
             pca.scaling
             pca.n_variables
             pca.n_components_init
@@ -487,6 +490,16 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
+            pca_X = PCA(X, scaling='0to1', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
             pca_X = PCA(X, scaling='-1to1', n_components=0)
             principal_components = pca_X.transform(X)
             X_rec = pca_X.reconstruct(principal_components)
@@ -602,6 +615,16 @@ class TestReduction(unittest.TestCase):
 
         try:
             pca_X = PCA(X, scaling='level', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='0to1', n_components=0)
             principal_components = pca_X.transform(X, nocenter=True)
             X_rec = pca_X.reconstruct(principal_components, nocenter=True)
             difference = abs(X - X_rec)
@@ -736,6 +759,16 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
+            pca_X = PCA(X, scaling='0to1', n_components=0)
+            principal_components = pca_X.transform(X)
+            X_rec = pca_X.reconstruct(principal_components)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
             pca_X = PCA(X, scaling='-1to1', n_components=0)
             principal_components = pca_X.transform(X)
             X_rec = pca_X.reconstruct(principal_components)
@@ -852,6 +885,16 @@ class TestReduction(unittest.TestCase):
 
         try:
             pca_X = PCA(X_init, scaling='level', n_components=0)
+            principal_components = pca_X.transform(X, nocenter=True)
+            X_rec = pca_X.reconstruct(principal_components, nocenter=True)
+            difference = abs(X - X_rec)
+            comparison = difference < 10**(-14)
+            self.assertTrue(comparison.all())
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='0to1', n_components=0)
             principal_components = pca_X.transform(X, nocenter=True)
             X_rec = pca_X.reconstruct(principal_components, nocenter=True)
             difference = abs(X - X_rec)
@@ -1227,6 +1270,13 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
+            pca_X = PCA(test_data_set, scaling='0to1', n_components=20, use_eigendec=True, nocenter=False)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
             pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=False)
             r2_values = pca_X.calculate_r2(test_data_set)
             self.assertTrue(np.allclose(r2_values, r2_test))
@@ -1316,6 +1366,13 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
+            pca_X = PCA(test_data_set, scaling='0to1', n_components=20, use_eigendec=True, nocenter=True)
+            r2_values = pca_X.calculate_r2(test_data_set)
+            self.assertTrue(np.allclose(r2_values, r2_test))
+        except Exception:
+            self.assertTrue(False)
+
+        try:
             pca_X = PCA(test_data_set, scaling='-1to1', n_components=20, use_eigendec=True, nocenter=True)
             r2_values = pca_X.calculate_r2(test_data_set)
             self.assertTrue(np.allclose(r2_values, r2_test))
@@ -1364,6 +1421,36 @@ class TestReduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+    def test_tq_tqj_loadings_computation(self):
+
+        X = np.random.rand(1000,20)
+
+        try:
+            pca_X = PCA(X, scaling='auto', n_components=10)
+            tq = pca_X.tq
+            tqj = pca_X.tqj
+            loadings = pca_X.loadings
+            self.assertTrue(np.array_equal(tq, np.sum(tqj, axis=1)))
+            difference = abs(tq - np.sum(tqj, axis=1))
+            comparison = difference < 10**(-14)
+            comparison.all()
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            pca_X = PCA(X, scaling='auto')
+            tq = pca_X.tq
+            tqj = pca_X.tqj
+            loadings = pca_X.loadings
+            difference = abs(np.ones_like(tq) - tq)
+            comparison = difference < 10**(-14)
+            comparison.all()
+            difference = abs(np.ones_like(tq) - np.sum(loadings**2, axis=1))
+            comparison = difference < 10**(-14)
+            comparison.all()
+        except Exception:
+            self.assertTrue(False)
+
 ################################################################################
 #
 # Test LPCA class
@@ -1386,6 +1473,7 @@ class TestReduction(unittest.TestCase):
             Z = lpca_X.principal_components
             l = lpca_X.loadings
             tq = lpca_X.tq
+            tqj = lpca_X.tqj
 
             S_k1 = lpca_X.S[0]
             A_k1 = lpca_X.A[0]
@@ -1393,6 +1481,7 @@ class TestReduction(unittest.TestCase):
             Z_k1 = lpca_X.principal_components[0]
             l_k1 = lpca_X.loadings[0]
             tq_k1 = lpca_X.tq[0]
+            tqj_k1 = lpca_X.tqj[0]
 
             S1_k1 = lpca_X.S[0][0,0]
             A1_k1 = lpca_X.A[0][:,0]
@@ -1400,6 +1489,7 @@ class TestReduction(unittest.TestCase):
             Z1_k1 = lpca_X.principal_components[0][:,0]
             l1_k1 = lpca_X.loadings[0][:,0]
             tq1_k1 = lpca_X.tq[0][0]
+            tqj1_k1 = lpca_X.tqj[0][:,0]
 
         except Exception:
             self.assertTrue(False)
@@ -1417,6 +1507,7 @@ class TestReduction(unittest.TestCase):
             Z = lpca_X.principal_components
             l = lpca_X.loadings
             tq = lpca_X.tq
+            tqj = lpca_X.tqj
 
             S_k1 = lpca_X.S[0]
             A_k1 = lpca_X.A[0]
@@ -1424,6 +1515,7 @@ class TestReduction(unittest.TestCase):
             Z_k1 = lpca_X.principal_components[0]
             l_k1 = lpca_X.loadings[0]
             tq_k1 = lpca_X.tq[0]
+            tqj_k1 = lpca_X.tqj[0]
 
             S1_k1 = lpca_X.S[0][0,0]
             A1_k1 = lpca_X.A[0][:,0]
@@ -1431,6 +1523,7 @@ class TestReduction(unittest.TestCase):
             Z1_k1 = lpca_X.principal_components[0][:,0]
             l1_k1 = lpca_X.loadings[0][:,0]
             tq1_k1 = lpca_X.tq[0][0]
+            tqj_k1 = lpca_X.tqj[0][:,0]
 
         except Exception:
             self.assertTrue(False)
@@ -1469,6 +1562,10 @@ class TestReduction(unittest.TestCase):
             pca_tq = pca_X.tq
             self.assertTrue(np.array_equal(lpca_tq, pca_tq))
 
+            lpca_tqj = lpca_X.tqj[0]
+            pca_tqj = pca_X.tqj
+            self.assertTrue(np.array_equal(lpca_tqj, pca_tqj))
+
         except:
             self.assertTrue(False)
 
@@ -1500,6 +1597,10 @@ class TestReduction(unittest.TestCase):
             pca_tq = pca_X.tq
             self.assertTrue(np.array_equal(lpca_tq, pca_tq))
 
+            lpca_tqj = lpca_X.tqj[0]
+            pca_tqj = pca_X.tqj
+            self.assertTrue(np.array_equal(lpca_tqj, pca_tqj))
+
         except:
             self.assertTrue(False)
 
@@ -1530,6 +1631,10 @@ class TestReduction(unittest.TestCase):
             lpca_tq = lpca_X.tq[0]
             pca_tq = pca_X.tq
             self.assertTrue(np.array_equal(lpca_tq, pca_tq))
+
+            lpca_tqj = lpca_X.tqj[0]
+            pca_tqj = pca_X.tqj
+            self.assertTrue(np.array_equal(lpca_tqj, pca_tqj))
 
         except:
             self.assertTrue(False)
@@ -1566,6 +1671,10 @@ class TestReduction(unittest.TestCase):
             pca_tq = pca_X.tq
             self.assertTrue(np.array_equal(lpca_tq, pca_tq))
 
+            lpca_tqj = lpca_X.tqj[0]
+            pca_tqj = pca_X.tqj
+            self.assertTrue(np.array_equal(lpca_tqj, pca_tqj))
+
         except:
             self.assertTrue(False)
 
@@ -1596,6 +1705,10 @@ class TestReduction(unittest.TestCase):
             lpca_tq = lpca_X.tq[0]
             pca_tq = pca_X.tq
             self.assertTrue(np.array_equal(lpca_tq, pca_tq))
+
+            lpca_tqj = lpca_X.tqj[0]
+            pca_tqj = pca_X.tqj
+            self.assertTrue(np.array_equal(lpca_tqj, pca_tqj))
 
         except:
             self.assertTrue(False)
@@ -1628,6 +1741,10 @@ class TestReduction(unittest.TestCase):
             pca_tq = pca_X.tq
             self.assertTrue(np.array_equal(lpca_tq, pca_tq))
 
+            lpca_tqj = lpca_X.tqj[0]
+            pca_tqj = pca_X.tqj
+            self.assertTrue(np.array_equal(lpca_tqj, pca_tqj))
+
         except:
             self.assertTrue(False)
 
@@ -1658,6 +1775,9 @@ class TestReduction(unittest.TestCase):
             tq = lpca_X.tq[2]
 
         with self.assertRaises(IndexError):
+            tqj = lpca_X.tqj[2]
+
+        with self.assertRaises(IndexError):
             A = lpca_X.A[0][:,8]
 
         with self.assertRaises(IndexError):
@@ -1668,6 +1788,9 @@ class TestReduction(unittest.TestCase):
 
         with self.assertRaises(IndexError):
             loadings = lpca_X.loadings[0][:,8]
+
+        with self.assertRaises(IndexError):
+            tqj = lpca_X.tqj[0][:,8]
 
         with self.assertRaises(ValueError):
             lpca_X = LPCA([1,2,3], idx, scaling='none', n_components=5)
@@ -1721,6 +1844,9 @@ class TestReduction(unittest.TestCase):
 
         with self.assertRaises(AttributeError):
             lpca_X.tq = 1
+
+        with self.assertRaises(AttributeError):
+            lpca_X.tqj = 1
 
     def test_LPCA_local_correlation__allowed_calls(self):
 
