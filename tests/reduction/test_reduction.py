@@ -47,7 +47,7 @@ class TestReduction(unittest.TestCase):
         if np.any(abs(PHI - pca.X_cs) > tol):
             self.assertTrue(False)
 
-        if np.any(abs(Q - pca.A) > tol):
+        if np.any(abs(Q) - abs(pca.A) > tol):
             self.assertTrue(False)
 
         if np.any(abs(L - pca.L) > tol):
