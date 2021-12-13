@@ -3350,7 +3350,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
 #
 ################################################################################
 
-def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, grid_on=False, s=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, grid_on=False, s=None, markerscale=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -3406,6 +3406,8 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         ``bool`` specifying whether grid should be plotted.
     :param s: (optional)
         ``int`` or ``float`` specifying the scatter point size.
+    :param markerscale: (optional)
+        ``int`` or ``float`` specifying the scale for the legend marker.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -3499,6 +3501,10 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         if not isinstance(s, int) and not isinstance(s, float):
             raise ValueError("Parameter `s` has to be of type `int` or `float`.")
 
+    if markerscale is not None:
+        if not isinstance(markerscale, int) and not isinstance(markerscale, float):
+            raise ValueError("Parameter `markerscale` has to be of type `int` or `float`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -3529,7 +3535,10 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         else:
             plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=s, alpha=alphas[k], label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
 
-    plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
+    if markerscale is None:
+        plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
+    else:
+        plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=markerscale)
 
     plt.xticks(fontsize=font_axes, **csfont), plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
