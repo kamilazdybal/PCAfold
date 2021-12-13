@@ -1516,7 +1516,7 @@ class LPCA:
     def tqj(self):
         return self.__tqj
 
-    def local_correlation(self, variable, index=0, metric='pearson', verbose=False):
+    def local_correlation(self, variable, index=0, metric='pearson', display=None, verbose=False):
         """
         Computes a correlation in each cluster and a globally-averaged correlation between the local
         principal component, PC, and some specified variable, :math:`\\phi`.
@@ -1607,11 +1607,13 @@ class LPCA:
         :param variable:
             ``numpy.ndarray`` specifying the variable, :math:`\\phi`, for correlation computation.
             It should be of size ``(n_observations,)`` or ``(n_observations,1)`` or ``(n_observations,n_variables)`` when ``metric='dcor'``.
-        :param index:
+        :param index: (optional)
             ``int`` specifying the index of the local principal component for correlation computation.
             Set ``index=0`` if you want to look at the first PC.
-        :param metric:
+        :param metric: (optional)
             ``str`` specifying the correlation metric to use. It can be ``'pearson'`` or ``'dcor'``.
+        :param display: (optional)
+            ``str`` specifying the display format for the correlations. It can be ``'abs'``, ``'percent'``, ``'abs-percent'``.
         :param verbose: (optional)
             ``bool`` for printing verbose details.
 
@@ -1622,6 +1624,7 @@ class LPCA:
         """
 
         __metrics = ['pearson', 'dcor']
+        __displays = ['abs', 'percent', 'abs-percent']
 
         if not isinstance(variable, np.ndarray):
             raise ValueError("Parameter `variable` has to be of type `numpy.ndarray`.")
@@ -1664,6 +1667,12 @@ class LPCA:
             except:
                 raise ValueError("Distance correlation requires the `dcor` module: `pip install dcor`.")
 
+        if display is not None:
+            if not isinstance(display, str):
+                raise ValueError("Parameter `display` has to be of type `str`.")
+            if display not in __displays:
+                raise ValueError("Parameter `display` can be `'abs'`, `'percent'` or `'abs-percent'`.")
+
         if not isinstance(verbose, bool):
             raise ValueError("Parameter `verbose` has to be of type `bool`.")
 
@@ -1693,14 +1702,28 @@ class LPCA:
                 local_correlations[k] = local_correlation
 
                 if verbose:
-                    print('PCC in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
+                    if display == 'abs':
+                        print('PCC in cluster ' + str(k+1) + ':\t' + str(round(abs(local_correlation),6)))
+                    elif display == 'percent':
+                        print('PCC in cluster ' + str(k+1) + ':\t' + str(round(local_correlation*100,4)) + ' %')
+                    elif display == 'abs-percent':
+                        print('PCC in cluster ' + str(k+1) + ':\t' + str(round(abs(local_correlation)*100,4)) + ' %')
+                    else:
+                        print('PCC in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
 
             elif metric == 'dcor':
 
                 local_correlation = distance_correlation(local_pc, local_variable)
 
                 if verbose:
-                    print('dCor in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
+                    if display == 'abs':
+                        print('dCor in cluster ' + str(k+1) + ':\t' + str(round(abs(local_correlation),6)))
+                    elif display == 'percent':
+                        print('dCor in cluster ' + str(k+1) + ':\t' + str(round(local_correlation*100,4)) + ' %')
+                    elif display == 'abs-percent':
+                        print('dCor in cluster ' + str(k+1) + ':\t' + str(round(abs(local_correlation)*100,4)) + ' %')
+                    else:
+                        print('dCor in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
 
             # Compute the weighted correlation:
             weighted_collected.append(abs(local_correlation) * len(indices))
@@ -1715,8 +1738,18 @@ class LPCA:
         unweighted = np.sum(unweighted_collected) / n_clusters
 
         if verbose:
-            print('\nGlobally-averaged weighted correlation: ' + str(round(weighted,6)))
-            print('Globally-averaged unweighted correlation: ' + str(round(unweighted,6)))
+            if display == 'abs':
+                print('\nGlobally-averaged weighted correlation: ' + str(round(abs(weighted),6)))
+                print('Globally-averaged unweighted correlation: ' + str(round(abs(unweighted),6)))
+            elif display == 'percent':
+                print('\nGlobally-averaged weighted correlation: ' + str(round(weighted*100,4)) + ' %')
+                print('Globally-averaged unweighted correlation: ' + str(round(unweighted*100,4)) + ' %')
+            elif display == 'abs-percent':
+                print('\nGlobally-averaged weighted correlation: ' + str(round(abs(weighted)*100,4)) + ' %')
+                print('Globally-averaged unweighted correlation: ' + str(round(abs(unweighted)*100,4)) + ' %')
+            else:
+                print('\nGlobally-averaged weighted correlation: ' + str(round(weighted,6)))
+                print('Globally-averaged unweighted correlation: ' + str(round(unweighted,6)))
 
         return (local_correlations, weighted, unweighted)
 
