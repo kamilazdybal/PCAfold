@@ -3350,7 +3350,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
 #
 ################################################################################
 
-def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, grid_on=False, s=None, markerscale=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, grid_on=False, s=None, markerscale=None, legend=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -3408,6 +3408,8 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         ``int`` or ``float`` specifying the scatter point size.
     :param markerscale: (optional)
         ``int`` or ``float`` specifying the scale for the legend marker.
+    :param legend: (optional)
+        ``bool`` specifying the whether legend should be plotted.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -3501,9 +3503,14 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         if not isinstance(s, int) and not isinstance(s, float):
             raise ValueError("Parameter `s` has to be of type `int` or `float`.")
 
-    if markerscale is not None:
+    if markerscale is None:
+        markerscale = marker_scale_legend_clustering
+    else:
         if not isinstance(markerscale, int) and not isinstance(markerscale, float):
             raise ValueError("Parameter `markerscale` has to be of type `int` or `float`.")
+
+    if not isinstance(legend, bool):
+        raise ValueError("Parameter `legend` has to be of type `bool`.")
 
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
@@ -3535,10 +3542,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         else:
             plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=s, alpha=alphas[k], label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
 
-    if markerscale is None:
-        plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
-    else:
-        plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=markerscale)
+    if legend: plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=markerscale)
 
     plt.xticks(fontsize=font_axes, **csfont), plt.yticks(fontsize=font_axes, **csfont)
     if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
@@ -3552,7 +3556,7 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, s=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, s=None, markerscale=None, legend=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a three-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -3617,6 +3621,10 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         If set to ``False`` the first cluster will be indexed ``1``.
     :param s: (optional)
         ``int`` or ``float`` specifying the scatter point size.
+    :param markerscale: (optional)
+        ``int`` or ``float`` specifying the scale for the legend marker.
+    :param legend: (optional)
+        ``bool`` specifying the whether legend should be plotted.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -3724,6 +3732,15 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         if not isinstance(s, int) and not isinstance(s, float):
             raise ValueError("Parameter `s` has to be of type `int` or `float`.")
 
+    if markerscale is None:
+        markerscale = marker_scale_legend_clustering
+    else:
+        if not isinstance(markerscale, int) and not isinstance(markerscale, float):
+            raise ValueError("Parameter `markerscale` has to be of type `int` or `float`.")
+
+    if not isinstance(legend, bool):
+        raise ValueError("Parameter `legend` has to be of type `bool`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -3799,7 +3816,7 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         else:
             ax.scatter(x[np.where(idx==k)], y[np.where(idx==k)], z[np.where(idx==k)], color=cluster_colors[k], marker='o', s=s, alpha=alphas[k], label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
 
-    plt.legend(bbox_to_anchor=(1.3, 1), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=marker_scale_legend_clustering)
+    if legend: plt.legend(bbox_to_anchor=(1.3, 1), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=markerscale)
 
     if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
     if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
