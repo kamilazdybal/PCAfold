@@ -548,9 +548,9 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def cost_function_normalized_variance_derivative(variance_data, weight=None, norm=None, integrate_to_peak=False):
+def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, norm=None, integrate_to_peak=False):
     """
-    Defines a cost function for manifold topology optimization based on the areas, or weighted areas, under
+    Defines a cost function for manifold topology optimization based on the areas, or  (penalized) areas, under
     the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
 
     An individual area, :math:`A_i`, for the :math:`i^{th}` dependent variable, is computed by directly integrating the function :math:`\\hat{\\mathcal{D}}_i(\\sigma)``
@@ -580,13 +580,13 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
     In addition, each individual area, :math:`A_i`, can be weighted. Three weighting options are available:
 
-    - If ``weight='peak'``, :math:`A_i` is weighted by the inverse of the rightmost peak location:
+    - If ``penalty_function='peak'``, :math:`A_i` is weighted by the inverse of the rightmost peak location:
 
     .. math::
 
         A_i = \\frac{1}{\\sigma_{peak, i}} \\cdot  \\int \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
 
-    - If ``weight='sigma'``, :math:`A_i` is weighted continuously by the bandwidth:
+    - If ``penalty_function='sigma'``, :math:`A_i` is weighted continuously by the bandwidth:
 
     .. math::
 
@@ -598,7 +598,7 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
         :width: 600
         :align: center
 
-    - If ``weight='log-sigma-over-peak'``, :math:`A_i` is weighted continuously by the :math:`\\log_{10}` -transformed bandwidth\
+    - If ``penalty_function='log-sigma-over-peak'``, :math:`A_i` is weighted continuously by the :math:`\\log_{10}` -transformed bandwidth\
     and takes into account information about the rightmost peak location:
 
     .. math::
@@ -655,18 +655,18 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
         # Compute the cost for the current manifold:
         cost = cost_function_normalized_variance_derivative(variance_data,
-                                                            weight='peak',
+                                                            penalty_function='peak',
                                                             norm='max',
                                                             integrate_to_peak=True)
 
     :param variance_data:
         an object of ``VarianceData`` class.
-    :param weight: (optional)
-        ``str`` specifying the weighting applied to each area.
-        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
-        Set ``weight='sigma'`` to weight each area continuously by the bandwidth.
-        Set ``weight='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
-        If ``weight=None``, the area is not weighted.
+    :param penalty_function: (optional)
+        ``str`` specifying the weighting (penalty) applied to each area.
+        Set ``penalty_function='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
+        Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``penalty_function=None``, the area is not weighted.
     :param norm: (optional)
         ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area. If ``norm=None``, a list of costs for all depedent variables is returned.
@@ -677,16 +677,16 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
         - **cost** - ``float`` specifying the normalized cost, :math:`\\mathcal{L}`, or, if ``norm=None``, a list of costs, :math:`A_i`, for each dependent variable.
     """
 
-    __weights = ['peak', 'sigma', 'log-sigma-over-peak']
+    __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
 
-    if weight is not None:
+    if penalty_function is not None:
 
-        if not isinstance(weight, str):
-            raise ValueError("Parameter `weight` has to be of type `str`.")
+        if not isinstance(penalty_function, str):
+            raise ValueError("Parameter `penalty_function` has to be of type `str`.")
 
-        if weight not in __weights:
-            raise ValueError("Parameter `weight` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+        if penalty_function not in __penalty_functions:
+            raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
 
     if norm is not None:
 
@@ -713,20 +713,20 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
         if integrate_to_peak:
 
-            if weight is None:
+            if penalty_function is None:
                 cost = np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak]))
                 costs.append(cost)
 
-            elif weight == 'peak':
+            elif penalty_function == 'peak':
                 cost = 1. / (rightmost_peak_location) * np.trapz(derivative[variable][indices_to_the_left_of_peak], np.log10(sigma[indices_to_the_left_of_peak]))
                 costs.append(cost)
 
-            elif weight == 'sigma':
+            elif penalty_function == 'sigma':
                 penalty_sigma = 1./sigma[indices_to_the_left_of_peak]
                 cost = np.trapz(derivative[variable][indices_to_the_left_of_peak]*penalty_sigma, np.log10(sigma[indices_to_the_left_of_peak]))
                 costs.append(cost)
 
-            elif weight == 'log-sigma-over-peak':
+            elif penalty_function == 'log-sigma-over-peak':
                 normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
                 addition = normalized_sigma[idx_rightmost_peak][0]
                 penalty_log_sigma_peak = abs(np.log10(sigma[indices_to_the_left_of_peak]/rightmost_peak_location)) + 1./addition
@@ -735,20 +735,20 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
         else:
 
-            if weight is None:
+            if penalty_function is None:
                 cost = np.trapz(derivative[variable], np.log10(sigma))
                 costs.append(cost)
 
-            elif weight == 'peak':
+            elif penalty_function == 'peak':
                 cost = 1. / (rightmost_peak_location) * np.trapz(derivative[variable], np.log10(sigma))
                 costs.append(cost)
 
-            elif weight == 'sigma':
+            elif penalty_function == 'sigma':
                 penalty_sigma = 1./sigma
                 cost = np.trapz(derivative[variable]*penalty_sigma, np.log10(sigma))
                 costs.append(cost)
 
-            elif weight == 'log-sigma-over-peak':
+            elif penalty_function == 'log-sigma-over-peak':
                 normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
                 addition = normalized_sigma[idx_rightmost_peak][0]
                 penalty_log_sigma_peak = abs(np.log10(sigma/rightmost_peak_location)) + 1./addition
@@ -790,7 +790,7 @@ def cost_function_normalized_variance_derivative(variance_data, weight=None, nor
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight=None, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
     """
     Manifold-informed feature selection algorithm based on forward feature addition. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
@@ -830,7 +830,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         X_source = np.random.rand(100,10)
 
         # Define original variables to add to the optimization:
-        d_hat_variables = X[:,0:3]
+        target_variables = X[:,0:3]
 
         # Specify variables names
         variable_names = ['X_' + str(i) for i in range(0,10)]
@@ -844,11 +844,11 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
                                                                          variable_names,
                                                                          scaling='auto',
                                                                          bandwidth_values=bandwidth_values,
-                                                                         d_hat_variables=d_hat_variables,
+                                                                         target_variables=target_variables,
                                                                          add_transformed_source=True,
                                                                          target_manifold_dimensionality=2,
                                                                          bootstrap_variables=None,
-                                                                         weight='peak',
+                                                                         penalty_function='peak',
                                                                          norm='max',
                                                                          integrate_to_peak=True,
                                                                          verbose=True)
@@ -867,20 +867,20 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param bandwidth_values:
         ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
-    :param d_hat_variables: (optional)
-        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
+    :param target_variables: (optional)
+        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_target_variables)``.
     :param add_transformed_source: (optional)
         ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
     :param target_manifold_dimensionality: (optional)
         ``int`` specifying the target dimensionality of the PCA manifold.
     :param bootstrap_variables: (optional)
         ``list`` specifying the user-selected variables to bootstrap the algorithm with. If set to ``None``, automatic bootstrapping is performed.
-    :param weight: (optional)
+    :param penalty_function: (optional)
         ``str`` specifying the weighting applied to each area.
-        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
-        Set ``weight='sigma'`` to weight each area continuously by the bandwidth.
-        Set ``weight='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
-        If ``weight=None``, the area is not weighted.
+        Set ``penalty_function='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
+        Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``penalty_function=None``, the area is not weighted.
     :param norm: (optional)
         ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
@@ -895,7 +895,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
     """
 
-    __weights = ['peak', 'sigma', 'log-sigma-over-peak']
+    __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
 
     if not isinstance(X, np.ndarray):
@@ -932,25 +932,25 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     if not isinstance(bandwidth_values, np.ndarray):
         raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
 
-    if d_hat_variables is not None:
-        if not isinstance(d_hat_variables, np.ndarray):
-            raise ValueError("Parameter `d_hat_variables` has to be of type `numpy.ndarray`.")
+    if target_variables is not None:
+        if not isinstance(target_variables, np.ndarray):
+            raise ValueError("Parameter `target_variables` has to be of type `numpy.ndarray`.")
 
         try:
-            (n_d_hat_observations, n_d_hat_variables) = np.shape(d_hat_variables)
-            d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
+            (n_d_hat_observations, n_target_variables) = np.shape(target_variables)
+            target_variables_names = ['X' + str(i) for i in range(0,n_target_variables)]
         except:
-            raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
+            raise ValueError("Parameter `target_variables` has to have shape `(n_observations,n_target_variables)`.")
 
         if n_d_hat_observations != n_observations_source:
-            raise ValueError("Parameter `d_hat_variables` has different number of observations than `X_source`.")
+            raise ValueError("Parameter `target_variables` has different number of observations than `X_source`.")
 
     if not isinstance(add_transformed_source, bool):
         raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
 
-    if d_hat_variables is None:
+    if target_variables is None:
         if not add_transformed_source:
-            raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
+            raise ValueError("Either `target_variables` has to be specified or `add_transformed_source` has to be set to True.")
 
     if not isinstance(target_manifold_dimensionality, int):
         raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
@@ -959,13 +959,13 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         if not isinstance(bootstrap_variables, list):
             raise ValueError("Parameter `bootstrap_variables` has to be of type `list`.")
 
-    if weight is not None:
+    if penalty_function is not None:
 
-        if not isinstance(weight, str):
-            raise ValueError("Parameter `weight` has to be of type `str`.")
+        if not isinstance(penalty_function, str):
+            raise ValueError("Parameter `penalty_function` has to be of type `str`.")
 
-        if weight not in __weights:
-            raise ValueError("Parameter `weight` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+        if penalty_function not in __penalty_functions:
+            raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
 
     if not isinstance(norm, str):
         raise ValueError("Parameter `norm` has to be of type `str`.")
@@ -999,20 +999,20 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             PCs = X[:,[i_variable]]
             PC_sources = X_source[:,[i_variable]]
 
-            if d_hat_variables is None:
+            if target_variables is None:
                 depvars = cp.deepcopy(PC_sources)
                 depvar_names = ['SZ1']
             else:
                 if add_transformed_source:
-                    depvars = np.hstack((PC_sources, d_hat_variables))
-                    depvar_names = ['SZ1'] + d_hat_variables_names
+                    depvars = np.hstack((PC_sources, target_variables))
+                    depvar_names = ['SZ1'] + target_variables_names
                 else:
-                    depvars = d_hat_variables
-                    depvar_names = d_hat_variables_names
+                    depvars = target_variables
+                    depvar_names = target_variables_names
 
             bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-            bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
+            bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % bootstrap_area)
             bootstrap_cost_function.append(bootstrap_area)
 
@@ -1050,20 +1050,20 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
         PCs = bootstrap_pca.transform(X[:,bootstrap_variables])
         PC_sources = bootstrap_pca.transform(X_source[:,bootstrap_variables], nocenter=True)
 
-        if d_hat_variables is None:
+        if target_variables is None:
             depvars = cp.deepcopy(PC_sources)
             depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
         else:
             if add_transformed_source:
-                depvars = np.hstack((PC_sources, d_hat_variables))
-                depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + d_hat_variables_names
+                depvars = np.hstack((PC_sources, target_variables))
+                depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + target_variables_names
             else:
-                depvars = d_hat_variables
-                depvar_names = d_hat_variables_names
+                depvars = target_variables
+                depvar_names = target_variables_names
 
         bootstrap_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-        bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
+        bootstrap_area = cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
         bootstrap_cost_function.append(bootstrap_area)
         costs.append(bootstrap_area)
 
@@ -1112,21 +1112,21 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
             PCs = pca.transform(X[:,current_variables_list])
             PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
 
-            if d_hat_variables is None:
+            if target_variables is None:
                 depvars = cp.deepcopy(PC_sources)
                 depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
             else:
                 if add_transformed_source:
-                    depvars = np.hstack((PC_sources, d_hat_variables))
-                    depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + d_hat_variables_names
+                    depvars = np.hstack((PC_sources, target_variables))
+                    depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + target_variables_names
                 else:
-                    depvars = d_hat_variables
-                    depvar_names = d_hat_variables_names
+                    depvars = target_variables
+                    depvar_names = target_variables_names
 
             current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
             current_derivative, current_sigma, _ = normalized_variance_derivative(current_variance_data)
 
-            current_area = cost_function_normalized_variance_derivative(current_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
+            current_area = cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
 
@@ -1183,7 +1183,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, weight=None, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
     """
     Manifold-informed feature selection algorithm based on backward elimination. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
@@ -1218,7 +1218,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
         X_source = np.random.rand(100,10)
 
         # Define original variables to add to the optimization:
-        d_hat_variables = X[:,0:3]
+        target_variables = X[:,0:3]
 
         # Specify variables names
         variable_names = ['X_' + str(i) for i in range(0,10)]
@@ -1232,10 +1232,10 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
                                                                             variable_names,
                                                                             scaling='auto',
                                                                             bandwidth_values=bandwidth_values,
-                                                                            d_hat_variables=d_hat_variables,
+                                                                            target_variables=target_variables,
                                                                             add_transformed_source=True,
                                                                             target_manifold_dimensionality=2,
-                                                                            weight='peak',
+                                                                            penalty_function='peak',
                                                                             norm='max',
                                                                             integrate_to_peak=True,
                                                                             verbose=True)
@@ -1254,20 +1254,20 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param bandwidth_values:
         ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
-    :param d_hat_variables: (optional)
-        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_d_hat_variables)``.
+    :param target_variables: (optional)
+        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_target_variables)``.
     :param add_transformed_source: (optional)
         ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
     :param source_space: (optional)
         ``str`` specifying the space to which the PC source terms should be transformed before computing the cost. It can be one of the following: ``symlog``, ``continuous-symlog``, ``original-and-symlog``, ``original-and-continuous-symlog``. If set to ``None``, PC source terms are kept in their original PCA-space.
     :param target_manifold_dimensionality: (optional)
         ``int`` specifying the target dimensionality of the PCA manifold.
-    :param weight: (optional)
+    :param penalty_function: (optional)
         ``str`` specifying the weighting applied to each area.
-        Set ``weight='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
-        Set ``weight='sigma'`` to weight each area continuously by the bandwidth.
-        Set ``weight='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
-        If ``weight=None``, the area is not weighted.
+        Set ``penalty_function='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
+        Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``penalty_function=None``, the area is not weighted.
     :param norm: (optional)
         ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
@@ -1282,7 +1282,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
         - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
     """
 
-    __weights = ['peak', 'sigma', 'log-sigma-over-peak']
+    __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
     __source_spaces = ['symlog', 'continuous-symlog', 'original-and-symlog', 'original-and-continuous-symlog']
 
@@ -1321,24 +1321,24 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     if not isinstance(bandwidth_values, np.ndarray):
         raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
 
-    if d_hat_variables is not None:
-        if not isinstance(d_hat_variables, np.ndarray):
-            raise ValueError("Parameter `d_hat_variables` has to be of type `numpy.ndarray`.")
+    if target_variables is not None:
+        if not isinstance(target_variables, np.ndarray):
+            raise ValueError("Parameter `target_variables` has to be of type `numpy.ndarray`.")
         try:
-            (n_d_hat_observations, n_d_hat_variables) = np.shape(d_hat_variables)
-            d_hat_variables_names = ['X' + str(i) for i in range(0,n_d_hat_variables)]
+            (n_d_hat_observations, n_target_variables) = np.shape(target_variables)
+            target_variables_names = ['X' + str(i) for i in range(0,n_target_variables)]
         except:
-            raise ValueError("Parameter `d_hat_variables` has to have shape `(n_observations,n_d_hat_variables)`.")
+            raise ValueError("Parameter `target_variables` has to have shape `(n_observations,n_target_variables)`.")
 
         if n_d_hat_observations != n_observations_source:
-            raise ValueError("Parameter `d_hat_variables` has different number of observations than `X_source`.")
+            raise ValueError("Parameter `target_variables` has different number of observations than `X_source`.")
 
     if not isinstance(add_transformed_source, bool):
         raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
 
-    if d_hat_variables is None:
+    if target_variables is None:
         if not add_transformed_source:
-            raise ValueError("Either `d_hat_variables` has to be specified or `add_transformed_source` has to be set to True.")
+            raise ValueError("Either `target_variables` has to be specified or `add_transformed_source` has to be set to True.")
 
     if source_space is not None:
         if not isinstance(source_space, str):
@@ -1349,11 +1349,11 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     if not isinstance(target_manifold_dimensionality, int):
         raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
 
-    if weight is not None:
-        if not isinstance(weight, str):
-            raise ValueError("Parameter `weight` has to be of type `str`.")
-        if weight not in __weights:
-            raise ValueError("Parameter `weight` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+    if penalty_function is not None:
+        if not isinstance(penalty_function, str):
+            raise ValueError("Parameter `penalty_function` has to be of type `str`.")
+        if penalty_function not in __penalty_functions:
+            raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
 
     if not isinstance(norm, str):
         raise ValueError("Parameter `norm` has to be of type `str`.")
@@ -1422,7 +1422,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
                     else:
                         transformed_PC_sources = preprocess.log_transform(PC_sources, method=source_space, threshold=1.e-4)
 
-            if d_hat_variables is None:
+            if target_variables is None:
                 if source_space == 'original-and-symlog' or source_space == 'original-and-continuous-symlog':
                     depvars = np.hstack((PC_sources, transformed_PC_sources))
                     depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
@@ -1435,20 +1435,20 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
             else:
                 if add_transformed_source:
                     if source_space == 'original-and-symlog' or source_space == 'original-and-continuous-symlog':
-                        depvars = np.hstack((PC_sources, transformed_PC_sources, d_hat_variables))
-                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
+                        depvars = np.hstack((PC_sources, transformed_PC_sources, target_variables))
+                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + target_variables_names
                     elif source_space == 'symlog' or source_space == 'continuous-symlog':
-                        depvars = np.hstack((transformed_PC_sources, d_hat_variables))
-                        depvar_names = ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
+                        depvars = np.hstack((transformed_PC_sources, target_variables))
+                        depvar_names = ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + target_variables_names
                     else:
-                        depvars = np.hstack((PC_sources, d_hat_variables))
-                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + d_hat_variables_names
+                        depvars = np.hstack((PC_sources, target_variables))
+                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + target_variables_names
                 else:
-                    depvars = cp.deepcopy(d_hat_variables)
-                    depvar_names = cp.deepcopy(d_hat_variables_names)
+                    depvars = cp.deepcopy(target_variables)
+                    depvar_names = cp.deepcopy(target_variables_names)
 
             current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
-            current_area = cost_function_normalized_variance_derivative(current_variance_data, weight=weight, norm=norm, integrate_to_peak=integrate_to_peak)
+            current_area = cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
 

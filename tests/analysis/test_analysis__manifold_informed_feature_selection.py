@@ -13,7 +13,7 @@ class Analysis(unittest.TestCase):
         variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
         scaling='auto'
         bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
-        d_hat_variables = X[:,0:4]
+        target_variables = X[:,0:4]
 
         try:
             (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values)
@@ -21,22 +21,22 @@ class Analysis(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=None, add_transformed_source=True, target_manifold_dimensionality=2, bootstrap_variables=None, weight=None, norm='max', integrate_to_peak=False)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, target_manifold_dimensionality=2, bootstrap_variables=None, penalty_function=None, norm='max', integrate_to_peak=False)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_variables=target_variables)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, weight='peak', norm='cumulative', integrate_to_peak=True)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_variables=target_variables, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, penalty_function='peak', norm='cumulative', integrate_to_peak=True)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=d_hat_variables, add_transformed_source=False, target_manifold_dimensionality=3, bootstrap_variables=[0,1], weight='peak', norm='cumulative', integrate_to_peak=True)
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_variables=target_variables, add_transformed_source=False, target_manifold_dimensionality=3, bootstrap_variables=[0,1], penalty_function='peak', norm='cumulative', integrate_to_peak=True)
         except Exception:
             self.assertTrue(False)
 
@@ -50,13 +50,13 @@ class Analysis(unittest.TestCase):
         scaling='auto'
         bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
 
-        # Need to specify d_hat_variables or set add_transformed_source to True:
+        # Need to specify target_variables or set add_transformed_source to True:
         with self.assertRaises(ValueError):
             (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, add_transformed_source=False)
 
         # Wrong type:
         with self.assertRaises(ValueError):
-            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, d_hat_variables=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_variables=[1])
 
         with self.assertRaises(ValueError):
             (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, add_transformed_source=[1])
@@ -68,7 +68,7 @@ class Analysis(unittest.TestCase):
             (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, bootstrap_variables=1)
 
         with self.assertRaises(ValueError):
-            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, weight=[1])
+            (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, penalty_function=[1])
 
         with self.assertRaises(ValueError):
             (ordered_variables, selected_variables, costs) = analysis.manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, norm=[1])
