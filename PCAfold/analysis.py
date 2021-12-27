@@ -550,7 +550,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, norm=None, integrate_to_peak=False):
     """
-    Defines a cost function for manifold topology optimization based on the areas, or  (penalized) areas, under
+    Defines a cost function for manifold topology optimization based on the areas, or weighted (penalized) areas, under
     the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
 
     An individual area, :math:`A_i`, for the :math:`i^{th}` dependent variable, is computed by directly integrating the function :math:`\\hat{\\mathcal{D}}_i(\\sigma)``
