@@ -1279,6 +1279,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     :return:
         - **ordered_variables** - ``list`` specifying the indices of the ordered variables.
         - **selected_variables** - ``list`` specifying the indices of the selected variables that correspond to the minimum cost :math:`\\mathcal{L}`.
+        - **optimized_cost** - ``float`` specifying the cost corresponding to the optimized subset.
         - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
     """
 
@@ -1411,6 +1412,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
             pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=target_manifold_dimensionality)
             PCs = pca.transform(X[:,current_variables_list])
+            (PCs, _, _) = preprocess.center_scale(PCs, '-1to1')
 
             if add_transformed_source:
                 PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
@@ -1447,7 +1449,7 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
                     depvars = cp.deepcopy(target_variables)
                     depvar_names = cp.deepcopy(target_variables_names)
 
-            current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+            current_variance_data = compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, scale_unit_box = False, bandwidth_values=bandwidth_values)
             current_area = cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
@@ -1513,6 +1515,8 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
 
     selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index])
 
+    optimized_cost = costs[min_cost_function_index]
+
     if verbose:
 
         print('Ordered variables:')
@@ -1523,12 +1527,12 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
         print('\nSelected variables:')
         print(', '.join([variable_names[i] for i in selected_variables]))
         print(selected_variables)
-        print('Lowest cost: %.4f' % previous_area)
+        print('Lowest cost: %.4f' % optimized_cost)
 
     total_toc = time.perf_counter()
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    return ordered_variables, selected_variables, costs
+    return ordered_variables, selected_variables, optimized_cost, costs
 
 ################################################################################
 #
