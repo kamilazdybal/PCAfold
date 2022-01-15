@@ -94,4 +94,5 @@ or using BibTeX:
    tutorials/demo-pca-on-sampled-data-sets
    tutorials/demo-handling-source-terms
    tutorials/demo-manifold-assessment
+   tutorials/demo-cost-function
    tutorials/demo-regression
