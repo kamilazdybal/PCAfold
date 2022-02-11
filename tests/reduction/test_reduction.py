@@ -1885,6 +1885,24 @@ class TestReduction(unittest.TestCase):
         except:
             self.assertTrue(False)
 
+        try:
+            lpca = LPCA(X, idx)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=1, metric='spearman')
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca = LPCA(X, idx, n_components=2)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=1, metric='spearman')
+        except:
+            self.assertTrue(False)
+
+        try:
+            lpca = LPCA(X, idx, n_components=0)
+            (local_correlations, weighted, unweighted) = lpca.local_correlation(X[:,0], index=4, metric='spearman')
+        except:
+            self.assertTrue(False)
+
     def test_LPCA_local_correlation__not_allowed_calls(self):
 
         X = np.random.rand(100,5)

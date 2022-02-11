@@ -12,7 +12,7 @@ __status__ = "Production"
 import numpy as np
 import copy as cp
 from scipy import linalg as lg
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, spearmanr
 import matplotlib.pyplot as plt
 from PCAfold import preprocess
 from PCAfold import DataSampler
@@ -1431,6 +1431,8 @@ class LPCA:
             # Remove constant variables from local cluster:
             (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X_k, maxtol=1e-12, rangetol=0.0001)
 
+            (_, n_variables_in_k) = np.shape(X_removed)
+
             # Perform PCA in local cluster:
             pca = PCA(X_removed, scaling=scaling, n_components=self.__n_components, use_eigendec=use_eigendec, nocenter=nocenter)
             Z = pca.transform(X_removed, nocenter=False)
@@ -1443,23 +1445,23 @@ class LPCA:
 
             # Compute a constant factor to scale the eigenvalues:
             constant_factor = 0
-            for j in range(0,self.__n_variables):
+            for j in range(0,n_variables_in_k):
                 if not np.isnan(pca.L[j]):
                     constant_factor += ( (pca.A[0,j] * np.sqrt(np.abs(pca.L[j]))) / (np.sqrt(pca.S[0,0])) )**2
 
             # Compute loadings:
-            loadings_matrix = np.zeros((self.__n_variables, self.__n_components))
+            loadings_matrix = np.zeros((n_variables_in_k, self.__n_components))
 
-            for i in range(self.__n_variables):
+            for i in range(0,n_variables_in_k):
                 for j in range(self.__n_components):
                     loadings_matrix[i,j] = (pca.A[i,j] * np.sqrt(pca.L[j])) / np.sqrt(pca.S[i,i])
 
             loadings.append(loadings_matrix / np.sqrt(constant_factor))
 
             # Compute the variance accounted for each variable in each individual PC:
-            tqj = np.zeros((self.__n_variables, self.__n_components))
+            tqj = np.zeros((n_variables_in_k, self.__n_components))
 
-            for i in range(0,self.__n_variables):
+            for i in range(0,n_variables_in_k):
                 for j in range(0,self.__n_components):
                     tqj[i,j] = ( (pca.A[i,j] * np.sqrt(pca.L[j])) / (np.sqrt(pca.S[i,i])) )**2
 
@@ -1532,6 +1534,8 @@ class LPCA:
             r_n(\\mathrm{PC}, \\phi) = \\mathrm{abs} \\Bigg( \\frac{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}}) (\\phi_i - \\bar{\\phi})}{\\sqrt{\\sum_{i=1}^{N_n} (\\mathrm{PC}_i - \\overline{\\mathrm{PC}})^2} \\sqrt{\\sum_{i=1}^{N_n} (\\phi_i - \\bar{\\phi})^2}} \\Bigg)
 
         where :math:`N_n` is the number of observations in the :math:`n^{th}` cluster.
+
+        - Spearman correlation coefficient (SCC), set ``metric='spearman'``.
 
         - Distance correlation (dCor), set ``metric='dcor'``:
 
@@ -1611,7 +1615,7 @@ class LPCA:
             ``int`` specifying the index of the local principal component for correlation computation.
             Set ``index=0`` if you want to look at the first PC.
         :param metric: (optional)
-            ``str`` specifying the correlation metric to use. It can be ``'pearson'`` or ``'dcor'``.
+            ``str`` specifying the correlation metric to use. It can be ``'pearson'``, ``'spearman'`` or ``'dcor'``.
         :param display: (optional)
             ``str`` specifying the display format for the correlations. It can be ``'abs'``, ``'percent'``, ``'abs-percent'``.
         :param verbose: (optional)
@@ -1623,7 +1627,7 @@ class LPCA:
             - **unweighted** - ``float`` specifying the globally-averaged unweighted correlation.
         """
 
-        __metrics = ['pearson', 'dcor']
+        __metrics = ['pearson', 'dcor', 'spearman']
         __displays = ['abs', 'percent', 'abs-percent']
 
         if not isinstance(variable, np.ndarray):
@@ -1710,6 +1714,21 @@ class LPCA:
                         print('PCC in cluster ' + str(k+1) + ':\t' + str(round(abs(local_correlation)*100,4)) + ' %')
                     else:
                         print('PCC in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
+
+            if metric == 'spearman':
+
+                (local_correlation, _) = spearmanr(local_pc, local_variable.ravel())
+                local_correlations[k] = local_correlation
+
+                if verbose:
+                    if display == 'abs':
+                        print('SCC in cluster ' + str(k+1) + ':\t' + str(round(abs(local_correlation),6)))
+                    elif display == 'percent':
+                        print('SCC in cluster ' + str(k+1) + ':\t' + str(round(local_correlation*100,4)) + ' %')
+                    elif display == 'abs-percent':
+                        print('SCC in cluster ' + str(k+1) + ':\t' + str(round(abs(local_correlation)*100,4)) + ' %')
+                    else:
+                        print('SCC in cluster ' + str(k+1) + ':\t' + str(round(local_correlation,6)))
 
             elif metric == 'dcor':
 
