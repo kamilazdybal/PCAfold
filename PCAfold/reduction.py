@@ -20,6 +20,7 @@ from PCAfold.styles import *
 from matplotlib.colors import ListedColormap
 from PCAfold.preprocess import _scalings_list
 import warnings
+from sklearn.metrics import r2_score
 
 ################################################################################
 #
@@ -1349,6 +1350,8 @@ class LPCA:
     - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     - **loadings** - (read only) ``list`` of ``numpy.ndarray`` specifying the local loadings, :math:`\mathbf{l}`. Each list element corresponds to loadings in a single cluster.
     - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for in each individual variable by the first :math:`q` PCs, :math:`\mathbf{t_q}`. Each list element corresponds to variance metric in a single cluster.
+    - **X_reconstructed** - (read only) ``list`` of ``numpy.ndarray`` specifying the clusters reconstructed using the first :math:`q` PCs. Each list element corresponds to each reconstructed cluster.
+    - **R2** - (read only) ``list`` specifying the average coefficient of determination for each cluster reconstructed using the first :math:`q` PCs. Each list element corresponds to each reconstructed cluster and is averaged over all non-constant state variables in that cluster.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
@@ -1422,6 +1425,8 @@ class LPCA:
         loadings = []
         variance_accounted = []
         variance_accounted_individually = []
+        X_reconstructed = []
+        R2_collected = []
 
         for k in range(0, n_clusters):
 
@@ -1442,6 +1447,17 @@ class LPCA:
             eigenvectors.append(pca.A[:,0:self.__n_components])
             eigenvalues.append(pca.L[0:self.__n_components])
             PCs.append(Z)
+
+            # Reconstruct the current cluster using n_components:
+            X_k_reconstructed = pca.reconstruct(Z)
+            X_reconstructed.append(X_k_reconstructed)
+
+            # Compute R2 of the cluster reconstruction (averaged over all state variables):
+            R2_in_k = []
+            for variable_i in range(0,n_variables_in_k):
+                R2_in_k_for_variable = r2_score(X_removed[:,variable_i], X_k_reconstructed[:,variable_i])
+                R2_in_k.append(R2_in_k_for_variable)
+            R2_collected.append(np.mean(R2_in_k))
 
             # Compute a constant factor to scale the eigenvalues:
             constant_factor = 0
@@ -1477,6 +1493,8 @@ class LPCA:
         self.__loadings = loadings
         self.__tq = variance_accounted
         self.__tqj = variance_accounted_individually
+        self.__X_reconstructed = X_reconstructed
+        self.__R2 = R2_collected
 
     @property
     def n_components(self):
@@ -1517,6 +1535,14 @@ class LPCA:
     @property
     def tqj(self):
         return self.__tqj
+
+    @property
+    def X_reconstructed(self):
+        return self.__X_reconstructed
+
+    @property
+    def R2(self):
+        return self.__R2
 
     def local_correlation(self, variable, index=0, metric='pearson', display=None, verbose=False):
         """
