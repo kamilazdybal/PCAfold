@@ -1386,7 +1386,7 @@ class LPCA:
             raise ValueError('Vector of cluster classifications `idx` has different number of observations than the original data set `X`.')
 
         if (len(np.unique(idx)) != (np.max(idx)+1)) or (np.min(idx) != 0):
-            (idx, _) = preprocess.degrade_clusters(idx, verbose)
+            (idx, _) = preprocess.degrade_clusters(idx)
 
         self.__idx = idx.ravel()
 
