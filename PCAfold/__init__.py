@@ -75,6 +75,7 @@ from .analysis import stratified_mean_squared_error
 from .analysis import stratified_root_mean_squared_error
 from .analysis import stratified_normalized_root_mean_squared_error
 from .analysis import mean_absolute_error
+from .analysis import max_absolute_error
 from .analysis import mean_squared_error
 from .analysis import root_mean_squared_error
 from .analysis import normalized_root_mean_squared_error

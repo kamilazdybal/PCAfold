@@ -171,6 +171,11 @@ Class ``RegressionAssessment``
 
 .. autofunction:: PCAfold.analysis.stratified_mean_absolute_error
 
+``max_absolute_error``
+=======================
+
+.. autofunction:: PCAfold.analysis.max_absolute_error
+
 ``mean_squared_error``
 ======================
 

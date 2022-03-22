@@ -2976,6 +2976,81 @@ def stratified_mean_absolute_error(observed, predicted, idx, verbose=False):
 
 # ------------------------------------------------------------------------------
 
+def max_absolute_error(observed, predicted):
+    """
+    Computes the maximum absolute error (MaxAE):
+
+    .. math::
+
+        \\mathrm{MaxAE} = \\mathrm{max}( | \\phi_{o,i} - \\phi_{p,i} | )
+
+    where :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, max_absolute_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the maximum absolute error for the first variable:
+        maxae = max_absolute_error(X[:,0], X_rec[:,0])
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **maxae** - max absolute error (MaxAE).
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    maxae = np.max(abs(__observed - __predicted))
+
+    return maxae
+
+# ------------------------------------------------------------------------------
+
 def mean_squared_error(observed, predicted):
     """
     Computes the mean squared error (MSE):
