@@ -603,9 +603,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
     .. math::
 
-        A_i = \\int \\Big(  \\big| \\log_{10} \\big( \\frac{\\sigma}{\\sigma_{peak, i}} \\big) \\big| + \\frac{1}{||\\sigma_{peak, i}||_{0-1}} \\Big) \\cdot \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
-
-    where :math:`||\\sigma_{peak, i}||_{0-1}` is the rightmost peak location expressed in a normalized 0-1 range. The normalization is performed so that :math:`||\\sigma_{min, i}||_{0-1} = 0.0` and :math:`||\\sigma_{max, i}||_{0-1} = 1.0`.
+        A_i = \\int \\Big(  \\big| \\log_{10} \\Big( \\frac{\\sigma}{\\sigma_{peak, i}} \\Big) \\big| + \\frac{\\log_{10} \\sigma_{max, i} - \\log_{10} \\sigma_{min, i}}{\\log_{10} \\sigma_{peak, i} - \\log_{10} \\sigma_{min, i}} \\Big) \\cdot \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
 
     This type of weighting creates a more gentle penalty for the area happening further from the rightmost peak location:
 
