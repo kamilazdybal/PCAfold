@@ -2967,7 +2967,7 @@ def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_optio
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, grid_on=True, s=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, grid_on=True, s=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold given two vectors defining the manifold.
 
@@ -2989,6 +2989,7 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         plt = plot_2d_manifold(principal_components[:,0],
                                principal_components[:,1],
                                color=X[:,0],
+                               clean=False,
                                x_label='PC-1',
                                y_label='PC-2',
                                colorbar_label='$X_1$',
@@ -3012,6 +3013,8 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         It can also be set to a string specifying the color directly, for
         instance ``'r'`` or ``'#006778'``.
         If not specified, manifold will be plotted in black.
+    :param clean: (optional)
+        ``bool`` specifying if a clean plot should be made. If set to ``True``, nothing else but the data points is plotted.
     :param x_label: (optional)
         ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -3090,6 +3093,9 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         if n_color != n_x:
             raise ValueError("Parameter `color` has different number of elements than `x` and `y`.")
 
+    if not isinstance(clean, bool):
+        raise ValueError("Parameter `clean` has to be of type `bool`.")
+
     if x_label is not None:
         if not isinstance(x_label, str):
             raise ValueError("Parameter `x_label` has to be of type `str`.")
@@ -3142,20 +3148,31 @@ def plot_2d_manifold(x, y, color=None, x_label=None, y_label=None, colorbar_labe
         elif isinstance(color, np.ndarray):
             scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1)
 
-    plt.xticks(fontsize=font_axes, **csfont)
-    plt.yticks(fontsize=font_axes, **csfont)
-    if x_label is not None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
-    if y_label is not None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
-    if grid_on: plt.grid(alpha=grid_opacity)
+    if clean:
+        plt.xticks([])
+        plt.yticks([])
+        axs.spines["top"].set_visible(False)
+        axs.spines["bottom"].set_visible(False)
+        axs.spines["right"].set_visible(False)
+        axs.spines["left"].set_visible(False)
 
-    if isinstance(color, np.ndarray):
-        if color is not None:
-            cb = fig.colorbar(scat)
-            cb.ax.tick_params(labelsize=font_colorbar_axes)
-            if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
-            if colorbar_range is not None: plt.clim(cbar_min, cbar_max)
+    else:
 
-    if title is not None: plt.title(title, fontsize=font_title, **csfont)
+        plt.xticks(fontsize=font_axes, **csfont)
+        plt.yticks(fontsize=font_axes, **csfont)
+        if x_label is not None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
+        if y_label is not None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
+        if grid_on: plt.grid(alpha=grid_opacity)
+
+        if isinstance(color, np.ndarray):
+            if color is not None:
+                cb = fig.colorbar(scat)
+                cb.ax.tick_params(labelsize=font_colorbar_axes)
+                if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+                if colorbar_range is not None: plt.clim(cbar_min, cbar_max)
+
+        if title is not None: plt.title(title, fontsize=font_title, **csfont)
+
     if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
