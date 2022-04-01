@@ -21,10 +21,6 @@ rcParams["font.serif"] = "Arial"
 rcParams["font.sans-serif"] = "Arial"
 rcParams["font.cursive"] = "Arial"
 rcParams["font.monospace"] = "Arial"
-rcParams['mathtext.fontset'] = 'custom'
-rcParams['mathtext.rm'] = 'Charter'
-rcParams['mathtext.it'] = 'Charter:italic'
-rcParams['mathtext.bf'] = 'Charter:bold'
 rcParams['font.size'] = 16
 rcParams["text.usetex"] = False
 
