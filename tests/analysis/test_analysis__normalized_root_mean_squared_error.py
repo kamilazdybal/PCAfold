@@ -50,7 +50,7 @@ class Analysis(unittest.TestCase):
 
         try:
             NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X_rec[:,0])
-            self.assertTrue(NRMSE<10**-15)
+            self.assertTrue(NRMSE<10**-14)
         except Exception:
             self.assertTrue(False)
 

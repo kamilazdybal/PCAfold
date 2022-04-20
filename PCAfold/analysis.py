@@ -621,7 +621,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
         A_i = \\int \\Big(  \\big| \\log_{10} \\Big( \\frac{\\sigma}{\\sigma_{peak, i}} \\Big) \\big|^r + b \\cdot \\frac{\\log_{10} \\sigma_{max, i} - \\log_{10} \\sigma_{min, i}}{\\log_{10} \\sigma_{peak, i} - \\log_{10} \\sigma_{min, i}} \\Big) \\cdot \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
 
     This type of weighting creates a more gentle penalty for the area happening further from the rightmost peak location.
-    By increasing :math:`b`, the user can tune the amount of penality to smaller feature sizes over larger ones.
+    By increasing :math:`b`, the user can increase the amount of penalty applied to smaller feature sizes over larger ones.
     By increasing :math:`r`, the user can penalize non-uniqueness more strongly.
 
     For instance, when :math:`r=1`:
