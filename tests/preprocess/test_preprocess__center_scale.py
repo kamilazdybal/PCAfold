@@ -48,6 +48,8 @@ class Preprocess(unittest.TestCase):
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'variance', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'median', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=False)
@@ -63,6 +65,8 @@ class Preprocess(unittest.TestCase):
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, '-1to1', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'level', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'max', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'variance', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'median', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'poisson', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_2', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_data_set, 'vast_3', nocenter=True)
@@ -89,6 +93,8 @@ class Preprocess(unittest.TestCase):
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'level', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'max', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'poisson', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'variance', nocenter=False)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'median', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_2', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_3', nocenter=False)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_4', nocenter=False)
@@ -104,6 +110,8 @@ class Preprocess(unittest.TestCase):
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'level', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'max', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'poisson', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'variance', nocenter=True)
+            (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'median', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_2', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_3', nocenter=True)
             (X_cs, X_center, X_scale) = preprocess.center_scale(test_1D_variable, 'vast_4', nocenter=True)
@@ -286,5 +294,93 @@ class Preprocess(unittest.TestCase):
             self.assertTrue(isinstance(X_scale, np.ndarray))
         except:
             self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_preprocess__center_scale__data_with_constant_nonzero_variables(self):
+
+        X = np.random.rand(100,20)
+        X[:,10] = np.ones((100,))
+
+        # Scalings ['none', '', 'max', 'level', 'median', 'poisson'] accept constant, non-zero variables in a matrix:
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'none')
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, '')
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'max')
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'level')
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'median')
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'poisson')
+        except:
+            self.assertTrue(False)
+
+        # Other scalings result in division by zero:
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'auto')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'std')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'pareto')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'range')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, '0to1')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, '-1to1')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'variance')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast_2')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast_3')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast_4')
+
+# ------------------------------------------------------------------------------
+
+    def test_preprocess__center_scale__data_with_zeroed_variables(self):
+
+        X = np.random.rand(100,20)
+        X[:,10] = np.zeros((100,))
+
+        # Scalings ['none', ''] accept zeroed variables in a matrix:
+        try:
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'none')
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, '')
+        except:
+            self.assertTrue(False)
+
+        # Other scalings result in division by zero:
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'auto')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'std')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'pareto')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'range')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, '0to1')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, '-1to1')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'level')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'max')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'variance')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'median')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'poisson')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast_2')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast_3')
+        with self.assertRaises(ValueError):
+            (X_cs, X_center, X_scale) = preprocess.center_scale(X, 'vast_4')
 
 # ------------------------------------------------------------------------------

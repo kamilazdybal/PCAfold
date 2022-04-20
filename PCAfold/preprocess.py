@@ -1,10 +1,10 @@
 """preprocess.py: module for data pre-processing."""
 
 __author__ = "Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
-__copyright__ = "Copyright (c) 22020-2022, Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
+__copyright__ = "Copyright (c) 2020-2022, Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
 __credits__ = ["Department of Chemical Engineering, University of Utah, Salt Lake City, Utah, USA", "Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
 __license__ = "MIT"
-__version__ = "1.5.0"
+__version__ = "1.6.0"
 __maintainer__ = ["Kamila Zdybal", "Elizabeth Armstrong"]
 __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "James.Sutherland@chemeng.utah.edu"]
 __status__ = "Production"
@@ -23,7 +23,7 @@ from PCAfold.styles import *
 #
 ################################################################################
 
-_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', '-1to1', 'level', 'max', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', '-1to1', 'level', 'max', 'variance', 'median', 'poisson', 'vast_2', 'vast_3', 'vast_4']
 
 # ------------------------------------------------------------------------------
 
@@ -68,7 +68,7 @@ def center_scale(X, scaling, nocenter=False):
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | Scaling method             | ``scaling``              | Scaling factor :math:`d_j`                                         |
     +============================+==========================+====================================================================+
-    | None                       | ``'none'``               | 1                                                                  |
+    | None                       | ``'none'`` or ``''``     | 1                                                                  |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | Auto :cite:`Berg2006`      | ``'auto'`` or ``'std'``  | :math:`\sigma`                                                     |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
@@ -88,13 +88,17 @@ def center_scale(X, scaling, nocenter=False):
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | Max                        | ``'max'``                | :math:`max(X_j)`                                                   |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Variance                   | ``'variance'``           | :math:`var(X_j)`                                                   |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | Median                     | ``'median'``             | :math:`median(X_j)`                                                |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
     | Poisson :cite:`Keenan2004` |``'poisson'``             | :math:`\sqrt{mean(X_j)}`                                           |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-2                     | ``'vast_2'``             | :math:`\sigma^2 k^2 / mean(X_j)`                                   |
+    | S1                         | ``'vast_2'``             | :math:`\sigma^2 k^2 / mean(X_j)`                                   |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-3                     | ``'vast_3'``             | :math:`\sigma^2 k^2 / max(X_j)`                                    |
+    | S2                         | ``'vast_3'``             | :math:`\sigma^2 k^2 / max(X_j)`                                    |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
-    | Vast-4                     | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(X_j) - min(X_j))`                       |
+    | S3                         | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(X_j) - min(X_j))`                       |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
 
     where :math:`\sigma` is the standard deviation of :math:`X_j`
@@ -121,7 +125,7 @@ def center_scale(X, scaling, nocenter=False):
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param nocenter: (optional)
         ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
@@ -148,15 +152,15 @@ def center_scale(X, scaling, nocenter=False):
     if not isinstance(nocenter, bool):
         raise ValueError("Parameter `nocenter` has to be a boolean.")
 
-    if scaling.lower() not in ['max', 'level', 'poisson']:
+    if scaling.lower() not in ['none', '', 'max', 'level', 'median', 'poisson']:
         for i in range(0, n_variables):
             if np.all(X[:,i] == X[0,i]):
-                raise ValueError("Constant variable(s) are detected in the original data set. This will cause division by zero for the selected scaling. Consider removing the constant variables using `preprocess.remove_constant_vars`.")
+                raise ValueError("Constant variable(s) detected in the original data set. This will cause division by zero for the selected scaling. Consider removing the constant variables using `preprocess.remove_constant_vars`.")
 
-    if scaling.lower() in ['max', 'level', 'poisson']:
+    if scaling.lower() not in ['none', '']:
         for i in range(0, n_variables):
             if np.all(X[:,i] == 0):
-                raise ValueError("Constant and zeroed variable(s) are detected in the original data set. This will cause division by zero for the selected scaling. Consider removing the constant variables using `preprocess.remove_constant_vars`.")
+                raise ValueError("Constant and zeroed variable(s) detected in the original data set. This will cause division by zero for the selected scaling. Consider removing the constant variables using `preprocess.remove_constant_vars`.")
 
     X_cs = np.zeros_like(X, dtype=float)
     X_center = X.mean(axis=0)
@@ -200,6 +204,10 @@ def center_scale(X, scaling, nocenter=False):
        X_scale = X_center
     elif scaling == 'MAX':
        X_scale = np.max(X, axis=0)
+    elif scaling == 'VARIANCE':
+       X_scale = np.var(X, axis=0)
+    elif scaling == 'MEDIAN':
+       X_scale = np.median(X, axis=0)
     elif scaling == 'PARETO':
        X_scale = np.zeros(n_variables)
        for i in range(0, n_variables):
