@@ -548,7 +548,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, power=1, norm=None, integrate_to_peak=False):
+def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, power=1, vertical_shift=1, norm=None, integrate_to_peak=False):
     """
     Defines a cost function for manifold topology assessment based on the areas, or weighted (penalized) areas, under
     the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
@@ -618,9 +618,10 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
     .. math::
 
-        A_i = \\int \\Big(  \\big| \\log_{10} \\Big( \\frac{\\sigma}{\\sigma_{peak, i}} \\Big) \\big|^r + \\frac{\\log_{10} \\sigma_{max, i} - \\log_{10} \\sigma_{min, i}}{\\log_{10} \\sigma_{peak, i} - \\log_{10} \\sigma_{min, i}} \\Big) \\cdot \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
+        A_i = \\int \\Big(  \\big| \\log_{10} \\Big( \\frac{\\sigma}{\\sigma_{peak, i}} \\Big) \\big|^r + b \\cdot \\frac{\\log_{10} \\sigma_{max, i} - \\log_{10} \\sigma_{min, i}}{\\log_{10} \\sigma_{peak, i} - \\log_{10} \\sigma_{min, i}} \\Big) \\cdot \\hat{\\mathcal{D}}_i(\\sigma) d(\\log_{10} \\sigma)
 
     This type of weighting creates a more gentle penalty for the area happening further from the rightmost peak location.
+    By increasing :math:`b`, the user can tune the amount of penality to smaller feature sizes over larger ones.
     By increasing :math:`r`, the user can penalize non-uniqueness more strongly.
 
     For instance, when :math:`r=1`:
@@ -679,6 +680,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
         cost = cost_function_normalized_variance_derivative(variance_data,
                                                             penalty_function='sigma',
                                                             power=0.5,
+                                                            vertical_shift=1,
                                                             norm='max',
                                                             integrate_to_peak=True)
 
@@ -692,6 +694,8 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
         If ``penalty_function=None``, the area is not weighted.
     :param power: (optional)
         ``float`` or ``int`` specifying the power, :math:`r`. It can be used to control how much penalty should be applied to variance happening at the smallest length scales.
+    :param vertical_shift: (optional)
+        ``float`` or ``int`` specifying the vertical shift multiplier, :math:`b`. It can be used to control how much penalty should be applied to feature sizes.
     :param norm: (optional)
         ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area. If ``norm=None``, a list of costs for all depedent variables is returned.
@@ -712,6 +716,9 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
         if penalty_function not in __penalty_functions:
             raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+
+    if not isinstance(vertical_shift, int) and not isinstance(vertical_shift, float):
+        raise ValueError("Parameter `vertical_shift` has to be of type `float` or `int`.")
 
     if not isinstance(power, int) and not isinstance(power, float):
         raise ValueError("Parameter `power` has to be of type `float` or `int`.")
@@ -757,7 +764,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
             elif penalty_function == 'log-sigma-over-peak':
                 normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
                 addition = normalized_sigma[idx_rightmost_peak][0]
-                penalty_log_sigma_peak = (abs(np.log10(sigma[indices_to_the_left_of_peak]/rightmost_peak_location)))**power + 1. / addition
+                penalty_log_sigma_peak = (abs(np.log10(sigma[indices_to_the_left_of_peak]/rightmost_peak_location)))**power + vertical_shift * 1. / addition
                 cost = np.trapz(derivative[variable][indices_to_the_left_of_peak]*penalty_log_sigma_peak, np.log10(sigma[indices_to_the_left_of_peak]))
                 costs.append(cost)
 
@@ -779,7 +786,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
             elif penalty_function == 'log-sigma-over-peak':
                 normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
                 addition = normalized_sigma[idx_rightmost_peak][0]
-                penalty_log_sigma_peak = (abs(np.log10(sigma/rightmost_peak_location)))**power + 1. / addition
+                penalty_log_sigma_peak = (abs(np.log10(sigma/rightmost_peak_location)))**power + vertical_shift * 1. / addition
                 cost = np.trapz(derivative[variable]*penalty_log_sigma_peak, np.log10(sigma))
                 costs.append(cost)
 
