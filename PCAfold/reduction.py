@@ -3420,7 +3420,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
 
 # ------------------------------------------------------------------------------
 
-def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=False, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,3), title=None, save_filename=None):
+def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=False, nrows=1, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,3), title=None, save_filename=None):
     """
     Plots a sequence of two-dimensional manifolds given a list of two vectors defining the manifold.
 
@@ -3443,6 +3443,7 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
                                         color=X[:,0],
                                         x_label='PC-1',
                                         y_label='PC-2',
+                                        nrows=2,
                                         colorbar_label='$X_1$',
                                         figure_size=(7,3),
                                         title=['First', 'Second', 'Third'],
@@ -3468,6 +3469,8 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         label will not be plotted.
     :param cbar: (optional)
         ``bool`` specifying if the colorbar should be plotted.
+    :param nrows: (optional)
+        ``int`` specifying in how many rows the manifold sequence should be plotted.
     :param colorbar_label: (optional)
         ``str`` specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
@@ -3538,6 +3541,12 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
             elif not isinstance(color[i], str):
                 raise ValueError("Parameters `color` has to have elements of type `str` or `numpy.ndarray`.")
 
+    if not isinstance(nrows, int):
+        raise ValueError("Parameter `nrows` has to be of type `int`.")
+
+    if not nrows >= 1:
+        raise ValueError("Parameter `nrows` has to be larger than or equal to 1.")
+
     if not isinstance(cbar, bool):
         raise ValueError("Parameter `cbar` has to be of type `bool`.")
 
@@ -3570,12 +3579,14 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
+    ncols = int(np.ceil(n_subplots / nrows))
+
     fig = plt.figure(figsize=figure_size)
-    spec = fig.add_gridspec(ncols=n_subplots, nrows=1)
+    spec = fig.add_gridspec(ncols=ncols, nrows=nrows)
 
     for i, element in enumerate(xy):
 
-        ax = fig.add_subplot(spec[0,i])
+        ax = fig.add_subplot(spec[int(np.floor(i/ncols)),np.mod(i, ncols)])
 
         if color is None:
             scat = ax.scatter(element[:,0], element[:,1], c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
@@ -3600,7 +3611,7 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
 
         if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
 
-        if i == 0:
+        if np.mod(i, ncols) == 0:
             if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
 
     if cbar:
