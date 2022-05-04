@@ -1844,6 +1844,9 @@ class VQPCA:
                       random_state=42,
                       verbose=True)
 
+        # Access the VQPCA clustering solution:
+        idx = vqpca.idx
+
     With ``verbose=True``, the code above will print detailed information on each iteration:
 
     .. code-block:: text
