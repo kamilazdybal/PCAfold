@@ -1898,7 +1898,7 @@ class VQPCA:
 
     """
 
-    def __init__(self, X, n_clusters, n_components, scaling='std', init='random', idx0=None, max_iter=300, random_state=None, verbose=False):
+    def __init__(self, X, n_clusters, n_components, scaling='std', init='random', idx0=None, max_iter=300, error_tolerance=None, random_state=None, verbose=False):
 
         __inits = ['random', 'uniform']
 
@@ -1970,6 +1970,10 @@ class VQPCA:
             if max_iter < 1:
                 raise ValueError("Parameter `max_iter` has to be larger than 0.")
 
+        if error_tolerance is not None:
+            if not isinstance(error_tolerance, float):
+                raise ValueError("Parameter `error_tolerance` has to be of type `float`.")
+
         if random_state is not None:
             if not isinstance(random_state, int):
                 raise ValueError("Parameter `random_state has to be of type `int` or None.")
@@ -1996,7 +2000,8 @@ class VQPCA:
         a_tol = 1.0e-16
 
         # Tolerance for the reconstruction error and for cluster centroids:
-        r_tol = 1.0e-08
+        if error_tolerance is None:
+            error_tolerance = 1.0e-08
 
         # Populate the initial eigenvectors and scalings matrices (scalings will not
         # be updated later in the algorithm since we do not scale the data locally):
@@ -2033,16 +2038,17 @@ class VQPCA:
                 centroids = X_pre_processed[centroids_indices, :]
 
         # Printing verbose information on the current iteration
-        print_width = 15
         rows_names = []
+        print_widths = [5,15,12,12] + [10 for i in range(0,n_clusters)]
         row_format = '|'
-        for i in range(n_clusters + 2):
-            row_format += ' {' + str(i) + ':<' + str(print_width) + '} |'
-        rows_names.append('Iteration')
+        for i in range(n_clusters + 4):
+            row_format += ' {' + str(i) + ':<' + str(print_widths[i]) + '} |'
+        rows_names.append('It.')
         rows_names.append('Rec. error')
+        rows_names.append('Cent. conv.?')
+        rows_names.append('Error conv.?')
         for j in range(0,n_clusters):
-            rows_names.append('Cluster ' + str(j+1) + ' size')
-
+            rows_names.append('Cluster ' + str(j+1))
         if verbose:
             print(row_format.format(*rows_names))
 
@@ -2054,10 +2060,10 @@ class VQPCA:
             sq_rec_err = np.zeros((n_observations, n_clusters))
 
             # Initialize the convergence of the cluster centroids:
-            centroids_convergence = 0
+            centroids_convergence = False
 
             # Initialize the convergence of the reconstruction error:s
-            eps_rec_convergence = 0
+            eps_rec_convergence = False
 
             # Reconstruct the data from the low-dimensional representation, evaluate the mean squared reconstruction error:
             for j in range(0,n_clusters):
@@ -2103,21 +2109,21 @@ class VQPCA:
             eps_rec_var = abs((eps_rec_new - eps_rec) / eps_rec_new)
 
             # Judge the convergence of errors:
-            if (eps_rec_var < r_tol):
-                eps_rec_convergence = 1
+            if (eps_rec_var < error_tolerance):
+                eps_rec_convergence = True
 
             # Judge the convergence of centroids:
             if (len(centroids) == len(centroids_new)):
                 centroids_var = abs((centroids_new - centroids) / (centroids_new + a_tol))
 
                 # If all elements in the C_var is less than the error tolerance:
-                if (centroids_var < r_tol).all():
-                    centroids_convergence = 1
+                if (centroids_var < error_tolerance).all():
+                    centroids_convergence = True
 
             # If the convergence of centroids and reconstruction error is reached, the algorithm stops:
-            if ((iteration > 1) and (centroids_convergence == 1) and (eps_rec_convergence == 1)):
+            if ((iteration > 1) and centroids_convergence and eps_rec_convergence):
                 converged = True
-                if verbose: print('Convergence reached in iteration: ' + str(iteration) + '\n')
+                if verbose: print('Convergence reached in iteration: ' + str(iteration+1) + '\n')
                 break
 
             # Update recontruction error and cluster centroids:
@@ -2138,7 +2144,7 @@ class VQPCA:
                 (cluster_length, _) = np.shape(PCs[j])
                 cluster_shapes.append(cluster_length)
             if verbose:
-                print(row_format.format(iteration+1, round(eps_rec_new,8), *cluster_shapes))
+                print(row_format.format(iteration+1, round(eps_rec_new,8), str(centroids_convergence), str(eps_rec_convergence), *cluster_shapes))
 
             # Increment the iteration counter:
             iteration = iteration + 1
