@@ -39,6 +39,7 @@ from .preprocess import plot_conditional_statistics
 from .reduction import PCA
 from .reduction import LPCA
 from .reduction import SubsetPCA
+from .reduction import VQPCA
 from .reduction import pca_on_sampled_data_set
 from .reduction import analyze_centers_change
 from .reduction import analyze_eigenvector_weights_change

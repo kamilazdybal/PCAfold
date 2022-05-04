@@ -1800,6 +1800,298 @@ class LPCA:
 
 ################################################################################
 #
+# Vector Quantification Principal Component Analysis
+#
+################################################################################
+
+class VQPCA:
+    """
+    Enables performing Vector Quantization Principal Component
+    Analysis (VQPCA) clustering.
+
+    VQPCA algorithm was first proposed in :cite:`Kambhatla1997` and later its
+    modified version, that we present here, was developed in :cite:`Parente2009`.
+    VQPCA assigns observations to a cluster based on the minimum reconstruction
+    error from PCA approximation with ``n_components`` number of Principal Components.
+    This is an iterative procedure in which the reconstruction errors are
+    evaluated for every observation as if that observation belonged to cluster *j* and next,
+    the observation is assigned to the cluster for which the reconstruction
+    error was the smallest.
+
+    *Note:*
+    VQPCA algorithm will center the global data set ``X`` by mean and scale by
+    the scaling specified in the ``scaling`` parameter.
+    Data in local clusters will be centered by the mean but will not be scaled.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import VQPCA
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(200,10)
+
+        # Instantiate VQPCA class object:
+        vqpca = VQPCA(X, 3, 2, scaling='std', idx0=[], max_n_iterations=100, verbose=True)
+
+    With ``verbose=True``, the code above will print detailed information on  each iteration:
+
+    .. code-block:: text
+
+        | Iteration       | Rec. error      | Cluster 1 size  | Cluster 2 size  | Cluster 3 size  |
+        | 1               | 10.7416429      | 54              | 106             | 40              |
+        | 2               | 5.62052845      | 62              | 87              | 51              |
+        | 3               | 5.43359656      | 64              | 84              | 52              |
+        | 4               | 5.35368661      | 62              | 83              | 55              |
+        | 5               | 5.33269981      | 61              | 82              | 57              |
+        | 6               | 5.3207212       | 60              | 81              | 59              |
+        | 7               | 5.31000383      | 60              | 80              | 60              |
+        | 8               | 5.30452841      | 58              | 80              | 62              |
+        | 9               | 5.28942031      | 57              | 79              | 64              |
+        | 10              | 5.28528236      | 56              | 79              | 65              |
+        | 11              | 5.28113929      | 56              | 79              | 65              |
+        Convergence reached in iteration: 11
+
+    :param X:
+        raw global data set, uncentered and unscaled.
+    :param k:
+        number of clusters to partition the data.
+    :param n_components:
+        number of Principal Components (PCs) that will be used to reconstruct the local data
+        at each iteration.
+    :param scaling:
+        scaling critertion for the global data set.
+    :param idx0: (optional)
+        user-supplied initial ``idx`` for initializing the centroids. By default
+        random intialization is performed.
+    :param max_n_iterations: (optional)
+        the maximum number of iterations that the algorithm will loop through.
+    :param verbose: (optional)
+        boolean for printing clustering details.
+
+    **Attributes:**
+
+    - **idx** - vector of cluster classifications.
+    - **converged** - boolean specifying whether the algorithm has converged.
+    - **A** - local eigenvectors from the last iteration.
+    - **principal_components** - local Principal Components from the last iteration.
+
+    """
+
+    def __init__(self, X, k, n_components, scaling='std', idx0=[], max_n_iterations=1000, verbose=False):
+
+        (n_observations, n_variables) = np.shape(X)
+
+        # Check that the provided idx0 has the same number of entries as there are observations in X:
+        if len(idx0) > 0:
+            if len(idx0) != n_observations:
+                raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx0` vector.")
+
+        # Initialize the iteration counter:
+        iteration = 0
+
+        # Initialize the eigenvectors matrix:
+        eigenvectors = []
+
+        # Initialize the scalings matrix:
+        scalings = []
+
+        # Algorithm convergence boolean that represents convergence of reconstruction errors and centroids:
+        converged = False
+
+        # Initialize the reconstruction error:
+        eps_rec = 1.0
+
+        # Tolerance for division operations (to avoid division by zero):
+        a_tol = 1.0e-16
+
+        # Tolerance for the reconstruction error and for cluster centroids:
+        r_tol = 1.0e-08
+
+        # Populate the initial eigenvectors and scalings matrices (scalings will not
+        # be updated later in the algorithm since we do not scale the data locally):
+        for i in range(0,k):
+            eigenvectors.append(np.eye(n_variables, n_components))
+            scalings.append(np.ones((n_variables,)))
+
+        # Center and scale the data:
+        (X_pre_processed, _, _) = preprocess.center_scale(X, scaling)
+
+        # Initialization of cluster centroids:
+        if len(idx0) > 0:
+
+            # If there is a user provided initial idx0, find the initial centroids:
+            centroids = preprocess.get_centroids(X_pre_processed, idx0)
+
+        else:
+
+            # Initialize centroids automatically as observations uniformly selected from X:
+            centroids_indices = [int(i) for i in np.linspace(0, n_observations-1, k+2)]
+            centroids_indices.pop()
+            centroids_indices.pop(0)
+            centroids = X_pre_processed[centroids_indices, :]
+
+        # Printing verbose information on the current iteration
+        print_width = 15
+        rows_names = []
+        row_format = '|'
+        for i in range(k + 2):
+            row_format += ' {' + str(i) + ':<' + str(print_width) + '} |'
+        rows_names.append('Iteration')
+        rows_names.append('Rec. error')
+        for j in range(0,k):
+            rows_names.append('Cluster ' + str(j+1) + ' size')
+
+        if verbose:
+            print(row_format.format(*rows_names))
+
+        # VQPCA algorithm:
+        collected_idx = np.zeros((n_observations,1))
+        while ((not converged) and (iteration <= max_n_iterations)):
+
+            # Initialize the reconstruction error matrix:
+            sq_rec_err = np.zeros((n_observations, k))
+
+            # Initialize the convergence of the cluster centroids:
+            centroids_convergence = 0
+
+            # Initialize the convergence of the reconstruction error:s
+            eps_rec_convergence = 0
+
+            # Reconstruct the data from the low-dimensional representation, evaluate the mean squared reconstruction error:
+            for j in range(0,k):
+
+                D = np.diag(scalings[j])
+                C_mat = np.tile(centroids[j, :], (n_observations, 1))
+
+                result = np.dot(np.linalg.inv(D), np.dot(eigenvectors[j], np.dot(np.transpose(eigenvectors[j]), D)))
+                rec_err_os = (X_pre_processed - C_mat - np.dot((X_pre_processed - C_mat), result))
+                sq_rec_err[:, j] = np.sum(rec_err_os**2, axis=1)
+
+            # Assign the observations to clusters based on the minimum reconstruction error:
+            idx = np.argmin(sq_rec_err, axis = 1)
+            rec_err_min = np.min(sq_rec_err, axis = 1)
+            rec_err_min_rel = rec_err_min.copy()
+
+            # Evaluate the global mean reconstruction error (single value):
+            eps_rec_new = np.mean(rec_err_min_rel)
+
+            # Partition the data observations into clusters:
+            (nz_X_k, nz_idx_clust) = preprocess.get_partition(X_pre_processed, idx)
+
+            # Evaluate the relative recontruction errors in each cluster:
+            rec_err_min_rel_k = []
+
+            for j in range(0,k):
+                rec_err_min_rel_k.append(rec_err_min_rel[nz_idx_clust[j]])
+
+            # Evaluate the mean reconstruction error in each cluster:
+            eps_rec_new_clust = np.zeros(k)
+            size_clust = np.zeros(k)
+
+            for j in range(0,k):
+                eps_rec_new_clust[j] = np.mean(rec_err_min_rel_k[j])
+                size_clust[j] = len(nz_X_k[j])
+
+            # Find the new cluster centroids:
+            centroids_new = np.zeros((k, n_variables))
+
+            for j in range(0,k):
+                centroids_new[j, :] = np.mean(nz_X_k[j], axis=0)
+
+            eps_rec_var = abs((eps_rec_new - eps_rec) / eps_rec_new)
+
+            # Judge the convergence of errors:
+            if (eps_rec_var < r_tol):
+                eps_rec_convergence = 1
+
+            # Judge the convergence of centroids:
+            if (len(centroids) == len(centroids_new)):
+                centroids_var = abs((centroids_new - centroids) / (centroids_new + a_tol))
+
+                # If all elements in the C_var is less than the error tolerance:
+                if (centroids_var < r_tol).all():
+                    centroids_convergence = 1
+
+            # If the convergence of centroids and reconstruction error is reached, the algorithm stops:
+            if ((iteration > 1) and (centroids_convergence == 1) and (eps_rec_convergence == 1)):
+                converged = True
+                print('Convergence reached in iteration: ' + str(iteration) + '\n')
+                break
+
+            # Update recontruction error and cluster centroids:
+            centroids = centroids_new.copy()
+            eps_rec = eps_rec_new.copy()
+
+            # Initialize the new eigenvectors matrix:
+            eigenvectors = []
+
+            # Perform PCA in local clusters to update the eigenvectors:
+            local_pca = LPCA(X_pre_processed, idx, scaling='none', n_components=n_components, use_eigendec=True, nocenter=False)
+            eigenvectors = local_pca.A
+            PCs = local_pca.principal_components
+
+            # Printing verbose information on the current iteration
+            cluster_shapes = []
+            for j in range(0,k):
+                (cluster_length, _) = np.shape(PCs[j])
+                cluster_shapes.append(cluster_length)
+            if verbose:
+                print(row_format.format(iteration+1, round(eps_rec_new,8), *cluster_shapes))
+
+            # Increment the iteration counter:
+            iteration = iteration + 1
+
+            collected_idx = np.hstack((collected_idx, idx[:,None]))
+
+        if not converged:
+            print('Convergence not reached in ' + str(iteration) + ' iterations.')
+
+        # Degrade clusters if needed:
+        if len(np.unique(idx)) != (np.max(idx)+1):
+            (idx, k_new) = preprocess.degrade_clusters(idx, verbose=False)
+
+        # Check that the number of entries inside idx is the same as the number of observations:
+        if len(idx) != n_observations:
+            raise ValueError("The number of entires inside `idx` is not equal to the number of observations in the data set `X`.")
+
+        collected_idx = collected_idx[:,1::]
+
+        self.__idx = idx
+        self.__collected_idx = collected_idx
+        self.__converged = converged
+        self.__eigenvectors = eigenvectors
+        self.__principal_components = PCs
+        self.__reconstruction_errors = sq_rec_err
+
+    @property
+    def idx(self):
+        return self.__idx
+
+    @property
+    def collected_idx(self):
+        return self.__collected_idx
+
+    @property
+    def converged(self):
+        return self.__converged
+
+    @property
+    def A(self):
+        return self.__eigenvectors
+
+    @property
+    def reconstruction_errors(self):
+        return self.__reconstruction_errors
+
+    @property
+    def principal_components(self):
+        return self.__principal_components
+
+################################################################################
+#
 # Subset Principal Component Analysis
 #
 ################################################################################
