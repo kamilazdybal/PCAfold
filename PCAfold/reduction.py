@@ -1834,7 +1834,7 @@ class VQPCA:
         X = np.random.rand(200,10)
 
         # Instantiate VQPCA class object:
-        vqpca = VQPCA(X, 3, 2, scaling='std', idx0=[], max_n_iterations=100, verbose=True)
+        vqpca = VQPCA(X, 3, 2, scaling='std', idx0=[], max_iter=100, verbose=True)
 
     With ``verbose=True``, the code above will print detailed information on  each iteration:
 
@@ -1855,39 +1855,114 @@ class VQPCA:
         Convergence reached in iteration: 11
 
     :param X:
-        raw global data set, uncentered and unscaled.
-    :param k:
-        number of clusters to partition the data.
-    :param n_components:
-        number of Principal Components (PCs) that will be used to reconstruct the local data
-        at each iteration.
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param n_clusters:
+        ``int`` specifying the number of clusters to partition the data.
+    :param n_components: (optional)
+        ``int`` specifying the number of retained principal components, :math:`q`. If set to 0 all PCs are retained. It should be a non-negative number.
     :param scaling:
-        scaling critertion for the global data set.
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+    :param init: (optional)
+        ``str`` specifying the method for centroids initialization. It can be ``uniform`` or ``random``. By default
+        random intialization is performed. This setting can be overwritten by the parameter ``idx0``.
     :param idx0: (optional)
-        user-supplied initial ``idx`` for initializing the centroids. By default
-        random intialization is performed.
-    :param max_n_iterations: (optional)
+        ``numpy.ndarray`` specifying the user-supplied initial ``idx`` for initializing the centroids.
+        It overwrites the setting of ``init``. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param max_iter: (optional)
         the maximum number of iterations that the algorithm will loop through.
+    :param random_state: (optional)
+        ``int`` specifying the random seed.
     :param verbose: (optional)
         boolean for printing clustering details.
 
     **Attributes:**
 
     - **idx** - vector of cluster classifications.
+    - **collected_idx** - vector of cluster classifications from all iterations.
     - **converged** - boolean specifying whether the algorithm has converged.
     - **A** - local eigenvectors from the last iteration.
     - **principal_components** - local Principal Components from the last iteration.
+    - **reconstruction_errors_in_clusters** - mean reconstruction errors in each cluster from the last iteration.
 
     """
 
-    def __init__(self, X, k, n_components, scaling='std', idx0=[], max_n_iterations=1000, verbose=False):
+    def __init__(self, X, n_clusters, n_components, scaling='std', init='random', idx0=None, max_iter=300, random_state=None, verbose=False):
 
-        (n_observations, n_variables) = np.shape(X)
+        __inits = ['random', 'uniform']
 
-        # Check that the provided idx0 has the same number of entries as there are observations in X:
-        if len(idx0) > 0:
-            if len(idx0) != n_observations:
-                raise ValueError("The number of observations in the data set `X` must match the number of elements in `idx0` vector.")
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations, n_variables) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        if (n_observations < n_variables):
+            raise ValueError('Variables should be in columns; observations in rows.\n'
+                             'Also ensure that you have more than one observation\n')
+
+        if not isinstance(n_clusters, int):
+            raise ValueError("Parameter `n_clusters` has to be of type `int`.")
+        else:
+            if n_clusters < 2:
+                raise ValueError("Parameter `n_clusters` has to be larger than 1.")
+
+        if not isinstance(n_components, int):
+            raise ValueError("Parameter `n_components` has to be of type `int`.")
+        else:
+            if n_components < 1:
+                raise ValueError("Parameter `n_components` has to be larger than 0.")
+
+        if not isinstance(scaling, str):
+            raise ValueError("Parameter `scaling` has to be of type `str`.")
+        else:
+            if scaling.lower() not in _scalings_list:
+                raise ValueError("Unrecognized scaling method.")
+            else:
+                self.__scaling = scaling.upper()
+
+        if not isinstance(init, str):
+            raise ValueError("Parameter `init` has to be of type `str`.")
+        else:
+            if init.lower() not in __inits:
+                raise ValueError("Parameter `init` has to be `random` or `uniform`.")
+
+        if idx0 is not None:
+
+            if not isinstance(idx0, np.ndarray):
+                raise ValueError("Parameter `idx0` has to be of type `numpy.ndarray`.")
+            else:
+                try:
+                    (n_observations_idx0,) = np.shape(idx0)
+                except:
+                    (n_observations_idx0, n_variables_idx0) = np.shape(idx0)
+
+            if n_variables_idx0 != 1:
+                raise ValueError("Parameter `idx0` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+            try:
+                (n_observations_idx0,) = np.shape(idx0)
+            except:
+                (n_observations_idx0, _) = np.shape(idx0)
+
+            if n_observations_idx0 != n_observations:
+                raise ValueError("The number of elements in `idx0` vector must match the number of observations in the data set `X`.")
+
+        if not isinstance(max_iter, int):
+            raise ValueError("Parameter `max_iter` has to be of type `int`.")
+        else:
+            if max_iter < 1:
+                raise ValueError("Parameter `max_iter` has to be larger than 0.")
+
+        if random_state is not None:
+            if not isinstance(random_state, int):
+                raise ValueError("Parameter `random_state has to be of type `int` or None.")
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
 
         # Initialize the iteration counter:
         iteration = 0
@@ -1912,7 +1987,7 @@ class VQPCA:
 
         # Populate the initial eigenvectors and scalings matrices (scalings will not
         # be updated later in the algorithm since we do not scale the data locally):
-        for i in range(0,k):
+        for i in range(0,n_clusters):
             eigenvectors.append(np.eye(n_variables, n_components))
             scalings.append(np.ones((n_variables,)))
 
@@ -1920,28 +1995,39 @@ class VQPCA:
         (X_pre_processed, _, _) = preprocess.center_scale(X, scaling)
 
         # Initialization of cluster centroids:
-        if len(idx0) > 0:
+        if idx0 is not None:
 
             # If there is a user provided initial idx0, find the initial centroids:
             centroids = preprocess.get_centroids(X_pre_processed, idx0)
 
         else:
 
-            # Initialize centroids automatically as observations uniformly selected from X:
-            centroids_indices = [int(i) for i in np.linspace(0, n_observations-1, k+2)]
-            centroids_indices.pop()
-            centroids_indices.pop(0)
-            centroids = X_pre_processed[centroids_indices, :]
+            if init == 'uniform':
+
+                # Initialize centroids automatically as observations uniformly selected from X:
+                centroids_indices = [int(i) for i in np.linspace(0, n_observations-1, n_clusters+2)]
+                centroids_indices.pop()
+                centroids_indices.pop(0)
+                centroids = X_pre_processed[centroids_indices, :]
+
+            elif init == 'random':
+
+                if random_state is not None:
+                    np.random.seed(random_state)
+
+                # Initialize centroids automatically as observations randomly selected from X:
+                centroids_indices = np.random.randint(n_observations, size=n_clusters)
+                centroids = X_pre_processed[centroids_indices, :]
 
         # Printing verbose information on the current iteration
         print_width = 15
         rows_names = []
         row_format = '|'
-        for i in range(k + 2):
+        for i in range(n_clusters + 2):
             row_format += ' {' + str(i) + ':<' + str(print_width) + '} |'
         rows_names.append('Iteration')
         rows_names.append('Rec. error')
-        for j in range(0,k):
+        for j in range(0,n_clusters):
             rows_names.append('Cluster ' + str(j+1) + ' size')
 
         if verbose:
@@ -1949,10 +2035,10 @@ class VQPCA:
 
         # VQPCA algorithm:
         collected_idx = np.zeros((n_observations,1))
-        while ((not converged) and (iteration <= max_n_iterations)):
+        while ((not converged) and (iteration <= max_iter)):
 
             # Initialize the reconstruction error matrix:
-            sq_rec_err = np.zeros((n_observations, k))
+            sq_rec_err = np.zeros((n_observations, n_clusters))
 
             # Initialize the convergence of the cluster centroids:
             centroids_convergence = 0
@@ -1961,7 +2047,7 @@ class VQPCA:
             eps_rec_convergence = 0
 
             # Reconstruct the data from the low-dimensional representation, evaluate the mean squared reconstruction error:
-            for j in range(0,k):
+            for j in range(0,n_clusters):
 
                 D = np.diag(scalings[j])
                 C_mat = np.tile(centroids[j, :], (n_observations, 1))
@@ -1984,21 +2070,21 @@ class VQPCA:
             # Evaluate the relative recontruction errors in each cluster:
             rec_err_min_rel_k = []
 
-            for j in range(0,k):
+            for j in range(0,n_clusters):
                 rec_err_min_rel_k.append(rec_err_min_rel[nz_idx_clust[j]])
 
             # Evaluate the mean reconstruction error in each cluster:
-            eps_rec_new_clust = np.zeros(k)
-            size_clust = np.zeros(k)
+            eps_rec_new_clust = np.zeros(n_clusters)
+            size_clust = np.zeros(n_clusters)
 
-            for j in range(0,k):
+            for j in range(0,n_clusters):
                 eps_rec_new_clust[j] = np.mean(rec_err_min_rel_k[j])
                 size_clust[j] = len(nz_X_k[j])
 
             # Find the new cluster centroids:
-            centroids_new = np.zeros((k, n_variables))
+            centroids_new = np.zeros((n_clusters, n_variables))
 
-            for j in range(0,k):
+            for j in range(0,n_clusters):
                 centroids_new[j, :] = np.mean(nz_X_k[j], axis=0)
 
             eps_rec_var = abs((eps_rec_new - eps_rec) / eps_rec_new)
@@ -2018,7 +2104,7 @@ class VQPCA:
             # If the convergence of centroids and reconstruction error is reached, the algorithm stops:
             if ((iteration > 1) and (centroids_convergence == 1) and (eps_rec_convergence == 1)):
                 converged = True
-                print('Convergence reached in iteration: ' + str(iteration) + '\n')
+                if verbose: print('Convergence reached in iteration: ' + str(iteration) + '\n')
                 break
 
             # Update recontruction error and cluster centroids:
@@ -2035,7 +2121,7 @@ class VQPCA:
 
             # Printing verbose information on the current iteration
             cluster_shapes = []
-            for j in range(0,k):
+            for j in range(0,n_clusters):
                 (cluster_length, _) = np.shape(PCs[j])
                 cluster_shapes.append(cluster_length)
             if verbose:
@@ -2047,7 +2133,7 @@ class VQPCA:
             collected_idx = np.hstack((collected_idx, idx[:,None]))
 
         if not converged:
-            print('Convergence not reached in ' + str(iteration) + ' iterations.')
+            if verbose: print('Convergence not reached in ' + str(iteration) + ' iterations.')
 
         # Degrade clusters if needed:
         if len(np.unique(idx)) != (np.max(idx)+1):
@@ -2064,7 +2150,7 @@ class VQPCA:
         self.__converged = converged
         self.__eigenvectors = eigenvectors
         self.__principal_components = PCs
-        self.__reconstruction_errors = sq_rec_err
+        self.__reconstruction_errors_in_clusters = eps_rec_new_clust
 
     @property
     def idx(self):
@@ -2083,12 +2169,12 @@ class VQPCA:
         return self.__eigenvectors
 
     @property
-    def reconstruction_errors(self):
-        return self.__reconstruction_errors
-
-    @property
     def principal_components(self):
         return self.__principal_components
+
+    @property
+    def reconstruction_errors_in_clusters(self):
+        return self.__reconstruction_errors_in_clusters
 
 ################################################################################
 #
