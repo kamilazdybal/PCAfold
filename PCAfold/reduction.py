@@ -1831,28 +1831,35 @@ class VQPCA:
         import numpy as np
 
         # Generate dummy data set:
-        X = np.random.rand(200,10)
+        X = np.random.rand(400,10)
 
         # Instantiate VQPCA class object:
-        vqpca = VQPCA(X, 3, 2, scaling='std', idx0=[], max_iter=100, verbose=True)
+        vqpca = VQPCA(X,
+                      n_clusters=3,
+                      n_components=2,
+                      scaling='std',
+                      init='random',
+                      idx0=None,
+                      max_iter=100,
+                      random_state=42,
+                      verbose=True)
 
-    With ``verbose=True``, the code above will print detailed information on  each iteration:
+    With ``verbose=True``, the code above will print detailed information on each iteration:
 
     .. code-block:: text
 
         | Iteration       | Rec. error      | Cluster 1 size  | Cluster 2 size  | Cluster 3 size  |
-        | 1               | 10.7416429      | 54              | 106             | 40              |
-        | 2               | 5.62052845      | 62              | 87              | 51              |
-        | 3               | 5.43359656      | 64              | 84              | 52              |
-        | 4               | 5.35368661      | 62              | 83              | 55              |
-        | 5               | 5.33269981      | 61              | 82              | 57              |
-        | 6               | 5.3207212       | 60              | 81              | 59              |
-        | 7               | 5.31000383      | 60              | 80              | 60              |
-        | 8               | 5.30452841      | 58              | 80              | 62              |
-        | 9               | 5.28942031      | 57              | 79              | 64              |
-        | 10              | 5.28528236      | 56              | 79              | 65              |
-        | 11              | 5.28113929      | 56              | 79              | 65              |
-        Convergence reached in iteration: 11
+        | 1               | 11.57170201     | 123             | 144             | 133             |
+        | 2               | 5.91757639      | 129             | 141             | 130             |
+        | 3               | 5.76129214      | 122             | 145             | 133             |
+        | 4               | 5.7108546       | 122             | 144             | 134             |
+        | 5               | 5.67447569      | 122             | 142             | 136             |
+        | 6               | 5.61220177      | 123             | 140             | 137             |
+        | 7               | 5.57668998      | 121             | 138             | 141             |
+        | 8               | 5.56395984      | 120             | 137             | 143             |
+        | 9               | 5.56061402      | 121             | 137             | 142             |
+        | 10              | 5.55957995      | 121             | 137             | 142             |
+        Convergence reached in iteration: 10
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -1937,11 +1944,14 @@ class VQPCA:
             else:
                 try:
                     (n_observations_idx0,) = np.shape(idx0)
+                    n_variables_idx0 = 1
                 except:
                     (n_observations_idx0, n_variables_idx0) = np.shape(idx0)
 
             if n_variables_idx0 != 1:
                 raise ValueError("Parameter `idx0` has to have size `(n_observations,)` or `(n_observations,1)`.")
+            else:
+                idx0 = idx0.ravel()
 
             try:
                 (n_observations_idx0,) = np.shape(idx0)
