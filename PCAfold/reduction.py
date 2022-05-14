@@ -1851,18 +1851,19 @@ class VQPCA:
 
     .. code-block:: text
 
-        | Iteration       | Rec. error      | Cluster 1 size  | Cluster 2 size  | Cluster 3 size  |
-        | 1               | 11.57170201     | 123             | 144             | 133             |
-        | 2               | 5.91757639      | 129             | 141             | 130             |
-        | 3               | 5.76129214      | 122             | 145             | 133             |
-        | 4               | 5.7108546       | 122             | 144             | 134             |
-        | 5               | 5.67447569      | 122             | 142             | 136             |
-        | 6               | 5.61220177      | 123             | 140             | 137             |
-        | 7               | 5.57668998      | 121             | 138             | 141             |
-        | 8               | 5.56395984      | 120             | 137             | 143             |
-        | 9               | 5.56061402      | 121             | 137             | 142             |
-        | 10              | 5.55957995      | 121             | 137             | 142             |
-        Convergence reached in iteration: 10
+        | It.   | Rec. error      | Cent. conv.? | Error conv.? | Cluster 1  | Cluster 2  | Cluster 3  |
+        | 1     | 11.57170201     | False        | False        | 123        | 144        | 133        |
+        | 2     | 5.91757639      | False        | False        | 129        | 141        | 130        |
+        | 3     | 5.76129214      | False        | False        | 122        | 145        | 133        |
+        | 4     | 5.7108546       | False        | False        | 122        | 144        | 134        |
+        | 5     | 5.67447569      | False        | False        | 122        | 142        | 136        |
+        | 6     | 5.61220177      | False        | False        | 123        | 140        | 137        |
+        | 7     | 5.57668998      | False        | False        | 121        | 138        | 141        |
+        | 8     | 5.56395984      | False        | False        | 120        | 137        | 143        |
+        | 9     | 5.56061402      | False        | False        | 121        | 137        | 142        |
+        | 10    | 5.55957995      | True         | False        | 121        | 137        | 142        |
+        | 11    | 5.55957995      | True         | True         | 121        | 137        | 142        |
+        Convergence reached in iteration: 11
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -1995,7 +1996,7 @@ class VQPCA:
         global_mean_squared_reconstruction_error_previous = 1.0
 
         # Tolerance for division operations (to avoid division by zero):
-        a_tol = 1.0e-16
+        eps = np.finfo(float).eps
 
         # Tolerance for the reconstruction error and for the cluster centroids:
         if tolerance is None:
@@ -2068,10 +2069,9 @@ class VQPCA:
 
                 D = np.diag(scalings[j])
                 centroids_matrix = np.tile(centroids_previous[j, :], (n_observations, 1))
-                result = np.dot(np.linalg.inv(D), np.dot(eigenvectors[j], np.dot(np.transpose(eigenvectors[j]), D)))
 
                 # Evaluate the mean squared reconstruction error:
-                squared_reconstruction_error_matrix[:, j] = np.sum((X_pre_processed - centroids_matrix - np.dot((X_pre_processed - centroids_matrix), result))**2, axis=1)
+                squared_reconstruction_error_matrix[:, j] = np.sum((X_pre_processed - centroids_matrix - np.dot((X_pre_processed - centroids_matrix), np.dot(np.linalg.inv(D), np.dot(eigenvectors[j], np.dot(np.transpose(eigenvectors[j]), D)))))**2, axis=1)
 
             # Assign observations to clusters based on the minimum squared reconstruction error:
             idx = np.argmin(squared_reconstruction_error_matrix, axis=1)
@@ -2079,7 +2079,7 @@ class VQPCA:
 
             # Evaluate the minimum squared reconstruction error:
             min_squared_reconstruction_error = np.min(squared_reconstruction_error_matrix, axis=1)
-            min_squared_reconstruction_error_previous = min_squared_reconstruction_error.copy()
+            min_squared_reconstruction_error_previous = cp.deepcopy(min_squared_reconstruction_error)
 
             # Evaluate the global mean squared reconstruction error (single value):
             global_mean_squared_reconstruction_error = np.mean(min_squared_reconstruction_error_previous)
@@ -2098,7 +2098,7 @@ class VQPCA:
 
             # Judge the convergence of centroids:
             if (len(centroids_previous) == len(centroids)):
-                centroids_var = abs((centroids - centroids_previous) / (centroids + a_tol))
+                centroids_var = abs((centroids - centroids_previous) / (centroids + eps))
 
                 # If all elements in the centroids_var is less than the error tolerance:
                 if (centroids_var < tolerance).all():
@@ -2121,10 +2121,10 @@ class VQPCA:
                 break
 
             # Update the global mean squared recontruction error:
-            global_mean_squared_reconstruction_error_previous = global_mean_squared_reconstruction_error.copy()
+            global_mean_squared_reconstruction_error_previous = cp.deepcopy(global_mean_squared_reconstruction_error)
 
             # Update the cluster centroids:
-            centroids_previous = centroids.copy()
+            centroids_previous = cp.deepcopy(centroids)
 
             # Initialize the new eigenvectors matrix:
             eigenvectors = []
