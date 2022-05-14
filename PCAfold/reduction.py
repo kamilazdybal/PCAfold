@@ -1839,8 +1839,7 @@ class VQPCA:
                       n_clusters=3,
                       n_components=2,
                       scaling='std',
-                      init='random',
-                      idx_init=None,
+                      idx_init='random',
                       max_iter=100,
                       random_state=42,
                       verbose=True)
@@ -1875,12 +1874,10 @@ class VQPCA:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
-    :param init: (optional)
-        ``str`` specifying the method for centroids initialization. It can be ``uniform`` or ``random``. By default
-        random intialization is performed. This setting can be overwritten by the parameter ``idx_init``.
     :param idx_init: (optional)
-        ``numpy.ndarray`` specifying the user-supplied initial ``idx`` for initializing the centroids.
-        It overwrites the setting of ``init``. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+        ``str`` or ``numpy.ndarray`` specifying the method for centroids initialization. If ``str``, it can be ``uniform`` or ``random``. By default
+        random intialization is performed. A user-supplied initial ``idx`` for initializing the centroids can be passed using a ``numpy.ndarray``.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param max_iter: (optional)
         the maximum number of iterations that the algorithm will loop through.
     :param random_state: (optional)
@@ -1899,7 +1896,7 @@ class VQPCA:
 
     """
 
-    def __init__(self, X, n_clusters, n_components, scaling='std', init='random', idx_init=None, max_iter=300, error_tolerance=None, random_state=None, verbose=False):
+    def __init__(self, X, n_clusters, n_components, scaling='std', idx_init='random', max_iter=300, error_tolerance=None, random_state=None, verbose=False):
 
         __inits = ['random', 'uniform']
 
@@ -1935,22 +1932,16 @@ class VQPCA:
             else:
                 self.__scaling = scaling.upper()
 
-        if not isinstance(init, str):
-            raise ValueError("Parameter `init` has to be of type `str`.")
-        else:
-            if init.lower() not in __inits:
-                raise ValueError("Parameter `init` has to be `random` or `uniform`.")
+        if isinstance(idx_init, str):
+            if idx_init.lower() not in __inits:
+                raise ValueError("Parameter `idx_init` has to be 'random' or 'uniform'.")
 
-        if idx_init is not None:
-
-            if not isinstance(idx_init, np.ndarray):
-                raise ValueError("Parameter `idx_init` has to be of type `numpy.ndarray`.")
-            else:
-                try:
-                    (n_observations_idx_init,) = np.shape(idx_init)
-                    n_variables_idx_init = 1
-                except:
-                    (n_observations_idx_init, n_variables_idx_init) = np.shape(idx_init)
+        elif isinstance(idx_init, np.ndarray):
+            try:
+                (n_observations_idx_init,) = np.shape(idx_init)
+                n_variables_idx_init = 1
+            except:
+                (n_observations_idx_init, n_variables_idx_init) = np.shape(idx_init)
 
             if n_variables_idx_init != 1:
                 raise ValueError("Parameter `idx_init` has to have size `(n_observations,)` or `(n_observations,1)`.")
@@ -1964,6 +1955,9 @@ class VQPCA:
 
             if n_observations_idx_init != n_observations:
                 raise ValueError("The number of elements in `idx_init` vector must match the number of observations in the data set `X`.")
+
+        else:
+            raise ValueError("Parameter `idx_init` has to be of type `str` or `numpy.ndarray`.")
 
         if not isinstance(max_iter, int):
             raise ValueError("Parameter `max_iter` has to be of type `int`.")
@@ -2014,14 +2008,14 @@ class VQPCA:
         (X_pre_processed, _, _) = preprocess.center_scale(X, scaling)
 
         # Initialization of cluster centroids:
-        if idx_init is not None:
+        if isinstance(idx_init, np.ndarray):
 
             # If there is a user provided initial idx_init, find the initial centroids:
             centroids = preprocess.get_centroids(X_pre_processed, idx_init)
 
         else:
 
-            if init == 'uniform':
+            if idx_init == 'uniform':
 
                 # Initialize centroids automatically as observations uniformly selected from X:
                 centroids_indices = [int(i) for i in np.linspace(0, n_observations-1, n_clusters+2)]
@@ -2029,7 +2023,7 @@ class VQPCA:
                 centroids_indices.pop(0)
                 centroids = X_pre_processed[centroids_indices, :]
 
-            elif init == 'random':
+            elif idx_init == 'random':
 
                 if random_state is not None:
                     np.random.seed(random_state)
