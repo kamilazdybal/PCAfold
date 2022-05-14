@@ -139,3 +139,83 @@ class Reduction(unittest.TestCase):
             self.assertTrue(False)
 
 # ------------------------------------------------------------------------------
+
+    def test_reduction__VQPCA__computation_on_line_dataset(self):
+
+        # Generate a synthetic line dataset:
+        n_observations = 1000
+        x = np.linspace(0, 50, n_observations)
+        phi_1 = np.zeros((n_observations,1))
+
+        k1_count = 0
+        k2_count = 0
+        k3_count = 0
+
+        for observation, x_value in enumerate(x):
+            if x_value <= 10:
+                phi_1[observation] = 2 * x_value
+                k1_count += 1
+            elif x_value > 10 and x_value <= 35:
+                phi_1[observation] = - x_value + 30
+                k2_count += 1
+            elif x_value > 35:
+                phi_1[observation] = 4 * x_value - 145
+                k3_count += 1
+
+        data_set_2d = np.hstack((x[:,None], phi_1))
+
+        try:
+            # Run VQPCA partitioning into three clusters:
+            vqpca = reduction.VQPCA(data_set_2d,
+                                    n_clusters=3,
+                                    n_components=1,
+                                    scaling='auto',
+                                    init='uniform',
+                                    max_iter=100,
+                                    verbose=False)
+            idx_2d = vqpca.idx
+            converged = vqpca.converged
+
+            self.assertTrue(converged==True)
+
+            # Check that clusters have been constructed as expected:
+            self.assertTrue(idx_2d[0] != idx_2d[k1_count])
+            self.assertTrue(idx_2d[k1_count] != idx_2d[k1_count+k2_count])
+
+            for i in range(1,k1_count):
+                self.assertTrue(idx_2d[0] == idx_2d[i])
+            for i in range(k1_count+1,k1_count+k2_count):
+                self.assertTrue(idx_2d[k1_count] == idx_2d[i])
+            for i in range(k1_count+k2_count+1,k1_count+k2_count+k3_count):
+                self.assertTrue(idx_2d[k1_count+k2_count] == idx_2d[i])
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+            # Run VQPCA partitioning into three clusters:
+            vqpca = reduction.VQPCA(data_set_2d,
+                                    n_clusters=3,
+                                    n_components=1,
+                                    scaling='auto',
+                                    init='random',
+                                    max_iter=100,
+                                    verbose=False)
+            idx_2d = vqpca.idx
+            converged = vqpca.converged
+
+            self.assertTrue(converged==True)
+
+            # Check that clusters have been constructed as expected:
+            self.assertTrue(idx_2d[0] != idx_2d[k1_count])
+            self.assertTrue(idx_2d[k1_count] != idx_2d[k1_count+k2_count])
+
+            for i in range(1,k1_count):
+                self.assertTrue(idx_2d[0] == idx_2d[i])
+            for i in range(k1_count+1,k1_count+k2_count):
+                self.assertTrue(idx_2d[k1_count] == idx_2d[i])
+            for i in range(k1_count+k2_count+1,k1_count+k2_count+k3_count):
+                self.assertTrue(idx_2d[k1_count+k2_count] == idx_2d[i])
+        except Exception:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
