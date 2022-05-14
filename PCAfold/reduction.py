@@ -1807,21 +1807,22 @@ class LPCA:
 class VQPCA:
     """
     Enables performing Vector Quantization Principal Component
-    Analysis (VQPCA) clustering.
+    Analysis (VQPCA).
 
-    VQPCA algorithm was first proposed in :cite:`Kambhatla1997` and later its
-    modified version, that we present here, was developed in :cite:`Parente2009`.
-    VQPCA assigns observations to a cluster based on the minimum reconstruction
+    The VQPCA algorithm was first proposed in :cite:`Kambhatla1997` and its
+    modified version that we present here was developed by :cite:`Parente2009`.
+    VQPCA assigns observations to local clusters based on the minimum reconstruction
     error from PCA approximation with ``n_components`` number of Principal Components.
     This is an iterative procedure in which the reconstruction errors are
     evaluated for every observation as if that observation belonged to cluster *j* and next,
     the observation is assigned to the cluster for which the reconstruction
-    error was the smallest.
+    error is smallest.
 
-    *Note:*
-    VQPCA algorithm will center the global data set ``X`` by mean and scale by
-    the scaling specified in the ``scaling`` parameter.
-    Data in local clusters will be centered by the mean but will not be scaled.
+    .. note::
+
+        The VQPCA algorithm centers the global data set :math:`\mathbf{X}` by the mean value and scales it by
+        the scaling specified with the ``scaling`` parameter.
+        Data in local clusters is centered by the mean value but is *not* scaled.
 
     **Example:**
 
@@ -1839,7 +1840,7 @@ class VQPCA:
                       n_components=2,
                       scaling='std',
                       init='random',
-                      idx0=None,
+                      idx_init=None,
                       max_iter=100,
                       random_state=42,
                       verbose=True)
@@ -1876,8 +1877,8 @@ class VQPCA:
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param init: (optional)
         ``str`` specifying the method for centroids initialization. It can be ``uniform`` or ``random``. By default
-        random intialization is performed. This setting can be overwritten by the parameter ``idx0``.
-    :param idx0: (optional)
+        random intialization is performed. This setting can be overwritten by the parameter ``idx_init``.
+    :param idx_init: (optional)
         ``numpy.ndarray`` specifying the user-supplied initial ``idx`` for initializing the centroids.
         It overwrites the setting of ``init``. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param max_iter: (optional)
@@ -1898,7 +1899,7 @@ class VQPCA:
 
     """
 
-    def __init__(self, X, n_clusters, n_components, scaling='std', init='random', idx0=None, max_iter=300, error_tolerance=None, random_state=None, verbose=False):
+    def __init__(self, X, n_clusters, n_components, scaling='std', init='random', idx_init=None, max_iter=300, error_tolerance=None, random_state=None, verbose=False):
 
         __inits = ['random', 'uniform']
 
@@ -1940,29 +1941,29 @@ class VQPCA:
             if init.lower() not in __inits:
                 raise ValueError("Parameter `init` has to be `random` or `uniform`.")
 
-        if idx0 is not None:
+        if idx_init is not None:
 
-            if not isinstance(idx0, np.ndarray):
-                raise ValueError("Parameter `idx0` has to be of type `numpy.ndarray`.")
+            if not isinstance(idx_init, np.ndarray):
+                raise ValueError("Parameter `idx_init` has to be of type `numpy.ndarray`.")
             else:
                 try:
-                    (n_observations_idx0,) = np.shape(idx0)
-                    n_variables_idx0 = 1
+                    (n_observations_idx_init,) = np.shape(idx_init)
+                    n_variables_idx_init = 1
                 except:
-                    (n_observations_idx0, n_variables_idx0) = np.shape(idx0)
+                    (n_observations_idx_init, n_variables_idx_init) = np.shape(idx_init)
 
-            if n_variables_idx0 != 1:
-                raise ValueError("Parameter `idx0` has to have size `(n_observations,)` or `(n_observations,1)`.")
+            if n_variables_idx_init != 1:
+                raise ValueError("Parameter `idx_init` has to have size `(n_observations,)` or `(n_observations,1)`.")
             else:
-                idx0 = idx0.ravel()
+                idx_init = idx_init.ravel()
 
             try:
-                (n_observations_idx0,) = np.shape(idx0)
+                (n_observations_idx_init,) = np.shape(idx_init)
             except:
-                (n_observations_idx0, _) = np.shape(idx0)
+                (n_observations_idx_init, _) = np.shape(idx_init)
 
-            if n_observations_idx0 != n_observations:
-                raise ValueError("The number of elements in `idx0` vector must match the number of observations in the data set `X`.")
+            if n_observations_idx_init != n_observations:
+                raise ValueError("The number of elements in `idx_init` vector must match the number of observations in the data set `X`.")
 
         if not isinstance(max_iter, int):
             raise ValueError("Parameter `max_iter` has to be of type `int`.")
@@ -2013,10 +2014,10 @@ class VQPCA:
         (X_pre_processed, _, _) = preprocess.center_scale(X, scaling)
 
         # Initialization of cluster centroids:
-        if idx0 is not None:
+        if idx_init is not None:
 
-            # If there is a user provided initial idx0, find the initial centroids:
-            centroids = preprocess.get_centroids(X_pre_processed, idx0)
+            # If there is a user provided initial idx_init, find the initial centroids:
+            centroids = preprocess.get_centroids(X_pre_processed, idx_init)
 
         else:
 

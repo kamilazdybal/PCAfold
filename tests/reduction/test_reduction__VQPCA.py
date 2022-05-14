@@ -18,17 +18,17 @@ class Reduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            idx0 = np.ones((400,1))
-            idx0[20:40,:] = 2
-            idx0[200:300,:] = 3
-            idx0 = idx0.astype(int)
-            vqpca = reduction.VQPCA(X, 3, 2, idx0=idx0)
+            idx_init = np.ones((400,1))
+            idx_init[20:40,:] = 2
+            idx_init[200:300,:] = 3
+            idx_init = idx_init.astype(int)
+            vqpca = reduction.VQPCA(X, 3, 2, idx_init=idx_init)
 
-            idx0 = np.ones((400,))
-            idx0[20:40] = 2
-            idx0[200:300] = 3
-            idx0 = idx0.astype(int)
-            vqpca = reduction.VQPCA(X, 3, 2, idx0=idx0)
+            idx_init = np.ones((400,))
+            idx_init[20:40] = 2
+            idx_init[200:300] = 3
+            idx_init = idx_init.astype(int)
+            vqpca = reduction.VQPCA(X, 3, 2, idx_init=idx_init)
         except Exception:
             self.assertTrue(False)
 
