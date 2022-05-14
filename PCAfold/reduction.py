@@ -1875,11 +1875,14 @@ class VQPCA:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
         ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param idx_init: (optional)
-        ``str`` or ``numpy.ndarray`` specifying the method for centroids initialization. If ``str``, it can be ``uniform`` or ``random``. By default
-        random intialization is performed. A user-supplied initial ``idx`` for initializing the centroids can be passed using a ``numpy.ndarray``.
+        ``str`` or ``numpy.ndarray`` specifying the method for centroids initialization. If ``str``, it can be ``'uniform'`` or ``'random'``. By default
+        random intialization is performed. An arbitrary user-supplied initial ``idx`` for initializing the centroids can be passed using a ``numpy.ndarray``.
         It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param max_iter: (optional)
         the maximum number of iterations that the algorithm will loop through.
+    :param tolerance: (optional)
+        ``float`` specifying the tolerance for the global mean squared reconstruction error and for the cluster centroids.
+        This parameter is important for judging the convergence of the VQPCA algorithm. If set to ``None``, the default value ``1.0e-08`` is used.
     :param random_state: (optional)
         ``int`` specifying the random seed.
     :param verbose: (optional)
@@ -1896,7 +1899,7 @@ class VQPCA:
 
     """
 
-    def __init__(self, X, n_clusters, n_components, scaling='std', idx_init='random', max_iter=300, error_tolerance=None, random_state=None, verbose=False):
+    def __init__(self, X, n_clusters, n_components, scaling='std', idx_init='random', max_iter=300, tolerance=None, random_state=None, verbose=False):
 
         __inits = ['random', 'uniform']
 
@@ -1965,9 +1968,9 @@ class VQPCA:
             if max_iter < 1:
                 raise ValueError("Parameter `max_iter` has to be larger than 0.")
 
-        if error_tolerance is not None:
-            if not isinstance(error_tolerance, float):
-                raise ValueError("Parameter `error_tolerance` has to be of type `float`.")
+        if tolerance is not None:
+            if not isinstance(tolerance, float):
+                raise ValueError("Parameter `tolerance` has to be of type `float`.")
 
         if random_state is not None:
             if not isinstance(random_state, int):
@@ -1988,15 +1991,15 @@ class VQPCA:
         # Algorithm convergence boolean that represents convergence of reconstruction errors and centroids:
         converged = False
 
-        # Initialize the reconstruction error:
-        eps_rec = 1.0
+        # Initialize the global mean squared reconstruction error:
+        global_mean_squared_reconstruction_error_previous = 1.0
 
         # Tolerance for division operations (to avoid division by zero):
         a_tol = 1.0e-16
 
-        # Tolerance for the reconstruction error and for cluster centroids:
-        if error_tolerance is None:
-            error_tolerance = 1.0e-08
+        # Tolerance for the reconstruction error and for the cluster centroids:
+        if tolerance is None:
+            tolerance = 1.0e-08
 
         # Populate the initial eigenvectors and scalings matrices (scalings will not
         # be updated later in the algorithm since we do not scale the data locally):
@@ -2011,7 +2014,7 @@ class VQPCA:
         if isinstance(idx_init, np.ndarray):
 
             # If there is a user provided initial idx_init, find the initial centroids:
-            centroids = preprocess.get_centroids(X_pre_processed, idx_init)
+            centroids_previous = preprocess.get_centroids(X_pre_processed, idx_init)
 
         else:
 
@@ -2021,7 +2024,7 @@ class VQPCA:
                 centroids_indices = [int(i) for i in np.linspace(0, n_observations-1, n_clusters+2)]
                 centroids_indices.pop()
                 centroids_indices.pop(0)
-                centroids = X_pre_processed[centroids_indices, :]
+                centroids_previous = X_pre_processed[centroids_indices, :]
 
             elif idx_init == 'random':
 
@@ -2030,9 +2033,9 @@ class VQPCA:
 
                 # Initialize centroids automatically as observations randomly selected from X:
                 centroids_indices = np.random.randint(n_observations, size=n_clusters)
-                centroids = X_pre_processed[centroids_indices, :]
+                centroids_previous = X_pre_processed[centroids_indices, :]
 
-        # Printing verbose information on the current iteration
+        # Template for printing verbose information on the current iteration:
         rows_names = []
         print_widths = [5,15,12,12] + [10 for i in range(0,n_clusters)]
         row_format = '|'
@@ -2047,104 +2050,100 @@ class VQPCA:
         if verbose:
             print(row_format.format(*rows_names))
 
-        # VQPCA algorithm:
+        # The VQPCA algorithm: -------------------------------------------------
         collected_idx = np.zeros((n_observations,1))
-        while ((not converged) and (iteration <= max_iter)):
+        while ((not converged) and (iteration < max_iter)):
 
             # Initialize the reconstruction error matrix:
-            sq_rec_err = np.zeros((n_observations, n_clusters))
+            squared_reconstruction_error_matrix = np.zeros((n_observations, n_clusters))
 
-            # Initialize the convergence of the cluster centroids:
+            # Initialize the convergence of cluster centroids:
             centroids_convergence = False
 
-            # Initialize the convergence of the reconstruction error:s
-            eps_rec_convergence = False
+            # Initialize the convergence of reconstruction errors:
+            reconstruction_error_convergence = False
 
-            # Reconstruct the data from the low-dimensional representation, evaluate the mean squared reconstruction error:
+            # Reconstruct the data from the low-dimensional representation of each cluster:
             for j in range(0,n_clusters):
 
                 D = np.diag(scalings[j])
-                C_mat = np.tile(centroids[j, :], (n_observations, 1))
-
+                centroids_matrix = np.tile(centroids_previous[j, :], (n_observations, 1))
                 result = np.dot(np.linalg.inv(D), np.dot(eigenvectors[j], np.dot(np.transpose(eigenvectors[j]), D)))
-                rec_err_os = (X_pre_processed - C_mat - np.dot((X_pre_processed - C_mat), result))
-                sq_rec_err[:, j] = np.sum(rec_err_os**2, axis=1)
 
-            # Assign the observations to clusters based on the minimum reconstruction error:
-            idx = np.argmin(sq_rec_err, axis = 1)
-            rec_err_min = np.min(sq_rec_err, axis = 1)
-            rec_err_min_rel = rec_err_min.copy()
+                # Evaluate the mean squared reconstruction error:
+                squared_reconstruction_error_matrix[:, j] = np.sum((X_pre_processed - centroids_matrix - np.dot((X_pre_processed - centroids_matrix), result))**2, axis=1)
 
-            # Evaluate the global mean reconstruction error (single value):
-            eps_rec_new = np.mean(rec_err_min_rel)
+            # Assign observations to clusters based on the minimum squared reconstruction error:
+            idx = np.argmin(squared_reconstruction_error_matrix, axis=1)
+            collected_idx = np.hstack((collected_idx, idx[:,None]))
 
-            # Partition the data observations into clusters:
-            (nz_X_k, nz_idx_clust) = preprocess.get_partition(X_pre_processed, idx)
+            # Evaluate the minimum squared reconstruction error:
+            min_squared_reconstruction_error = np.min(squared_reconstruction_error_matrix, axis=1)
+            min_squared_reconstruction_error_previous = min_squared_reconstruction_error.copy()
 
-            # Evaluate the relative recontruction errors in each cluster:
-            rec_err_min_rel_k = []
+            # Evaluate the global mean squared reconstruction error (single value):
+            global_mean_squared_reconstruction_error = np.mean(min_squared_reconstruction_error_previous)
 
-            for j in range(0,n_clusters):
-                rec_err_min_rel_k.append(rec_err_min_rel[nz_idx_clust[j]])
-
-            # Evaluate the mean reconstruction error in each cluster:
-            eps_rec_new_clust = np.zeros(n_clusters)
-            size_clust = np.zeros(n_clusters)
-
-            for j in range(0,n_clusters):
-                eps_rec_new_clust[j] = np.mean(rec_err_min_rel_k[j])
-                size_clust[j] = len(nz_X_k[j])
-
-            # Find the new cluster centroids:
-            centroids_new = np.zeros((n_clusters, n_variables))
-
-            for j in range(0,n_clusters):
-                centroids_new[j, :] = np.mean(nz_X_k[j], axis=0)
-
-            eps_rec_var = abs((eps_rec_new - eps_rec) / eps_rec_new)
+            # Partition the data observations into clusters based on the current idx:
+            (X_k, idx_k) = preprocess.get_partition(X_pre_processed, idx)
 
             # Judge the convergence of errors:
-            if (eps_rec_var < error_tolerance):
-                eps_rec_convergence = True
+            if (abs((global_mean_squared_reconstruction_error - global_mean_squared_reconstruction_error_previous) / global_mean_squared_reconstruction_error) < tolerance):
+                reconstruction_error_convergence = True
+
+            # Find the new cluster centroids:
+            centroids = np.zeros((n_clusters, n_variables))
+            for j in range(0,n_clusters):
+                centroids[j, :] = np.mean(X_k[j], axis=0)
 
             # Judge the convergence of centroids:
-            if (len(centroids) == len(centroids_new)):
-                centroids_var = abs((centroids_new - centroids) / (centroids_new + a_tol))
+            if (len(centroids_previous) == len(centroids)):
+                centroids_var = abs((centroids - centroids_previous) / (centroids + a_tol))
 
-                # If all elements in the C_var is less than the error tolerance:
-                if (centroids_var < error_tolerance).all():
+                # If all elements in the centroids_var is less than the error tolerance:
+                if (centroids_var < tolerance).all():
                     centroids_convergence = True
 
             # If the convergence of centroids and reconstruction error is reached, the algorithm stops:
-            if ((iteration > 1) and centroids_convergence and eps_rec_convergence):
+            if ((iteration > 1) and centroids_convergence and reconstruction_error_convergence):
                 converged = True
+
+                # Printing verbose information on the current iteration:
+                cluster_shapes = []
+                for j in range(0,n_clusters):
+                    (cluster_length, _) = np.shape(PCs[j])
+                    cluster_shapes.append(cluster_length)
+                if verbose:
+                    print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(centroids_convergence), str(reconstruction_error_convergence), *cluster_shapes))
+
                 if verbose: print('Convergence reached in iteration: ' + str(iteration+1) + '\n')
+
                 break
 
-            # Update recontruction error and cluster centroids:
-            centroids = centroids_new.copy()
-            eps_rec = eps_rec_new.copy()
+            # Update the global mean squared recontruction error:
+            global_mean_squared_reconstruction_error_previous = global_mean_squared_reconstruction_error.copy()
+
+            # Update the cluster centroids:
+            centroids_previous = centroids.copy()
 
             # Initialize the new eigenvectors matrix:
             eigenvectors = []
 
-            # Perform PCA in local clusters to update the eigenvectors:
+            # Perform local PCA to update the eigenvectors:
             local_pca = LPCA(X_pre_processed, idx, scaling='none', n_components=n_components, use_eigendec=True, nocenter=False)
             eigenvectors = local_pca.A
             PCs = local_pca.principal_components
 
-            # Printing verbose information on the current iteration
+            # Printing verbose information on the current iteration:
             cluster_shapes = []
             for j in range(0,n_clusters):
                 (cluster_length, _) = np.shape(PCs[j])
                 cluster_shapes.append(cluster_length)
             if verbose:
-                print(row_format.format(iteration+1, round(eps_rec_new,8), str(centroids_convergence), str(eps_rec_convergence), *cluster_shapes))
+                print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(centroids_convergence), str(reconstruction_error_convergence), *cluster_shapes))
 
             # Increment the iteration counter:
-            iteration = iteration + 1
-
-            collected_idx = np.hstack((collected_idx, idx[:,None]))
+            iteration += 1
 
         if not converged:
             if verbose: print('Convergence not reached in ' + str(iteration) + ' iterations.')
@@ -2164,7 +2163,7 @@ class VQPCA:
         self.__converged = converged
         self.__eigenvectors = eigenvectors
         self.__principal_components = PCs
-        self.__reconstruction_errors_in_clusters = eps_rec_new_clust
+        self.__global_mean_squared_reconstruction_error = global_mean_squared_reconstruction_error
 
     @property
     def idx(self):
@@ -2187,8 +2186,8 @@ class VQPCA:
         return self.__principal_components
 
     @property
-    def reconstruction_errors_in_clusters(self):
-        return self.__reconstruction_errors_in_clusters
+    def global_mean_squared_reconstruction_error(self):
+        return self.__global_mean_squared_reconstruction_error
 
 ################################################################################
 #
