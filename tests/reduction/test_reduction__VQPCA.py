@@ -45,7 +45,7 @@ class Reduction(unittest.TestCase):
             vqpca.converged
             vqpca.A
             vqpca.principal_components
-            vqpca.reconstruction_errors_in_clusters
+            vqpca.global_mean_squared_reconstruction_error
         except Exception:
             self.assertTrue(False)
 
@@ -67,7 +67,7 @@ class Reduction(unittest.TestCase):
         with self.assertRaises(AttributeError):
             vqpca.principal_components = 1
         with self.assertRaises(AttributeError):
-            vqpca.reconstruction_errors_in_clusters = 1
+            vqpca.global_mean_squared_reconstruction_error = 1
 
 # ------------------------------------------------------------------------------
 
@@ -181,6 +181,7 @@ class Reduction(unittest.TestCase):
             # Check that clusters have been constructed as expected:
             self.assertTrue(idx_2d[0] != idx_2d[k1_count])
             self.assertTrue(idx_2d[k1_count] != idx_2d[k1_count+k2_count])
+            self.assertTrue(idx_2d[0] != idx_2d[k1_count+k2_count])
 
             for i in range(1,k1_count):
                 self.assertTrue(idx_2d[0] == idx_2d[i])
@@ -208,6 +209,7 @@ class Reduction(unittest.TestCase):
             # Check that clusters have been constructed as expected:
             self.assertTrue(idx_2d[0] != idx_2d[k1_count])
             self.assertTrue(idx_2d[k1_count] != idx_2d[k1_count+k2_count])
+            self.assertTrue(idx_2d[0] != idx_2d[k1_count+k2_count])
 
             for i in range(1,k1_count):
                 self.assertTrue(idx_2d[0] == idx_2d[i])
@@ -241,6 +243,7 @@ class Reduction(unittest.TestCase):
             # Check that clusters have been constructed as expected:
             self.assertTrue(idx_2d[0] != idx_2d[k1_count])
             self.assertTrue(idx_2d[k1_count] != idx_2d[k1_count+k2_count])
+            self.assertTrue(idx_2d[0] != idx_2d[k1_count+k2_count])
 
             for i in range(1,k1_count):
                 self.assertTrue(idx_2d[0] == idx_2d[i])
@@ -279,6 +282,10 @@ class Reduction(unittest.TestCase):
                 phi_3d_1[observation] = 5 * x_value + y_value + 95
                 k3_count += 1
 
+        (idx_k1, ) = np.where(x_3d<=10)
+        (idx_k2, ) = np.where((x_3d>10) & (x_3d<=35))
+        (idx_k3, ) = np.where(x_3d>35)
+
         data_set_3d = np.hstack((x_3d[:,None], y_3d[:,None], phi_3d_1))
 
         try:
@@ -295,11 +302,94 @@ class Reduction(unittest.TestCase):
 
             self.assertTrue(converged==True)
 
+            idx_k1_label = idx_3d[idx_k1[0]]
+            idx_k2_label = idx_3d[idx_k2[0]]
+            idx_k3_label = idx_3d[idx_k3[0]]
+
             # Check that clusters have been constructed as expected:
+            self.assertTrue(idx_k1_label != idx_k2_label)
+            self.assertTrue(idx_k2_label != idx_k3_label)
+            self.assertTrue(idx_k3_label != idx_k1_label)
 
+            for i in idx_k1:
+                self.assertTrue(idx_k1_label==idx_3d[i])
+            for i in idx_k2:
+                self.assertTrue(idx_k2_label==idx_3d[i])
+            for i in idx_k3:
+                self.assertTrue(idx_k3_label==idx_3d[i])
+        except Exception:
+            self.assertTrue(False)
 
+        try:
+            # Run VQPCA partitioning into three clusters:
+            vqpca = reduction.VQPCA(data_set_3d,
+                                    n_clusters=3,
+                                    n_components=2,
+                                    scaling='auto',
+                                    idx_init='random',
+                                    max_iter=100,
+                                    random_state=2,
+                                    verbose=False)
+            idx_3d = vqpca.idx
+            converged = vqpca.converged
 
+            self.assertTrue(converged==True)
 
+            idx_k1_label = idx_3d[idx_k1[0]]
+            idx_k2_label = idx_3d[idx_k2[0]]
+            idx_k3_label = idx_3d[idx_k3[0]]
+
+            # Check that clusters have been constructed as expected:
+            self.assertTrue(idx_k1_label != idx_k2_label)
+            self.assertTrue(idx_k2_label != idx_k3_label)
+            self.assertTrue(idx_k3_label != idx_k1_label)
+
+            for i in idx_k1:
+                self.assertTrue(idx_k1_label==idx_3d[i])
+            for i in idx_k2:
+                self.assertTrue(idx_k2_label==idx_3d[i])
+            for i in idx_k3:
+                self.assertTrue(idx_k3_label==idx_3d[i])
+        except Exception:
+            self.assertTrue(False)
+
+        try:
+
+            (n_obs, ) = np.shape(x_3d)
+
+            idx_init = np.zeros((n_obs,))
+            idx_init[1000:5000] = 1
+            idx_init[30000:40000] = 2
+            idx_init = idx_init.astype(int)
+
+            # Run VQPCA partitioning into three clusters:
+            vqpca = reduction.VQPCA(data_set_3d,
+                                    n_clusters=3,
+                                    n_components=2,
+                                    scaling='auto',
+                                    idx_init=idx_init,
+                                    max_iter=100,
+                                    verbose=False)
+            idx_3d = vqpca.idx
+            converged = vqpca.converged
+
+            self.assertTrue(converged==True)
+
+            idx_k1_label = idx_3d[idx_k1[0]]
+            idx_k2_label = idx_3d[idx_k2[0]]
+            idx_k3_label = idx_3d[idx_k3[0]]
+
+            # Check that clusters have been constructed as expected:
+            self.assertTrue(idx_k1_label != idx_k2_label)
+            self.assertTrue(idx_k2_label != idx_k3_label)
+            self.assertTrue(idx_k3_label != idx_k1_label)
+
+            for i in idx_k1:
+                self.assertTrue(idx_k1_label==idx_3d[i])
+            for i in idx_k2:
+                self.assertTrue(idx_k2_label==idx_3d[i])
+            for i in idx_k3:
+                self.assertTrue(idx_k3_label==idx_3d[i])
         except Exception:
             self.assertTrue(False)
 
