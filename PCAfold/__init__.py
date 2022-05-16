@@ -41,10 +41,10 @@ from .reduction import LPCA
 from .reduction import SubsetPCA
 from .reduction import VQPCA
 from .reduction import SamplePCA
+from .reduction import EquilibratedSamplePCA
 from .reduction import analyze_centers_change
 from .reduction import analyze_eigenvector_weights_change
 from .reduction import analyze_eigenvalue_distribution
-from .reduction import equilibrate_cluster_populations
 from .reduction import plot_2d_manifold
 from .reduction import plot_3d_manifold
 from .reduction import plot_2d_manifold_sequence

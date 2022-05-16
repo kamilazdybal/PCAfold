@@ -1935,41 +1935,6 @@ class TestReduction(unittest.TestCase):
 #
 ################################################################################
 
-    def test_equilibrate_cluster_populations_allowed_calls(self):
-
-        X = np.random.rand(200,20)
-        idx = np.zeros((200,))
-        idx[20:60,] = 1
-        idx[150:190] = 2
-
-        idx = idx.astype(int)
-
-        try:
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 1, X_source=None, n_iterations=10, stop_iter=0, random_seed=None, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 2, X_source=None, n_iterations=10, stop_iter=0, random_seed=None, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 3, X_source=None, n_iterations=10, stop_iter=0, random_seed=None, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 4, X_source=None, n_iterations=10, stop_iter=0, random_seed=None, verbose=False)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 1, X_source=None, n_iterations=1, stop_iter=0, random_seed=None, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 2, X_source=None, n_iterations=1, stop_iter=0, random_seed=None, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 3, X_source=None, n_iterations=1, stop_iter=0, random_seed=None, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 2, 4, X_source=None, n_iterations=1, stop_iter=0, random_seed=None, verbose=False)
-        except Exception:
-            self.assertTrue(False)
-
-        try:
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'range', 2, 1, X_source=None, n_iterations=1, stop_iter=0, random_seed=100, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'range', 2, 2, X_source=None, n_iterations=1, stop_iter=0, random_seed=100, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'range', 2, 3, X_source=None, n_iterations=1, stop_iter=0, random_seed=100, verbose=False)
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'range', 2, 4, X_source=None, n_iterations=1, stop_iter=0, random_seed=100, verbose=False)
-        except Exception:
-            self.assertTrue(False)
-
-        X_source = np.random.rand(200,20)
-
     def test_analyze_centers_change(self):
 
         test_data_set = np.random.rand(100,20)
@@ -1997,7 +1962,17 @@ class TestReduction(unittest.TestCase):
         idx = idx.astype(int)
 
         try:
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 20, 1, X_source=None, n_iterations=20, stop_iter=0, random_seed=None, verbose=False)
+
+            equilibrate_pca = reduction.EquilibratedSamplePCA(X, idx, 'auto', 20, 1, X_source=None, n_iterations=20, stop_iter=0, random_seed=None, verbose=False)
+
+            eigenvalues = equilibrate_pca.eigenvalues
+            eigenvectors_matrix = equilibrate_pca.eigenvectors
+            pc_scores_matrix = equilibrate_pca.pc_scores
+            pc_sources_matrix = equilibrate_pca.pc_sources
+            idx_train = equilibrate_pca.idx_train
+            C_r = equilibrate_pca.C_r
+            D_r = equilibrate_pca.D_r
+
             plt = reduction.analyze_eigenvector_weights_change(eigenvectors_matrix[:,0,:], variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None)
             plt.close()
             plt = reduction.analyze_eigenvector_weights_change(eigenvectors_matrix[:,0,:], variable_names=[], plot_variables=[2,5,10], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None)
@@ -2014,7 +1989,17 @@ class TestReduction(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = reduction.equilibrate_cluster_populations(X, idx, 'auto', 20, 1, X_source=None, n_iterations=2, stop_iter=0, random_seed=None, verbose=False)
+
+            equilibrate_pca = reduction.EquilibratedSamplePCA(X, idx, 'auto', 20, 1, X_source=None, n_iterations=2, stop_iter=0, random_seed=None, verbose=False)
+
+            eigenvalues = equilibrate_pca.eigenvalues
+            eigenvectors_matrix = equilibrate_pca.eigenvectors
+            pc_scores_matrix = equilibrate_pca.pc_scores
+            pc_sources_matrix = equilibrate_pca.pc_sources
+            idx_train = equilibrate_pca.idx_train
+            C_r = equilibrate_pca.C_r
+            D_r = equilibrate_pca.D_r
+
             plt = reduction.analyze_eigenvector_weights_change(eigenvectors_matrix[:,0,:], variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None)
             plt.close()
             plt = reduction.analyze_eigenvector_weights_change(eigenvectors_matrix[:,0,:], variable_names=[], plot_variables=[2,5,10], normalize=False, zero_norm=False, legend_label=[], title=None, save_filename=None)
