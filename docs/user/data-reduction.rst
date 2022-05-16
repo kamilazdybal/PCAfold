@@ -136,13 +136,13 @@ Class ``SubsetPCA``
 --------------------------------------------------------------------------------
 
 ********************************************************
-PCA on sampled data sets
+Sample Principal Component Analysis
 ********************************************************
 
-``pca_on_sampled_data_set``
-===========================
+Class ``SamplePCA``
+===================
 
-.. autofunction:: PCAfold.reduction.pca_on_sampled_data_set
+.. autofunction:: PCAfold.reduction.SamplePCA
 
 ``analyze_centers_change``
 ==========================
@@ -166,9 +166,8 @@ PCA on sampled data sets
 
 --------------------------------------------------------------------------------
 
-***************
 Biasing options
-***************
+================
 
 This section explains the choice for ``biasing_option`` input parameter in some
 of the functions in this module.
@@ -184,7 +183,7 @@ and centers and scales computed on :math:`\mathbf{X}` are denoted
 observations in :math:`\mathbf{X}`.
 
 Biasing option 1
-================
+----------------
 
 The steps of PCA in this option:
 
@@ -208,7 +207,7 @@ These steps are presented graphically below:
     :align: center
 
 Biasing option 2
-================
+----------------
 
 The steps of PCA in this option:
 
@@ -232,7 +231,7 @@ These steps are presented graphically below:
     :align: center
 
 Biasing option 3
-================
+----------------
 
 The steps of PCA in this option:
 
@@ -256,7 +255,7 @@ These steps are presented graphically below:
     :align: center
 
 Biasing option 4
-================
+----------------
 
 The steps of PCA in this option:
 
