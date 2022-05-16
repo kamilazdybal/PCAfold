@@ -144,6 +144,11 @@ Class ``SamplePCA``
 
 .. autofunction:: PCAfold.reduction.SamplePCA
 
+Class ``EquilibratedSamplePCA``
+======================================
+
+.. autofunction:: PCAfold.reduction.EquilibratedSamplePCA
+
 ``analyze_centers_change``
 ==========================
 
@@ -158,11 +163,6 @@ Class ``SamplePCA``
 ===================================
 
 .. autofunction:: PCAfold.reduction.analyze_eigenvalue_distribution
-
-``equilibrate_cluster_populations``
-===================================
-
-.. autofunction:: PCAfold.reduction.equilibrate_cluster_populations
 
 --------------------------------------------------------------------------------
 

@@ -2659,6 +2659,409 @@ class SamplePCA:
     def D_r(self):
         return self.__D_r
 
+class EquilibratedSamplePCA:
+    """
+    Enables performing Principal Component Analysis (PCA) on a sample, :math:`\mathbf{X_r}`, of the
+    original data set, :math:`\mathbf{X}`, with one of the four implemented options.
+    Reach out to the
+    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-option-1>`_
+    section of the documentation for more information on the available options.
+
+    This implementation gradually (in ``n_iterations``) equilibrates cluster populations heading towards
+    population of the smallest cluster, in each cluster.
+
+    At each iteration it generates a reduced data set :math:`\mathbf{X_r}^{(i)}`
+    made up from new populations, performs PCA on that data set to find the
+    :math:`i^{th}` version of the eigenvectors. Depending on the option
+    selected, it then does the projection of a data set (and optionally also
+    its sources) onto the found eigenvectors.
+
+    **Equilibration:**
+
+    For the moment, there is only one way implemented for the equilibration.
+    The smallest cluster is found and any larger :math:`j^{th}` cluster's
+    observations are diminished at each iteration by:
+
+    .. math::
+
+        \\frac{N_j - N_s}{\\verb|n_iterations|}
+
+    :math:`N_j` is the number of observations in that :math:`j^{th}` cluster and
+    :math:`N_s` is the number of observations in the smallest
+    cluster. This is further illustrated on synthetic data set below:
+
+    .. image:: ../images/cluster-equilibration-scheme.svg
+        :width: 700
+        :align: center
+
+    Future implementation will include equilibration that slows down close to
+    equilibrium.
+
+    **Interpretation for the outputs:**
+
+    This function returns 3D arrays ``eigenvectors``, ``pc_scores`` and
+    ``pc_sources`` that have the following structure:
+
+    .. image:: ../images/cbpca-equilibrate-outputs.svg
+        :width: 700
+        :align: center
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import EquilibratedSamplePCA
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Generate dummy sampling indices:
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+
+        # Instantiate EquilibratedSamplePCA class object:
+        equilibrated_pca = EquilibratedSamplePCA(X,
+                                                 idx,
+                                                 'auto',
+                                                 n_components=2,
+                                                 biasing_option=1,
+                                                 n_iterations=1,
+                                                 random_seed=100,
+                                                 verbose=True)
+
+        # Access the re-sampled PCs from the last (equilibrated) iteration:
+        PCs_resampled = equilibrated_pca.pc_scores[:,:,-1]
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param idx:
+        ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param scaling:
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+    :param X_source:
+        ``numpy.ndarray`` specifying the source terms :math:`\mathbf{S_X}` corresponding to the state-space
+        variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`.
+    :param n_components:
+        ``int`` specifying number of :math:`q` first principal components that will be saved.
+    :param biasing_option:
+        ``int`` specifying the biasing option. It can only attain values 1, 2, 3 or 4.
+    :param n_iterations: (optional)
+        ``int`` specifying the number of iterations to loop over.
+    :param stop_iter: (optional)
+        ``int`` specifying the index of iteration to stop.
+    :param random_seed: (optional)
+        ``int`` specifying random seed for random sample selection.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **eigenvalues** - ``numpy.ndarray`` specifying the collected eigenvalues from each iteration.
+        - **eigenvectors** - ``numpy.ndarray`` specifying the collected eigenvectors from each iteration.\
+        This is a 3D array of size ``(n_variables, n_components, n_iterations+1)``.
+        - **pc_scores** - ``numpy.ndarray`` specifying the collected principal components from each iteration.\
+        This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
+        - **pc_sources** - ``numpy.ndarray`` specifying the collected sources of principal components from each iteration.\
+        This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
+        - **idx_train** - ``numpy.ndarray`` specifying the final training indices from the equilibrated iteration.
+        - **C_r** - ``numpy.ndarray`` specifying a vector of final centers that were used to center\
+        the data set at the last (equilibration) iteration.
+        - **D_r** - ``numpy.ndarray`` specifying a vector of final scales that were used to scale the\
+        data set at the last (equilibration) iteration.
+    """
+
+    def __init__(self, X, idx, scaling, n_components, biasing_option, X_source=None, n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
+
+        _biasing_options = [1,2,3,4]
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations, n_variables) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        if not isinstance(idx, np.ndarray):
+            raise ValueError("Parameter `idx` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations_idx,) = np.shape(idx)
+            n_variables_idx = 1
+        except:
+            (n_observations_idx, n_variables_idx) = np.shape(idx)
+
+        if n_observations_idx != n_observations:
+            raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+        if n_variables_idx != 1:
+            raise ValueError("Parameter `idx` has to have size `(n_observations,)` or `(n_observations,1)`.")
+        else:
+            idx = idx.ravel()
+
+        if not isinstance(scaling, str):
+            raise ValueError("Parameter `scaling` has to be a string.")
+        else:
+            if scaling.lower() not in _scalings_list:
+                raise ValueError("Unrecognized scaling method.")
+            else:
+                self.__scaling = scaling.upper()
+
+        if not isinstance(n_components, int) or isinstance(n_components, bool):
+            raise ValueError("Parameter `n_components` has to be an integer.")
+        else:
+            if (n_components < 0) or (n_components > n_variables):
+                raise ValueError("Parameter `n_components` cannot be negative or larger than number of variables in a data set.")
+
+        if biasing_option not in _biasing_options:
+            raise ValueError("Parameter `biasing_option` can only be 1-4.")
+
+        if X_source is not None:
+            if not isinstance(X_source, np.ndarray):
+                raise ValueError("Parameter `X_source` has to be of type `numpy.ndarray`.")
+
+        if not isinstance(n_iterations, int) or isinstance(n_iterations, bool):
+            raise ValueError("Parameter `n_iterations` has to be an integer.")
+
+        if n_iterations < 1:
+            raise ValueError("Parameter `n_iterations` has to be larger than 0.")
+
+        if not isinstance(stop_iter, int) or isinstance(stop_iter, bool):
+            raise ValueError("Parameter `stop_iter` has to be an integer.")
+
+        if random_seed is not None:
+            if not isinstance(random_seed, int):
+                raise ValueError("Random seed has to be an integer.")
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
+
+        (n_observations, n_variables) = np.shape(X)
+        populations = preprocess.get_populations(idx)
+        N_smallest_cluster = np.min(populations)
+        k = len(populations)
+
+        # Initialize matrices:
+        eigenvectors_matrix = np.zeros((n_variables,n_components,n_iterations+1))
+        pc_scores_matrix = np.zeros((n_observations,n_components,n_iterations+1))
+        pc_sources_matrix = np.zeros((n_observations,n_components,n_iterations+1))
+        eigenvalues = np.zeros((n_variables, 1))
+        idx_train = []
+
+        # Perform global PCA on the original data set X: ---------------------------
+        pca_global = PCA(X, scaling, n_components, use_eigendec=True)
+
+        # Get a centered and scaled data set:
+        X_cs = pca_global.X_cs
+        X_center = pca_global.X_center
+        X_scale = pca_global.X_scale
+
+        # Compute global eigenvectors:
+        global_eigenvectors = pca_global.A
+
+        # Compute global eigenvalues:
+        global_eigenvalues = pca_global.L
+        maximum_global_eigenvalue = np.max(global_eigenvalues)
+
+        # Append the global eigenvectors:
+        eigenvectors_matrix[:,:,0] = global_eigenvectors[:,0:n_components]
+
+        # Append the global eigenvalues:
+        eigenvalues = np.hstack((eigenvalues, np.reshape(global_eigenvalues, (n_variables, 1))/maximum_global_eigenvalue))
+
+        # Compute global PC-scores:
+        global_pc_scores = pca_global.transform(X, nocenter=False)
+
+        # Append the global PC-scores:
+        pc_scores_matrix[:,:,0] = global_pc_scores
+
+        if X_source is not None:
+
+            # Scale sources with the global scalings:
+            X_source_cs = np.divide(X_source, X_scale)
+
+            # Compute global PC-sources:
+            global_pc_sources = pca_global.transform(X_source, nocenter=True)
+
+            # Append the global PC-sources:
+            pc_sources_matrix[:,:,0] = global_pc_sources
+
+        # Number of observations that should be taken from each cluster at each iteration:
+        eat_ups = np.zeros((k,))
+        for cluster in range(0,k):
+            eat_ups[cluster] = (populations[cluster] - N_smallest_cluster)/n_iterations
+
+        if verbose == True:
+            print('Biasing is performed with option ' + str(biasing_option) + '.')
+
+        # Perform PCA on the reduced data set X_r(i): ------------------------------
+        for iter in range(0,n_iterations):
+
+            if (stop_iter != 0) and (iter == stop_iter):
+                break
+
+            for cluster, population in enumerate(populations):
+                if population != N_smallest_cluster:
+                    # Eat up the segment:
+                    populations[cluster] = population - int(eat_ups[cluster])
+                else:
+                    populations[cluster] = N_smallest_cluster
+
+            # Generate a dictionary for manual sampling:
+            sampling_dictionary = {}
+
+            for cluster in range(0,k):
+                if iter == n_iterations-1:
+                    # At the last iteration reach equal number of samples:
+                    sampling_dictionary[cluster] = int(N_smallest_cluster)
+                else:
+                    sampling_dictionary[cluster] = int(populations[cluster])
+
+            if verbose == True:
+                print("\nAt iteration " + str(iter+1) + " taking samples:")
+                print(sampling_dictionary)
+
+            # Sample manually according to current `sampling_dictionary`:
+            sampling_object = DataSampler(idx, random_seed=random_seed)
+            (idx_train, _) = sampling_object.manual(sampling_dictionary, sampling_type='number')
+
+            # Biasing option 1 -----------------------------------------------------
+            if biasing_option == 1:
+
+                sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
+
+                local_eigenvalues = sample_pca.eigenvalues
+                eigenvectors = sample_pca.eigenvectors
+                pc_scores = sample_pca.pc_scores
+                pc_sources = sample_pca.pc_sources
+                C_r = sample_pca.C_r
+                D_r = sample_pca.D_r
+
+                maximum_local_eigenvalue = np.max(local_eigenvalues)
+
+                # Append the local PC-scores:
+                pc_scores_matrix[:,:,iter+1] = pc_scores
+
+                if X_source is not None:
+
+                    # Append the global PC-sources:
+                    pc_sources_matrix[:,:,iter+1] = pc_sources
+
+            # Biasing option 2 -----------------------------------------------------
+            elif biasing_option == 2:
+
+                sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
+
+                local_eigenvalues = sample_pca.eigenvalues
+                eigenvectors = sample_pca.eigenvectors
+                pc_scores = sample_pca.pc_scores
+                pc_sources = sample_pca.pc_sources
+                C_r = sample_pca.C_r
+                D_r = sample_pca.D_r
+
+                maximum_local_eigenvalue = np.max(local_eigenvalues)
+
+                # Append the local PC-scores:
+                pc_scores_matrix[:,:,iter+1] = pc_scores
+
+                if X_source is not None:
+
+                    # Append the global PC-sources:
+                    pc_sources_matrix[:,:,iter+1] = pc_sources
+
+            # Biasing option 3 -----------------------------------------------------
+            elif biasing_option == 3:
+
+                sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
+
+                local_eigenvalues = sample_pca.eigenvalues
+                eigenvectors = sample_pca.eigenvectors
+                pc_scores = sample_pca.pc_scores
+                pc_sources = sample_pca.pc_sources
+                C_r = sample_pca.C_r
+                D_r = sample_pca.D_r
+
+                maximum_local_eigenvalue = np.max(local_eigenvalues)
+
+                # Append the local PC-scores:
+                pc_scores_matrix[:,:,iter+1] = pc_scores
+
+                if X_source is not None:
+
+                    # Append the global PC-sources:
+                    pc_sources_matrix[:,:,iter+1] = pc_sources
+
+            # Biasing option 4 -----------------------------------------------------
+            elif biasing_option == 4:
+
+                sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
+
+                local_eigenvalues = sample_pca.eigenvalues
+                eigenvectors = sample_pca.eigenvectors
+                pc_scores = sample_pca.pc_scores
+                pc_sources = sample_pca.pc_sources
+                C_r = sample_pca.C_r
+                D_r = sample_pca.D_r
+
+                maximum_local_eigenvalue = np.max(local_eigenvalues)
+
+                # Append the local PC-scores:
+                pc_scores_matrix[:,:,iter+1] = pc_scores
+
+                if X_source is not None:
+
+                    # Append the global PC-sources:
+                    pc_sources_matrix[:,:,iter+1] = pc_sources
+
+            # Append the local eigenvectors:
+            eigenvectors_matrix[:,:,iter+1] = eigenvectors[:,0:n_components]
+
+            # Append the local eigenvalues:
+            eigenvalues = np.hstack((eigenvalues, np.reshape(local_eigenvalues, (n_variables, 1))/maximum_local_eigenvalue))
+
+        # Remove the first column of zeros:
+        eigenvalues = eigenvalues[:,1::]
+
+        self.__eigenvalues = eigenvalues
+        self.__eigenvectors = eigenvectors_matrix
+        self.__pc_scores = pc_scores_matrix
+        self.__pc_sources = pc_sources_matrix
+        self.__idx_train = idx_train
+        self.__C_r = C_r
+        self.__D_r = D_r
+
+    @property
+    def eigenvalues(self):
+        return self.__eigenvalues
+
+    @property
+    def eigenvectors(self):
+        return self.__eigenvectors
+
+    @property
+    def pc_scores(self):
+        return self.__pc_scores
+
+    @property
+    def pc_sources(self):
+        return self.__pc_sources
+
+    @property
+    def idx_train(self):
+        return self.__idx_train
+
+    @property
+    def C_r(self):
+        return self.__C_r
+
+    @property
+    def D_r(self):
+        return self.__D_r
+
 def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], figure_size=None, title=None, save_filename=None):
     """
     Analyzes the change in normalized centers computed on the
@@ -3172,307 +3575,6 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
         plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
-
-def equilibrate_cluster_populations(X, idx, scaling, n_components, biasing_option, X_source=None, n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
-    """
-    Gradually (in ``n_iterations``) equilibrates cluster populations heading towards
-    population of the smallest cluster, in each cluster.
-
-    At each iteration it generates a reduced data set :math:`\mathbf{X_r}^{(i)}`
-    made up from new populations, performs PCA on that data set to find the
-    :math:`i^{th}` version of the eigenvectors. Depending on the option
-    selected, it then does the projection of a data set (and optionally also
-    its sources) onto the found eigenvectors.
-
-    Reach out to the
-    `Biasing options <https://pcafold.readthedocs.io/en/latest/user/data-reduction.html#biasing-option-1>`_
-    section of the documentation for more information on the available options.
-
-    **Equilibration:**
-
-    For the moment, there is only one way implemented for the equilibration.
-    The smallest cluster is found and any larger :math:`j^{th}` cluster's
-    observations are diminished at each iteration by:
-
-    .. math::
-
-        \\frac{N_j - N_s}{\\verb|n_iterations|}
-
-    :math:`N_j` is the number of observations in that :math:`j^{th}` cluster and
-    :math:`N_s` is the number of observations in the smallest
-    cluster. This is further illustrated on synthetic data set below:
-
-    .. image:: ../images/cluster-equilibration-scheme.svg
-        :width: 700
-        :align: center
-
-    Future implementation will include equilibration that slows down close to
-    equilibrium.
-
-    **Interpretation for the outputs:**
-
-    This function returns 3D arrays ``eigenvectors``, ``pc_scores`` and
-    ``pc_sources`` that have the following structure:
-
-    .. image:: ../images/cbpca-equilibrate-outputs.svg
-        :width: 700
-        :align: center
-
-    **Example:**
-
-    .. code::
-
-        from PCAfold import equilibrate_cluster_populations
-        import numpy as np
-
-        # Generate dummy data set:
-        X = np.random.rand(100,10)
-
-        # Generate dummy sampling indices:
-        idx = np.zeros((100,))
-        idx[50:80] = 1
-
-        # Run cluster equlibration:
-        (eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r) = equilibrate_cluster_populations(X, idx, 'auto', n_components=2, biasing_option=1, n_iterations=1, random_seed=100, verbose=True)
-
-    :param X:
-        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
-    :param idx:
-        vector of cluster classifications.
-        The first cluster has index 0.
-    :param scaling:
-        ``str`` specifying the scaling methodology. It can be one of the following:
-        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
-    :param X_source:
-        source terms :math:`\mathbf{S_X}` corresponding to the state-space
-        variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
-        representing reactive flows. More information can be found in :cite:`Sutherland2009`.
-    :param n_components:
-        number of :math:`q` first principal components that will be saved.
-    :param biasing_option:
-        integer specifying biasing option.
-        Can only attain values 1, 2, 3 or 4.
-    :param n_iterations: (optional)
-        number of iterations to loop over.
-    :param stop_iter: (optional)
-        index of iteration to stop.
-    :param random_seed: (optional)
-        integer specifying random seed for random sample selection.
-    :param verbose: (optional)
-        ``bool`` for printing verbose details.
-
-    :return:
-        - **eigenvalues** - collected eigenvalues from each iteration.
-        - **eigenvectors_matrix** - collected eigenvectors from each iteration.\
-        This is a 3D array of size ``(n_variables, n_components, n_iterations+1)``.
-        - **pc_scores_matrix** - collected principal components from each iteration.\
-        This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
-        - **pc_sources_matrix** - collected sources of principal components from each iteration.\
-        This is a 3D array of size ``(n_observations, n_components, n_iterations+1)``.
-        - **idx_train** - the final training indices from the equilibrated iteration.
-        - **C_r** - a vector of final centers that were used to center\
-        the data set at the last (equilibration) iteration.
-        - **D_r** - a vector of final scales that were used to scale the\
-        data set at the last (equilibration) iteration.
-    """
-
-    # Check that `biasing_option` parameter was passed correctly:
-    _biasing_options = [1,2,3,4]
-    if biasing_option not in _biasing_options:
-        raise ValueError("Option can only be 1-4.")
-
-    if random_seed is not None:
-        if not isinstance(random_seed, int):
-            raise ValueError("Random seed has to be an integer.")
-
-    (n_observations, n_variables) = np.shape(X)
-    populations = preprocess.get_populations(idx)
-    N_smallest_cluster = np.min(populations)
-    k = len(populations)
-
-    # Initialize matrices:
-    eigenvectors_matrix = np.zeros((n_variables,n_components,n_iterations+1))
-    pc_scores_matrix = np.zeros((n_observations,n_components,n_iterations+1))
-    pc_sources_matrix = np.zeros((n_observations,n_components,n_iterations+1))
-    eigenvalues = np.zeros((n_variables, 1))
-    idx_train = []
-
-    # Perform global PCA on the original data set X: ---------------------------
-    pca_global = PCA(X, scaling, n_components, use_eigendec=True)
-
-    # Get a centered and scaled data set:
-    X_cs = pca_global.X_cs
-    X_center = pca_global.X_center
-    X_scale = pca_global.X_scale
-
-    # Compute global eigenvectors:
-    global_eigenvectors = pca_global.A
-
-    # Compute global eigenvalues:
-    global_eigenvalues = pca_global.L
-    maximum_global_eigenvalue = np.max(global_eigenvalues)
-
-    # Append the global eigenvectors:
-    eigenvectors_matrix[:,:,0] = global_eigenvectors[:,0:n_components]
-
-    # Append the global eigenvalues:
-    eigenvalues = np.hstack((eigenvalues, np.reshape(global_eigenvalues, (n_variables, 1))/maximum_global_eigenvalue))
-
-    # Compute global PC-scores:
-    global_pc_scores = pca_global.transform(X, nocenter=False)
-
-    # Append the global PC-scores:
-    pc_scores_matrix[:,:,0] = global_pc_scores
-
-    if X_source is not None:
-
-        # Scale sources with the global scalings:
-        X_source_cs = np.divide(X_source, X_scale)
-
-        # Compute global PC-sources:
-        global_pc_sources = pca_global.transform(X_source, nocenter=True)
-
-        # Append the global PC-sources:
-        pc_sources_matrix[:,:,0] = global_pc_sources
-
-    # Number of observations that should be taken from each cluster at each iteration:
-    eat_ups = np.zeros((k,))
-    for cluster in range(0,k):
-        eat_ups[cluster] = (populations[cluster] - N_smallest_cluster)/n_iterations
-
-    if verbose == True:
-        print('Biasing is performed with option ' + str(biasing_option) + '.')
-
-    # Perform PCA on the reduced data set X_r(i): ------------------------------
-    for iter in range(0,n_iterations):
-
-        if (stop_iter != 0) and (iter == stop_iter):
-            break
-
-        for cluster, population in enumerate(populations):
-            if population != N_smallest_cluster:
-                # Eat up the segment:
-                populations[cluster] = population - int(eat_ups[cluster])
-            else:
-                populations[cluster] = N_smallest_cluster
-
-        # Generate a dictionary for manual sampling:
-        sampling_dictionary = {}
-
-        for cluster in range(0,k):
-            if iter == n_iterations-1:
-                # At the last iteration reach equal number of samples:
-                sampling_dictionary[cluster] = int(N_smallest_cluster)
-            else:
-                sampling_dictionary[cluster] = int(populations[cluster])
-
-        if verbose == True:
-            print("\nAt iteration " + str(iter+1) + " taking samples:")
-            print(sampling_dictionary)
-
-        # Sample manually according to current `sampling_dictionary`:
-        sampling_object = DataSampler(idx, random_seed=random_seed)
-        (idx_train, _) = sampling_object.manual(sampling_dictionary, sampling_type='number')
-
-        # Biasing option 1 -----------------------------------------------------
-        if biasing_option == 1:
-
-            sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
-
-            local_eigenvalues = sample_pca.eigenvalues
-            eigenvectors = sample_pca.eigenvectors
-            pc_scores = sample_pca.pc_scores
-            pc_sources = sample_pca.pc_sources
-            C_r = sample_pca.C_r
-            D_r = sample_pca.D_r
-
-            maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Append the local PC-scores:
-            pc_scores_matrix[:,:,iter+1] = pc_scores
-
-            if X_source is not None:
-
-                # Append the global PC-sources:
-                pc_sources_matrix[:,:,iter+1] = pc_sources
-
-        # Biasing option 2 -----------------------------------------------------
-        elif biasing_option == 2:
-
-            sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
-
-            local_eigenvalues = sample_pca.eigenvalues
-            eigenvectors = sample_pca.eigenvectors
-            pc_scores = sample_pca.pc_scores
-            pc_sources = sample_pca.pc_sources
-            C_r = sample_pca.C_r
-            D_r = sample_pca.D_r
-
-            maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Append the local PC-scores:
-            pc_scores_matrix[:,:,iter+1] = pc_scores
-
-            if X_source is not None:
-
-                # Append the global PC-sources:
-                pc_sources_matrix[:,:,iter+1] = pc_sources
-
-        # Biasing option 3 -----------------------------------------------------
-        elif biasing_option == 3:
-
-            sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
-
-            local_eigenvalues = sample_pca.eigenvalues
-            eigenvectors = sample_pca.eigenvectors
-            pc_scores = sample_pca.pc_scores
-            pc_sources = sample_pca.pc_sources
-            C_r = sample_pca.C_r
-            D_r = sample_pca.D_r
-
-            maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Append the local PC-scores:
-            pc_scores_matrix[:,:,iter+1] = pc_scores
-
-            if X_source is not None:
-
-                # Append the global PC-sources:
-                pc_sources_matrix[:,:,iter+1] = pc_sources
-
-        # Biasing option 4 -----------------------------------------------------
-        elif biasing_option == 4:
-
-            sample_pca = SamplePCA(X, idx_train, scaling, n_components, biasing_option, X_source=X_source)
-
-            local_eigenvalues = sample_pca.eigenvalues
-            eigenvectors = sample_pca.eigenvectors
-            pc_scores = sample_pca.pc_scores
-            pc_sources = sample_pca.pc_sources
-            C_r = sample_pca.C_r
-            D_r = sample_pca.D_r
-
-            maximum_local_eigenvalue = np.max(local_eigenvalues)
-
-            # Append the local PC-scores:
-            pc_scores_matrix[:,:,iter+1] = pc_scores
-
-            if X_source is not None:
-
-                # Append the global PC-sources:
-                pc_sources_matrix[:,:,iter+1] = pc_sources
-
-        # Append the local eigenvectors:
-        eigenvectors_matrix[:,:,iter+1] = eigenvectors[:,0:n_components]
-
-        # Append the local eigenvalues:
-        eigenvalues = np.hstack((eigenvalues, np.reshape(local_eigenvalues, (n_variables, 1))/maximum_local_eigenvalue))
-
-    # Remove the first column of zeros:
-    eigenvalues = eigenvalues[:,1::]
-
-    return(eigenvalues, eigenvectors_matrix, pc_scores_matrix, pc_sources_matrix, idx_train, C_r, D_r)
 
 ################################################################################
 #
