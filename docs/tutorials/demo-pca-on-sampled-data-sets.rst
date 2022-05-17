@@ -26,7 +26,7 @@ We import the necessary modules:
   from PCAfold import PCA
   import numpy as np
   from matplotlib.colors import ListedColormap
-  
+
 and we set some initial parameters:
 
 .. code:: python
@@ -74,7 +74,7 @@ Cluster the data set:
 .. code:: python
 
   (idx, borders) = preprocess.zero_neighborhood_bins(S_Z[:,0], k=4, zero_offset_percentage=2, split_at_zero=True, verbose=True)
-  
+
 Visualize the result of clustering:
 
 .. code:: python
@@ -87,12 +87,12 @@ Visualize the result of clustering:
 
 --------------------------------------------------------------------------------
 
-Special case of PCA on sampled data sets   
+Special case of PCA on sampled data sets
 -------------------------------------------
 
 In this section, we present the special case for performing PCA on data sets formed by taking equal number of samples from local clusters.
 
-The ``reduction.equilibrate_cluster_populations`` function is a special case of performing PCA on a sampled data set. It uses equal number of samples from each cluster and allows to
+The ``reduction.EquilibratedSamplePCA`` class enables a special case of performing PCA on a sampled data set. It uses equal number of samples from each cluster and allows to
 analyze what happens when the data set is sampled gradually. It begins with
 performing PCA on the original data set and then in
 ``n_iterations`` it will gradually decrease the number of populations in each
@@ -113,7 +113,16 @@ Run cluster equilibration
 
 .. code:: python
 
-  (eigenvalues, eigenvectors, pc_scores, _, idx_train, _, _) = reduction.equilibrate_cluster_populations(state_space, idx, scaling=scal_crit, X_source=[], n_components=n_components, biasing_option=biasing_option, n_iterations=10, stop_iter=0, random_seed=random_seed, verbose=True)
+  equilibrated_pca = reduction.EquilibratedSamplePCA(X,
+                                                     idx,
+                                                     scaling=scaling,
+                                                     X_source=S_X,
+                                                     n_components=n_components,
+                                                     biasing_option=biasing_option,
+                                                     n_iterations=10,
+                                                     stop_iter=0,
+                                                     random_seed=random_seed,
+                                                     verbose=True)
 
 With ``verbose=True`` we will see some detailed information on thee number of samples
 in each cluster at each iteration:
@@ -152,12 +161,20 @@ in each cluster at each iteration:
   At iteration 10 taking samples:
   {0: 2416, 1: 2416, 2: 2416, 3: 2416}
 
+.. code:: python
+
+  eigenvalues = equilibrated_pca.eigenvalues
+  eigenvectors = equilibrated_pca.eigenvectors
+  PCs = equilibrated_pca.pc_scores
+  PC_sources = equilibrated_pca.pc_sources
+  idx_train = equilibrated_pca.idx_train
+
 Analyze centers change
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``reduction.analyze_centers_change`` function compares centers computed on the original data set, :math:`\mathbf{X}`, versus on the sampled data set, :math:`\mathbf{X_r}`.
 The ``idx_train`` input parameter could for instance be obtained
-from ``reduction.equilibrate_cluster_populations``
+from ``reduction.EquilibratedSamplePCA``
 and will thus represent the equilibrated data set sampled from the original data
 set. It could also be obtained as sampled indices using any of the sampling
 function from the ``preprocess.DataSampler`` class.
@@ -189,7 +206,7 @@ plot:
 Analyze eigenvector weights change
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The ``eigenvectors`` 3D array obtained from ``equilibrate_cluster_populations``
+The ``eigenvectors`` 3D array obtained from ``reduction.EquilibratedSamplePCA``
 can now be used as an input parameter for plotting the eigenvector weights change
 as we were gradually equilibrating cluster populations.
 
@@ -225,11 +242,11 @@ Three weight normalization variants are available:
   is between 0 and 1. This is useful for judging the severity of the weight change. \
   To use this variant set ``normalize=True`` and ``zero_norm=False``. \
   Example can be seen below:
-  
+
 .. code:: python
 
     plt = reduction.analyze_eigenvector_weights_change(eigenvectors[:,0,:], X_names, plot_variables=[], normalize=True, zero_norm=False, save_filename=save_filename)
-    
+
 .. image:: ../images/eigenvector-weights-movement-normalized.svg
     :width: 500
     :align: center
@@ -315,16 +332,15 @@ the sampled data set. Example of a plot:
 Generalization of PCA on sampled data sets
 ------------------------------------------
 
-A more general approach to performing PCA on sampled data sets (instead of using
-``reduction.equilibrate_cluster_populations`` function) is to use the
-``reduction.pca_on_sampled_data_set`` function. This function allows to perform PCA on
+A more general approach to performing PCA on sampled data sets (instead of using the
+``reduction.EquilibratedSamplePCA`` class) is to use the
+the ``reduction.SamplePCA`` class. This function allows to perform PCA on
 a data set that has been sampled in any way (in contrast to *equilibrated* sampling
 which always samples equal number of samples from each cluster).
 
 .. note::
 
-  It is worth noting that function ``reduction.equilibrate_cluster_populations`` uses
-  ``reduction.pca_on_sampled_data_set`` inside.
+  It is worth noting that the class ``reduction.EquilibratedSamplePCA`` uses ``reduction.SamplePCA`` inside.
 
 We first inspect how many samples each cluster has (in the clusters we
 identified earlier by binning the first principal component source term):
@@ -345,7 +361,7 @@ clusters. Let's select 4000 samples from :math:`k_0`, 1000 samples from :math:`k
 
 .. code:: python
 
-  sample = DataSampler(idx, idx_test=[], random_seed=random_seed, verbose=True)
+  sample = DataSampler(idx, idx_test=None, random_seed=random_seed, verbose=True)
 
   (idx_manual, _) = sample.manual({0:4000, 1:1000, 2:1000, 3:2400}, sampling_type='number', test_selection_option=1)
 
@@ -366,11 +382,21 @@ The verbose information will tell us how sample densities compare in terms of pe
   Selected 8400 train samples (16.8%) and 41600 test samples (83.2%).
 
 We now perform PCA on a data set that has been sampled according to
-``idx_manual`` using the ``reduction.pca_on_sampled_data_set`` function:
+``idx_manual`` using the ``reduction.SamplePCA`` class:
 
 .. code:: python
 
-    (eigenvalues_manual, eigenvectors_manual, PCs_manual, _, _, _, _, _) = reduction.pca_on_sampled_data_set(X, idx_manual, scaling, n_components, biasing_option)
+  sample_pca = reduction.SamplePCA(X,
+                                   idx_manual,
+                                   scaling,
+                                   n_components,
+                                   biasing_option)
+
+.. code:: python
+
+  eigenvalues_manual = sample_pca.eigenvalues
+  eigenvectors_manual = sample_pca.eigenvectors
+  PCs_manual = sample_pca.pc_scores
 
 Finally, we can generate all the same plots that were shown before.
 Here, we are only going to present the new re-sampled manifold resulting from
