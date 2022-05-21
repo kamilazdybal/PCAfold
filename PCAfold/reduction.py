@@ -115,7 +115,7 @@ class PCA:
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param n_components: (optional)
         ``int`` specifying the number of retained principal components, :math:`q`. If set to 0 all PCs are retained. It should be a non-negative number.
     :param use_eigendec: (optional)
@@ -1331,7 +1331,7 @@ class LPCA:
     :param scaling: (optional)
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param n_components: (optional)
         ``int`` specifying the number of returned eigenvectors, eigenvalues and principal components, :math:`q`. If set to 0 all are returned.
     :param use_eigendec: (optional)
@@ -1874,7 +1874,7 @@ class VQPCA:
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param idx_init: (optional)
         ``str`` or ``numpy.ndarray`` specifying the method for centroids initialization. If ``str``, it can be ``'uniform'`` or ``'random'``. By default
         random intialization is performed. An arbitrary user-supplied initial ``idx`` for initializing the centroids can be passed using a ``numpy.ndarray``.
@@ -2231,7 +2231,7 @@ class SubsetPCA:
     :param scaling: (optional)
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param n_components: (optional)
         ``int`` specifying the number of retained principal components, :math:`q`. If set to 0 all PCs are retained. It should be a non-negative number.
     :param use_eigendec: (optional)
@@ -2427,7 +2427,7 @@ class SamplePCA:
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param n_components:
         ``int`` specifying the number of retained principal components, :math:`q`. If set to 0 all PCs are retained. It should be a non-negative number.
     :param biasing_option:
@@ -2741,7 +2741,7 @@ class EquilibratedSamplePCA:
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param X_source:
         ``numpy.ndarray`` specifying the source terms :math:`\mathbf{S_X}` corresponding to the state-space
         variables in :math:`\mathbf{X}`. This parameter is applicable to data sets
@@ -3481,7 +3481,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param biasing_option:
         ``int`` specifying biasing option.
         Can only attain values 1, 2, 3 or 4.

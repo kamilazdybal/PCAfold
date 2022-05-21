@@ -125,7 +125,7 @@ def center_scale(X, scaling, nocenter=False):
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, '``median``', ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
     :param nocenter: (optional)
         ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
