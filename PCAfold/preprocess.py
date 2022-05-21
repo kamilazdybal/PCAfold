@@ -3358,7 +3358,7 @@ def get_average_centroid_distance(X, idx, weighted=False):
 #
 ################################################################################
 
-def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, grid_on=False, s=None, markerscale=None, legend=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_clustering(x, y, idx, clean=False, x_label=None, y_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, grid_on=False, s=None, markerscale=None, legend=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -3397,6 +3397,8 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param idx:
         ``numpy.ndarray`` of cluster classifications. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param clean: (optional)
+        ``bool`` specifying if a clean plot should be made. If set to ``True``, nothing else but the data points is plotted.
     :param x_label: (optional)
         ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -3478,6 +3480,9 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
     if n_observations_x != n_observations_idx:
         raise ValueError("Parameter `idx` has different number of observations than parameters `x` and `y`.")
 
+    if not isinstance(clean, bool):
+        raise ValueError("Parameter `clean` has to be of type `bool`.")
+
     if x_label is not None:
         if not isinstance(x_label, str):
             raise ValueError("Parameter `x_label` has to be of type `str`.")
@@ -3550,14 +3555,26 @@ def plot_2d_clustering(x, y, idx, x_label=None, y_label=None, color_map='viridis
         else:
             plt.scatter(x[np.where(idx==k)], y[np.where(idx==k)], color=cluster_colors[k], marker='o', s=s, alpha=alphas[k], label='$k_{' + str(k+1) + '}$ - ' + str(populations[k]))
 
-    if legend: plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=markerscale)
+    if clean:
 
-    plt.xticks(fontsize=font_axes, **csfont), plt.yticks(fontsize=font_axes, **csfont)
-    if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
-    if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
-    if grid_on: plt.grid(alpha=grid_opacity)
+        plt.xticks([])
+        plt.yticks([])
+        plt.gca().spines["top"].set_visible(False)
+        plt.gca().spines["bottom"].set_visible(False)
+        plt.gca().spines["right"].set_visible(False)
+        plt.gca().spines["left"].set_visible(False)
 
-    if title != None: plt.title(title, fontsize=font_title, **csfont)
+    else:
+
+        if legend: plt.legend(bbox_to_anchor=(1, 1.05), fancybox=True, shadow=True, ncol=1, fontsize=font_legend, markerscale=markerscale)
+
+        plt.xticks(fontsize=font_axes, **csfont), plt.yticks(fontsize=font_axes, **csfont)
+        if x_label != None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
+        if y_label != None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
+        if grid_on: plt.grid(alpha=grid_opacity)
+
+        if title != None: plt.title(title, fontsize=font_title, **csfont)
+
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
     return plt
