@@ -284,6 +284,8 @@ class Reduction(unittest.TestCase):
         except Exception:
             self.assertTrue(False)
 
+# ------------------------------------------------------------------------------
+
     def test_reduction__EquilibratedSamplePCA__not_allowed_calls(self):
 
         X = np.random.rand(200,20)
