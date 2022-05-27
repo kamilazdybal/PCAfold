@@ -403,4 +403,55 @@ class Reduction(unittest.TestCase):
         with self.assertRaises(AttributeError):
             lpca_X.tqj = 1
 
+        with self.assertRaises(AttributeError):
+            lpca_X.X_reconstructed = 1
+
+# ------------------------------------------------------------------------------
+
+    def test_reduction__LPCA__data_reconstruction(self):
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+
+        try:
+            lpca_X = reduction.LPCA(X, idx, scaling='none', n_components=2)
+            X_reconstructed = lpca_X.X_reconstructed
+            (n_observations, n_variables) = np.shape(X_reconstructed)
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==10)
+        except:
+            self.assertTrue(False)
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+        X[50:80,2] = np.ones_like(idx[50:80])
+
+        try:
+            lpca_X = reduction.LPCA(X, idx, scaling='none', n_components=2)
+            X_reconstructed = lpca_X.X_reconstructed
+            (n_observations, n_variables) = np.shape(X_reconstructed)
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==10)
+        except:
+            self.assertTrue(False)
+
+        X = np.random.rand(100,10)
+        idx = np.zeros((100,))
+        idx[50:80] = 1
+        idx = idx.astype(int)
+        X[:,2] = np.ones_like(idx)
+
+        try:
+            lpca_X = reduction.LPCA(X, idx, scaling='none', n_components=2)
+            X_reconstructed = lpca_X.X_reconstructed
+            (n_observations, n_variables) = np.shape(X_reconstructed)
+            self.assertTrue(n_observations==100)
+            self.assertTrue(n_variables==10)
+        except:
+            self.assertTrue(False)
+
 # ------------------------------------------------------------------------------

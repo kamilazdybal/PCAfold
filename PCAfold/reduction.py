@@ -1341,6 +1341,8 @@ class LPCA:
         * ``use_eigendec=False`` uses Singular Value Decomposition (SVD) (from ``scipy.linalg.svd``)
     :param nocenter: (optional)
         ``bool`` specifying whether data should be centered by mean.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
 
     **Attributes:**
 
@@ -1350,12 +1352,11 @@ class LPCA:
     - **principal_components** - (read only) ``list`` of ``numpy.ndarray`` specifying the local principal components, :math:`\mathbf{Z}`. Each list element corresponds to principal components in a single cluster.
     - **loadings** - (read only) ``list`` of ``numpy.ndarray`` specifying the local loadings, :math:`\mathbf{l}`. Each list element corresponds to loadings in a single cluster.
     - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for in each individual variable by the first :math:`q` PCs, :math:`\mathbf{t_q}`. Each list element corresponds to variance metric in a single cluster.
-    - **X_reconstructed_in_clusters** - (read only) ``list`` of ``numpy.ndarray`` specifying the clusters reconstructed using the first :math:`q` PCs. Each list element corresponds to each reconstructed cluster.
     - **X_reconstructed** - (read only) ``numpy.ndarray`` specifying the dataset reconstructed from local PCA using the first :math:`q` PCs. It has size ``(n_observations,n_variables)``.
     - **R2** - (read only) ``list`` specifying the average coefficient of determination for each cluster reconstructed using the first :math:`q` PCs. Each list element corresponds to each reconstructed cluster and is averaged over all non-constant state variables in that cluster.
     """
 
-    def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
+    def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False, verbose=False):
 
         if not isinstance(X, np.ndarray):
             raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -1416,6 +1417,9 @@ class LPCA:
         if not isinstance(nocenter, bool):
             raise ValueError("Parameter `nocenter` has to be a boolean.")
 
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be of type `bool`.")
+
         n_clusters = len(np.unique(idx))
 
         # Initialize the outputs:
@@ -1426,7 +1430,6 @@ class LPCA:
         loadings = []
         variance_accounted = []
         variance_accounted_individually = []
-        X_reconstructed_in_clusters = []
         R2_collected = []
         X_reconstructed = np.zeros_like(X)
 
@@ -1452,10 +1455,14 @@ class LPCA:
 
             # Reconstruct the current cluster using n_components:
             X_k_reconstructed = pca.reconstruct(Z)
-            X_reconstructed_in_clusters.append(X_k_reconstructed)
 
+            # Append the currently reconstructed cluster to the matrix of reconstructed data:
             if len(idx_removed) == 0:
                 X_reconstructed[self.__idx==k,:] = X_k_reconstructed
+            else:
+                if verbose: print('Cluster ' + str(k) + ' has constant variable(s): ' + str(idx_removed) + '.')
+                for i_retained in range(0,len(idx_retained)):
+                    X_reconstructed[self.__idx==k,i_retained] = X_k_reconstructed[:,i_retained]
 
             # Compute R2 of the cluster reconstruction (averaged over all state variables):
             R2_in_k = []
@@ -1498,7 +1505,6 @@ class LPCA:
         self.__loadings = loadings
         self.__tq = variance_accounted
         self.__tqj = variance_accounted_individually
-        self.__X_reconstructed_in_clusters = X_reconstructed_in_clusters
         self.__X_reconstructed = X_reconstructed
         self.__R2 = R2_collected
 
@@ -1541,10 +1547,6 @@ class LPCA:
     @property
     def tqj(self):
         return self.__tqj
-
-    @property
-    def X_reconstructed_in_clusters(self):
-        return self.__X_reconstructed_in_clusters
 
     @property
     def X_reconstructed(self):
