@@ -1432,6 +1432,7 @@ class LPCA:
         variance_accounted_individually = []
         R2_collected = []
         X_reconstructed = np.zeros_like(X)
+        idx_retained_in_clusters = []
 
         for k in range(0, n_clusters):
 
@@ -1440,7 +1441,7 @@ class LPCA:
 
             # Remove constant variables from local cluster:
             (X_removed, idx_removed, idx_retained) = preprocess.remove_constant_vars(X_k, maxtol=1e-12, rangetol=0.0001)
-
+            idx_retained_in_clusters.append(idx_retained)
             (_, n_variables_in_k) = np.shape(X_removed)
 
             # Perform PCA in local cluster:
@@ -1507,6 +1508,7 @@ class LPCA:
         self.__tqj = variance_accounted_individually
         self.__X_reconstructed = X_reconstructed
         self.__R2 = R2_collected
+        self.__idx_retained_in_clusters = idx_retained_in_clusters
 
     @property
     def n_components(self):
@@ -1555,6 +1557,10 @@ class LPCA:
     @property
     def R2(self):
         return self.__R2
+
+    @property
+    def idx_retained_in_clusters(self):
+        return self.__idx_retained_in_clusters
 
     def local_correlation(self, variable, index=0, metric='pearson', display=None, verbose=False):
         """
@@ -2010,6 +2016,9 @@ class VQPCA:
         # Tolerance for division operations (to avoid division by zero):
         eps = np.finfo(float).eps
 
+        # Initialized retained variables in a dataset:
+        idx_retained_in_clusters = [[i for i in range(0,n_variables)] for i in range(0,n_clusters)]
+
         # Tolerance for the reconstruction error and for the cluster centroids:
         if tolerance is None:
             tolerance = 1.0e-08
@@ -2080,10 +2089,12 @@ class VQPCA:
             for j in range(0,n_clusters):
 
                 D = np.diag(scalings[j])
-                centroids_matrix = np.tile(centroids_previous[j, :], (n_observations, 1))
+                D = D[idx_retained_in_clusters[j],:]
+                D = D[:,idx_retained_in_clusters[j]]
+                centroids_matrix = np.tile(centroids_previous[j, :], (n_observations, 1))[:,idx_retained_in_clusters[j]]
 
                 # Evaluate the mean squared reconstruction error:
-                squared_reconstruction_error_matrix[:, j] = np.sum((X_pre_processed - centroids_matrix - np.dot((X_pre_processed - centroids_matrix), np.dot(np.linalg.inv(D), np.dot(eigenvectors[j], np.dot(np.transpose(eigenvectors[j]), D)))))**2, axis=1)
+                squared_reconstruction_error_matrix[:, j] = np.sum((X_pre_processed[:,idx_retained_in_clusters[j]] - centroids_matrix - np.dot((X_pre_processed[:,idx_retained_in_clusters[j]] - centroids_matrix), np.dot(np.linalg.inv(D), np.dot(eigenvectors[j], np.dot(np.transpose(eigenvectors[j]), D)))))**2, axis=1)
 
             # Assign observations to clusters based on the minimum squared reconstruction error:
             idx = np.argmin(squared_reconstruction_error_matrix, axis=1)
@@ -2145,6 +2156,7 @@ class VQPCA:
             local_pca = LPCA(X_pre_processed, idx, scaling='none', n_components=n_components, use_eigendec=True, nocenter=False)
             eigenvectors = local_pca.A
             PCs = local_pca.principal_components
+            idx_retained_in_clusters = local_pca.idx_retained_in_clusters
 
             # Printing verbose information on the current iteration:
             cluster_shapes = []
