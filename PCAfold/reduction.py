@@ -11,6 +11,7 @@ __status__ = "Production"
 
 import numpy as np
 import copy as cp
+import time
 from scipy import linalg as lg
 from scipy.stats import pearsonr, spearmanr
 import matplotlib.pyplot as plt
@@ -1860,6 +1861,7 @@ class VQPCA:
                       scaling='std',
                       idx_init='random',
                       max_iter=100,
+                      tolerance=1.0e-08,
                       random_state=42,
                       verbose=True)
 
@@ -1870,19 +1872,29 @@ class VQPCA:
 
     .. code-block:: text
 
-        | It.   | Rec. error      | Cent. conv.? | Error conv.? | Cluster 1  | Cluster 2  | Cluster 3  |
-        | 1     | 11.57170201     | False        | False        | 123        | 144        | 133        |
-        | 2     | 5.91757639      | False        | False        | 129        | 141        | 130        |
-        | 3     | 5.76129214      | False        | False        | 122        | 145        | 133        |
-        | 4     | 5.7108546       | False        | False        | 122        | 144        | 134        |
-        | 5     | 5.67447569      | False        | False        | 122        | 142        | 136        |
-        | 6     | 5.61220177      | False        | False        | 123        | 140        | 137        |
-        | 7     | 5.57668998      | False        | False        | 121        | 138        | 141        |
-        | 8     | 5.56395984      | False        | False        | 120        | 137        | 143        |
-        | 9     | 5.56061402      | False        | False        | 121        | 137        | 142        |
-        | 10    | 5.55957995      | True         | False        | 121        | 137        | 142        |
-        | 11    | 5.55957995      | True         | True         | 121        | 137        | 142        |
-        Convergence reached in iteration: 11
+        | It.   | Rec. error      | Error conv.? | Cent. conv.? | Cluster 1  | Cluster 2  | Cluster 3  | Time [min]   |
+        | 1     | 10.20073505     | False        | False        | 165        | 58         | 177        | 0.00042      |
+        | 2     | 6.02108074      | False        | False        | 155        | 84         | 161        | 0.00073      |
+        | 3     | 5.79390739      | False        | False        | 148        | 97         | 155        | 0.0011       |
+        | 4     | 5.69141601      | False        | False        | 148        | 110        | 142        | 0.00134      |
+        | 5     | 5.63347972      | False        | False        | 148        | 117        | 135        | 0.00156      |
+        | 6     | 5.61523762      | False        | False        | 148        | 117        | 135        | 0.00175      |
+        | 7     | 5.61010989      | False        | False        | 147        | 117        | 136        | 0.00199      |
+        | 8     | 5.60402719      | False        | False        | 144        | 119        | 137        | 0.00224      |
+        | 9     | 5.59803052      | False        | False        | 144        | 121        | 135        | 0.00246      |
+        | 10    | 5.59072799      | False        | False        | 142        | 123        | 135        | 0.00268      |
+        | 11    | 5.5783608       | False        | False        | 139        | 123        | 138        | 0.00291      |
+        | 12    | 5.57368963      | False        | False        | 138        | 123        | 139        | 0.00316      |
+        | 13    | 5.56762599      | False        | False        | 140        | 122        | 138        | 0.0034       |
+        | 14    | 5.55839038      | False        | False        | 138        | 120        | 142        | 0.00368      |
+        | 15    | 5.55167405      | False        | False        | 137        | 120        | 143        | 0.00394      |
+        | 16    | 5.54661554      | False        | False        | 136        | 120        | 144        | 0.0042       |
+        | 17    | 5.5453694       | False        | True         | 136        | 120        | 144        | 0.00444      |
+        | 18    | 5.5453694       | True         | True         | 136        | 120        | 144        | 0.00444      |
+        Convergence reached in iteration: 18
+
+        Total time: 0.004471 minutes.
+        --------------------------------------------------------------------------------------------------------------
 
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
@@ -2060,18 +2072,21 @@ class VQPCA:
 
         # Template for printing verbose information on the current iteration:
         rows_names = []
-        print_widths = [5,15,12,12] + [10 for i in range(0,n_clusters)]
+        print_widths = [5,15,12,12] + [10 for i in range(0,n_clusters)] + [12]
         row_format = '|'
-        for i in range(n_clusters + 4):
+        for i in range(n_clusters + 5):
             row_format += ' {' + str(i) + ':<' + str(print_widths[i]) + '} |'
         rows_names.append('It.')
         rows_names.append('Rec. error')
-        rows_names.append('Cent. conv.?')
         rows_names.append('Error conv.?')
+        rows_names.append('Cent. conv.?')
         for j in range(0,n_clusters):
             rows_names.append('Cluster ' + str(j+1))
+        rows_names.append('Time [min]')
         if verbose:
             print(row_format.format(*rows_names))
+
+        global_tic = time.perf_counter()
 
         # The VQPCA algorithm: -------------------------------------------------
         collected_idx = np.zeros((n_observations,1))
@@ -2138,7 +2153,7 @@ class VQPCA:
                     (cluster_length, _) = np.shape(PCs[j])
                     cluster_shapes.append(cluster_length)
                 if verbose:
-                    print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(centroids_convergence), str(reconstruction_error_convergence), *cluster_shapes))
+                    print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(reconstruction_error_convergence), str(centroids_convergence), *cluster_shapes, str(round((toc - global_tic)/60, 5))))
 
                 if verbose: print('Convergence reached in iteration: ' + str(iteration+1) + '\n')
 
@@ -2159,16 +2174,22 @@ class VQPCA:
             PCs = local_pca.principal_components
             idx_retained_in_clusters = local_pca.idx_retained_in_clusters
 
+            toc = time.perf_counter()
+
             # Printing verbose information on the current iteration:
             cluster_shapes = []
             for j in range(0,n_clusters):
                 (cluster_length, _) = np.shape(PCs[j])
                 cluster_shapes.append(cluster_length)
             if verbose:
-                print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(centroids_convergence), str(reconstruction_error_convergence), *cluster_shapes))
+                print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(reconstruction_error_convergence), str(centroids_convergence), *cluster_shapes, str(round((toc - global_tic)/60, 5))))
 
             # Increment the iteration counter:
             iteration += 1
+
+        global_toc = time.perf_counter()
+
+        if verbose: print(f'Total time: {(global_toc - global_tic)/60:0.6f} minutes.\n' + '-'*(20*n_clusters+50))
 
         if not converged:
             if verbose: print('Convergence not reached in ' + str(iteration) + ' iterations.')
