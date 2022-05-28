@@ -1354,6 +1354,7 @@ class LPCA:
     - **tq** - (read only) ``list`` of ``numpy.ndarray`` specifying the local variance accounted for in each individual variable by the first :math:`q` PCs, :math:`\mathbf{t_q}`. Each list element corresponds to variance metric in a single cluster.
     - **X_reconstructed** - (read only) ``numpy.ndarray`` specifying the dataset reconstructed from local PCA using the first :math:`q` PCs. It has size ``(n_observations,n_variables)``.
     - **R2** - (read only) ``list`` specifying the average coefficient of determination for each cluster reconstructed using the first :math:`q` PCs. Each list element corresponds to each reconstructed cluster and is averaged over all non-constant state variables in that cluster.
+    - **idx_retained_in_clusters** - (read only) ``list`` of ``list`` specifying the variables retained in each cluster. If a variable within a particular cluster becomes constant, it will be removed from this list.
     """
 
     def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False, verbose=False):

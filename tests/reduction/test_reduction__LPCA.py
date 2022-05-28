@@ -23,6 +23,7 @@ class Reduction(unittest.TestCase):
             l = lpca_X.loadings
             tq = lpca_X.tq
             tqj = lpca_X.tqj
+            idx_retained_in_clusters = lpca_X.idx_retained_in_clusters
 
             S_k1 = lpca_X.S[0]
             A_k1 = lpca_X.A[0]
@@ -31,6 +32,7 @@ class Reduction(unittest.TestCase):
             l_k1 = lpca_X.loadings[0]
             tq_k1 = lpca_X.tq[0]
             tqj_k1 = lpca_X.tqj[0]
+            idx_retained_in_clusters = lpca_X.idx_retained_in_clusters[0]
 
             S1_k1 = lpca_X.S[0][0,0]
             A1_k1 = lpca_X.A[0][:,0]
@@ -39,6 +41,7 @@ class Reduction(unittest.TestCase):
             l1_k1 = lpca_X.loadings[0][:,0]
             tq1_k1 = lpca_X.tq[0][0]
             tqj1_k1 = lpca_X.tqj[0][:,0]
+            idx_retained_in_clusters = lpca_X.idx_retained_in_clusters[0][0]
 
         except Exception:
             self.assertTrue(False)
@@ -57,6 +60,7 @@ class Reduction(unittest.TestCase):
             l = lpca_X.loadings
             tq = lpca_X.tq
             tqj = lpca_X.tqj
+            idx_retained_in_clusters = lpca_X.idx_retained_in_clusters
 
             S_k1 = lpca_X.S[0]
             A_k1 = lpca_X.A[0]
@@ -65,6 +69,7 @@ class Reduction(unittest.TestCase):
             l_k1 = lpca_X.loadings[0]
             tq_k1 = lpca_X.tq[0]
             tqj_k1 = lpca_X.tqj[0]
+            idx_retained_in_clusters = lpca_X.idx_retained_in_clusters[0]
 
             S1_k1 = lpca_X.S[0][0,0]
             A1_k1 = lpca_X.A[0][:,0]
@@ -73,7 +78,8 @@ class Reduction(unittest.TestCase):
             l1_k1 = lpca_X.loadings[0][:,0]
             tq1_k1 = lpca_X.tq[0][0]
             tqj_k1 = lpca_X.tqj[0][:,0]
-
+            idx_retained_in_clusters = lpca_X.idx_retained_in_clusters[0][0]
+            
         except Exception:
             self.assertTrue(False)
 
