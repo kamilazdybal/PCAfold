@@ -23,7 +23,7 @@ from PCAfold.styles import *
 #
 ################################################################################
 
-_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', '-1to1', 'level', 'max', 'variance', 'median', 'poisson', 'vast_2', 'vast_3', 'vast_4']
+_scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', '-1to1', 'level', 'max', 'variance', 'median', 'poisson', 'vast_2', 'vast_3', 'vast_4', 'l2-norm']
 
 # ------------------------------------------------------------------------------
 
@@ -100,6 +100,8 @@ def center_scale(X, scaling, nocenter=False):
     +----------------------------+--------------------------+--------------------------------------------------------------------+
     | S3                         | ``'vast_4'``             | :math:`\sigma^2 k^2 / (max(X_j) - min(X_j))`                       |
     +----------------------------+--------------------------+--------------------------------------------------------------------+
+    | L2-norm                    | ``'l2-norm'``            | :math:`\|X_j\|_2`                                                  |
+    +----------------------------+--------------------------+--------------------------------------------------------------------+
 
     where :math:`\sigma` is the standard deviation of :math:`X_j`
     and :math:`k` is the kurtosis of :math:`X_j`.
@@ -125,7 +127,7 @@ def center_scale(X, scaling, nocenter=False):
     :param scaling:
         ``str`` specifying the scaling methodology. It can be one of the following:
         ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
-        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'variance'``, ``'median'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``, ``'l2-norm'``.
     :param nocenter: (optional)
         ``bool`` specifying whether data should be centered by mean. If set to ``True`` data will *not* be centered.
 
@@ -214,6 +216,8 @@ def center_scale(X, scaling, nocenter=False):
            X_scale[i] = np.sqrt(dev[i])
     elif scaling == 'POISSON':
        X_scale = np.sqrt(X_center)
+    elif scaling == 'L2-NORM':
+       X_scale = np.linalg.norm(X, ord=2, axis=0)
     else:
         raise ValueError('Unsupported scaling option')
 
