@@ -49,18 +49,18 @@ class VarianceData:
         list of the variable names
     :param normalized_variance_limit:
         dictionary of the normalized variance computed as the bandwidth approaches zero (numerically at :math:`10^{-16}`) for each variable
-    :param individual_normalized_variance:
-        dictionary of the individual normalized variance for every observation, for each bandwidth and for each variable
+    :param sample_normalized_variance:
+        dictionary of the sample normalized variance for every observation, for each bandwidth and for each variable
     """
 
-    def __init__(self, bandwidth_values, norm_var, global_var, bandwidth_10pct_rise, keys, norm_var_limit, individual_norm_var):
+    def __init__(self, bandwidth_values, norm_var, global_var, bandwidth_10pct_rise, keys, norm_var_limit, sample_norm_var):
         self._bandwidth_values = bandwidth_values.copy()
         self._normalized_variance = norm_var.copy()
         self._global_variance = global_var.copy()
         self._bandwidth_10pct_rise = bandwidth_10pct_rise.copy()
         self._variable_names = keys.copy()
         self._normalized_variance_limit = norm_var_limit.copy()
-        self._individual_normalized_variance = individual_norm_var.copy()
+        self._sample_normalized_variance = sample_norm_var.copy()
 
     @property
     def bandwidth_values(self):
@@ -94,9 +94,9 @@ class VarianceData:
         return self._normalized_variance_limit.copy()
 
     @property
-    def individual_normalized_variance(self):
-        """return a dictionary of the individual normalized variances for each bandwidth and for each variable"""
-        return self._individual_normalized_variance.copy()
+    def sample_normalized_variance(self):
+        """return a dictionary of the sample normalized variances for each bandwidth and for each variable"""
+        return self._sample_normalized_variance.copy()
 
 # ------------------------------------------------------------------------------
 
@@ -227,19 +227,19 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     norm_local_var = dict({key: local_var[key] / global_var[key] for key in depvar_names})
 
     # Computing normalized variance for each individual observation:
-    individual_norm_var = {}
+    sample_norm_var = {}
     for idx, key in enumerate(depvar_names):
-        individual_local_variance = np.zeros((yi.shape[0], bandwidth_values.size))
+        sample_local_variance = np.zeros((yi.shape[0], bandwidth_values.size))
         for si in range(bandwidth_values.size):
-            individual_local_variance[:,si] = (yi[:, idx] - kregmodResults[si][:,idx])**2
-        individual_norm_var[key] = individual_local_variance / global_var[key]
+            sample_local_variance[:,si] = (yi[:, idx] - kregmodResults[si][:,idx])**2
+        sample_norm_var[key] = sample_local_variance / global_var[key]
 
     # computing normalized variance as bandwidth approaches zero to check for non-uniqueness
     lvar_limit = kregmod.predict(xi, 1.e-16)
     nlvar_limit = np.linalg.norm(yi - lvar_limit, axis=0) ** 2
     normvar_limit = dict({key: nlvar_limit[idx] for idx, key in enumerate(depvar_names)})
 
-    solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit, individual_norm_var)
+    solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit, sample_norm_var)
     return solution_data
 
 # ------------------------------------------------------------------------------
