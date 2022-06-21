@@ -7,8 +7,6 @@
 #
 # ------------------------------------------------------------------------------
 
-from matplotlib import rcParams
-
 # Set resolution for the saved plots (in dpi - dots-per-inch):
 save_dpi = 200
 
@@ -16,13 +14,6 @@ save_dpi = 200
 csfont = {'fontname':'Arial', 'fontweight':'regular'}
 hfont = {'fontname':'Arial', 'fontweight':'bold'}
 ifont = {'fontname':'Arial', 'fontweight':'regular', 'style':'italic'}
-rcParams["font.family"] = "serif"
-rcParams["font.serif"] = "Arial"
-rcParams["font.sans-serif"] = "Arial"
-rcParams["font.cursive"] = "Arial"
-rcParams["font.monospace"] = "Arial"
-rcParams['font.size'] = 16
-rcParams["text.usetex"] = False
 
 # Set grid opacity:
 grid_opacity = 0.3
