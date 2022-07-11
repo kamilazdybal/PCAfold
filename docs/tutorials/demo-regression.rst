@@ -156,6 +156,93 @@ or in 3D:
     :width: 500
     :align: center
 
+Predicted 2D field for scalar quantities
+===========================================
+
+When the predicted variable is a scalar quantity, a scatter plot for the regressed scalar field can be plotted using the function `plot_2d_regression_scalar_field`. Regression of the scalar field can be tested at any user-defined grid, also outside of the bounds of the training data. This can be of particular importance when generating reduced-order models, where the behavior of the regression should be tested outside of the training manifold. 
+
+Below, we show an example on a combustion data set.
+
+.. code:: python
+
+    X = np.genfromtxt('data-state-space.csv', delimiter=',')
+    S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
+
+.. code:: python
+
+    pca_X = reduction.PCA(X, scaling='vast', n_components=2)
+    PCs = pca_X.transform(X)
+    PC_sources = pca_X.transform(S_X, nocenter=True)
+    (PCs_pp, centers_PCs, scales_PCs) = preprocess.center_scale(PCs, '-1to1')
+
+Fit the kernel regression model with the train data:
+
+.. code:: python
+
+    KReg_model = analysis.KReg(PCs_pp, PC_sources)
+
+We define the regression model function that will make predictions for any query point:
+
+.. code:: python
+
+    def regression_model(regression_input):
+
+        regression_input_CS = (regression_input - centers_PCs)/scales_PCs
+
+        regressed_value = KReg_model.predict(regression_input_CS, 'nearest_neighbors_isotropic', n_neighbors=10)[0,1]
+
+        return regressed_value
+
+We first visualize the training manifold, colored by the dependent variable being predicted:
+
+.. code:: python
+
+    reduction.plot_2d_manifold(PCs[:,0], 
+                               PCs[:,1], 
+                               x_label='$Z_1$',
+                               y_label='$Z_2$',
+                               color=PC_sources[:,1], 
+                               color_map='viridis',
+                               colorbar_label='$S_{Z_2}$',
+                               figure_size=(8,6),
+                               save_filename=save_filename)
+
+.. image:: ../images/tutorial-regression-scalar-field-training-manifold.png
+    :width: 500
+    :align: center
+    
+Define the bounds for the scalar field:
+
+.. code:: python
+
+    grid_bounds = ([np.min(PCs[:,0]),np.max(PCs[:,0])],[np.min(PCs[:,1]),np.max(PCs[:,1])])
+
+Plot the regressed scalar field:
+
+.. code:: python
+
+    plt = analysis.plot_2d_regression_scalar_field(grid_bounds,
+                                                   regression_model,
+                                                   x=PCs[:,0],
+                                                   y=PCs[:,1],
+                                                   resolution=(200,200),
+                                                   extension=(10,10),
+                                                   s_field=10,
+                                                   s_manifold=1,
+                                                   x_label='$Z_1$ [$-$]',
+                                                   y_label='$Z_2$ [$-$]',
+                                                   manifold_color='r',
+                                                   colorbar_label='$S_{Z, 1}$',
+                                                   color_map='viridis',
+                                                   manifold_alpha=1,
+                                                   grid_on=False,
+                                                   figure_size=(10,6),
+                                                   save_filename=save_filename);
+
+.. image:: ../images/tutorial-regression-scalar-field.png
+    :width: 500
+    :align: center
+
 Streamplots for predicted vector quantities
 ===========================================
 
