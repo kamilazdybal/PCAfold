@@ -4231,9 +4231,9 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
         ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
     :param s_field: (optional)
-        ``int`` or ``float specifying the scatter point size for the scalar field.
+        ``int`` or ``float`` specifying the scatter point size for the scalar field.
     :param s_manifold: (optional)
-        ``int`` or ``float specifying the scatter point size for the manifold.
+        ``int`` or ``float`` specifying the scatter point size for the manifold.
     :param manifold_color: (optional)
         vector or string specifying color for the manifold. If it is a
         vector, it has to have length consistent with the number of observations

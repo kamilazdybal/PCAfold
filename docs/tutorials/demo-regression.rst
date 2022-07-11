@@ -234,6 +234,7 @@ Plot the regressed scalar field:
                                                    manifold_color='r',
                                                    colorbar_label='$S_{Z, 1}$',
                                                    color_map='viridis',
+                                                   colorbar_range=(np.min(PC_sources[:,1]), np.max(PC_sources[:,1])),
                                                    manifold_alpha=1,
                                                    grid_on=False,
                                                    figure_size=(10,6),
