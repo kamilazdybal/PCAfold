@@ -237,6 +237,11 @@ Plotting functions
 
 .. autofunction:: PCAfold.analysis.plot_2d_regression
 
+``plot_2d_regression_scalar_field``
+============================================
+
+.. autofunction:: PCAfold.analysis.plot_2d_regression_scalar_field
+
 ``plot_2d_regression_streamplot``
 ============================================
 

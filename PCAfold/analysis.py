@@ -4166,39 +4166,35 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
         import numpy as np
 
         # Generate dummy data set:
-        X = np.random.rand(100,5)
-        S_X = np.random.rand(100,5)
-
-        # Obtain two-dimensional manifold from PCA:
-        pca_X = PCA(X, n_components=2)
-        PCs = pca_X.transform(X)
-        S_Z = pca_X.transform(S_X, nocenter=True)
+        X = np.random.rand(100,2)
+        Z = np.random.rand(100,1)
 
         # Train the kernel regression model:
-        model = KReg(PCs, S_Z)
+        model = KReg(X, Z)
 
         # Define the regression model:
         def regression_model(query):
 
-            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)
+            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[:,0]
 
             return predicted
 
-        # Define the bounds for the streamplot:
-        grid_bounds = ([np.min(PCs[:,0]),np.max(PCs[:,0])],[np.min(PCs[:,1]),np.max(PCs[:,1])])
+        # Define the bounds for the scalar field:
+        grid_bounds = ([np.min(X[:,0]),np.max(X[:,0])],[np.min(X[:,1]),np.max(X[:,1])])
 
-        # Plot the regression streamplot:
+        # Plot the regressed scalar field:
         plt = plot_2d_regression_scalar_field(grid_bounds,
                                             regression_model,
-                                            x=PCs[:,0],
-                                            y=PCs[:,1],
-                                            resolution=(15,15),
-                                            extension=(20,20),
-                                            color='r',
-                                            x_label='$Z_1$',
-                                            y_label='$Z_2$',
-                                            manifold_color=X[:,0],
-                                            colorbar_label='$X_1$',
+                                            x=X[:,0],
+                                            y=X[:,1],
+                                            resolution=(100,100),
+                                            extension=(10,10),
+                                            x_label='$X_1$',
+                                            y_label='$X_2$',
+                                            s_field=4,
+                                            s_manifold=60,
+                                            manifold_color=Z,
+                                            colorbar_label='$Z_1$',
                                             color_map='inferno',
                                             colorbar_range=(0,1),
                                             manifold_alpha=1,
@@ -4236,7 +4232,7 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
         label will not be plotted.
     :param s_field: (optional)
         ``int`` or ``float specifying the scatter point size for the scalar field.
-    :param s_field: (optional)
+    :param s_manifold: (optional)
         ``int`` or ``float specifying the scatter point size for the manifold.
     :param manifold_color: (optional)
         vector or string specifying color for the manifold. If it is a
@@ -4408,7 +4404,10 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
 
     fig = plt.figure(figsize=figure_size)
 
-    scat_field = plt.scatter(xy_mesh[0].ravel(), xy_mesh[1].ravel(), c=regressed_scalar, cmap=color_map, s=s_field)
+    if colorbar_range is not None:
+        scat_field = plt.scatter(xy_mesh[0].ravel(), xy_mesh[1].ravel(), c=regressed_scalar, cmap=color_map, s=s_field, vmin=cbar_min, vmax=cbar_max)
+    else:
+        scat_field = plt.scatter(xy_mesh[0].ravel(), xy_mesh[1].ravel(), c=regressed_scalar, cmap=color_map, s=s_field)
 
     if (x is not None) and (y is not None):
 
@@ -4417,7 +4416,10 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
         elif isinstance(manifold_color, str):
             scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color, cmap=color_map, marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
         elif isinstance(manifold_color, np.ndarray):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=s_manifold, edgecolor='none', vmin=np.min(regressed_scalar), vmax=np.max(regressed_scalar), alpha=manifold_alpha)
+            if colorbar_range is not None:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=s_manifold, edgecolor='none', vmin=cbar_min, vmax=cbar_max, alpha=manifold_alpha)
+            else:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=s_manifold, edgecolor='none', vmin=np.min(regressed_scalar), vmax=np.max(regressed_scalar), alpha=manifold_alpha)
 
     cb = fig.colorbar(scat_field)
     cb.ax.tick_params(labelsize=font_colorbar_axes)
