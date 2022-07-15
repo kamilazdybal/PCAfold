@@ -564,7 +564,7 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, power=1, vertical_shift=1, norm=None, integrate_to_peak=False):
+def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, power=1, vertical_shift=1, norm=None, integrate_to_peak=False, rightmost_peak_shift=None):
     """
     Defines a cost function for manifold topology assessment based on the areas, or weighted (penalized) areas, under
     the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
@@ -717,6 +717,8 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area. If ``norm=None``, a list of costs for all depedent variables is returned.
     :param integrate_to_peak: (optional)
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
+    :param rightmost_peak_shift: (optional)
+        ``float`` or ``int`` specifying the percentage of shift in the rightmost peak location. If set to a number between 0 and 100, a quantity ``rightmost_peak_shift/100 * (sigma[-1] - rightmost_peak_location)`` is added to the rightmost peak location. It can be used to move the rightmost peak location further right, for instance if there is a blending of scales in the :math:`\\hat{\\mathcal{D}}(\\sigma)` profile.
 
     :return:
         - **cost** - ``float`` specifying the normalized cost, :math:`\\mathcal{L}`, or, if ``norm=None``, a list of costs, :math:`A_i`, for each dependent variable.
@@ -750,6 +752,12 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
     if not isinstance(integrate_to_peak, bool):
         raise ValueError("Parameter `integrate_to_peak` has to be of type `bool`.")
 
+    if rightmost_peak_shift is not None:
+        if not isinstance(rightmost_peak_shift, int) and not isinstance(rightmost_peak_shift, float):
+            raise ValueError("Parameter `rightmost_peak_shift` has to be of type `int` or `float`.")
+        if rightmost_peak_shift > 100 or rightmost_peak_shift < 0:
+            raise ValueError("Parameter `rightmost_peak_shift` should represent percentage between 0 and 100.")
+
     derivative, sigma, _ = normalized_variance_derivative(variance_data)
 
     costs = []
@@ -759,6 +767,9 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
         idx_peaks, _ = find_peaks(derivative[variable], height=0)
         idx_rightmost_peak = idx_peaks[-1]
         rightmost_peak_location = sigma[idx_rightmost_peak]
+
+        if rightmost_peak_shift is not None:
+            rightmost_peak_location = rightmost_peak_location + rightmost_peak_shift/100 * (sigma[-1] - rightmost_peak_location)
 
         (indices_to_the_left_of_peak, ) = np.where(sigma<=rightmost_peak_location)
 
