@@ -718,7 +718,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
     :param integrate_to_peak: (optional)
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
     :param rightmost_peak_shift: (optional)
-        ``float`` or ``int`` specifying the percentage of shift in the rightmost peak location. If set to a number between 0 and 100, a quantity ``rightmost_peak_shift/100 * (sigma[-1] - rightmost_peak_location)`` is added to the rightmost peak location. It can be used to move the rightmost peak location further right, for instance if there is a blending of scales in the :math:`\\hat{\\mathcal{D}}(\\sigma)` profile.
+        ``float`` or ``int`` specifying the percentage, :math:`p`, of shift in the rightmost peak location. If set to a number between 0 and 100, a quantity :math:`p/100 (\\sigma_{max} - \\sigma_{peak, i})` is added to the rightmost peak location. It can be used to move the rightmost peak location further right, for instance if there is a blending of scales in the :math:`\\hat{\\mathcal{D}}(\\sigma)` profile.
 
     :return:
         - **cost** - ``float`` specifying the normalized cost, :math:`\\mathcal{L}`, or, if ``norm=None``, a list of costs, :math:`A_i`, for each dependent variable.
@@ -854,7 +854,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
 def manifold_informed_feature_selection(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
     """
-    Manifold-informed feature selection algorithm based on forward feature addition. The goal of the algorithm is to
+    Manifold-informed feature selection algorithm based on forward feature addition introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
     The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
@@ -871,6 +871,8 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     the first output is a list of indices of the ordered
     original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`. The second output is a list of indices of the selected
     subset of the original variables, :math:`\\mathbf{X}_S = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
+
+    More information can be found in :cite:`Zdybal2022`.
 
     .. note::
 
@@ -1247,7 +1249,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
 
 def manifold_informed_backward_elimination(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
     """
-    Manifold-informed feature selection algorithm based on backward elimination. The goal of the algorithm is to
+    Manifold-informed feature selection algorithm based on backward elimination introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
     The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
@@ -1259,6 +1261,8 @@ def manifold_informed_backward_elimination(X, X_source, variable_names, scaling,
     the first output is a list of indices of the ordered
     original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`. The second output is a list of indices of the selected
     subset of the original variables, :math:`\\mathbf{X}_S = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
+
+    More information can be found in :cite:`Zdybal2022`.
 
     .. note::
 
