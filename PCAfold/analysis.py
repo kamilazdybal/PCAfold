@@ -569,6 +569,8 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
     Defines a cost function for manifold topology assessment based on the areas, or weighted (penalized) areas, under
     the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
 
+    More information on the theory and application of the cost function can be found in :cite:`zdybal2022cost`.
+
     An individual area, :math:`A_i`, for the :math:`i^{th}` dependent variable, is computed by directly integrating the function :math:`\\hat{\\mathcal{D}}_i(\\sigma)``
     in the :math:`\\log_{10}` space of bandwidths :math:`\\sigma`. Integration is performed using the composite trapezoid rule.
 
