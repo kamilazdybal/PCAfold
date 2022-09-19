@@ -613,8 +613,11 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
         ``bool`` for printing verbose details.
 
     :return:
-        - **feature_size_map** - ``numpy.ndarray`` specifying the local feature sizes on a manifold, :math:`\\mathcal{B}`. It has size ``(n_observations,)``.
+        - **feature_size_map** - ``numpy.ndarray`` specifying the local feature sizes on a manifold, :math:`\\mathbf{B}`. It has size ``(n_observations,)``.
     """
+
+    if not isinstance(variance_data, VarianceData):
+        raise ValueError("Parameter `variance_data` has to be an instance of class `PCAfold.analysis.VarianceData`.")
 
     if not isinstance(variable_name, str):
         raise ValueError("Parameter `variable_name` has to be of type `str`.")
@@ -728,14 +731,14 @@ def feature_size_map_smooth(indepvars, feature_size_map, method='median', n_neig
     :param indepvars:
         ``numpy.ndarray`` specifying the independent variable values. It should be of size ``(n_observations,n_independent_variables)``.
     :param feature_size_map:
-        ``numpy.ndarray`` specifying the local feature sizes on a manifold, :math:`\\mathcal{B}`. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+        ``numpy.ndarray`` specifying the local feature sizes on a manifold, :math:`\\mathbf{B}`. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
     :param method: (optional)
         ``str`` specifying the smoothing method. It can be ``'median'``, ``'mean'``, ``'max'`` or ``'min'``.
     :param n_neighbors: (optional)
         ``int`` specifying the number of nearest neighbors to smooth over.
 
     :return:
-        - **updated_feature_size_map** - ``numpy.ndarray`` specifying the smoothed local feature sizes on a manifold, :math:`\\mathcal{B}`. It has size ``(n_observations,)``.
+        - **updated_feature_size_map** - ``numpy.ndarray`` specifying the smoothed local feature sizes on a manifold, :math:`\\mathbf{B}`. It has size ``(n_observations,)``.
     """
 
     __methods = ['median', 'mean', 'max', 'min']
@@ -967,6 +970,9 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
     __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
+    
+    if not isinstance(variance_data, VarianceData):
+        raise ValueError("Parameter `variance_data` has to be an instance of class `PCAfold.analysis.VarianceData`.")
 
     if penalty_function is not None:
 
