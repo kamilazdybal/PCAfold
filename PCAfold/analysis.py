@@ -564,6 +564,245 @@ def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
 
 # ------------------------------------------------------------------------------
 
+def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_idx='peak', verbose=False):
+    """
+    Computes a map of local feature sizes on a manifold.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, feature_size_map
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Specify variables names
+        variable_names = ['X_' + str(i) for i in range(0,10)]
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=variable_names,
+                                                    bandwidth_values=bandwidth_values)
+
+        # Compute the feature size map:
+        feature_size_map = feature_size_map(variance_data,
+                                            variable_name='X_1',
+                                            cutoff=1,
+                                            starting_bandwidth_idx='peak',
+                                            verbose=True)
+
+    :param variance_data:
+        an object of ``VarianceData`` class.
+    :param variable_name:
+        ``str`` specifying the name of the dependent variable for which the feature size map should be computed. It should be as per name specified when computing ``variance_data``.
+    :param cutoff: (optional)
+        ``float`` or ``int`` specifying the cutoff percentage, :math:`p`. It should be a number between 0 and 100.
+    :param starting_bandwidth_idx: (optional)
+        ``int`` or ``str`` specifying the index of the starting bandwidth to compute the local feature sizes from. Local feature sizes computed will never be smaller than the starting bandwidth. If set to ``'peak'``, the starting bandwidth will be automatically calculated as the rightmost peak, :math:`\sigma_{peak}`.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **feature_size_map** - ``numpy.ndarray`` specifying the local feature sizes on a manifold, :math:`\\mathcal{B}`. It has size ``(n_observations,)``.
+    """
+
+    if not isinstance(variable_name, str):
+        raise ValueError("Parameter `variable_name` has to be of type `str`.")
+
+    if not isinstance(cutoff, int) and not isinstance(cutoff, float):
+        raise ValueError("Parameter `cutoff` has to be of type `int` or `float`.")
+
+    if cutoff < 0 or cutoff > 100:
+        raise ValueError("Parameter `cutoff` has to be of a number between 0 and 100.")
+
+    if starting_bandwidth_idx != 'peak':
+        if not isinstance(starting_bandwidth_idx, int):
+            raise ValueError("Parameter `starting_bandwidth_idx` has to be of type `int` or be set to 'peak'.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be of type `bool`.")
+
+    NV = variance_data.normalized_variance[variable_name]
+    SNV = variance_data.sample_normalized_variance[variable_name]
+
+    derivative, sigmas, _ = normalized_variance_derivative(variance_data)
+    derivatives = derivative[variable_name]
+
+    if starting_bandwidth_idx == 'peak':
+        idx_peaks, _ = find_peaks(derivatives, height=0)
+        starting_bandwidth_idx = idx_peaks[-1]
+
+        if verbose: print('Rightmost peak at index ' + str(starting_bandwidth_idx) + ' is used as the starting bandwidth.\n')
+
+    starting_bandwidth = sigmas[starting_bandwidth_idx]
+    starting_derivative = derivatives[starting_bandwidth_idx]
+    bandwidth_idx_list = [i for i in range(0, starting_bandwidth_idx)]
+
+    if verbose:
+        print('Feature sizes will be computed starting from size:\n' + str(starting_bandwidth) + '\nwhere the normalized variance derivative is equal to:\n' + str(starting_derivative))
+
+    n_observations, _ = np.shape(SNV)
+
+    # Populate the initial bandwidth vector with the starting bandwidth:
+    feature_size_map = np.ones((n_observations,)) * starting_bandwidth
+
+    # Run iterative bandwidth update:
+    for i, bandwidth_idx in enumerate(bandwidth_idx_list[::-1]):
+
+        # The reason for the (+1) is that the smallest bandwidth has been used up to compute the derivative
+        # so the SNV is shifted by one index with respect to the D-hat:
+        current_SNV = SNV[:,bandwidth_idx+1]
+
+        # Compute the current maximum normalized variance:
+        current_max_SNV = np.max(current_SNV)
+
+        # Look for locations where the local variance is larger than a cutoff:
+        (change_bandwidth_idx, ) = np.where(current_SNV > (cutoff/100)*current_max_SNV)
+
+        # Update the feature sizes at locations where the condition is met:
+        feature_size_map[change_bandwidth_idx] = sigmas[bandwidth_idx]
+
+    return feature_size_map
+
+# ------------------------------------------------------------------------------
+
+def feature_size_map_smooth(indepvars, feature_size_map, method='median', n_neighbors=10):
+    """
+    Smooths out a map of local feature sizes on a manifold.
+
+    .. note::
+
+        This function requires the ``scikit-learn`` module. You can install it through:
+
+        ``pip install scikit-learn``
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance, feature_size_map, smooth_feature_size_map
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Specify variables names
+        variable_names = ['X_' + str(i) for i in range(0,10)]
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=variable_names,
+                                                    bandwidth_values=bandwidth_values)
+
+        # Compute the feature size map:
+        feature_size_map = feature_size_map(variance_data,
+                                            variable_name='X_1',
+                                            cutoff=1,
+                                            starting_bandwidth_idx='peak',
+                                            verbose=True)
+
+        # Smooth out the feature size map:
+        updated_feature_size_map = feature_size_map_smooth(principal_components,
+                                                           feature_size_map,
+                                                           method='median',
+                                                           n_neighbors=4)
+
+    :param indepvars:
+        ``numpy.ndarray`` specifying the independent variable values. It should be of size ``(n_observations,n_independent_variables)``.
+    :param feature_size_map:
+        ``numpy.ndarray`` specifying the local feature sizes on a manifold, :math:`\\mathcal{B}`. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param method: (optional)
+        ``str`` specifying the smoothing method. It can be ``'median'``, ``'mean'``, ``'max'`` or ``'min'``.
+    :param n_neighbors: (optional)
+        ``int`` specifying the number of nearest neighbors to smooth over.
+
+    :return:
+        - **updated_feature_size_map** - ``numpy.ndarray`` specifying the smoothed local feature sizes on a manifold, :math:`\\mathcal{B}`. It has size ``(n_observations,)``.
+    """
+
+    __methods = ['median', 'mean', 'max', 'min']
+
+    if not isinstance(indepvars, np.ndarray):
+        raise ValueError("Parameter `indepvars` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(feature_size_map, np.ndarray):
+        raise ValueError("Parameter `feature_size_map` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_independent_variables) = np.shape(indepvars)
+    except:
+        raise ValueError("Parameter `indepvars` has to have size `(n_observations,n_independent_variables)`.")
+
+    try:
+        (n_observations_feature_size_map,) = np.shape(feature_size_map)
+    except:
+        (n_observations_feature_size_map,n_variables_feature_size_map) = np.shape(feature_size_map)
+        if n_variables_feature_size_map != 1:
+            raise ValueError("Parameter `feature_size_map` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations != n_observations_feature_size_map:
+        raise ValueError("Parameter `indepvars` has different number of observations than `feature_size_map`.")
+
+    if method not in __methods:
+        raise ValueError("Parameter `method` can only be 'median', 'mean', 'max', or 'min'.")
+
+    if not isinstance(n_neighbors, int):
+        raise ValueError("Parameter `n_neighbors` has to be of type `int`.")
+
+    if n_neighbors < 0 or n_neighbors > n_observations:
+        raise ValueError("Parameter `n_neighbors` has to be positive and smaller than the total number of observations, `n_observations`.")
+
+    try:
+        from sklearn.neighbors import NearestNeighbors
+    except:
+        raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install scikit-learn`.")
+
+    indepvars_normalized, _, _ = preprocess.center_scale(indepvars, scaling='-1to1')
+
+    knn_model = NearestNeighbors(n_neighbors=n_neighbors)
+    knn_model.fit(indepvars_normalized)
+
+    average_distances = np.zeros((n_observations,))
+
+    updated_feature_size_map = np.zeros_like(feature_size_map)
+
+    for query_point in range(0,n_observations):
+
+        (idx_neigh) = knn_model.kneighbors(indepvars_normalized[query_point,:][None,:], n_neighbors=n_neighbors, return_distance=False)
+
+        if method == 'median':
+            updated_value = np.median(feature_size_map[idx_neigh])
+        if method == 'mean':
+            updated_value = np.mean(feature_size_map[idx_neigh])
+        if method == 'max':
+            updated_value = np.max(feature_size_map[idx_neigh])
+        if method == 'min':
+            updated_value = np.min(feature_size_map[idx_neigh])
+
+        updated_feature_size_map[query_point] = updated_value
+
+    return updated_feature_size_map
+
+# ------------------------------------------------------------------------------
+
 def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, power=1, vertical_shift=1, norm=None, integrate_to_peak=False, rightmost_peak_shift=None):
     """
     Defines a cost function for manifold topology assessment based on the areas, or weighted (penalized) areas, under
