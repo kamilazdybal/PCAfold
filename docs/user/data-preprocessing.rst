@@ -87,6 +87,26 @@ Class ``KernelDensity``
 
 .. autoclass:: PCAfold.preprocess.KernelDensity
 
+Class ``DensityEstimation``
+=======================
+
+.. autoclass:: PCAfold.preprocess.DensityEstimation
+
+``DensityEstimation.average_knn_distance``
+================================================
+
+.. autofunction:: PCAfold.preprocess.DensityEstimation.average_knn_distance
+
+``DensityEstimation.kth_nearest_neighbor_codensity``
+=====================================================
+
+.. autofunction:: PCAfold.preprocess.DensityEstimation.kth_nearest_neighbor_codensity
+
+``DensityEstimation.kth_nearest_neighbor_density``
+===================================================
+
+.. autofunction:: PCAfold.preprocess.DensityEstimation.kth_nearest_neighbor_density
+
 --------------------------------------------------------------------------------
 
 ***************

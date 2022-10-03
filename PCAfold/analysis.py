@@ -467,103 +467,6 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 
 # ------------------------------------------------------------------------------
 
-def average_knn_distance(indepvars, n_neighbors=10, verbose=False):
-    """
-    Computes an average Euclidean distances to :math:`k` nearest neighbors on
-    a manifold defined by the independent variables.
-
-    **Example:**
-
-    .. code:: python
-
-        from PCAfold import PCA, average_knn_distance
-        import numpy as np
-
-        # Generate dummy data set:
-        X = np.random.rand(100,20)
-
-        # Instantiate PCA class object:
-        pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
-
-        # Calculate the principal components:
-        principal_components = pca_X.transform(X)
-
-        # Compute average distances on a manifold defined by the PCs:
-        average_distances = average_knn_distance(principal_components, n_neighbors=10, verbose=True)
-
-    With ``verbose=True``, minimum, maximum and average distance will be printed:
-
-    .. code-block:: text
-
-        Minimum distance:	0.1388300829487847
-        Maximum distance:	0.4689587542132183
-        Average distance:	0.20824964953425693
-        Median distance:	0.18333873029179215
-
-    .. note::
-
-        This function requires the ``scikit-learn`` module. You can install it through:
-
-        ``pip install scikit-learn``
-
-    :param indepvars:
-        ``numpy.ndarray`` specifying the independent variable values. It should be of size ``(n_observations,n_independent_variables)``.
-    :param n_neighbors: (optional)
-        ``int`` specifying the number of nearest neighbors, :math:`k`.
-    :param verbose: (optional)
-        ``bool`` for printing verbose details.
-
-    :return:
-        - **average_distances** - ``numpy.ndarray`` specifying the vector of average distances for every observation in a data set to its :math:`k` nearest neighbors. It has size ``(n_observations,)``.
-    """
-
-    if not isinstance(indepvars, np.ndarray):
-        raise ValueError("Parameter `indepvars` has to be of type `numpy.ndarray`.")
-
-    try:
-        (n_observations, n_independent_variables) = np.shape(indepvars)
-    except:
-        raise ValueError("Parameter `indepvars` has to have size `(n_observations,n_independent_variables)`.")
-
-    if not isinstance(n_neighbors, int):
-        raise ValueError("Parameter `n_neighbors` has to be of type int.")
-
-    if n_neighbors < 2:
-        raise ValueError("Parameter `n_neighbors` cannot be smaller than 2.")
-
-    if not isinstance(verbose, bool):
-        raise ValueError("Parameter `verbose` has to be a boolean.")
-
-    try:
-        from sklearn.neighbors import NearestNeighbors
-    except:
-        raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install scikit-learn`.")
-
-    (n_observations, n_independent_variables) = np.shape(indepvars)
-
-    knn_model = NearestNeighbors(n_neighbors=n_neighbors+1)
-    knn_model.fit(indepvars)
-
-    average_distances = np.zeros((n_observations,))
-
-    for query_point in range(0,n_observations):
-
-        (distances_neigh, idx_neigh) = knn_model.kneighbors(indepvars[query_point,:][None,:], n_neighbors=n_neighbors+1, return_distance=True)
-        query_point_idx = np.where(idx_neigh.ravel()==query_point)
-        distances_neigh = np.delete(distances_neigh.ravel(), np.s_[query_point_idx])
-        idx_neigh = np.delete(idx_neigh.ravel(), np.s_[query_point_idx])
-        average_distances[query_point] = np.mean(distances_neigh)
-
-    if verbose:
-        print('Minimum distance:\t' + str(np.min(average_distances)))
-        print('Maximum distance:\t' + str(np.max(average_distances)))
-        print('Average distance:\t' + str(np.mean(average_distances)))
-        print('Median distance:\t' + str(np.median(average_distances)))
-
-    return average_distances
-
-# ------------------------------------------------------------------------------
-
 def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_idx='peak', verbose=False):
     """
     Computes a map of local feature sizes on a manifold.
@@ -970,7 +873,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
     __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
-    
+
     if not isinstance(variance_data, VarianceData):
         raise ValueError("Parameter `variance_data` has to be an instance of class `PCAfold.analysis.VarianceData`.")
 

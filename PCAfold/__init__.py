@@ -18,6 +18,7 @@ from .preprocess import order_variables
 from .preprocess import PreProcessing
 from .preprocess import outlier_detection
 from .preprocess import KernelDensity
+from .preprocess import DensityEstimation
 from .preprocess import DataSampler
 from .preprocess import ConditionalStatistics
 from .preprocess import variable_bins
@@ -64,7 +65,6 @@ from .analysis import compute_normalized_variance
 from .analysis import normalized_variance_derivative
 from .analysis import find_local_maxima
 from .analysis import random_sampling_normalized_variance
-from .analysis import average_knn_distance
 from .analysis import feature_size_map
 from .analysis import feature_size_map_smooth
 from .analysis import cost_function_normalized_variance_derivative

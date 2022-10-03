@@ -65,11 +65,6 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.random_sampling_normalized_variance
 
-``average_knn_distance``
-================================================
-
-.. autofunction:: PCAfold.analysis.average_knn_distance
-
 ``feature_size_map``
 ================================================
 

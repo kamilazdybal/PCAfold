@@ -910,7 +910,7 @@ class ConditionalStatistics:
         conditioning_variable = np.linspace(-1,1,100)
         y = -conditioning_variable**2 + 1
 
-        # Instantiate object of the ConditionalStatistics class
+        # Instantiate an object of the ConditionalStatistics class
         # and compute conditional statistics in 10 bins of the conditioning variable:
         cond = ConditionalStatistics(y[:,None], conditioning_variable, k=10)
 
@@ -1401,6 +1401,171 @@ class KernelDensity:
             W_c[i] = Kc_inv[i] / np.max(Kc_inv)
 
         return(W_c)
+
+# ------------------------------------------------------------------------------
+
+class DensityEstimation:
+    """
+    Enables density estimation on point-cloud data.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, DensityEstimation
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
+
+        # Calculate the principal components:
+        principal_components = pca_X.transform(X)
+
+        # Instantiate an object of the DensityEstimation class:
+        density_estimation = DensityEstimation(principal_components, n_neighbors=10)
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param n_neighbors:
+        ``int`` specifying the number of nearest neighbors, or the :math:`k`th nearest neighbor when applicable.
+    """
+
+    def __init__(self, X, n_neighbors):
+
+        if not isinstance(X, np.ndarray):
+            raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_observations_X, n_variables_X) = np.shape(X)
+        except:
+            raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+        if not isinstance(n_neighbors, int):
+            raise ValueError("Parameter `n_neighbors` has to be of type int.")
+
+        if n_neighbors < 2:
+            raise ValueError("Parameter `n_neighbors` cannot be smaller than 2.")
+
+        self.__X = X
+        self.__n_neighbors = n_neighbors
+
+# ------------------------------------------------------------------------------
+
+    def average_knn_distance(self, verbose=False):
+        """
+        Computes an average Euclidean distances to :math:`k` nearest neighbors on
+        a manifold defined by the independent variables.
+
+        **Example:**
+
+        .. code:: python
+
+            from PCAfold import PCA, DensityEstimation
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,20)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
+
+            # Calculate the principal components:
+            principal_components = pca_X.transform(X)
+
+            # Instantiate an object of the DensityEstimation class:
+            density_estimation = DensityEstimation(principal_components, n_neighbors=10)
+
+            # Compute average distances on a manifold defined by the PCs:
+            average_distances = density_estimation.average_knn_distance(verbose=True)
+
+        With ``verbose=True``, minimum, maximum and average distance will be printed:
+
+        .. code-block:: text
+
+            Minimum distance:	0.1388300829487847
+            Maximum distance:	0.4689587542132183
+            Average distance:	0.20824964953425693
+            Median distance:	0.18333873029179215
+
+        .. note::
+
+            This function requires the ``scikit-learn`` module. You can install it through:
+
+            ``pip install scikit-learn``
+
+        :param verbose: (optional)
+            ``bool`` for printing verbose details.
+
+        :return:
+            - **average_distances** - ``numpy.ndarray`` specifying the vector of average distances for every observation in a data set to its :math:`k` nearest neighbors. It has size ``(n_observations,)``.
+        """
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
+
+        try:
+            from sklearn.neighbors import NearestNeighbors
+        except:
+            raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install scikit-learn`.")
+
+        (n_observations, n_independent_variables) = np.shape(self.__X)
+
+        knn_model = NearestNeighbors(n_neighbors=self.__n_neighbors+1)
+        knn_model.fit(self.__X)
+
+        average_distances = np.zeros((n_observations,))
+
+        for query_point in range(0,n_observations):
+
+            (distances_neigh, idx_neigh) = knn_model.kneighbors(self.__X[query_point,:][None,:], n_neighbors=self.__n_neighbors+1, return_distance=True)
+            query_point_idx = np.where(idx_neigh.ravel()==query_point)
+            distances_neigh = np.delete(distances_neigh.ravel(), np.s_[query_point_idx])
+            idx_neigh = np.delete(idx_neigh.ravel(), np.s_[query_point_idx])
+            average_distances[query_point] = np.mean(distances_neigh)
+
+        if verbose:
+            print('Minimum distance:\t' + str(np.min(average_distances)))
+            print('Maximum distance:\t' + str(np.max(average_distances)))
+            print('Average distance:\t' + str(np.mean(average_distances)))
+            print('Median distance:\t' + str(np.median(average_distances)))
+
+        return average_distances
+
+# ------------------------------------------------------------------------------
+
+def kth_nearest_neighbor_codensity(self):
+    """
+    Computes the Euclidean distance to the :math:`k`th nearest neighbor on
+    a manifold defined by the independent variables. This value has an interpretation of a *codensity* defined as:
+
+    .. math::
+
+        \\delta_k(x) = d(x, v_k(x))
+
+    where :math:`v_k(x)` is the :math:`k`th nearest neighbor of :math:`x`.
+    """
+
+    pass
+
+# ------------------------------------------------------------------------------
+
+def kth_nearest_neighbor_density(self):
+    """
+    Computes an inverse of the Euclidean distance to the :math:`k`th nearest neighbor on
+    a manifold defined by the independent variables. This value has an interpretation of a *density* defined as:
+
+    .. math::
+
+        \\rho_k(x) = 1 / \\delta_k(x)
+
+    where :math:`\\delta_k(x)` is the *codensity*.
+    """
+
+    return 1/kth_nearest_neighbor_codensity()
+
 
 ################################################################################
 #
