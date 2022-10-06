@@ -1430,7 +1430,7 @@ class DensityEstimation:
     :param X:
         ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
     :param n_neighbors:
-        ``int`` specifying the number of nearest neighbors, or the :math:`k`th nearest neighbor when applicable.
+        ``int`` specifying the number of nearest neighbors, or the :math:`k` th nearest neighbor when applicable.
     """
 
     def __init__(self, X, n_neighbors):
@@ -1538,14 +1538,15 @@ class DensityEstimation:
 
     def kth_nearest_neighbor_codensity(self):
         """
-        Computes the Euclidean distance to the :math:`k`th nearest neighbor on
-        a manifold defined by the independent variables as per :cite:`Carlsson2021`. This value has an interpretation of a *codensity* defined as:
+        Computes the Euclidean distance to the :math:`k` th nearest neighbor on
+        a manifold defined by the independent variables as per :cite:`Carlsson2021`.
+        This value has an interpretation of a data *codensity* defined as:
 
         .. math::
 
             \delta_k(x) = d(x, v_k(x))
 
-        where :math:`v_k(x)` is the :math:`k`th nearest neighbor of :math:`x`.
+        where :math:`v_k(x)` is the :math:`k` th nearest neighbor of :math:`x`.
 
         **Example:**
 
@@ -1576,7 +1577,7 @@ class DensityEstimation:
             ``pip install scikit-learn``
 
         :return:
-            - **data_codensity** - ``numpy.ndarray`` specifying the vector of distances to the :math:`k`th nearest neighbor of every data observation. It has size ``(n_observations,)``.
+            - **data_codensity** - ``numpy.ndarray`` specifying the vector of distances to the :math:`k` th nearest neighbor of every data observation. It has size ``(n_observations,)``.
         """
 
         try:
@@ -1603,8 +1604,9 @@ class DensityEstimation:
 
     def kth_nearest_neighbor_density(self):
         """
-        Computes an inverse of the Euclidean distance to the :math:`k`th nearest neighbor on
-        a manifold defined by the independent variables as per :cite:`Carlsson2021`. This value has an interpretation of a *density* defined as:
+        Computes an inverse of the Euclidean distance to the :math:`k` th nearest neighbor on
+        a manifold defined by the independent variables as per :cite:`Carlsson2021`.
+        This value has an interpretation of a data *density* defined as:
 
         .. math::
 
@@ -1641,7 +1643,7 @@ class DensityEstimation:
             ``pip install scikit-learn``
 
         :return:
-            - **data_density** - ``numpy.ndarray`` specifying the vector of inverse distances to the :math:`k`th nearest neighbor of every data observation. It has size ``(n_observations,)``.
+            - **data_density** - ``numpy.ndarray`` specifying the vector of inverse distances to the :math:`k` th nearest neighbor of every data observation. It has size ``(n_observations,)``.
         """
 
         data_density = 1/self.kth_nearest_neighbor_codensity()
