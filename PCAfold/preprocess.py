@@ -1534,38 +1534,119 @@ class DensityEstimation:
 
         return average_distances
 
-# ------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------
 
-def kth_nearest_neighbor_codensity(self):
-    """
-    Computes the Euclidean distance to the :math:`k`th nearest neighbor on
-    a manifold defined by the independent variables. This value has an interpretation of a *codensity* defined as:
+    def kth_nearest_neighbor_codensity(self):
+        """
+        Computes the Euclidean distance to the :math:`k`th nearest neighbor on
+        a manifold defined by the independent variables as per :cite:`Carlsson2021`. This value has an interpretation of a *codensity* defined as:
 
-    .. math::
+        .. math::
 
-        \\delta_k(x) = d(x, v_k(x))
+            \delta_k(x) = d(x, v_k(x))
 
-    where :math:`v_k(x)` is the :math:`k`th nearest neighbor of :math:`x`.
-    """
+        where :math:`v_k(x)` is the :math:`k`th nearest neighbor of :math:`x`.
 
-    pass
+        **Example:**
 
-# ------------------------------------------------------------------------------
+        .. code:: python
 
-def kth_nearest_neighbor_density(self):
-    """
-    Computes an inverse of the Euclidean distance to the :math:`k`th nearest neighbor on
-    a manifold defined by the independent variables. This value has an interpretation of a *density* defined as:
+            from PCAfold import PCA, DensityEstimation
+            import numpy as np
 
-    .. math::
+            # Generate dummy data set:
+            X = np.random.rand(100,20)
 
-        \\rho_k(x) = 1 / \\delta_k(x)
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
 
-    where :math:`\\delta_k(x)` is the *codensity*.
-    """
+            # Calculate the principal components:
+            principal_components = pca_X.transform(X)
 
-    return 1/kth_nearest_neighbor_codensity()
+            # Instantiate an object of the DensityEstimation class:
+            density_estimation = DensityEstimation(principal_components, n_neighbors=10)
 
+            # Compute the distance to the kth nearest neighbor:
+            data_codensity = density_estimation.kth_nearest_neighbor_codensity()
+
+        .. note::
+
+            This function requires the ``scikit-learn`` module. You can install it through:
+
+            ``pip install scikit-learn``
+
+        :return:
+            - **data_codensity** - ``numpy.ndarray`` specifying the vector of distances to the :math:`k`th nearest neighbor of every data observation. It has size ``(n_observations,)``.
+        """
+
+        try:
+            from sklearn.neighbors import NearestNeighbors
+        except:
+            raise ValueError("Nearest neighbors search requires the `sklearn` module: `pip install scikit-learn`.")
+
+        (n_observations, n_independent_variables) = np.shape(self.__X)
+
+        knn_model = NearestNeighbors(n_neighbors=self.__n_neighbors+1)
+        knn_model.fit(self.__X)
+
+        data_codensity = np.zeros((n_observations,))
+
+        for query_point in range(0,n_observations):
+
+            (distances_neigh, _) = knn_model.kneighbors(self.__X[query_point,:][None,:], n_neighbors=self.__n_neighbors+1, return_distance=True)
+            distances_neigh = list(distances_neigh.ravel())
+            data_codensity[query_point] = distances_neigh[-1]
+
+        return data_codensity
+
+    # ------------------------------------------------------------------------------
+
+    def kth_nearest_neighbor_density(self):
+        """
+        Computes an inverse of the Euclidean distance to the :math:`k`th nearest neighbor on
+        a manifold defined by the independent variables as per :cite:`Carlsson2021`. This value has an interpretation of a *density* defined as:
+
+        .. math::
+
+            \rho_k(x) = 1 / \delta_k(x)
+
+        where :math:`\\delta_k(x)` is the *codensity*.
+
+        **Example:**
+
+        .. code:: python
+
+            from PCAfold import PCA, DensityEstimation
+            import numpy as np
+
+            # Generate dummy data set:
+            X = np.random.rand(100,20)
+
+            # Instantiate PCA class object:
+            pca_X = PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
+
+            # Calculate the principal components:
+            principal_components = pca_X.transform(X)
+
+            # Instantiate an object of the DensityEstimation class:
+            density_estimation = DensityEstimation(principal_components, n_neighbors=10)
+
+            # Compute the distance to the kth nearest neighbor:
+            data_density = density_estimation.kth_nearest_neighbor_density()
+
+        .. note::
+
+            This function requires the ``scikit-learn`` module. You can install it through:
+
+            ``pip install scikit-learn``
+
+        :return:
+            - **data_density** - ``numpy.ndarray`` specifying the vector of inverse distances to the :math:`k`th nearest neighbor of every data observation. It has size ``(n_observations,)``.
+        """
+
+        data_density = 1/self.kth_nearest_neighbor_codensity()
+
+        return data_density
 
 ################################################################################
 #
