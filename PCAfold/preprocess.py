@@ -1610,7 +1610,7 @@ class DensityEstimation:
 
         .. math::
 
-            \rho_k(x) = 1 / \delta_k(x)
+            \\rho_k(x) = \\frac{1}{\\delta_k(x)}
 
         where :math:`\\delta_k(x)` is the *codensity*.
 
