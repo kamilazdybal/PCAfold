@@ -3840,7 +3840,7 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, s=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, clean=False, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, s=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a three-dimensional manifold given three vectors defining the manifold.
 
@@ -3865,6 +3865,7 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
                                color=X[:,0],
                                elev=30,
                                azim=-60,
+                               clean=False,
                                x_label='PC-1',
                                y_label='PC-2',
                                z_label='PC-3',
@@ -3896,6 +3897,8 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         elevation angle.
     :param azim: (optional)
         azimuth angle.
+    :param clean: (optional)
+        ``bool`` specifying if a clean plot should be made. If set to ``True``, nothing else but the data points and the 3D axes is plotted.
     :param x_label: (optional)
         ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -4046,11 +4049,6 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
         elif isinstance(color, np.ndarray):
             scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, alpha=1)
 
-    if x_label is not None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-    if y_label is not None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-    if z_label is not None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-
-    ax.tick_params(pad=5)
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
@@ -4058,21 +4056,39 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, x_label=None, y_lab
     ax.yaxis.pane.set_edgecolor('w')
     ax.zaxis.pane.set_edgecolor('w')
     ax.view_init(elev=elev, azim=azim)
-    ax.grid(alpha=grid_opacity)
 
-    for label in (ax.get_xticklabels()):
-        label.set_fontsize(font_axes)
-    for label in (ax.get_yticklabels()):
-        label.set_fontsize(font_axes)
-    for label in (ax.get_zticklabels()):
-        label.set_fontsize(font_axes)
+    if clean:
 
-    if isinstance(color, np.ndarray):
-        if color is not None:
-            cb = fig.colorbar(scat, shrink=0.6)
-            cb.ax.tick_params(labelsize=font_colorbar_axes)
-            if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
-            if colorbar_range is not None: scat.set_clim(cbar_min, cbar_max)
+        plt.xticks([])
+        plt.yticks([])
+        ax.set_zticks([])
+        ax.spines["top"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+
+    else:
+
+        if x_label is not None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+        if y_label is not None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+        if z_label is not None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+
+        ax.tick_params(pad=5)
+        ax.grid(alpha=grid_opacity)
+
+        for label in (ax.get_xticklabels()):
+            label.set_fontsize(font_axes)
+        for label in (ax.get_yticklabels()):
+            label.set_fontsize(font_axes)
+        for label in (ax.get_zticklabels()):
+            label.set_fontsize(font_axes)
+
+        if isinstance(color, np.ndarray):
+            if color is not None:
+                cb = fig.colorbar(scat, shrink=0.6)
+                cb.ax.tick_params(labelsize=font_colorbar_axes)
+                if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+                if colorbar_range is not None: scat.set_clim(cbar_min, cbar_max)
 
     if title is not None: ax.set_title(title, **csfont, fontsize=font_title)
     if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
