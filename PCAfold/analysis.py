@@ -1106,6 +1106,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     :return:
         - **ordered_variables** - ``list`` specifying the indices of the ordered variables.
         - **selected_variables** - ``list`` specifying the indices of the selected variables that correspond to the minimum cost :math:`\\mathcal{L}`.
+        - **optimized_cost** - ``float`` specifying the cost corresponding to the optimized subset.
         - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
     """
 
@@ -1393,7 +1394,7 @@ def manifold_informed_feature_selection(X, X_source, variable_names, scaling, ba
     total_toc = time.perf_counter()
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
-    return ordered_variables, selected_variables, costs
+    return ordered_variables, selected_variables, previous_area, costs
 
 # ------------------------------------------------------------------------------
 
