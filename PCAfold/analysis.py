@@ -4607,7 +4607,7 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
 
 # ------------------------------------------------------------------------------
 
-def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None, resolution=(10,10), extension=(0,0), color='k', x_label=None, y_label=None, manifold_color=None, colorbar_label=None, color_map='viridis', colorbar_range=None, manifold_alpha=1, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None, resolution=(10,10), extension=(0,0), color='k', x_label=None, y_label=None, s_manifold=None, manifold_color=None, colorbar_label=None, color_map='viridis', colorbar_range=None, manifold_alpha=1, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a streamplot of a regressed vector field of a dependent variable.
     A two-dimensional manifold can be additionally plotted on top of the streamplot.
@@ -4691,6 +4691,8 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
     :param y_label: (optional)
         ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
+    :param s_manifold: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the manifold.
     :param manifold_color: (optional)
         vector or string specifying color for the manifold. If it is a
         vector, it has to have length consistent with the number of observations
@@ -4779,6 +4781,12 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
         if not isinstance(y_label, str):
             raise ValueError("Parameter `y_label` has to be of type `str`.")
 
+    if s_manifold is None:
+        s_manifold = scatter_point_size
+    else:
+        if not isinstance(s_manifold, int) and not isinstance(s_manifold, float):
+            raise ValueError("Parameter `s_manifold` has to be of type `int` or `float`.")
+
     if manifold_color is not None:
         if not isinstance(manifold_color, str):
             if not isinstance(manifold_color, np.ndarray):
@@ -4862,11 +4870,11 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
     if (x is not None) and (y is not None):
 
         if manifold_color is None:
-            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=manifold_alpha)
+            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
         elif isinstance(manifold_color, str):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=manifold_alpha)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color, cmap=color_map, marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
         elif isinstance(manifold_color, np.ndarray):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=manifold_alpha)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
 
     if isinstance(manifold_color, np.ndarray):
         if manifold_color is not None:
