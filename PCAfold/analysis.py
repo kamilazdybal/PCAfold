@@ -4900,7 +4900,7 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_observed=None, color_predicted=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, clean=False, x_label=None, y_label=None, z_label=None, color_observed=None, color_predicted=None, s_observed=None, s_predicted=None, alpha_observed=None, alpha_predicted=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots the result of regression of a dependent variable on top
     of a two-dimensional manifold defined by two independent variables ``x`` and ``y``.
@@ -4951,6 +4951,8 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         ``float`` or ``int`` specifying the elevation angle.
     :param azim: (optional)
         ``float`` or ``int`` specifying the azimuth angle.
+    :param clean: (optional)
+        ``bool`` specifying if a clean plot should be made. If set to ``True``, nothing else but the data points and the 3D axes is plotted.
     :param x_label: (optional)
         ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
         label will not be plotted.
@@ -4964,6 +4966,14 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
         ``str`` specifying the color of the plotted observed variable.
     :param color_predicted: (optional)
         ``str`` specifying the color of the plotted predicted variable.
+    :param s_observed: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the observed variable.
+    :param s_predicted: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the predicted variable.
+    :param alpha_observed: (optional)
+        ``int`` or ``float`` specifying the point opacity for the observed variable.
+    :param alpha_predicted: (optional)
+        ``int`` or ``float`` specifying the point opacity for the predicted variable.
     :param figure_size: (optional)
         ``tuple`` specifying figure size.
     :param title: (optional)
@@ -5044,6 +5054,9 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     if not isinstance(azim, float) and not isinstance(azim, int):
         raise ValueError("Parameter `azim` has to be of type `int` or `float`.")
 
+    if not isinstance(clean, bool):
+        raise ValueError("Parameter `clean` has to be of type `bool`.")
+
     if x_label is not None:
         if not isinstance(x_label, str):
             raise ValueError("Parameter `x_label` has to be of type `str`.")
@@ -5068,6 +5081,30 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     else:
         color_predicted = '#C7254E'
 
+    if s_observed is None:
+        s_observed = scatter_point_size
+    else:
+        if not isinstance(s_observed, int) and not isinstance(s_observed, float):
+            raise ValueError("Parameter `s_observed` has to be of type `int` or `float`.")
+
+    if s_predicted is None:
+        s_predicted = scatter_point_size
+    else:
+        if not isinstance(s_predicted, int) and not isinstance(s_predicted, float):
+            raise ValueError("Parameter `s_predicted` has to be of type `int` or `float`.")
+
+    if alpha_observed is None:
+        alpha_observed = 0.1
+    else:
+        if not isinstance(alpha_observed, int) and not isinstance(alpha_observed, float):
+            raise ValueError("Parameter `alpha_observed` has to be of type `int` or `float`.")
+
+    if alpha_predicted is None:
+        alpha_predicted = 0.4
+    else:
+        if not isinstance(alpha_predicted, int) and not isinstance(alpha_predicted, float):
+            raise ValueError("Parameter `alpha_predicted` has to be of type `int` or `float`.")
+
     if not isinstance(figure_size, tuple):
         raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
 
@@ -5082,14 +5119,9 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111, projection='3d')
 
-    scat = ax.scatter(x.ravel(), y.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=0.1)
-    scat = ax.scatter(x.ravel(), y.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=0.4)
+    scat = ax.scatter(x.ravel(), y.ravel(), observed.ravel(), c=color_observed, marker='o', s=s_observed, alpha=alpha_observed)
+    scat = ax.scatter(x.ravel(), y.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=s_predicted, alpha=alpha_predicted)
 
-    if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-    if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-    if z_label != None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
-
-    ax.tick_params(pad=5)
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
@@ -5097,14 +5129,32 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, x_label=Non
     ax.yaxis.pane.set_edgecolor('w')
     ax.zaxis.pane.set_edgecolor('w')
     ax.view_init(elev=elev, azim=azim)
-    ax.grid(alpha=grid_opacity)
 
-    for label in (ax.get_xticklabels()):
-        label.set_fontsize(font_axes)
-    for label in (ax.get_yticklabels()):
-        label.set_fontsize(font_axes)
-    for label in (ax.get_zticklabels()):
-        label.set_fontsize(font_axes)
+    if clean:
+
+        plt.xticks([])
+        plt.yticks([])
+        ax.set_zticks([])
+        ax.spines["top"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+
+    else:
+
+        if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+        if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+        if z_label != None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+
+        ax.tick_params(pad=5)
+        ax.grid(alpha=grid_opacity)
+
+        for label in (ax.get_xticklabels()):
+            label.set_fontsize(font_axes)
+        for label in (ax.get_yticklabels()):
+            label.set_fontsize(font_axes)
+        for label in (ax.get_zticklabels()):
+            label.set_fontsize(font_axes)
 
     lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, bbox_to_anchor=(0.9,0.9), loc="upper left")
     lgnd.legendHandles[0]._sizes = [marker_size*5]
