@@ -88,7 +88,7 @@ Class ``KernelDensity``
 .. autoclass:: PCAfold.preprocess.KernelDensity
 
 Class ``DensityEstimation``
-=======================
+============================
 
 .. autoclass:: PCAfold.preprocess.DensityEstimation
 
