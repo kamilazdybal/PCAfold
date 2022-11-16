@@ -5,4 +5,4 @@ scipy
 sklearn
 termcolor
 pandas
-sklearn
+scikit-learn
