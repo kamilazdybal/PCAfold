@@ -3,4 +3,4 @@ sphinxcontrib-bibtex<2.0.0
 Cython
 termcolor
 furo
-sklearn
+scikit-learn
