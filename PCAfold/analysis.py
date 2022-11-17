@@ -2541,24 +2541,26 @@ class RegressionAssessment:
             ``str`` specifying the display format for the numerical entries inside the
             table. By default it is set to ``'.4f'``.
         :param metrics: (optional)
-            ``list`` of ``str`` specifying which metrics should be printed. Strings can only be ``'R2'``, ``'MAE'``, ``'MSE'``, ``'RMSE'``, ``'NRMSE'``.
+            ``list`` of ``str`` specifying which metrics should be printed. Strings can only be ``'R2'``, ``'MAE'``, ``'MSE'``,  ``'MSLE'``, ``'RMSE'``, ``'NRMSE'``.
             If metrics is set to ``None``, all available metrics will be printed.
         :param comparison: (optional)
             object of ``RegressionAssessment`` class specifying the metrics that should be compared with the current regression metrics.
         """
 
         __table_formats = ['raw', 'tex', 'pandas']
-        __metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE']
+        __metrics_names = ['R2', 'MAE', 'MSE', 'MSLE', 'RMSE', 'NRMSE']
         __clusters_names = ['k' + str(i) for i in range(1,self.__n_clusters+1)]
         __metrics_dict = {'R2': self.__stratified_coefficient_of_determination,
                           'MAE': self.__stratified_mean_absolute_error,
                           'MSE': self.__stratified_mean_squared_error,
+                          'MSLE': self.__stratified_mean_squared_logarithmic_error,
                           'RMSE': self.__stratified_root_mean_squared_error,
                           'NRMSE': self.__stratified_normalized_root_mean_squared_error}
         if comparison is not None:
             __comparison_metrics_dict = {'R2': comparison.stratified_coefficient_of_determination,
                                          'MAE': comparison.stratified_mean_absolute_error,
                                          'MSE': comparison.stratified_mean_squared_error,
+                                         'MSLE': comparison.stratified_mean_squared_logarithmic_error,
                                          'RMSE': comparison.stratified_root_mean_squared_error,
                                          'NRMSE': comparison.stratified_normalized_root_mean_squared_error}
 
@@ -2578,7 +2580,7 @@ class RegressionAssessment:
 
             for item in metrics:
                 if item not in __metrics_names:
-                    raise ValueError("Parameter `metrics` can only be: 'R2', 'MAE', 'MSE', 'RMSE', 'NRMSE'.")
+                    raise ValueError("Parameter `metrics` can only be: 'R2', 'MAE', 'MSE', 'MSLE', 'RMSE', 'NRMSE'.")
         else:
             metrics = __metrics_names
 
@@ -2699,6 +2701,10 @@ class RegressionAssessment:
                         except:
                             pass
                         try:
+                            is_better['MSLE'] = data['MSLE'].astype(float) < data_comparison['MSLE']
+                        except:
+                            pass
+                        try:
                             is_better['RMSE'] = data['RMSE'].astype(float) < data_comparison['RMSE']
                         except:
                             pass
@@ -2732,6 +2738,10 @@ class RegressionAssessment:
                             pass
                         try:
                             is_worse['MSE'] = data['MSE'].astype(float) > data_comparison['MSE']
+                        except:
+                            pass
+                        try:
+                            is_worse['MSLE'] = data['MSLE'].astype(float) > data_comparison['MSLE']
                         except:
                             pass
                         try:
