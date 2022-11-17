@@ -5899,7 +5899,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
 
 # ------------------------------------------------------------------------------
 
-def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, metric_name=None, yscale='linear', figure_size=(10,5), title=None, save_filename=None):
+def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, metric_name=None, yscale='linear', ylim=None, figure_size=(10,5), title=None, save_filename=None):
     """
     This function plots a stratified metric across bins of a dependent variable.
 
@@ -5981,6 +5981,7 @@ def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, met
     plt.scatter(bin_centers, metric_in_bins, c='#191b27')
     plt.grid(alpha=grid_opacity)
     plt.yscale(yscale)
+    if ylim is not None: plt.ylim(ylim)
     if variable_name is not None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
     if metric_name is not None: plt.ylabel(metric_name, **csfont, fontsize=font_labels)
 
