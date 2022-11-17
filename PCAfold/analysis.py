@@ -3343,6 +3343,88 @@ def mean_squared_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
+def mean_squared_logarithmic_error(observed, predicted):
+    """
+    Computes the mean squared logarithmic error (MSLE):
+
+    .. math::
+
+        \\mathrm{MSLE} = \\frac{1}{N} \\sum_{i=1}^N (\\log(\\phi_{o,i} + 1) - \\log(\\phi_{p,i} + 1)) ^2
+
+    where :math:`N` is the number of observations, :math:`\\phi_o` is the observed and
+    :math:`\\phi_p` is the predicted dependent variable.
+
+    .. warning::
+
+        The MSLE metric can only be used on non-negative samples.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, mean_squared_logarithmic_error
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,3)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Compute the mean squared error for the first variable:
+        msle = mean_squared_logarithmic_error(X[:,0], X_rec[:,0])
+
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable, :math:`\\phi_p`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+
+    :return:
+        - **msle** - mean squared logarithmic error (MSLE).
+    """
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if np.any(observed<0) or np.any(predicted<0):
+        raise ValueError("Parameters `observed` and `predicted` can only contain non-negative samples.")
+
+    __observed = observed.ravel()
+    __predicted = predicted.ravel()
+
+    msle = 1.0 / n_observed * np.sum((np.log(__observed + 1) - np.log(__predicted+1)) * (np.log(__observed + 1) - np.log(__predicted+1)))
+
+    return msle
+
+# ------------------------------------------------------------------------------
+
 def stratified_mean_squared_error(observed, predicted, idx, verbose=False):
     """
     Computes the stratified mean squared error (MSE) values. Stratified MSE is computed separately in each

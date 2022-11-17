@@ -191,6 +191,11 @@ Class ``RegressionAssessment``
 
 .. autofunction:: PCAfold.analysis.stratified_mean_squared_error
 
+``mean_squared_logarithmic_error``
+==================================
+
+.. autofunction:: PCAfold.analysis.mean_squared_logarithmic_error
+
 ``root_mean_squared_error``
 ===========================
 
