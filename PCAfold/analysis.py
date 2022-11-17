@@ -1917,6 +1917,7 @@ class RegressionAssessment:
         self.__coefficient_of_determination_matrix = np.ones((1,self.__n_variables))
         self.__mean_absolute_error_matrix = np.ones((1,self.__n_variables))
         self.__mean_squared_error_matrix = np.ones((1,self.__n_variables))
+        self.__mean_squared_logarithmic_error_matrix = np.ones((1,self.__n_variables))
         self.__root_mean_squared_error_matrix = np.ones((1,self.__n_variables))
         self.__normalized_root_mean_squared_error_matrix = np.ones((1,self.__n_variables))
 
@@ -1932,6 +1933,7 @@ class RegressionAssessment:
             self.__coefficient_of_determination_matrix[0,i] = coefficient_of_determination(observed[:,i], predicted[:,i])
             self.__mean_absolute_error_matrix[0,i] = mean_absolute_error(observed[:,i], predicted[:,i])
             self.__mean_squared_error_matrix[0,i] = mean_squared_error(observed[:,i], predicted[:,i])
+            self.__mean_squared_logarithmic_error_matrix[0,i] = mean_squared_logarithmic_error(np.abs(observed[:,i]), np.abs(predicted[:,i]))
             self.__root_mean_squared_error_matrix[0,i] = root_mean_squared_error(observed[:,i], predicted[:,i])
             self.__normalized_root_mean_squared_error_matrix[0,i] = normalized_root_mean_squared_error(observed[:,i], predicted[:,i], norm=norm)
 
@@ -1940,6 +1942,7 @@ class RegressionAssessment:
             self.__stratified_coefficient_of_determination = stratified_coefficient_of_determination(observed, predicted, idx=idx, use_global_mean=use_global_mean)
             self.__stratified_mean_absolute_error = stratified_mean_absolute_error(observed, predicted, idx=idx)
             self.__stratified_mean_squared_error = stratified_mean_squared_error(observed, predicted, idx=idx)
+            self.__stratified_mean_squared_logarithmic_error = stratified_mean_squared_logarithmic_error(np.abs(observed), np.abs(predicted), idx=idx)
             self.__stratified_root_mean_squared_error = stratified_root_mean_squared_error(observed, predicted, idx=idx)
             self.__stratified_normalized_root_mean_squared_error = stratified_normalized_root_mean_squared_error(observed, predicted, idx=idx, norm=norm, use_global_norm=use_global_norm)
 
@@ -1948,6 +1951,7 @@ class RegressionAssessment:
             self.__stratified_coefficient_of_determination = None
             self.__stratified_mean_absolute_error = None
             self.__stratified_mean_squared_error = None
+            self.__stratified_mean_squared_logarithmic_error = None
             self.__stratified_root_mean_squared_error = None
             self.__stratified_normalized_root_mean_squared_error = None
 
@@ -1962,6 +1966,10 @@ class RegressionAssessment:
     @property
     def mean_squared_error(self):
         return self.__mean_squared_error_matrix
+
+    @property
+    def mean_squared_logarithmic_error(self):
+        return self.__mean_squared_logarithmic_error_matrix
 
     @property
     def root_mean_squared_error(self):
@@ -1986,6 +1994,10 @@ class RegressionAssessment:
     @property
     def stratified_mean_squared_error(self):
         return self.__stratified_mean_squared_error
+
+    @property
+    def stratified_mean_squared_logarithmic_error(self):
+        return self.__stratified_mean_squared_logarithmic_error
 
     @property
     def stratified_root_mean_squared_error(self):
@@ -2133,17 +2145,18 @@ class RegressionAssessment:
             ``str`` specifying the display format for the numerical entries inside the
             table. By default it is set to ``'.4f'``.
         :param metrics: (optional)
-            ``list`` of ``str`` specifying which metrics should be printed. Strings can only be ``'R2'``, ``'MAE'``, ``'MSE'``, ``'RMSE'``, ``'NRMSE'``, ``'GDE'``.
+            ``list`` of ``str`` specifying which metrics should be printed. Strings can only be ``'R2'``, ``'MAE'``, ``'MSE'``, ``'MSLE'``, ``'RMSE'``, ``'NRMSE'``, ``'GDE'``.
             If metrics is set to ``None``, all available metrics will be printed.
         :param comparison: (optional)
             object of ``RegressionAssessment`` class specifying the metrics that should be compared with the current regression metrics.
         """
 
         __table_formats = ['raw', 'tex', 'pandas']
-        __metrics_names = ['R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE']
+        __metrics_names = ['R2', 'MAE', 'MSE', 'MSLE', 'RMSE', 'NRMSE', 'GDE']
         __metrics_dict = {'R2': self.__coefficient_of_determination_matrix,
                           'MAE': self.__mean_absolute_error_matrix,
                           'MSE': self.__mean_squared_error_matrix,
+                          'MSLE': self.__mean_squared_logarithmic_error_matrix,
                           'RMSE': self.__root_mean_squared_error_matrix,
                           'NRMSE': self.__normalized_root_mean_squared_error_matrix,
                           'GDE': self.__good_direction_estimate_matrix}
@@ -2151,6 +2164,7 @@ class RegressionAssessment:
             __comparison_metrics_dict = {'R2': comparison.coefficient_of_determination,
                                          'MAE': comparison.mean_absolute_error,
                                          'MSE': comparison.mean_squared_error,
+                                         'MSLE': comparison.mean_squared_logarithmic_error,
                                          'RMSE': comparison.root_mean_squared_error,
                                          'NRMSE': comparison.normalized_root_mean_squared_error,
                                          'GDE': comparison.good_direction_estimate * np.ones_like(comparison.coefficient_of_determination)}
@@ -2171,7 +2185,7 @@ class RegressionAssessment:
 
             for item in metrics:
                 if item not in __metrics_names:
-                    raise ValueError("Parameter `metrics` can only be: 'R2', 'MAE', 'MSE', 'RMSE', 'NRMSE', 'GDE'.")
+                    raise ValueError("Parameter `metrics` can only be: 'R2', 'MAE', 'MSE', 'MSLE', 'RMSE', 'NRMSE', 'GDE'.")
         else:
             metrics = __metrics_names
 
@@ -2282,6 +2296,10 @@ class RegressionAssessment:
                         except:
                             pass
                         try:
+                            is_better['MSLE'] = data['MSLE'].astype(float) < data_comparison['MSLE']
+                        except:
+                            pass
+                        try:
                             is_better['RMSE'] = data['RMSE'].astype(float) < data_comparison['RMSE']
                         except:
                             pass
@@ -2312,13 +2330,17 @@ class RegressionAssessment:
 
                         is_worse = False * data
 
-                        # Higher value is worse (MAE, MSE, RMSE, NRMSE):
+                        # Higher value is worse (MAE, MSE, MSLE, RMSE, NRMSE):
                         try:
                             is_worse['MAE'] = data['MAE'].astype(float) > data_comparison['MAE']
                         except:
                             pass
                         try:
                             is_worse['MSE'] = data['MSE'].astype(float) > data_comparison['MSE']
+                        except:
+                            pass
+                        try:
+                            is_worse['MSLE'] = data['MSLE'].astype(float) > data_comparison['MSLE']
                         except:
                             pass
                         try:
