@@ -5974,12 +5974,15 @@ def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, met
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    bin_length = bins_borders[1] - bins_borders[0]
-    bin_centers = bins_borders[0:-1] + bin_length/2
+    bin_centers = []
+    for i in range(0,len(bins_borders)-1):
+        bin_length = bins_borders[i+1] - bins_borders[i]
+        bin_centers.append(bins_borders[i] + bin_length/2)
 
     figure = plt.figure(figsize=figure_size)
     plt.scatter(bin_centers, metric_in_bins, c='#191b27')
     plt.grid(alpha=grid_opacity)
+    plt.xlim([bins_borders[0], bins_borders[-1]])
     plt.yscale(yscale)
     if ylim is not None: plt.ylim(ylim)
     if variable_name is not None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
