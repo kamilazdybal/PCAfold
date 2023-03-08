@@ -54,7 +54,7 @@ class VarianceData:
         dictionary of the sample normalized variance for every observation, for each bandwidth and for each variable
     """
 
-    def __init__(self, bandwidth_values, norm_var, global_var, bandwidth_10pct_rise, keys, norm_var_limit, sample_norm_var):
+    def __init__(self, bandwidth_values, norm_var, global_var, bandwidth_10pct_rise, keys, norm_var_limit, sample_norm_var, sample_norm_range):
         self._bandwidth_values = bandwidth_values.copy()
         self._normalized_variance = norm_var.copy()
         self._global_variance = global_var.copy()
@@ -62,6 +62,7 @@ class VarianceData:
         self._variable_names = keys.copy()
         self._normalized_variance_limit = norm_var_limit.copy()
         self._sample_normalized_variance = sample_norm_var.copy()
+        self._sample_normalized_range = sample_norm_range.copy()
 
     @property
     def bandwidth_values(self):
@@ -98,6 +99,11 @@ class VarianceData:
     def sample_normalized_variance(self):
         """return a dictionary of the sample normalized variances for each bandwidth and for each variable"""
         return self._sample_normalized_variance.copy()
+
+    @property
+    def sample_normalized_range(self):
+        """return a dictionary of the sample normalized ranges for each bandwidth and for each variable"""
+        return self._sample_normalized_range.copy()
 
 # ------------------------------------------------------------------------------
 
@@ -228,41 +234,31 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     norm_local_var = dict({key: local_var[key] / global_var[key] for key in depvar_names})
 
     # Computing normalized variance for each individual observation:
-    zero_SNV = 10**-10
     sample_norm_var = {}
     for idx, key in enumerate(depvar_names):
         sample_local_variance = np.zeros((yi.shape[0], bandwidth_values.size))
-
         for si in range(bandwidth_values.size):
-
             sample_local_variance[:,si] = (yi[:, idx] - kregmodResults[si][:,idx])**2
+        sample_norm_var[key] = sample_local_variance / global_var[key]
 
-            # Correct for inflection points:
-            idx_zero_SNV, = np.where(sample_local_variance[:,si]<=zero_SNV)
-
-            point_tree = cKDTree(xi)
-
-            for i in idx_zero_SNV:
-
-                # Find all neighbors within current bandwidth distance from the point with zeroing SNV:
+    # Computing normalized range for each individual observation:
+    sample_norm_range = {}
+    point_tree = cKDTree(xi)
+    for idx, key in enumerate(depvar_names):
+        neighborhood_range = np.zeros((yi.shape[0], bandwidth_values.size))
+        for si in range(bandwidth_values.size):
+            for i in range(0,yi.shape[0]):
                 neighbors = point_tree.query_ball_point(xi[i], bandwidth_values[si])
                 yi_neighbors = yi[neighbors,idx]
-
-                # Compute half the range of the neighborhood values:
-                neighborhood_range = (0.5*(np.max(yi_neighbors) - np.min(yi_neighbors)))**2
-
-                if neighborhood_range > 10**-5:
-
-                    sample_local_variance[i,si] = neighborhood_range
-
-        sample_norm_var[key] = sample_local_variance / global_var[key]
+                neighborhood_range[i,si] = ((np.max(yi_neighbors) - np.min(yi_neighbors)))**2
+        sample_norm_range[key] = neighborhood_range / global_var[key]
 
     # computing normalized variance as bandwidth approaches zero to check for non-uniqueness
     lvar_limit = kregmod.predict(xi, 1.e-16)
     nlvar_limit = np.linalg.norm(yi - lvar_limit, axis=0) ** 2
     normvar_limit = dict({key: nlvar_limit[idx] for idx, key in enumerate(depvar_names)})
 
-    solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit, sample_norm_var)
+    solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit, sample_norm_var, sample_norm_range)
     return solution_data
 
 # ------------------------------------------------------------------------------
@@ -490,7 +486,7 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 
 # ------------------------------------------------------------------------------
 
-def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_idx='peak', verbose=False):
+def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_idx='peak', use_variance=False, verbose=False):
     """
     Computes a map of local feature sizes on a manifold.
 
@@ -562,7 +558,10 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
         raise ValueError("Parameter `verbose` has to be of type `bool`.")
 
     NV = variance_data.normalized_variance[variable_name]
-    SNV = variance_data.sample_normalized_variance[variable_name]
+    if use_variance:
+        SNV = variance_data.sample_normalized_variance[variable_name]
+    else:
+        SNV = variance_data.sample_normalized_range[variable_name]
 
     derivative, sigmas, _ = normalized_variance_derivative(variance_data)
     derivatives = derivative[variable_name]
