@@ -14,6 +14,7 @@ import copy as cp
 import multiprocessing as multiproc
 from PCAfold import KReg
 from scipy.spatial import KDTree
+from scipy.spatial import cKDTree
 from scipy.optimize import minimize
 from scipy.signal import find_peaks
 import matplotlib.pyplot as plt
@@ -227,11 +228,33 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     norm_local_var = dict({key: local_var[key] / global_var[key] for key in depvar_names})
 
     # Computing normalized variance for each individual observation:
+    zero_SNV = 10**-10
     sample_norm_var = {}
     for idx, key in enumerate(depvar_names):
         sample_local_variance = np.zeros((yi.shape[0], bandwidth_values.size))
+
         for si in range(bandwidth_values.size):
+
             sample_local_variance[:,si] = (yi[:, idx] - kregmodResults[si][:,idx])**2
+
+            # Correct for inflection points:
+            idx_zero_SNV, = np.where(sample_local_variance[:,si]<=zero_SNV)
+
+            point_tree = cKDTree(xi)
+
+            for i in idx_zero_SNV:
+
+                # Find all neighbors within current bandwidth distance from the point with zeroing SNV:
+                neighbors = point_tree.query_ball_point(xi[i], bandwidth_values[si])
+                yi_neighbors = yi[neighbors,idx]
+
+                # Compute half the range of the neighborhood values:
+                neighborhood_range = (0.5*(np.max(yi_neighbors) - np.min(yi_neighbors)))**2
+
+                if neighborhood_range > 10**-5:
+
+                    sample_local_variance[i,si] = neighborhood_range
+
         sample_norm_var[key] = sample_local_variance / global_var[key]
 
     # computing normalized variance as bandwidth approaches zero to check for non-uniqueness
