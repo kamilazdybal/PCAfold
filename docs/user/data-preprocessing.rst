@@ -77,6 +77,11 @@ Class ``PreProcessing``
 
 .. autofunction:: PCAfold.preprocess.outlier_detection
 
+``representative_sample_size``
+================================
+
+.. autofunction:: PCAfold.preprocess.representative_sample_size
+
 Class ``ConditionalStatistics``
 ===============================
 

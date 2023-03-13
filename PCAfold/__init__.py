@@ -17,6 +17,7 @@ from .preprocess import remove_constant_vars
 from .preprocess import order_variables
 from .preprocess import PreProcessing
 from .preprocess import outlier_detection
+from .preprocess import representative_sample_size
 from .preprocess import KernelDensity
 from .preprocess import DensityEstimation
 from .preprocess import DataSampler

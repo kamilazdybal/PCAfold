@@ -14,6 +14,8 @@ import random
 import copy
 import operator
 import matplotlib.pyplot as plt
+from scipy.stats import norm
+from scipy.special import kl_div
 from matplotlib.colors import ListedColormap
 from PCAfold.styles import *
 
@@ -661,6 +663,166 @@ def order_variables(X, method='mean', descending=True):
     X_ordered = X[:,idx]
 
     return (X_ordered, idx)
+
+# ------------------------------------------------------------------------------
+
+def representative_sample_size(depvars, percentages, method='kl-divergence', statistics='median', n_resamples=10, threshold=10**-4, random_seed=None, verbose=False):
+    """
+    Computes a representative sample size given dependent variables that serve as ground truth (100% of data).
+    It is assumed that the full dataset is representative of some phenomena.
+
+    **Example:**
+
+    .. code::
+
+        from PCAfold import center_scale, representative_sample_size
+        import numpy as np
+
+        # Generate dummy data set and two dependent variables:
+        x, y = np.meshgrid(np.linspace(-1,1,100), np.linspace(-1,1,100))
+        xy = np.hstack((x.ravel()[:,None],y.ravel()[:,None]))
+
+        phi_1 = np.exp(-((x*x+y*y) / (1 * 1**2)))
+        phi_1 = phi_1.ravel()[:,None]
+
+        phi_2 = np.exp(1*x*y)
+        phi_2 = phi_2.ravel()[:,None]
+
+        depvars = np.column_stack((phi_1, phi_2))
+        depvars, _, _ = center_scale(depvars, scaling='0to1')
+
+        # Specify the list of percentages to explore:
+        percentages = list(np.linspace(1,99.9,100))
+
+        # Compute representative sample size for each dependent variable:
+        (sample_sizes, statistics) = representative_sample_size(depvars,
+                                                                percentages,
+                                                                method='kl-divergence',
+                                                                statistics='mean',
+                                                                n_resamples=20,
+                                                                threshold=10**-4,
+                                                                random_seed=100,
+                                                                verbose=True)
+
+    With ``verbose=True`` we will see some detailed information:
+
+    .. code-block:: text
+
+        Representative sample size for dependent variable 1: 3296 samples (33.0% of data).
+        Representative sample size for dependent variable 2: 5694 samples (56.9% of data).
+
+    :param depvars:
+        ``numpy.ndarray`` specifying the dependent variables that should be well represented in a sampled dataset. . It should be of size ``(n_observations,n_dependent_variables)``.
+    :param percentages:
+        ``list`` of percentages to explore. It should be ordered in ascending order.
+    :param method:
+        ``str`` specifying the method used to compute the sample size statistics. It can be ``mean``, ``median``, ``std``, or ``'kl-divergence'``.
+    :param statistics:
+        ``str`` specifying the overall statistics that should be computed from a given method. It can be ``min``, ``max``,``mean``, or ``median``.
+    :param n_resamples:
+        ``int`` specifying the number of resamples to perform for each percentage in the ``percentages`` vector. It is recommended to set this parameters to above 1, since it might accidentally happen that a random sample is statistically representative of the full dataset. Re-sampling helps to average-out the effect of such one-off "lucky" random samples.
+    :param threshold:
+        ``float`` specifying the target threshold for the statistics based on which a representative sample size is computed.
+    :param random_seed:
+        ``int`` specifying the random seed.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **representatitive_sample_sizes** - ``int`` specifying the representative number of samples.
+        - **sample_size_statistics** - ``numpy.ndarray`` specifying the full vector of computed statistics correponding to each entry in ``percentages`` and each dependent variable. It has size ``(n_percentages,n_depvars)``,
+    """
+
+    _available_methods = ['mean', 'median', 'std', 'kl-divergence']
+    _available_statistics = ['mean', 'median', 'min', 'max']
+
+    if not isinstance(depvars, np.ndarray):
+        raise ValueError("Parameter `depvars` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_dependent_variables) = np.shape(depvars)
+    except:
+        raise ValueError("Parameter `depvars` has to have size `(n_observations,n_dependent_variables)`.")
+
+    if not isinstance(percentages, list):
+        raise ValueError("Parameter `percentages` has to be a `list`.")
+
+    n_percentages = len(percentages)
+
+    if not isinstance(method, str):
+        raise ValueError("Parameter `method` has to be a string.")
+    else:
+        if method.lower() not in _available_methods:
+            raise ValueError("Unrecognized method.")
+
+    if not isinstance(statistics, str):
+        raise ValueError("Parameter `statistics` has to be a string.")
+    else:
+        if statistics.lower() not in _available_statistics:
+            raise ValueError("Unrecognized statistics.")
+
+    if not isinstance(n_resamples, int):
+        raise ValueError("Parameter `n_resamples` has to be an `int`.")
+
+    if n_resamples < 1:
+        raise ValueError("Parameter `n_resamples` has to be larger than or equal to 1.")
+
+    if not isinstance(threshold, float):
+        raise ValueError("Parameter `threshold` has to be a `float`.")
+
+    if random_seed is not None:
+        if not isinstance(random_seed, int):
+            raise ValueError("Parameter `random_seed` has to be an integer or None.")
+        if isinstance(random_seed, bool):
+            raise ValueError("Parameter `random_seed` has to be an integer or None.")
+
+    if random_seed is None:
+        random_seed = random.randint(0, 1000)
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    sample_size_statistics = np.zeros((n_percentages, n_dependent_variables))
+    representatitive_sample_sizes = np.zeros((1,n_dependent_variables))
+
+    if method == 'kl-divergence':
+
+        for k in range(0,n_dependent_variables):
+
+            KL_divergence_across_sample_sizes = np.zeros((n_percentages, n_resamples))
+
+            for i, sample_percentage in enumerate(percentages):
+
+                for j, current_random_seed in enumerate(range(random_seed,random_seed+n_resamples)):
+
+                    sample_random = DataSampler(np.zeros((n_observations,)).astype(int), random_seed=current_random_seed, verbose=False)
+                    (idx_sample, _) = sample_random.random(sample_percentage)
+                    sampled_depvars = depvars[idx_sample,:]
+
+                    PDF = norm.pdf(depvars[:,k], np.mean(depvars[:,k]), np.std(depvars[:,k]))
+                    sampled_PDF = norm.pdf(sampled_depvars[:,k], np.mean(sampled_depvars[:,k]), np.std(sampled_depvars[:,k]))
+
+                    KL_divergence = kl_div(PDF[idx_sample], sampled_PDF)
+                    KL_divergence_across_sample_sizes[i,j] = np.median(KL_divergence)
+
+            if statistics == 'min':
+                sample_size_statistics[:,k] = np.min(KL_divergence_across_sample_sizes, axis=1)
+            elif statistics == 'max':
+                sample_size_statistics[:,k] = np.max(KL_divergence_across_sample_sizes, axis=1)
+            elif statistics == 'mean':
+                sample_size_statistics[:,k] = np.mean(KL_divergence_across_sample_sizes, axis=1)
+            elif statistics == 'median':
+                sample_size_statistics[:,k] = np.median(KL_divergence_across_sample_sizes, axis=1)
+
+            # Compute the sample size based on the threshold:
+            (idx_representative_sample_size, ) = np.where(sample_size_statistics[:,k]<threshold)
+            representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[0]]/100*n_observations)
+
+            if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[0]],1)) + '% of data).')
+
+    representatitive_sample_sizes = representatitive_sample_sizes.astype(int)
+
+    return representatitive_sample_sizes, sample_size_statistics
 
 # ------------------------------------------------------------------------------
 
