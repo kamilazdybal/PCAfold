@@ -714,23 +714,23 @@ def representative_sample_size(depvars, percentages, method='kl-divergence', sta
     :param depvars:
         ``numpy.ndarray`` specifying the dependent variables that should be well represented in a sampled dataset. . It should be of size ``(n_observations,n_dependent_variables)``.
     :param percentages:
-        ``list`` of percentages to explore. It should be ordered in ascending order.
-    :param method:
+        ``list`` of percentages to explore. It should be ordered in ascending order. Elements should be larger than 0 and not larger than 100.
+    :param method: (optional)
         ``str`` specifying the method used to compute the sample size statistics. It can be ``mean``, ``median``, ``std``, or ``'kl-divergence'``.
-    :param statistics:
-        ``str`` specifying the overall statistics that should be computed from a given method. It can be ``min``, ``max``,``mean``, or ``median``.
-    :param n_resamples:
+    :param statistics: (optional)
+        ``str`` specifying the overall statistics that should be computed from a given method. It can be ``min``, ``max``, ``mean``, or ``median``.
+    :param n_resamples: (optional)
         ``int`` specifying the number of resamples to perform for each percentage in the ``percentages`` vector. It is recommended to set this parameters to above 1, since it might accidentally happen that a random sample is statistically representative of the full dataset. Re-sampling helps to average-out the effect of such one-off "lucky" random samples.
-    :param threshold:
+    :param threshold: (optional)
         ``float`` specifying the target threshold for the statistics based on which a representative sample size is computed.
-    :param random_seed:
+    :param random_seed: (optional)
         ``int`` specifying the random seed.
     :param verbose: (optional)
         ``bool`` for printing verbose details.
 
     :return:
-        - **representatitive_sample_sizes** - ``int`` specifying the representative number of samples.
-        - **sample_size_statistics** - ``numpy.ndarray`` specifying the full vector of computed statistics correponding to each entry in ``percentages`` and each dependent variable. It has size ``(n_percentages,n_depvars)``,
+        - **representatitive_sample_sizes** - ``list`` of ``int`` specifying the representative number of samples. It has size ``(1,n_depvars)``.
+        - **sample_size_statistics** - ``numpy.ndarray`` specifying the full vector of computed statistics correponding to each entry in ``percentages`` and each dependent variable. It has size ``(n_percentages,n_depvars)``.
     """
 
     _available_methods = ['mean', 'median', 'std', 'kl-divergence']
@@ -746,6 +746,15 @@ def representative_sample_size(depvars, percentages, method='kl-divergence', sta
 
     if not isinstance(percentages, list):
         raise ValueError("Parameter `percentages` has to be a `list`.")
+
+    if len(percentages) == 0:
+        raise ValueError("Parameter `percentages` is an empty `list`.")
+
+    if np.any(np.array(percentages)>100):
+        raise ValueError("Elements of `percentages` have to be less than 100.")
+
+    if np.any(np.array(percentages)<=0):
+        raise ValueError("Elements of `percentages` have to be larger than 0.")
 
     n_percentages = len(percentages)
 
