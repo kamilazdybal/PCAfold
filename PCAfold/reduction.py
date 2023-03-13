@@ -3628,7 +3628,7 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, grid_on=True, s=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, norm=None, grid_on=True, s=None, figure_size=(7,7), title=None, save_filename=None):
     """
     Plots a two-dimensional manifold given two vectors defining the manifold.
 
@@ -3687,6 +3687,8 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
         If set to ``None``, colorbar label will not be plotted.
     :param color_map: (optional)
         ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param norm: (optional)
+        ``matplotlib.colors`` specifying the colormap normalization to use. Example can be ``matplotlib.colors.LogNorm()``.
     :param colorbar_range: (optional)
         ``tuple`` specifying the lower and the upper bound for the colorbar range.
     :param grid_on:
@@ -3800,14 +3802,20 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
         elif isinstance(color, str):
             scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, np.ndarray):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+            if norm is not None:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, norm=norm, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+            else:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
     else:
         if color is None:
             scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s, edgecolor='none', alpha=1)
         elif isinstance(color, str):
             scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1)
         elif isinstance(color, np.ndarray):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1)
+            if norm is not None:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, norm=norm, marker='o', s=s, edgecolor='none', alpha=1)
+            else:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1)
 
     if clean:
         plt.xticks([])
