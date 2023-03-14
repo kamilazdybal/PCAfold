@@ -800,20 +800,21 @@ def representative_sample_size(depvars, percentages, method='kl-divergence', sta
 
             KL_divergence_across_sample_sizes = np.zeros((n_percentages, n_resamples))
 
+            PDF = norm.pdf(depvars[:,k], np.mean(depvars[:,k]), np.std(depvars[:,k]))
+
             for i, sample_percentage in enumerate(percentages):
 
                 for j, current_random_seed in enumerate(range(random_seed,random_seed+n_resamples)):
 
                     sample_random = DataSampler(np.zeros((n_observations,)).astype(int), random_seed=current_random_seed, verbose=False)
                     (idx_sample, _) = sample_random.random(sample_percentage)
-                    sampled_depvars = depvars[idx_sample,:]
 
-                    PDF = norm.pdf(depvars[:,k], np.mean(depvars[:,k]), np.std(depvars[:,k]))
-                    sampled_PDF = norm.pdf(sampled_depvars[:,k], np.mean(sampled_depvars[:,k]), np.std(sampled_depvars[:,k]))
+                    sampled_PDF = norm.pdf(depvars[idx_sample,k], np.mean(depvars[idx_sample,k]), np.std(depvars[idx_sample,k]))
 
                     KL_divergence = kl_div(PDF[idx_sample], sampled_PDF)
                     KL_divergence_across_sample_sizes[i,j] = np.median(KL_divergence)
 
+            # Compute an overal statistic from all re-samples:
             if statistics == 'min':
                 sample_size_statistics[:,k] = np.min(KL_divergence_across_sample_sizes, axis=1)
             elif statistics == 'max':
@@ -828,6 +829,49 @@ def representative_sample_size(depvars, percentages, method='kl-divergence', sta
             representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[0]]/100*n_observations)
 
             if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[0]],1)) + '% of data).')
+
+    elif method == 'std':
+
+        for k in range(0,n_dependent_variables):
+
+            std_across_sample_sizes = np.zeros((n_percentages, n_resamples))
+
+            ground_truth_std = np.std(depvars[:,k])**2
+
+            for i, sample_percentage in enumerate(percentages):
+
+                for j, current_random_seed in enumerate(range(random_seed,random_seed+n_resamples)):
+
+                    sample_random = DataSampler(np.zeros((n_observations,)).astype(int), random_seed=current_random_seed, verbose=False)
+                    (idx_sample, _) = sample_random.random(sample_percentage)
+
+                    std_across_sample_sizes[i,j] = np.std(depvars[idx_sample,k])**2
+
+            # Compute an overal statistic from all re-samples:
+            if statistics == 'min':
+                sample_size_statistics[:,k] = np.min(std_across_sample_sizes, axis=1)
+            elif statistics == 'max':
+                sample_size_statistics[:,k] = np.max(std_across_sample_sizes, axis=1)
+            elif statistics == 'mean':
+                sample_size_statistics[:,k] = np.mean(std_across_sample_sizes, axis=1)
+            elif statistics == 'median':
+                sample_size_statistics[:,k] = np.median(std_across_sample_sizes, axis=1)
+
+            # Compute the sample size based on the threshold:
+            (idx_representative_sample_size, ) = np.where(np.abs(sample_size_statistics[:,k] - ground_truth_std)<threshold)
+
+            # Check if the condition is met for any two consecutive sample percentages:
+            if np.any(np.diff(idx_representative_sample_size) == 1):
+                (idx_consecutive, ) = np.where(np.diff(idx_representative_sample_size) == 1)
+                representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[idx_consecutive[0]]]/100*n_observations)
+
+                if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[idx_consecutive[0]]],1)) + '% of data).')
+
+            # Otherwise just pick the first time when the condition is met:
+            else:
+                representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[0]]/100*n_observations)
+
+                if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[0]],1)) + '% of data).')
 
     representatitive_sample_sizes = representatitive_sample_sizes.astype(int)
 
