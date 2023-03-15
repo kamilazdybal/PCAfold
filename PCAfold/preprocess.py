@@ -669,7 +669,13 @@ def order_variables(X, method='mean', descending=True):
 def representative_sample_size(depvars, percentages, method='kl-divergence', statistics='median', n_resamples=10, threshold=10**-4, random_seed=None, verbose=False):
     """
     Computes a representative sample size given dependent variables that serve as ground truth (100% of data).
-    It is assumed that the full dataset is representative of some phenomena.
+    It is assumed that the full dataset is representative of some physical phenomena.
+
+    Two general approaches are available:
+
+    - If ``method='kl-divergence'``, the representative sample size is computed based on Kullback-Leibler divergence.
+
+    - If ``method='mean'``, ``method='median'``, or ``method='std'``, the representative sample size is computed based on convergence of a first order (mean or median) or of second order statistics (standard deviation).
 
     **Example:**
 
@@ -729,7 +735,7 @@ def representative_sample_size(depvars, percentages, method='kl-divergence', sta
         ``bool`` for printing verbose details.
 
     :return:
-        - **representatitive_sample_sizes** - ``list`` of ``int`` specifying the representative number of samples. It has size ``(1,n_depvars)``.
+        - **representatitive_sample_sizes** - ``numpy.ndarray`` of ``int`` specifying the representative number of samples. It has size ``(1,n_depvars)``. If the condition for a representative sample size was not met for a dependent variable, a value of ``-1`` is returned in the array for that dependent variable.
         - **sample_size_statistics** - ``numpy.ndarray`` specifying the full vector of computed statistics correponding to each entry in ``percentages`` and each dependent variable. It has size ``(n_percentages,n_depvars)``.
     """
 
@@ -826,9 +832,18 @@ def representative_sample_size(depvars, percentages, method='kl-divergence', sta
 
             # Compute the sample size based on the threshold:
             (idx_representative_sample_size, ) = np.where(sample_size_statistics[:,k]<threshold)
-            representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[0]]/100*n_observations)
 
-            if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[0]],1)) + '% of data).')
+            if len(idx_representative_sample_size) == 0:
+
+                if verbose: print('No sample for which the condition is met for dependent variable ' + str(k+1) + '. Consider increasing the `threshold` parameter or providing higher percentage values.')
+
+                representatitive_sample_sizes[0,k] = -1
+
+            else:
+
+                representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[0]]/100*n_observations)
+
+                if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[0]],1)) + '% of data).')
 
     elif method == 'std':
 
@@ -860,18 +875,28 @@ def representative_sample_size(depvars, percentages, method='kl-divergence', sta
             # Compute the sample size based on the threshold:
             (idx_representative_sample_size, ) = np.where(np.abs(sample_size_statistics[:,k] - ground_truth_std)<threshold)
 
-            # Check if the condition is met for any two consecutive sample percentages:
-            if np.any(np.diff(idx_representative_sample_size) == 1):
-                (idx_consecutive, ) = np.where(np.diff(idx_representative_sample_size) == 1)
-                representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[idx_consecutive[0]]]/100*n_observations)
+            if len(idx_representative_sample_size) == 0:
 
-                if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[idx_consecutive[0]]],1)) + '% of data).')
+                if verbose: print('No sample for which the condition is met for dependent variable ' + str(k+1) + '. Consider increasing the `threshold` parameter or providing higher percentage values.')
 
-            # Otherwise just pick the first time when the condition is met:
+                representatitive_sample_sizes[0,k] = -1
+
             else:
-                representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[0]]/100*n_observations)
 
-                if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[0]],1)) + '% of data).')
+                # Check if the condition is met for any two consecutive sample percentages:
+                if np.any(np.diff(idx_representative_sample_size) == 1):
+
+                    (idx_consecutive, ) = np.where(np.diff(idx_representative_sample_size) == 1)
+                    representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[idx_consecutive[0]]]/100*n_observations)
+
+                    if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[idx_consecutive[0]]],1)) + '% of data).')
+
+                # Otherwise just pick the first time when the condition is met:
+                else:
+
+                    representatitive_sample_sizes[0,k] = int(percentages[idx_representative_sample_size[0]]/100*n_observations)
+
+                    if verbose: print('Representative sample size for dependent variable ' + str(k+1) + ': ' + str(int(representatitive_sample_sizes[0,k])) + ' samples (' + str(round(percentages[idx_representative_sample_size[0]],1)) + '% of data).')
 
     representatitive_sample_sizes = representatitive_sample_sizes.astype(int)
 

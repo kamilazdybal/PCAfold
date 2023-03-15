@@ -8,8 +8,8 @@ The ``preprocess`` module can be used for performing data preprocessing
 including centering and scaling, outlier detection and removal, kernel density
 weighting of data sets, data clustering and data sampling. It also includes
 functionalities that allow the user to perform initial data inspection such
-as computing conditional statistics or ordering variables in a data set according
-to a criterion.
+as computing conditional statistics, calculating statistically representative sample sizes,
+or ordering variables in a data set according to a criterion.
 
 .. note:: The format for the user-supplied input data matrix
   :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}`, common to all modules, is that
