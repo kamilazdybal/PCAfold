@@ -22,28 +22,30 @@ class Preprocess(unittest.TestCase):
 
         percentages = list(np.linspace(1,99.9,10))
 
+        thresholds = [0.0001, 0.0001]
+
         try:
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages)
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, method='kl-divergence')
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='kl-divergence')
         except Exception:
             self.assertTrue(False)
 
         try:
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, method='kl-divergence', statistics='mean')
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='kl-divergence', statistics='mean')
         except Exception:
             self.assertTrue(False)
 
         try:
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, method='kl-divergence', statistics='mean', n_resamples=10)
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='kl-divergence', statistics='mean', n_resamples=10)
         except Exception:
             self.assertTrue(False)
 
         try:
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, method='kl-divergence', statistics='mean', n_resamples=1)
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='kl-divergence', statistics='mean', n_resamples=1)
         except Exception:
             self.assertTrue(False)
 
@@ -65,35 +67,34 @@ class Preprocess(unittest.TestCase):
 
         percentages = list(np.linspace(1,99.9,100))
 
-        with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, [])
+        thresholds = [0.0001, 0.0001]
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, [10,50,200])
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, [], thresholds)
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, method=None)
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, [10,50,200], thresholds)
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, method='method')
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method=None)
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, statistics='statistics')
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='method')
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, n_resamples=0)
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, statistics='statistics')
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, n_resamples=-1)
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, n_resamples=0)
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, threshold=[])
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, n_resamples=-1)
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, random_seed=[])
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, random_seed=[])
 
         with self.assertRaises(ValueError):
-            (sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, verbose=[])
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, verbose=[])
 
 # ------------------------------------------------------------------------------
 
