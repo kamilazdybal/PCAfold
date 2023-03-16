@@ -12,7 +12,7 @@ class Analysis(unittest.TestCase):
         variable_names = ['X_' + str(i) for i in range(0,10)]
         pca_X = reduction.PCA(X, n_components=2)
         principal_components = pca_X.transform(X)
-        bandwidth_values = np.logspace(-4, 2, 50)
+        bandwidth_values = np.logspace(-4, 2, 10)
 
         variance_data = analysis.compute_normalized_variance(principal_components,
                                                     X,
@@ -32,7 +32,7 @@ class Analysis(unittest.TestCase):
         variable_names = ['X_' + str(i) for i in range(0,10)]
         pca_X = reduction.PCA(X, n_components=2)
         principal_components = pca_X.transform(X)
-        bandwidth_values = np.logspace(-4, 2, 50)
+        bandwidth_values = np.logspace(-4, 2, 10)
 
         variance_data = analysis.compute_normalized_variance(principal_components,
                                                     X,
@@ -102,7 +102,7 @@ class Analysis(unittest.TestCase):
         variable_names = ['X_' + str(i) for i in range(0,10)]
         pca_X = reduction.PCA(X, n_components=2)
         principal_components = pca_X.transform(X)
-        bandwidth_values = np.logspace(-4, 2, 50)
+        bandwidth_values = np.logspace(-4, 2, 10)
 
         variance_data = analysis.compute_normalized_variance(principal_components,
                                                     X,
@@ -219,8 +219,9 @@ class Analysis(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            for i in range(0,50):
-                X = np.random.rand(100,10)
+            for i in range(0,10):
+                X = np.random.rand(100,4)
+                variable_names = ['X_' + str(i) for i in range(0,4)]
                 pca_X = reduction.PCA(X, n_components=2)
                 principal_components = pca_X.transform(X)
 

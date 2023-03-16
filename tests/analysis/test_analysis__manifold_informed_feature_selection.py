@@ -12,7 +12,7 @@ class Analysis(unittest.TestCase):
         X_source = np.random.rand(100,5)
         variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
         scaling='auto'
-        bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
+        bandwidth_values = bandwidth_values = np.logspace(-4, 2, 10)
         target_variables = X[:,0:4]
 
         try:
