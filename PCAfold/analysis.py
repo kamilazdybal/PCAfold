@@ -476,9 +476,9 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
             der, xder, _ = normalized_variance_derivative(nv_data[it])
             for key in der.keys():
                 if it == 0:
-                    avg_der[key] = der[key] / np.float(n_sample_iterations)
+                    avg_der[key] = der[key] / np.float64(n_sample_iterations)
                 else:
-                    avg_der[key] += der[key] / np.float(n_sample_iterations)
+                    avg_der[key] += der[key] / np.float64(n_sample_iterations)
 
         avg_der_data[p] = avg_der
         normvar_data[p] = nv_data
