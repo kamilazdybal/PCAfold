@@ -691,17 +691,17 @@ def representative_sample_size(depvars, percentages, thresholds, variable_names=
         phi_1 = np.exp(-((x*x+y*y) / (1 * 1**2)))
         phi_1 = phi_1.ravel()[:,None]
 
-        phi_2 = np.exp(1*x*y)
+        phi_2 = np.exp(-((x*x+y*y) / (0.01 * 1**2)))
         phi_2 = phi_2.ravel()[:,None]
 
         depvars = np.column_stack((phi_1, phi_2))
         depvars, _, _ = center_scale(depvars, scaling='0to1')
 
         # Specify the list of percentages to explore:
-        percentages = list(np.linspace(1,99.9,100))
+        percentages = list(np.linspace(1,99.9,200))
 
         # Specify the list of thresholds for each dependent variable:
-        thresholds = [0.001 * np.std(depvars[:,0]), 0.001 * np.std(depvars[:,1])]
+        thresholds = [10**-4, 10**-4]
 
         # Specify the names of the dependent variables:
         variable_names = ['Phi-1', 'Phi-2']
@@ -711,7 +711,7 @@ def representative_sample_size(depvars, percentages, thresholds, variable_names=
                                                                      percentages,
                                                                      thresholds=thresholds,
                                                                      variable_names=variable_names,
-                                                                     method='std',
+                                                                     method='kl-divergence',
                                                                      statistics='median',
                                                                      n_resamples=20,
                                                                      random_seed=100,
@@ -722,13 +722,13 @@ def representative_sample_size(depvars, percentages, thresholds, variable_names=
     .. code-block:: text
 
         Dependent variable Phi-1 ...
-        Standard deviation threshold used: 0.00025202416448305174
-        Representative sample size for dependent variable Phi-1: 8691 samples (86.9% of data).
+        KL divergence threshold used: 0.0001
+        Representative sample size for dependent variable Phi-1: 2833 samples (28.3% of data).
 
 
         Dependent variable Phi-2 ...
-        Standard deviation threshold used: 0.0001588680075433664
-        Representative sample size for dependent variable Phi-2: 7192 samples (71.9% of data).
+        KL divergence threshold used: 0.0001
+        Representative sample size for dependent variable Phi-2: 9890 samples (98.9% of data).
 
     :param depvars:
         ``numpy.ndarray`` specifying the dependent variables that should be well represented in a sampled dataset. . It should be of size ``(n_observations,n_dependent_variables)``.
