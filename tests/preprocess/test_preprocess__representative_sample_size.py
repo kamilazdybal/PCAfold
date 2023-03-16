@@ -101,3 +101,103 @@ class Preprocess(unittest.TestCase):
     def test_preprocess__representative_sample_size__computation(self):
 
         pass
+
+# ------------------------------------------------------------------------------
+
+    def test_preprocess__representative_sample_size__method_kl_divergence(self):
+
+        x, y = np.meshgrid(np.linspace(-1,1,20), np.linspace(-1,1,20))
+        xy = np.hstack((x.ravel()[:,None],y.ravel()[:,None]))
+
+        depvars = np.exp(-((x*x+y*y) / (1 * 1**2)))
+        depvars = depvars.ravel()[:,None]
+        depvars, _, _ = preprocess.center_scale(depvars, scaling='0to1')
+
+        percentages = list(np.linspace(1,99.9,10))
+
+        thresholds = [0.0001]
+
+        try:
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='kl-divergence')
+        except Exception:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_preprocess__representative_sample_size__method_std(self):
+
+        x, y = np.meshgrid(np.linspace(-1,1,20), np.linspace(-1,1,20))
+        xy = np.hstack((x.ravel()[:,None],y.ravel()[:,None]))
+
+        depvars = np.exp(-((x*x+y*y) / (1 * 1**2)))
+        depvars = depvars.ravel()[:,None]
+        depvars, _, _ = preprocess.center_scale(depvars, scaling='0to1')
+
+        percentages = list(np.linspace(1,99.9,10))
+
+        thresholds = [0.001 * np.std(depvars)]
+
+        try:
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='std')
+        except Exception:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_preprocess__representative_sample_size__method_median(self):
+
+        x, y = np.meshgrid(np.linspace(-1,1,20), np.linspace(-1,1,20))
+        xy = np.hstack((x.ravel()[:,None],y.ravel()[:,None]))
+
+        depvars = np.exp(-((x*x+y*y) / (1 * 1**2)))
+        depvars = depvars.ravel()[:,None]
+        depvars, _, _ = preprocess.center_scale(depvars, scaling='0to1')
+
+        percentages = list(np.linspace(1,99.9,10))
+
+        thresholds = [0.001 * np.median(depvars)]
+
+        try:
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='median')
+        except Exception:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_preprocess__representative_sample_size__method_mean(self):
+
+        x, y = np.meshgrid(np.linspace(-1,1,20), np.linspace(-1,1,20))
+        xy = np.hstack((x.ravel()[:,None],y.ravel()[:,None]))
+
+        depvars = np.exp(-((x*x+y*y) / (1 * 1**2)))
+        depvars = depvars.ravel()[:,None]
+        depvars, _, _ = preprocess.center_scale(depvars, scaling='0to1')
+
+        percentages = list(np.linspace(1,99.9,10))
+
+        thresholds = [0.001 * np.mean(depvars)]
+
+        try:
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='mean')
+        except Exception:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_preprocess__representative_sample_size__method_variance(self):
+
+        x, y = np.meshgrid(np.linspace(-1,1,20), np.linspace(-1,1,20))
+        xy = np.hstack((x.ravel()[:,None],y.ravel()[:,None]))
+
+        depvars = np.exp(-((x*x+y*y) / (1 * 1**2)))
+        depvars = depvars.ravel()[:,None]
+        depvars, _, _ = preprocess.center_scale(depvars, scaling='0to1')
+
+        percentages = list(np.linspace(1,99.9,10))
+
+        thresholds = [0.001 * np.var(depvars)]
+
+        try:
+            (threshold_idx, sample_sizes, statistics) = preprocess.representative_sample_size(depvars, percentages, thresholds, method='variance')
+        except Exception:
+            self.assertTrue(False)
