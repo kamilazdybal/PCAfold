@@ -108,7 +108,7 @@ class VarianceData:
 # ------------------------------------------------------------------------------
 
 def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth=25, min_bandwidth=None,
-                                max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
+                                max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None, compute_sample_norm_var=False, compute_sample_norm_range=False):
     """
     Compute a normalized variance (and related quantities) for analyzing manifold dimensionality.
     The normalized variance is computed as
@@ -174,6 +174,10 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
         (optional, default True) center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension
     :param n_threads:
         (optional, default None) number of threads to run this computation. If None, default behavior of multiprocessing.Pool is used, which is to use all available cores on the current system.
+    :param compute_sample_norm_var:
+        (optional, default False) ``bool`` specifying if sample normalized variance should be computed.
+    :param compute_sample_norm_range:
+        (optional, default False) ``bool`` specifying if sample normalized range should be computed.
 
     :return:
         - **variance_data** - an object of the ``VarianceData`` class.
@@ -233,25 +237,37 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
             bandwidth_10pct_rise[key] = bandwidth_values[bandwidth_idx[0]][0]
     norm_local_var = dict({key: local_var[key] / global_var[key] for key in depvar_names})
 
-    # Computing normalized variance for each individual observation:
-    sample_norm_var = {}
-    for idx, key in enumerate(depvar_names):
-        sample_local_variance = np.zeros((yi.shape[0], bandwidth_values.size))
-        for si in range(bandwidth_values.size):
-            sample_local_variance[:,si] = (yi[:, idx] - kregmodResults[si][:,idx])**2
-        sample_norm_var[key] = sample_local_variance / global_var[key]
+    if compute_sample_norm_var:
 
-    # Computing normalized range for each individual observation:
-    sample_norm_range = {}
-    point_tree = cKDTree(xi)
-    for idx, key in enumerate(depvar_names):
-        neighborhood_range = np.zeros((yi.shape[0], bandwidth_values.size))
-        for si in range(bandwidth_values.size):
-            for i in range(0,yi.shape[0]):
-                neighbors = point_tree.query_ball_point(xi[i], bandwidth_values[si])
-                yi_neighbors = yi[neighbors,idx]
-                neighborhood_range[i,si] = ((np.max(yi_neighbors) - np.min(yi_neighbors)))**2
-        sample_norm_range[key] = neighborhood_range / global_var[key]
+        # Computing normalized variance for each individual observation:
+        sample_norm_var = {}
+        for idx, key in enumerate(depvar_names):
+            sample_local_variance = np.zeros((yi.shape[0], bandwidth_values.size))
+            for si in range(bandwidth_values.size):
+                sample_local_variance[:,si] = (yi[:, idx] - kregmodResults[si][:,idx])**2
+            sample_norm_var[key] = sample_local_variance / global_var[key]
+
+    else:
+
+        sample_norm_var = {}
+
+    if compute_sample_norm_range:
+
+        # Computing normalized range for each individual observation:
+        sample_norm_range = {}
+        point_tree = cKDTree(xi)
+        for idx, key in enumerate(depvar_names):
+            neighborhood_range = np.zeros((yi.shape[0], bandwidth_values.size))
+            for si in range(bandwidth_values.size):
+                for i in range(0,yi.shape[0]):
+                    neighbors = point_tree.query_ball_point(xi[i], bandwidth_values[si])
+                    yi_neighbors = yi[neighbors,idx]
+                    neighborhood_range[i,si] = ((np.max(yi_neighbors) - np.min(yi_neighbors)))**2
+            sample_norm_range[key] = neighborhood_range / global_var[key]
+
+    else:
+
+        sample_norm_range = {}
 
     # computing normalized variance as bandwidth approaches zero to check for non-uniqueness
     lvar_limit = kregmod.predict(xi, 1.e-16)
@@ -259,6 +275,7 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
     normvar_limit = dict({key: nlvar_limit[idx] for idx, key in enumerate(depvar_names)})
 
     solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, bandwidth_10pct_rise, depvar_names, normvar_limit, sample_norm_var, sample_norm_range)
+
     return solution_data
 
 # ------------------------------------------------------------------------------

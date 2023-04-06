@@ -16,7 +16,9 @@ class Analysis(unittest.TestCase):
         variance_data = analysis.compute_normalized_variance(principal_components,
                                                     X,
                                                     depvar_names=variable_names,
-                                                    bandwidth_values=bandwidth_values)
+                                                    bandwidth_values=bandwidth_values,
+                                                    compute_sample_norm_var=True,
+                                                    compute_sample_norm_range=True)
 
         feature_size_map = analysis.feature_size_map(variance_data, variable_name='X_1', cutoff=1, starting_bandwidth_idx='peak', verbose=False)
 
@@ -57,7 +59,9 @@ class Analysis(unittest.TestCase):
         variance_data = analysis.compute_normalized_variance(principal_components,
                                                     X,
                                                     depvar_names=variable_names,
-                                                    bandwidth_values=bandwidth_values)
+                                                    bandwidth_values=bandwidth_values,
+                                                    compute_sample_norm_var=True,
+                                                    compute_sample_norm_range=True)
 
         feature_size_map = analysis.feature_size_map(variance_data, variable_name='X_1', cutoff=1, starting_bandwidth_idx='peak', verbose=False)
 
