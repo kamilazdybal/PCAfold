@@ -892,6 +892,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
         ``str`` specifying the weighting (penalty) applied to each area.
         Set ``penalty_function='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
         Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``penalty_function='log-sigma'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth.
         Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
         If ``penalty_function=None``, the area is not weighted.
     :param power: (optional)
@@ -910,7 +911,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
         - **cost** - ``float`` specifying the normalized cost, :math:`\\mathcal{L}`, or, if ``norm=None``, a list of costs, :math:`A_i`, for each dependent variable.
     """
 
-    __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
+    __penalty_functions = ['peak', 'sigma', 'log-sigma', 'log-sigma-over-peak']
     __norms = ['average', 'cumulative', 'max', 'median', 'min']
 
     if not isinstance(variance_data, VarianceData):
@@ -984,6 +985,13 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
                 cost = np.trapz(derivative[variable][indices_to_the_left_of_peak]*penalty_log_sigma_peak, np.log10(sigma[indices_to_the_left_of_peak]))
                 costs.append(cost)
 
+            elif penalty_function == 'log-sigma':
+                normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
+                addition = normalized_sigma[idx_rightmost_peak][0]
+                penalty_log_sigma = (abs(np.log10(sigma[indices_to_the_left_of_peak])))**power + vertical_shift * 1. / addition
+                cost = np.trapz(derivative[variable][indices_to_the_left_of_peak]*penalty_log_sigma, np.log10(sigma[indices_to_the_left_of_peak]))
+                costs.append(cost)
+
         else:
 
             if penalty_function is None:
@@ -1004,6 +1012,13 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
                 addition = normalized_sigma[idx_rightmost_peak][0]
                 penalty_log_sigma_peak = (abs(np.log10(sigma/rightmost_peak_location)))**power + vertical_shift * 1. / addition
                 cost = np.trapz(derivative[variable]*penalty_log_sigma_peak, np.log10(sigma))
+                costs.append(cost)
+
+            elif penalty_function == 'log-sigma':
+                normalized_sigma, _, _ = preprocess.center_scale(np.log10(sigma[:,None]), scaling='0to1')
+                addition = normalized_sigma[idx_rightmost_peak][0]
+                penalty_log_sigma = (abs(np.log10(sigma)))**power + vertical_shift * 1. / addition
+                cost = np.trapz(derivative[variable]*penalty_log_sigma, np.log10(sigma))
                 costs.append(cost)
 
     if norm is None:
