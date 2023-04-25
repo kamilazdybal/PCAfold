@@ -20,6 +20,6 @@ setup(name='PCAfold',
       version='1.6.0',
       license='MIT',
       description='PCAfold is a Python library for generating, improving and analyzing PCA-derived low-dimensional manifolds',
-      author='Elizabeth Armstrong, Kamila Zdybal',
+      author='Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland',
       packages=['PCAfold'],
       ext_modules=kreg_cython)
