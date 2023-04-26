@@ -13,6 +13,7 @@ import numpy as np
 import copy as cp
 from termcolor import colored
 import time
+import warnings
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import tensorflow as tf
@@ -51,11 +52,11 @@ class QoIAwareProjection:
                 batch_size=200,
                 n_epochs=1000,
                 learning_rate=0.001,
-                validation_data=None,
+                validation_perc=10,
                 random_seed=None,
                 verbose=False):
 
-        __activations = ['linear', 'sigmoid', 'tanh', 'relu', 'selu']
+        __activations = ['linear', 'sigmoid', 'tanh']
         __projection_dependent_outputs_transformations = ['symlog', 'signed-square-root']
         __optimizers = ['Adam', 'Nadam']
         __losses = ['MSE', 'MAE']
@@ -124,7 +125,13 @@ class QoIAwareProjection:
             if transformed_projection_dependent_outputs not in __projection_dependent_outputs_transformations:
                 raise ValueError("Parameter `transformed_projection_dependent_outputs` has to be 'symlog' or 'signed-square-root'.")
 
-            n_transformed_projection_dependent_output_variables = n_components
+            # The transformed projection dependent outputs can only be added IN ADDITION to the projection dependent outputs.
+            # This can be modified in future implementations.
+            if projection_dependent_outputs is not None:
+                n_transformed_projection_dependent_output_variables = n_components
+            else:
+                n_transformed_projection_dependent_output_variables = 0
+                warnings.warn("Parameter `transformed_projection_dependent_outputs` has been set, but no projection dependent outputs have been given! Transformed projection-dependent outputs will not be used at the decoder output.")
 
         else:
             n_transformed_projection_dependent_output_variables = 0
@@ -162,9 +169,11 @@ class QoIAwareProjection:
         if not isinstance(learning_rate, float):
             raise ValueError("Parameter `learning_rate` has to be of type `float`.")
 
-        if validation_data is not None:
-            if not isinstance(validation_data, tuple):
-                raise ValueError("Parameter `validation_data` has to be of type `tuple`.")
+        if not isinstance(validation_perc, int):
+            raise ValueError("Parameter `validation_perc` has to be of type `int`.")
+
+        if (validation_perc < 0) or (validation_perc > 100):
+            raise ValueError("Parameter `validation_perc` has to be an integer between 0 and 100`.")
 
         # Set random seed for neural network training reproducibility:
         if random_seed is not None:
@@ -173,22 +182,22 @@ class QoIAwareProjection:
         if not isinstance(verbose, bool):
             raise ValueError("Parameter `verbose` has to be a boolean.")
 
-        n_total_outputs = n_projection_independent_output_variables + n_projection_dependent_output_variables + n_transformed_projection_dependent_output_variables
+        self.__n_total_outputs = n_projection_independent_output_variables + n_projection_dependent_output_variables + n_transformed_projection_dependent_output_variables
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
         # Evaluate the architecture string:
         if len(decoder_interior_architecture)==0:
-            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + str(n_total_outputs)
+            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + str(self.__n_total_outputs)
         else:
-            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + '-'.join([str(i) for i in decoder_interior_architecture]) + '-' + str(n_total_outputs)
+            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + '-'.join([str(i) for i in decoder_interior_architecture]) + '-' + str(self.__n_total_outputs)
 
         # Create an encoder-decoder neural network with a given architecture:
         qoi_aware_encoder_decoder = models.Sequential()
         qoi_aware_encoder_decoder.add(layers.Dense(n_components, input_dim=n_input_variables, activation='linear', kernel_initializer=encoder_kernel_initializer))
         for n_neurons in decoder_interior_architecture:
             qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
-        qoi_aware_encoder_decoder.add(layers.Dense(n_total_outputs, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
+        qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
 
         # Compile the neural network model:
         qoi_aware_encoder_decoder.compile(model_optimizer, loss=model_loss)
@@ -208,8 +217,9 @@ class QoIAwareProjection:
         self.__batch_size = batch_size
         self.__n_epochs = n_epochs
         self.__learning_rate = learning_rate
-        self.__validation_data = validation_data
+        self.__validation_perc = validation_perc
         self.__random_seed = random_seed
+        self.__verbose = verbose
 
         # Attributes computed at class object initialization:
         self.__architecture = architecture
@@ -221,22 +231,31 @@ class QoIAwareProjection:
         self.__training_loss = None
         self.__validation_loss = None
         self.__bases_across_epochs = None
+        self.__weights_and_biases_trained = None
 
     @property
     def input_data(self):
         return self.__input_data
 
     @property
-    def output_data(self):
-        return self.__output_data
-
-    @property
     def n_components(self):
         return self.__n_components
 
     @property
+    def projection_independent_outputs(self):
+        return self.__projection_independent_outputs
+
+    @property
+    def projection_dependent_outputs(self):
+        return self.__projection_dependent_outputs
+
+    @property
     def architecture(self):
         return self.__architecture
+
+    @property
+    def n_total_outputs(self):
+        return self.__n_total_outputs
 
     @property
     def qoi_aware_encoder_decoder(self):
@@ -245,6 +264,10 @@ class QoIAwareProjection:
     @property
     def weights_and_biases_init(self):
         return self.__weights_and_biases_init
+
+    @property
+    def weights_and_biases_trained(self):
+        return self.__weights_and_biases_trained
 
     @property
     def training_loss(self):
@@ -281,4 +304,123 @@ class QoIAwareProjection:
 
     def train(self):
 
-        pass
+        if self.__verbose: print('Starting model training...\n\n')
+
+        bases_across_epochs = []
+        training_losses_across_epochs = []
+        validation_losses_across_epochs = []
+
+        # Determine the first basis:
+        basis_init = self.weights_and_biases_init[0]
+        basis_init = basis_init / np.linalg.norm(basis_init, axis=0)
+        bases_across_epochs.append(basis_init)
+
+        if self.projection_independent_outputs is not None:
+            decoder_outputs = self.projection_independent_outputs
+
+            if self.projection_dependent_outputs is not None:
+                current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_init)
+                decoder_outputs = np.hstack((decoder_outputs, current_projection_dependent_outputs))
+
+        else:
+            current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_init)
+            decoder_outputs = current_projection_dependent_outputs
+
+        if self.projection_dependent_outputs is not None:
+            if self.__transformed_projection_dependent_outputs == 'symlog':
+                transformed_projection_dependent_outputs = preprocess.log_transform(current_projection_dependent_outputs, method='continuous-symlog', threshold=1.e-4)
+                decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
+            elif self.__transformed_projection_dependent_outputs == 'signed-square-root':
+                transformed_projection_dependent_outputs = current_projection_dependent_outputs + 10**(-4)
+                transformed_projection_dependent_outputs = np.sign(transformed_projection_dependent_outputs) * np.sqrt(np.abs(transformed_projection_dependent_outputs))
+                decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
+
+
+        # Normalize the dependent variables to match the output activation function range:
+        if self.__activation_decoder == 'tanh':
+            decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
+        elif self.__activation_decoder == 'sigmoid':
+            decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
+        elif self.__activation_decoder == 'linear':
+            decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
+
+        (n_observations_decoder_outputs, n_decoder_outputs) = np.shape(decoder_outputs)
+
+        if self.n_total_outputs != n_decoder_outputs:
+            raise ValueError("There is a mismatch between requested and actual number of decoder outputs! This is PCAfold's issue.")
+
+        tic = time.perf_counter()
+
+        n_count_epochs = 0
+
+        if self.__validation_perc != 0:
+            sample_random = preprocess.DataSampler(np.zeros((n_observations_decoder_outputs,)).astype(int), random_seed=self.__random_seed, verbose=False)
+            (idx_train, idx_validation) = sample_random.random(100 - self.__validation_perc)
+            validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
+            if self.__verbose: print('Using ' + str(self.__validation_perc) + '% of input data as validation data. Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data.\n')
+        else:
+            sample_random = preprocess.DataSampler(np.zeros((n_observations_decoder_outputs,)).astype(int), random_seed=self.__random_seed, verbose=False)
+            (idx_train, _) = sample_random.random(100)
+            validation_data = None
+            if self.__verbose: print('No validation data is used in model training. Model will be trained on 100% of input data.\n')
+
+        for i_epoch in tqdm(self.__epochs_list):
+
+            history = self.__qoi_aware_encoder_decoder.fit(self.__input_data[idx_train,:],
+                                                           decoder_outputs_normalized[idx_train,:],
+                                                           epochs=1,
+                                                           batch_size=self.__batch_size,
+                                                           shuffle=True,
+                                                           validation_data=validation_data,
+                                                           verbose=0)
+
+            # Holding the initial weights constant:
+            if self.__hold_initialization is not None:
+                if i_epoch < self.__hold_initialization:
+                    weights_and_biases = self.__qoi_aware_encoder_decoder.get_weights()
+                    weights_and_biases[0] = basis_init
+                    self.__qoi_aware_encoder_decoder.set_weights(weights_and_biases)
+                    n_count_epochs = 0
+
+            # Change the weights only once every hold_weights epochs:
+            if self.__hold_weights is not None:
+                if self.__hold_initialization is None:
+                    weights_and_biases = self.__qoi_aware_encoder_decoder.get_weights()
+                    if (n_count_epochs % self.__hold_weights) == 0:
+                        previous_weights = weights_and_biases[0]
+                    weights_and_biases[0] = previous_weights
+                    self.__qoi_aware_encoder_decoder.set_weights(weights_and_biases)
+                    n_count_epochs += 1
+                else:
+                    if i_epoch >= self.__hold_initialization:
+                        weights_and_biases = self.__qoi_aware_encoder_decoder.get_weights()
+                        if (n_count_epochs % self.__hold_weights) == 0:
+                            previous_weights = weights_and_biases[0]
+                        weights_and_biases[0] = previous_weights
+                        self.__qoi_aware_encoder_decoder.set_weights(weights_and_biases)
+                        n_count_epochs += 1
+
+
+            # Update the projection-dependent output variables:
+
+
+
+
+
+
+
+
+
+
+
+            training_losses_across_epochs.append(history.history['loss'][0])
+            if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
+
+
+        toc = time.perf_counter()
+        print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
+
+        self.__training_loss = training_losses_across_epochs
+        self.__validation_loss = validation_losses_across_epochs
+        self.__bases_across_epochs = bases_across_epochs
+        self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
