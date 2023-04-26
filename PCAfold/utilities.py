@@ -285,11 +285,22 @@ class QoIAwareProjection:
 
     def summary(self):
 
+        print('QoI-aware encoder-decoder model summary...\n')
+
         print('- '*40)
+
         print('Architecture:\n')
         print(self.architecture)
         print('- '*40)
-        print('')
+
+        print('Variables at the decoder output:\n')
+        if self.projection_independent_outputs is not None:
+            print('\t- ' + str(self.projection_independent_outputs.shape[1]) + ' projection independent variables')
+        if self.projection_dependent_outputs is not None:
+            print('\t- ' + str(self.n_components) + ' projection dependent variables')
+            if self.__transformed_projection_dependent_outputs is not None:
+                print('\t- ' + str(self.n_components) + ' transformed projection dependent variables using ' + self.__transformed_projection_dependent_outputs)
+        print('- '*40)
 
 # ------------------------------------------------------------------------------
 
@@ -329,6 +340,9 @@ class QoIAwareProjection:
 
         if self.__verbose: print('Starting model training...\n\n')
 
+        if self.__random_seed is not None:
+            tf.random.set_seed(self.__random_seed)
+
         bases_across_epochs = []
         training_losses_across_epochs = []
         validation_losses_across_epochs = []
@@ -339,7 +353,7 @@ class QoIAwareProjection:
         bases_across_epochs.append(basis_init)
 
         if self.projection_independent_outputs is not None:
-            decoder_outputs = self.projection_independent_outputs
+            decoder_outputs = cp.deepcopy(self.projection_independent_outputs)
 
             if self.projection_dependent_outputs is not None:
                 current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_init)
@@ -347,7 +361,7 @@ class QoIAwareProjection:
 
         else:
             current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_init)
-            decoder_outputs = current_projection_dependent_outputs
+            decoder_outputs = cp.deepcopy(current_projection_dependent_outputs)
 
         if self.projection_dependent_outputs is not None:
             if self.__transformed_projection_dependent_outputs == 'symlog':
@@ -358,12 +372,13 @@ class QoIAwareProjection:
                 transformed_projection_dependent_outputs = np.sign(transformed_projection_dependent_outputs) * np.sqrt(np.abs(transformed_projection_dependent_outputs))
                 decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
-
         # Normalize the dependent variables to match the output activation function range:
         if self.__activation_decoder == 'tanh':
             decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
+            if self.__verbose: print('Decoder outputs are scaled to a -1 to 1 range.')
         elif self.__activation_decoder == 'sigmoid':
             decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
+            if self.__verbose: print('Decoder outputs are scaled to a 0 to 1 range.')
         elif self.__activation_decoder == 'linear':
             decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
@@ -397,15 +412,15 @@ class QoIAwareProjection:
                                                            validation_data=validation_data,
                                                            verbose=0)
 
-            # Holding the initial weights constant:
+            # Holding the initial weights constant for `hold_initialization` first epochs:
             if self.__hold_initialization is not None:
                 if i_epoch < self.__hold_initialization:
                     weights_and_biases = self.__qoi_aware_encoder_decoder.get_weights()
-                    weights_and_biases[0] = basis_init
+                    weights_and_biases[0] = self.weights_and_biases_init[0]
                     self.__qoi_aware_encoder_decoder.set_weights(weights_and_biases)
                     n_count_epochs = 0
 
-            # Change the weights only once every hold_weights epochs:
+            # Change the weights only once every `hold_weights` epochs:
             if self.__hold_weights is not None:
                 if self.__hold_initialization is None:
                     weights_and_biases = self.__qoi_aware_encoder_decoder.get_weights()
@@ -429,6 +444,8 @@ class QoIAwareProjection:
             basis_current = self.__qoi_aware_encoder_decoder.get_weights()[0]
             basis_current = basis_current / np.linalg.norm(basis_current, axis=0)
             bases_across_epochs.append(basis_current)
+
+            # print(self.__qoi_aware_encoder_decoder.get_weights()[0])
 
             if self.projection_independent_outputs is not None:
                 decoder_outputs = self.projection_independent_outputs
@@ -458,17 +475,9 @@ class QoIAwareProjection:
             elif self.__activation_decoder == 'linear':
                 decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
-            (n_observations_decoder_outputs, n_decoder_outputs) = np.shape(decoder_outputs)
-
             # Determine the new validation data:
             if self.__validation_perc != 0:
-                sample_random = preprocess.DataSampler(np.zeros((n_observations_decoder_outputs,)).astype(int), random_seed=self.__random_seed, verbose=False)
-                (idx_train, idx_validation) = sample_random.random(100 - self.__validation_perc)
                 validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
-            else:
-                sample_random = preprocess.DataSampler(np.zeros((n_observations_decoder_outputs,)).astype(int), random_seed=self.__random_seed, verbose=False)
-                (idx_train, _) = sample_random.random(100)
-                validation_data = None
 
             training_losses_across_epochs.append(history.history['loss'][0])
             if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
