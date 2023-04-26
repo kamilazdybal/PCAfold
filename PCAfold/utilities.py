@@ -277,6 +277,10 @@ class QoIAwareProjection:
     def validation_loss(self):
         return self.__validation_loss
 
+    @property
+    def bases_across_epochs(self):
+        return self.__bases_across_epochs
+
 # ------------------------------------------------------------------------------
 
     def summary(self):
@@ -299,6 +303,25 @@ class QoIAwareProjection:
                 print('Bias:')
             print(self.weights_and_biases_init[i])
             print()
+
+# ------------------------------------------------------------------------------
+
+    def print_weights_and_biases_trained(self):
+
+        if self.weights_and_biases_trained is not None:
+
+            for i in range(0,len(self.weights_and_biases_trained)):
+                if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
+                if i%2==0:
+                    print('\nWeight:')
+                else:
+                    print('Bias:')
+                print(self.weights_and_biases_trained[i])
+                print()
+
+        else:
+
+            print('Model has not been trained yet!')
 
 # ------------------------------------------------------------------------------
 
@@ -400,22 +423,55 @@ class QoIAwareProjection:
                         self.__qoi_aware_encoder_decoder.set_weights(weights_and_biases)
                         n_count_epochs += 1
 
+            # Update the projection-dependent output variables - - - - - - - - -
 
-            # Update the projection-dependent output variables:
+            # Determine the current basis:
+            basis_current = self.__qoi_aware_encoder_decoder.get_weights()[0]
+            basis_current = basis_current / np.linalg.norm(basis_current, axis=0)
+            bases_across_epochs.append(basis_current)
 
+            if self.projection_independent_outputs is not None:
+                decoder_outputs = self.projection_independent_outputs
 
+                if self.projection_dependent_outputs is not None:
+                    current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_current)
+                    decoder_outputs = np.hstack((decoder_outputs, current_projection_dependent_outputs))
 
+            else:
+                current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_current)
+                decoder_outputs = current_projection_dependent_outputs
 
+            if self.projection_dependent_outputs is not None:
+                if self.__transformed_projection_dependent_outputs == 'symlog':
+                    transformed_projection_dependent_outputs = preprocess.log_transform(current_projection_dependent_outputs, method='continuous-symlog', threshold=1.e-4)
+                    decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
+                elif self.__transformed_projection_dependent_outputs == 'signed-square-root':
+                    transformed_projection_dependent_outputs = current_projection_dependent_outputs + 10**(-4)
+                    transformed_projection_dependent_outputs = np.sign(transformed_projection_dependent_outputs) * np.sqrt(np.abs(transformed_projection_dependent_outputs))
+                    decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
+            # Normalize the dependent variables to match the output activation function range:
+            if self.__activation_decoder == 'tanh':
+                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
+            elif self.__activation_decoder == 'sigmoid':
+                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
+            elif self.__activation_decoder == 'linear':
+                decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
+            (n_observations_decoder_outputs, n_decoder_outputs) = np.shape(decoder_outputs)
 
-
-
-
+            # Determine the new validation data:
+            if self.__validation_perc != 0:
+                sample_random = preprocess.DataSampler(np.zeros((n_observations_decoder_outputs,)).astype(int), random_seed=self.__random_seed, verbose=False)
+                (idx_train, idx_validation) = sample_random.random(100 - self.__validation_perc)
+                validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
+            else:
+                sample_random = preprocess.DataSampler(np.zeros((n_observations_decoder_outputs,)).astype(int), random_seed=self.__random_seed, verbose=False)
+                (idx_train, _) = sample_random.random(100)
+                validation_data = None
 
             training_losses_across_epochs.append(history.history['loss'][0])
             if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
-
 
         toc = time.perf_counter()
         print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
