@@ -40,7 +40,7 @@ class QoIAwareProjection:
                 n_components,
                 projection_independent_outputs=None,
                 projection_dependent_outputs=None,
-                activation_decoder='linear',
+                activation_decoder='tanh',
                 decoder_interior_architecture=(),
                 encoder_weights_init=None,
                 decoder_weights_init=None,
@@ -95,6 +95,22 @@ class QoIAwareProjection:
 
         else:
             n_projection_dependent_output_variables = 0
+
+        if not isinstance(activation_decoder, str) and not isinstance(activation_decoder, tuple):
+            raise ValueError("Parameter `activation_decoder` has to be of type `str` or `tuple`.")
+
+        if isinstance(activation_decoder, str):
+            if activation_decoder not in __activations:
+                raise ValueError("Parameter `activation_decoder` can only be 'linear' 'sigmoid' or 'tanh'.")
+
+        if isinstance(activation_decoder, tuple):
+            for i in activation_decoder:
+                if not isinstance(i, str):
+                    raise ValueError("Parameter `activation_decoder` has to be a tuple of `str`.")
+                if i not in __activations:
+                    raise ValueError("Elements of the parameter `activation_decoder` can only be 'linear' 'sigmoid' or 'tanh'.")
+            if len(activation_decoder) != len(decoder_interior_architecture) + 1:
+                raise ValueError("Parameter `activation_decoder` has to have as many elements as there are layers in the decoder.")
 
         if not isinstance(decoder_interior_architecture, tuple):
             raise ValueError("Parameter `decoder_interior_architecture` has to be of type `tuple`.")
@@ -199,9 +215,15 @@ class QoIAwareProjection:
         # Create an encoder-decoder neural network with a given architecture:
         qoi_aware_encoder_decoder = models.Sequential()
         qoi_aware_encoder_decoder.add(layers.Dense(n_components, input_dim=n_input_variables, activation='linear', kernel_initializer=encoder_kernel_initializer))
-        for n_neurons in decoder_interior_architecture:
-            qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
-        qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
+        for i, n_neurons in enumerate(decoder_interior_architecture):
+            if isinstance(activation_decoder, str):
+                qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
+            elif isinstance(activation_decoder, tuple):
+                qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder[i], kernel_initializer=decoder_kernel_initializer))
+        if isinstance(activation_decoder, str):
+            qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
+        elif isinstance(activation_decoder, tuple):
+            qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder[-1], kernel_initializer=decoder_kernel_initializer))
 
         # Compile the neural network model:
         qoi_aware_encoder_decoder.compile(model_optimizer, loss=model_loss)
@@ -306,7 +328,10 @@ class QoIAwareProjection:
             if i == 0:
                 activation_function_string = activation_function_string + '--linear--'
             elif i < len(self.__neuron_count) - 1:
-                activation_function_string = activation_function_string + '--' + self.__activation_decoder + '--'
+                if isinstance(self.__activation_decoder, str):
+                    activation_function_string = activation_function_string + '--' + self.__activation_decoder + '--'
+                elif isinstance(self.__activation_decoder, tuple):
+                    activation_function_string = activation_function_string + '--' + self.__activation_decoder[i-1] + '--'
         print('\t' + activation_function_string)
         print('\n' + '- '*40)
 
@@ -421,14 +446,24 @@ class QoIAwareProjection:
                 decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
         # Normalize the dependent variables to match the output activation function range:
-        if self.__activation_decoder == 'tanh':
-            decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
-            if self.__verbose: print('Decoder outputs are scaled to a -1 to 1 range.')
-        elif self.__activation_decoder == 'sigmoid':
-            decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
-            if self.__verbose: print('Decoder outputs are scaled to a 0 to 1 range.')
-        elif self.__activation_decoder == 'linear':
-            decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
+        if isinstance(self.__activation_decoder, str):
+            if self.__activation_decoder == 'tanh':
+                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
+                if self.__verbose: print('Decoder outputs are scaled to a -1 to 1 range.')
+            elif self.__activation_decoder == 'sigmoid':
+                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
+                if self.__verbose: print('Decoder outputs are scaled to a 0 to 1 range.')
+            elif self.__activation_decoder == 'linear':
+                decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
+        elif isinstance(self.__activation_decoder, tuple):
+            if self.__activation_decoder[-1] == 'tanh':
+                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
+                if self.__verbose: print('Decoder outputs are scaled to a -1 to 1 range.')
+            elif self.__activation_decoder[-1] == 'sigmoid':
+                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
+                if self.__verbose: print('Decoder outputs are scaled to a 0 to 1 range.')
+            elif self.__activation_decoder[-1] == 'linear':
+                decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
         (n_observations_decoder_outputs, n_decoder_outputs) = np.shape(decoder_outputs)
 
@@ -516,12 +551,20 @@ class QoIAwareProjection:
                     decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
             # Normalize the dependent variables to match the output activation function range:
-            if self.__activation_decoder == 'tanh':
-                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
-            elif self.__activation_decoder == 'sigmoid':
-                decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
-            elif self.__activation_decoder == 'linear':
-                decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
+            if isinstance(self.__activation_decoder, str):
+                if self.__activation_decoder == 'tanh':
+                    decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
+                elif self.__activation_decoder == 'sigmoid':
+                    decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
+                elif self.__activation_decoder == 'linear':
+                    decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
+            elif isinstance(self.__activation_decoder, tuple):
+                if self.__activation_decoder[-1] == 'tanh':
+                    decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='-1to1')
+                elif self.__activation_decoder[-1] == 'sigmoid':
+                    decoder_outputs_normalized, _, _ = preprocess.center_scale(decoder_outputs, scaling='0to1')
+                elif self.__activation_decoder[-1] == 'linear':
+                    decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
             # Determine the new validation data:
             if self.__validation_perc != 0:
