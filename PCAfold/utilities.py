@@ -33,6 +33,8 @@ class QoIAwareProjection:
     """
     Enables computing QoI-aware encoder-decoder projections.
 
+    More information can be found in :cite:`Zdybal2023`.
+
     **Example:**
 
     .. code:: python
@@ -61,7 +63,7 @@ class QoIAwareProjection:
                                        encoder_weights_init=None,
                                        decoder_weights_init=None,
                                        hold_initialization=10,
-                                       hold_weights=None,
+                                       hold_weights=2,
                                        transformed_projection_dependent_outputs='signed-square-root',
                                        loss='MSE',
                                        optimizer='Adam',
@@ -86,32 +88,35 @@ class QoIAwareProjection:
 
         QoI-aware encoder-decoder model summary...
 
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        Architecture:
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Projection dimensionality:
+
+        	- 2D projection
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Encoder-decoder architecture:
 
         	8-2-5-8-7
 
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Activation functions:
 
         	(8)--linear--(2)--tanh--(5)--tanh--(8)--linear--(7)
 
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Variables at the decoder output:
 
         	- 3 projection independent variables
         	- 2 projection dependent variables
         	- 2 transformed projection dependent variables using signed-square-root
 
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Model validation:
 
         	- Using 10% of input data as validation data.
         	- Model will be trained on 90% of input data.
 
-        	Note that validation data does not impact model training!
-
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Hyperparameters:
 
         	- Batch size:		100
@@ -120,13 +125,18 @@ class QoIAwareProjection:
         	- Learning rate:	0.001
         	- Loss function:	MSE
 
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Weights updates in the encoder:
 
         	- Initial weights in the encoder will be kept for 10 first epochs.
-        	- Weights in the encoder will change at every epoch.
+        	- Weights in the encoder will change once every 2 epochs.
 
-        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Results reproducibility:
+
+        	- Reproducible neural network training will be assured using random seed: 100.
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     :param input_data:
         ``numpy.ndarray`` specifying the data set used as the input to the encoder-decoder. It should be of size ``(n_observations,n_variables)``.
@@ -171,6 +181,18 @@ class QoIAwareProjection:
 
     **Attributes:**
 
+    - **input_data** - (read only) ``numpy.ndarray`` specifying the data set used as the input to the encoder-decoder.
+    - **n_components** - (read only) ``int`` specifying the dimensionality of the QoI-aware encoder-decoder projection.
+    - **projection_independent_outputs** - (read only) ``numpy.ndarray`` specifying any projection-independent outputs at the decoder.
+    - **projection_dependent_outputs** - (read only) ``numpy.ndarray`` specifying any projection-dependent outputs at the decoder.
+    - **architecture** - (read only) ``str`` specifying the QoI-aware encoder-decoder architecture.
+    - **n_total_outputs** - (read only) ``int`` counting the total number of outputs at the decoder.
+    - **qoi_aware_encoder_decoder** - (read only) object of ``Keras.models.Sequential`` class that stores the QoI-aware encoder-decoder neural network.
+    - **weights_and_biases_init** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases with which the QoI-aware encoder-decoder was intialized.
+    - **weights_and_biases_trained** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases after training the QoI-aware encoder-decoder. Only available after calling ``train()``.
+    - **training_loss** - (read only) ``list`` of losses computed on the training data. Only available after calling ``train()``.
+    - **validation_loss** - (read only) ``list`` of losses computed on the validation data. Only available after calling ``train()`` and only when ``validation_perc`` was not equal to 0.
+    - **bases_across_epochs** - (read only) ``list`` of ``numpy.ndarray`` specifying all basis matrices from all epochs. Only available after calling ``train()``.
     """
 
     def __init__(self,
@@ -450,14 +472,21 @@ class QoIAwareProjection:
 # ------------------------------------------------------------------------------
 
     def summary(self):
+        """
+        Prints the QoI-aware encoder-decoder model summary.
+        """
 
         print('QoI-aware encoder-decoder model summary...\n')
 
-        print('- '*40)
+        print('- '*60)
 
-        print('Architecture:\n')
+        print('Projection dimensionality:\n')
+        print('\t- ' + str(self.__n_components) + 'D projection')
+        print('\n' + '- '*60)
+
+        print('Encoder-decoder architecture:\n')
         print('\t' + self.architecture)
-        print('\n' + '- '*40)
+        print('\n' + '- '*60)
 
         print('Activation functions:\n')
         activation_function_string = ''
@@ -471,7 +500,7 @@ class QoIAwareProjection:
                 elif isinstance(self.__activation_decoder, tuple):
                     activation_function_string = activation_function_string + '--' + self.__activation_decoder[i-1] + '--'
         print('\t' + activation_function_string)
-        print('\n' + '- '*40)
+        print('\n' + '- '*60)
 
         print('Variables at the decoder output:\n')
         if self.projection_independent_outputs is not None:
@@ -480,7 +509,7 @@ class QoIAwareProjection:
             print('\t- ' + str(self.n_components) + ' projection dependent variables')
             if self.__transformed_projection_dependent_outputs is not None:
                 print('\t- ' + str(self.n_components) + ' transformed projection dependent variables using ' + self.__transformed_projection_dependent_outputs)
-        print('\n' + '- '*40)
+        print('\n' + '- '*60)
 
         print('Model validation:\n')
         if self.__validation_perc != 0:
@@ -490,7 +519,7 @@ class QoIAwareProjection:
 
         print('\t- ' + 'Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data.')
 
-        print('\n' + '- '*40)
+        print('\n' + '- '*60)
 
         print('Hyperparameters:\n')
         print('\t- ' + 'Batch size:\t\t' + str(self.__batch_size))
@@ -498,7 +527,7 @@ class QoIAwareProjection:
         print('\t- ' + 'Optimizer:\t\t' + self.__optimizer)
         print('\t- ' + 'Learning rate:\t' + str(self.__learning_rate))
         print('\t- ' + 'Loss function:\t' + self.__loss)
-        print('\n' + '- '*40)
+        print('\n' + '- '*60)
 
         print('Weights updates in the encoder:\n')
         if self.__hold_initialization is not None:
@@ -509,11 +538,21 @@ class QoIAwareProjection:
             print('\t- ' + 'Weights in the encoder will change once every ' + str(self.__hold_weights) + ' epochs.')
         else:
             print('\t- ' + 'Weights in the encoder will change at every epoch.')
-        print('\n' + '- '*40)
+        print('\n' + '- '*60)
+
+        print('Results reproducibility:\n')
+        if self.__random_seed is not None:
+            print('\t- ' + 'Reproducible neural network training will be assured using random seed: ' + str(self.__random_seed) + '.')
+        else:
+            print('\t- ' + 'Random seed not set, neural network training results will not be reproducible!')
+        print('\n' + '- '*60)
 
 # ------------------------------------------------------------------------------
 
     def print_weights_and_biases_init(self):
+        """
+        Prints initial weights and biases from all layers of the QoI-aware encoder-decoder.
+        """
 
         for i in range(0,len(self.weights_and_biases_init)):
             if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
@@ -527,6 +566,9 @@ class QoIAwareProjection:
 # ------------------------------------------------------------------------------
 
     def print_weights_and_biases_trained(self):
+        """
+        Prints trained weights and biases from all layers of the QoI-aware encoder-decoder.
+        """
 
         if self.weights_and_biases_trained is not None:
 
@@ -546,6 +588,11 @@ class QoIAwareProjection:
 # ------------------------------------------------------------------------------
 
     def train(self):
+        """
+        Trains the QoI-aware encoder-decoder neural network model.
+
+        After training, the optimized basis matrix for low-dimensional data projection can be obtained.
+        """
 
         if self.__verbose: print('Starting model training...\n\n')
 
