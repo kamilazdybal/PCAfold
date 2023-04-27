@@ -88,6 +88,9 @@ class QoIAwareProjection:
 
         QoI-aware encoder-decoder model summary...
 
+        (Model has been trained.)
+
+
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Projection dimensionality:
 
@@ -151,7 +154,10 @@ class QoIAwareProjection:
         If set to a ``tuple`` of ``str``, a different activation function can be set at different decoding layers. The number of elements in the ``tuple`` should match the number of decoding layers!
         ``str`` and ``str`` elements of the ``tuple`` can only be ``'linear'``, ``'sigmoid'``, or ``'tanh'``. Note, that the activation function in the encoder is hardcoded to ``'linear'``.
     :param decoder_interior_architecture: (optional)
-        ``tuple`` of ``int`` specifying the number of neurons in the interior architecture of a decoder. For example, if ``decoder_interior_architecture=(4,5)``, two interior decoding layers will be created and the overal network architecture will be ``(Input)-(Bottleneck)-(4)-(5)-(Output)``.
+        ``tuple`` of ``int`` specifying the number of neurons in the interior architecture of a decoder.
+        For example, if ``decoder_interior_architecture=(4,5)``, two interior decoding layers will be created and the overal network architecture will be ``(Input)-(Bottleneck)-(4)-(5)-(Output)``.
+        If set to an empty tuple, ``decoder_interior_architecture=()``, the overal network architecture will be ``(Input)-(Bottleneck)-(Output)``.
+        Keep in mind that if you'd like to create just one interior layer, you should use a comma after the integer: ``decoder_interior_architecture=(4,)``.
     :param encoder_weights_init: (optional)
         ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
     :param decoder_weights_init: (optional)
@@ -189,10 +195,10 @@ class QoIAwareProjection:
     - **n_total_outputs** - (read only) ``int`` counting the total number of outputs at the decoder.
     - **qoi_aware_encoder_decoder** - (read only) object of ``Keras.models.Sequential`` class that stores the QoI-aware encoder-decoder neural network.
     - **weights_and_biases_init** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases with which the QoI-aware encoder-decoder was intialized.
-    - **weights_and_biases_trained** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases after training the QoI-aware encoder-decoder. Only available after calling ``train()``.
-    - **training_loss** - (read only) ``list`` of losses computed on the training data. Only available after calling ``train()``.
-    - **validation_loss** - (read only) ``list`` of losses computed on the validation data. Only available after calling ``train()`` and only when ``validation_perc`` was not equal to 0.
-    - **bases_across_epochs** - (read only) ``list`` of ``numpy.ndarray`` specifying all basis matrices from all epochs. Only available after calling ``train()``.
+    - **weights_and_biases_trained** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases after training the QoI-aware encoder-decoder. Only available after calling ``QoIAwareProjection.train()``.
+    - **training_loss** - (read only) ``list`` of losses computed on the training data. Only available after calling ``QoIAwareProjection.train()``.
+    - **validation_loss** - (read only) ``list`` of losses computed on the validation data. Only available after calling ``QoIAwareProjection.train()`` and only when ``validation_perc`` was not equal to 0.
+    - **bases_across_epochs** - (read only) ``list`` of ``numpy.ndarray`` specifying all basis matrices from all epochs. Only available after calling ``QoIAwareProjection.train()``.
     """
 
     def __init__(self,
@@ -263,6 +269,9 @@ class QoIAwareProjection:
             if activation_decoder not in __activations:
                 raise ValueError("Parameter `activation_decoder` can only be 'linear' 'sigmoid' or 'tanh'.")
 
+        if not isinstance(decoder_interior_architecture, tuple):
+            raise ValueError("Parameter `decoder_interior_architecture` has to be of type `tuple`.")
+
         if isinstance(activation_decoder, tuple):
             for i in activation_decoder:
                 if not isinstance(i, str):
@@ -271,9 +280,6 @@ class QoIAwareProjection:
                     raise ValueError("Elements of the parameter `activation_decoder` can only be 'linear' 'sigmoid' or 'tanh'.")
             if len(activation_decoder) != len(decoder_interior_architecture) + 1:
                 raise ValueError("Parameter `activation_decoder` has to have as many elements as there are layers in the decoder.")
-
-        if not isinstance(decoder_interior_architecture, tuple):
-            raise ValueError("Parameter `decoder_interior_architecture` has to be of type `tuple`.")
 
         # Determine initialization of weights in the encoder
         if encoder_weights_init is not None:
@@ -414,6 +420,7 @@ class QoIAwareProjection:
         self.__qoi_aware_encoder_decoder = qoi_aware_encoder_decoder
         self.__weights_and_biases_init = qoi_aware_encoder_decoder.get_weights()
         self.__epochs_list = [e for e in range(0, n_epochs)]
+        self.__trained = False
 
         # Attributes available after model training:
         self.__training_loss = None
@@ -477,6 +484,10 @@ class QoIAwareProjection:
         """
 
         print('QoI-aware encoder-decoder model summary...\n')
+        if self.__trained:
+            print('(Model has been trained.)\n\n')
+        else:
+            print('(Model has not been trained yet.)\n\n')
 
         print('- '*60)
 
@@ -570,7 +581,7 @@ class QoIAwareProjection:
         Prints trained weights and biases from all layers of the QoI-aware encoder-decoder.
         """
 
-        if self.weights_and_biases_trained is not None:
+        if self.__trained:
 
             for i in range(0,len(self.weights_and_biases_trained)):
                 if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
@@ -763,3 +774,4 @@ class QoIAwareProjection:
         self.__validation_loss = validation_losses_across_epochs
         self.__bases_across_epochs = bases_across_epochs
         self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
+        self.__trained = True
