@@ -61,6 +61,9 @@ this software, such as K-Means algorithm or Artificial Neural Networks.
 - `numpy`
 - `scipy`
 - `termcolor`
+- `tensorflow`
+- `keras`
+- `tqdm`
 
 ### Build from source
 

@@ -5,3 +5,6 @@ scipy
 termcolor
 pandas
 scikit-learn
+tensorflow
+keras
+tqdm

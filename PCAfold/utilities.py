@@ -33,6 +33,144 @@ class QoIAwareProjection:
     """
     Enables computing QoI-aware encoder-decoder projections.
 
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import center_scale, QoIAwareProjection
+        import numpy as np
+
+        # Generate dummy dataset:
+        X = np.random.rand(100,8)
+        S = np.random.rand(100,8)
+
+        # Create 2D encoder-decoder projection of the dataset:
+        n_components = 2
+
+        # Preprocess the dataset before passing it to the encoder-decoder:
+        (input_data, centers, scales) = center_scale(X, scaling='0to1')
+        projection_dependent_outputs = S / scales
+
+        # Instantiate QoIAwareProjection class object:
+        qoi_aware = QoIAwareProjection(input_data,
+                                       n_components,
+                                       projection_independent_outputs=input_data[:,0:3],
+                                       projection_dependent_outputs=projection_dependent_outputs,
+                                       activation_decoder=('tanh', 'tanh', 'linear'),
+                                       decoder_interior_architecture=(5,8),
+                                       encoder_weights_init=None,
+                                       decoder_weights_init=None,
+                                       hold_initialization=10,
+                                       hold_weights=None,
+                                       transformed_projection_dependent_outputs='signed-square-root',
+                                       loss='MSE',
+                                       optimizer='Adam',
+                                       batch_size=100,
+                                       n_epochs=200,
+                                       learning_rate=0.001,
+                                       validation_perc=10,
+                                       random_seed=100,
+                                       verbose=True)
+
+        # Begin model training:
+        qoi_aware.train()
+
+    A summary of the current QoI-aware encoder-decoder model and its hyperparameter settings can be printed using the ``summary()`` function:
+
+    .. code:: python
+
+        # Print the QoI-aware encoder-decoder model summary
+        qoi_aware.summary()
+
+    .. code-block:: text
+
+        QoI-aware encoder-decoder model summary...
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Architecture:
+
+        	8-2-5-8-7
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Activation functions:
+
+        	(8)--linear--(2)--tanh--(5)--tanh--(8)--linear--(7)
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Variables at the decoder output:
+
+        	- 3 projection independent variables
+        	- 2 projection dependent variables
+        	- 2 transformed projection dependent variables using signed-square-root
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Model validation:
+
+        	- Using 10% of input data as validation data.
+        	- Model will be trained on 90% of input data.
+
+        	Note that validation data does not impact model training!
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Hyperparameters:
+
+        	- Batch size:		100
+        	- # of epochs:		200
+        	- Optimizer:		Adam
+        	- Learning rate:	0.001
+        	- Loss function:	MSE
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Weights updates in the encoder:
+
+        	- Initial weights in the encoder will be kept for 10 first epochs.
+        	- Weights in the encoder will change at every epoch.
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+    :param input_data:
+        ``numpy.ndarray`` specifying the data set used as the input to the encoder-decoder. It should be of size ``(n_observations,n_variables)``.
+    :param n_components:
+        ``int`` specifying the dimensionality of the QoI-aware encoder-decoder projection. This is equal to the number of neurons in the bottleneck layer.
+    :param projection_independent_outputs: (optional)
+        ``numpy.ndarray`` specifying any projection-independent outputs at the decoder. It should be of size ``(n_observations,n_projection_independent_outputs)``.
+    :param projection_dependent_outputs: (optional)
+        ``numpy.ndarray`` specifying any projection-dependent outputs at the decoder. During training, ``projection_dependent_outputs`` is projected onto the current basis matrix and the decoder outputs are updated accordingly. It should be of size ``(n_observations,n_projection_dependent_outputs)``.
+    :param activation_decoder: (optional)
+        ``str`` or ``tuple`` specifying activation functions in all the decoding layers. If set to ``str``, the same activation function is used in all decoding layers.
+        If set to a ``tuple`` of ``str``, a different activation function can be set at different decoding layers. The number of elements in the ``tuple`` should match the number of decoding layers!
+        ``str`` and ``str`` elements of the ``tuple`` can only be ``'linear'``, ``'sigmoid'``, or ``'tanh'``. Note, that the activation function in the encoder is hardcoded to ``'linear'``.
+    :param decoder_interior_architecture: (optional)
+        ``tuple`` of ``int`` specifying the number of neurons in the interior architecture of a decoder. For example, if ``decoder_interior_architecture=(4,5)``, two interior decoding layers will be created and the overal network architecture will be ``(Input)-(Bottleneck)-(4)-(5)-(Output)``.
+    :param encoder_weights_init: (optional)
+        ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+    :param decoder_weights_init: (optional)
+        ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+    :param hold_initialization: (optional)
+        ``int`` specifying the number of first epochs during which the initial weights in the encoder are held constant. If set to ``None``, weights in the encoder will change at the first epoch. This parameter can be used in conjunction with ``hold_weights``.
+    :param hold_weights: (optional)
+        ``int`` specifying how frequently the weights should be changed in the encoder. For example, if set to ``hold_weights=2``, the weights in the encoder will only be updated once every two epochs throught the whole training process. If set to ``None``, weights in the encoder will change at every epoch. This parameter can be used in conjunction with ``hold_initialization``.
+    :param transformed_projection_dependent_outputs: (optional)
+        ``str`` specifying if any nonlinear transformation of the projection-dependent outputs should be added at the decoder output. It can be ``'symlog'`` or ``'signed-square-root'``.
+    :param loss: (optional)
+        ``str`` specifying the loss function. It can be ``'MAE'`` or ``'MSE'``.
+    :param optimizer: (optional)
+        ``str`` specifying the optimizer used during training. It can be ``'Adam'`` or ``'Nadam'``.
+    :param batch_size: (optional)
+        ``int`` specifying the batch size.
+    :param n_epochs: (optional)
+        ``int`` specifying the number of epochs.
+    :param n_epochs: (optional)
+        ``float`` specifying the learning rate passed to the optimizer.
+    :param validation_perc: (optional)
+        ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number between 0 and 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
+    :param random_seed: (optional)
+        ``int`` specifying the random seed to be used for any random operations. It is highly recommended to set a fixed random seed, as this allows for complete reproducibility of the results.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    **Attributes:**
+
     """
 
     def __init__(self,
@@ -352,8 +490,6 @@ class QoIAwareProjection:
 
         print('\t- ' + 'Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data.')
 
-        print('\n\tNote that validation data does not impact model training!')
-
         print('\n' + '- '*40)
 
         print('Hyperparameters:\n')
@@ -574,7 +710,7 @@ class QoIAwareProjection:
             if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
 
         toc = time.perf_counter()
-        print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
+        if self.__verbose: print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
 
         self.__training_loss = training_losses_across_epochs
         self.__validation_loss = validation_losses_across_epochs

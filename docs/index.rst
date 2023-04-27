@@ -81,6 +81,7 @@ or using BibTeX:
    user/data-preprocessing
    user/data-reduction
    user/data-analysis
+   user/utilities
 
 .. toctree::
    :maxdepth: 2

@@ -4,3 +4,6 @@ Cython
 termcolor
 furo
 scikit-learn
+tensorflow
+keras
+tqdm
