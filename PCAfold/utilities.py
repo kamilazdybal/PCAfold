@@ -189,8 +189,12 @@ class QoIAwareProjection:
         # Evaluate the architecture string:
         if len(decoder_interior_architecture)==0:
             architecture = str(n_input_variables) + '-' + str(n_components) + '-' + str(self.__n_total_outputs)
+            neuron_count = [n_input_variables, n_components, self.__n_total_outputs]
         else:
             architecture = str(n_input_variables) + '-' + str(n_components) + '-' + '-'.join([str(i) for i in decoder_interior_architecture]) + '-' + str(self.__n_total_outputs)
+            neuron_count = [n_input_variables, n_components] + [i for i in decoder_interior_architecture] + [self.__n_total_outputs]
+
+        self.__neuron_count = neuron_count
 
         # Create an encoder-decoder neural network with a given architecture:
         qoi_aware_encoder_decoder = models.Sequential()
@@ -212,8 +216,10 @@ class QoIAwareProjection:
         self.__hold_initialization = hold_initialization
         self.__hold_weights = hold_weights
         self.__transformed_projection_dependent_outputs = transformed_projection_dependent_outputs
-        self.__loss = model_loss
-        self.__optimizer = model_optimizer
+        self.__loss = loss
+        self.__loss_function = model_loss
+        self.__optimizer = optimizer
+        self.__model_optimizer = model_optimizer
         self.__batch_size = batch_size
         self.__n_epochs = n_epochs
         self.__learning_rate = learning_rate
@@ -290,8 +296,19 @@ class QoIAwareProjection:
         print('- '*40)
 
         print('Architecture:\n')
-        print(self.architecture)
-        print('- '*40)
+        print('\t' + self.architecture)
+        print('\n' + '- '*40)
+
+        print('Activation functions:\n')
+        activation_function_string = ''
+        for i, n_neurons in enumerate(self.__neuron_count):
+            activation_function_string = activation_function_string + '(' + str(n_neurons) + ')'
+            if i == 0:
+                activation_function_string = activation_function_string + '--linear--'
+            elif i < len(self.__neuron_count) - 1:
+                activation_function_string = activation_function_string + '--' + self.__activation_decoder + '--'
+        print('\t' + activation_function_string)
+        print('\n' + '- '*40)
 
         print('Variables at the decoder output:\n')
         if self.projection_independent_outputs is not None:
@@ -300,7 +317,38 @@ class QoIAwareProjection:
             print('\t- ' + str(self.n_components) + ' projection dependent variables')
             if self.__transformed_projection_dependent_outputs is not None:
                 print('\t- ' + str(self.n_components) + ' transformed projection dependent variables using ' + self.__transformed_projection_dependent_outputs)
-        print('- '*40)
+        print('\n' + '- '*40)
+
+        print('Model validation:\n')
+        if self.__validation_perc != 0:
+            print('\t- ' + 'Using ' + str(self.__validation_perc) + '% of input data as validation data.')
+        else:
+            print('\t- ' + 'No validation data is used at model training.')
+
+        print('\t- ' + 'Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data.')
+
+        print('\n\tNote that validation data does not impact model training!')
+
+        print('\n' + '- '*40)
+
+        print('Hyperparameters:\n')
+        print('\t- ' + 'Batch size:\t\t' + str(self.__batch_size))
+        print('\t- ' + '# of epochs:\t\t' + str(self.__n_epochs))
+        print('\t- ' + 'Optimizer:\t\t' + self.__optimizer)
+        print('\t- ' + 'Learning rate:\t' + str(self.__learning_rate))
+        print('\t- ' + 'Loss function:\t' + self.__loss)
+        print('\n' + '- '*40)
+
+        print('Weights updates in the encoder:\n')
+        if self.__hold_initialization is not None:
+            print('\t- ' + 'Initial weights in the encoder will be kept for ' + str(self.__hold_initialization) + ' first epochs.')
+        else:
+            print('\t- ' + 'Initial weights in the encoder will change after first epoch.')
+        if self.__hold_weights is not None:
+            print('\t- ' + 'Weights in the encoder will change once every ' + str(self.__hold_weights) + ' epochs.')
+        else:
+            print('\t- ' + 'Weights in the encoder will change at every epoch.')
+        print('\n' + '- '*40)
 
 # ------------------------------------------------------------------------------
 
@@ -400,7 +448,7 @@ class QoIAwareProjection:
             sample_random = preprocess.DataSampler(np.zeros((n_observations_decoder_outputs,)).astype(int), random_seed=self.__random_seed, verbose=False)
             (idx_train, _) = sample_random.random(100)
             validation_data = None
-            if self.__verbose: print('No validation data is used in model training. Model will be trained on 100% of input data.\n')
+            if self.__verbose: print('No validation data is used at model training. Model will be trained on 100% of input data.\n')
 
         for i_epoch in tqdm(self.__epochs_list):
 
