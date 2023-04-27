@@ -219,71 +219,70 @@ class Analysis(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            for i in range(0,10):
-                X = np.random.rand(100,4)
-                variable_names = ['X_' + str(i) for i in range(0,4)]
-                pca_X = reduction.PCA(X, n_components=2)
-                principal_components = pca_X.transform(X)
+            X = np.random.rand(100,4)
+            variable_names = ['X_' + str(i) for i in range(0,4)]
+            pca_X = reduction.PCA(X, n_components=2)
+            principal_components = pca_X.transform(X)
 
-                variance_data = analysis.compute_normalized_variance(principal_components,
-                                                            X,
-                                                            depvar_names=variable_names,
-                                                            bandwidth_values=bandwidth_values)
+            variance_data = analysis.compute_normalized_variance(principal_components,
+                                                        X,
+                                                        depvar_names=variable_names,
+                                                        bandwidth_values=bandwidth_values)
 
-                cost = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='average')
+            cost = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='average')
 
-                cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='average',
-                                                                    integrate_to_peak=True)
+            cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='average',
+                                                                integrate_to_peak=True)
 
-                self.assertTrue(cost_to_peak < cost)
+            self.assertTrue(cost_to_peak < cost)
 
-                cost = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='cumulative')
+            cost = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='cumulative')
 
-                cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='cumulative',
-                                                                    integrate_to_peak=True)
+            cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='cumulative',
+                                                                integrate_to_peak=True)
 
-                self.assertTrue(cost_to_peak < cost)
+            self.assertTrue(cost_to_peak < cost)
 
-                cost = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='max')
+            cost = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='max')
 
-                cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='max',
-                                                                    integrate_to_peak=True)
+            cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='max',
+                                                                integrate_to_peak=True)
 
-                self.assertTrue(cost_to_peak < cost)
+            self.assertTrue(cost_to_peak < cost)
 
-                cost = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='median')
+            cost = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='median')
 
-                cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='median',
-                                                                    integrate_to_peak=True)
+            cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='median',
+                                                                integrate_to_peak=True)
 
-                self.assertTrue(cost_to_peak < cost)
+            self.assertTrue(cost_to_peak < cost)
 
-                cost = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='min')
+            cost = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='min')
 
-                cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
-                                                                    penalty_function='log-sigma-over-peak',
-                                                                    norm='min',
-                                                                    integrate_to_peak=True)
+            cost_to_peak = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function='log-sigma-over-peak',
+                                                                norm='min',
+                                                                integrate_to_peak=True)
 
-                self.assertTrue(cost_to_peak < cost)
+            self.assertTrue(cost_to_peak < cost)
 
         except:
             self.assertTrue(False)

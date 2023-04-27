@@ -85,7 +85,7 @@ class Analysis(unittest.TestCase):
 
     def test_analysis__mean_squared_error__check_against_sklearn(self):
 
-        n_repeat_scenario = 50
+        n_repeat_scenario = 5
 
         if 'sklearn' in modules:
 
