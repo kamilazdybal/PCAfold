@@ -401,6 +401,8 @@ class QoIAwareProjection:
         self.__projection_dependent_outputs = projection_dependent_outputs
         self.__activation_decoder = activation_decoder
         self.__decoder_interior_architecture = decoder_interior_architecture
+        self.__encoder_weights_init = encoder_weights_init
+        self.__decoder_weights_init = decoder_weights_init
         self.__hold_initialization = hold_initialization
         self.__hold_weights = hold_weights
         self.__transformed_projection_dependent_outputs = transformed_projection_dependent_outputs
@@ -485,9 +487,9 @@ class QoIAwareProjection:
 
         print('QoI-aware encoder-decoder model summary...\n')
         if self.__trained:
-            print('(Model has been trained.)\n\n')
+            print('(Model has been trained)\n\n')
         else:
-            print('(Model has not been trained yet.)\n\n')
+            print('(Model has not been trained yet)\n\n')
 
         print('- '*60)
 
@@ -524,11 +526,11 @@ class QoIAwareProjection:
 
         print('Model validation:\n')
         if self.__validation_perc != 0:
-            print('\t- ' + 'Using ' + str(self.__validation_perc) + '% of input data as validation data.')
+            print('\t- ' + 'Using ' + str(self.__validation_perc) + '% of input data as validation data')
         else:
-            print('\t- ' + 'No validation data is used at model training.')
+            print('\t- ' + 'No validation data is used at model training')
 
-        print('\t- ' + 'Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data.')
+        print('\t- ' + 'Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data')
 
         print('\n' + '- '*60)
 
@@ -540,61 +542,53 @@ class QoIAwareProjection:
         print('\t- ' + 'Loss function:\t' + self.__loss)
         print('\n' + '- '*60)
 
+        print('Weights initialization in the encoder:\n')
+        if self.__encoder_weights_init is None:
+            print('\t- ' + 'Glorot uniform')
+        else:
+            print('\t- ' + 'User-provided custom initialization of the encoder')
+        print('\n' + '- '*60)
+
+        print('Weights initialization in the decoder:\n')
+        if self.__decoder_weights_init is None:
+            print('\t- ' + 'Glorot uniform')
+        else:
+            print('\t- ' + 'User-provided custom initialization of the decoder')
+        print('\n' + '- '*60)
+
         print('Weights updates in the encoder:\n')
         if self.__hold_initialization is not None:
-            print('\t- ' + 'Initial weights in the encoder will be kept for ' + str(self.__hold_initialization) + ' first epochs.')
+            print('\t- ' + 'Initial weights in the encoder will be kept for ' + str(self.__hold_initialization) + ' first epochs')
         else:
-            print('\t- ' + 'Initial weights in the encoder will change after first epoch.')
+            print('\t- ' + 'Initial weights in the encoder will change after first epoch')
         if self.__hold_weights is not None:
-            print('\t- ' + 'Weights in the encoder will change once every ' + str(self.__hold_weights) + ' epochs.')
+            print('\t- ' + 'Weights in the encoder will change once every ' + str(self.__hold_weights) + ' epochs')
         else:
-            print('\t- ' + 'Weights in the encoder will change at every epoch.')
+            print('\t- ' + 'Weights in the encoder will change at every epoch')
         print('\n' + '- '*60)
 
         print('Results reproducibility:\n')
         if self.__random_seed is not None:
-            print('\t- ' + 'Reproducible neural network training will be assured using random seed: ' + str(self.__random_seed) + '.')
+            print('\t- ' + 'Reproducible neural network training will be assured using random seed: ' + str(self.__random_seed))
         else:
             print('\t- ' + 'Random seed not set, neural network training results will not be reproducible!')
-        print('\n' + '- '*60)
-
-# ------------------------------------------------------------------------------
-
-    def print_weights_and_biases_init(self):
-        """
-        Prints initial weights and biases from all layers of the QoI-aware encoder-decoder.
-        """
-
-        for i in range(0,len(self.weights_and_biases_init)):
-            if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
-            if i%2==0:
-                print('\nWeight:')
-            else:
-                print('Bias:')
-            print(self.weights_and_biases_init[i])
-            print()
-
-# ------------------------------------------------------------------------------
-
-    def print_weights_and_biases_trained(self):
-        """
-        Prints trained weights and biases from all layers of the QoI-aware encoder-decoder.
-        """
+        print('\n' + '= '*60)
 
         if self.__trained:
 
-            for i in range(0,len(self.weights_and_biases_trained)):
-                if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
-                if i%2==0:
-                    print('\nWeight:')
-                else:
-                    print('Bias:')
-                print(self.weights_and_biases_trained[i])
-                print()
+            idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
+            idx_min_training_loss = idx_min_training_loss[0]
 
-        else:
+            print('Training results:\n')
+            print('\t- ' + 'Minimum training loss:\t\t' + str(np.min(self.__training_loss)))
+            print('\t- ' + 'Minimum training loss at epoch:\t' + str(idx_min_training_loss+1))
+            if self.__validation_perc != 0:
+                idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
+                idx_min_validation_loss = idx_min_validation_loss[0]
+                print('\n\t- ' + 'Minimum validation loss:\t\t' + str(np.min(self.__validation_loss)))
+                print('\t- ' + 'Minimum validation loss at epoch:\t' + str(idx_min_validation_loss+1))
 
-            print('Model has not been trained yet!')
+            print('\n' + '- '*60)
 
 # ------------------------------------------------------------------------------
 
@@ -775,3 +769,124 @@ class QoIAwareProjection:
         self.__bases_across_epochs = bases_across_epochs
         self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
         self.__trained = True
+
+# ------------------------------------------------------------------------------
+
+    def print_weights_and_biases_init(self):
+        """
+        Prints initial weights and biases from all layers of the QoI-aware encoder-decoder.
+        """
+
+        for i in range(0,len(self.weights_and_biases_init)):
+            if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
+            if i%2==0:
+                print('\nWeight:')
+            else:
+                print('Bias:')
+            print(self.weights_and_biases_init[i])
+            print()
+
+# ------------------------------------------------------------------------------
+
+    def print_weights_and_biases_trained(self):
+        """
+        Prints trained weights and biases from all layers of the QoI-aware encoder-decoder.
+        """
+
+        if self.__trained:
+
+            for i in range(0,len(self.weights_and_biases_trained)):
+                if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
+                if i%2==0:
+                    print('\nWeight:')
+                else:
+                    print('Bias:')
+                print(self.weights_and_biases_trained[i])
+                print()
+
+        else:
+
+            print('Model has not been trained yet!')
+
+# ------------------------------------------------------------------------------
+
+    def get_best_basis(self, method='min-training-loss'):
+        """
+        Returns the best low-dimensional basis according to the selected method.
+
+        :param method: (optional)
+            ``str`` specifying the method used to select the best basis. It should be ``'min-training-loss'``, ``'min-validation-loss'``, or ``'last-epoch'``.
+
+        :return:
+            - **best_basis** - ``numpy.ndarray`` specifying the best basis extracted from the ``bases_across_epochs`` attribute.
+        """
+
+        __methods = ['min-training-loss', 'min-validation-loss', 'last-epoch']
+
+        if not isinstance(method, str):
+            raise ValueError("Parameter `method` has to be of type `str`.")
+
+        if method not in __methods:
+            raise ValueError("Parameter `method` can only be 'min-training-loss', 'min-validation-loss', or 'last-epoch'.")
+
+        if self.__trained:
+
+            if method == 'min-training-loss':
+
+                idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
+                idx_min_training_loss = idx_min_training_loss[0]
+
+                print('Minimum training loss:\t\t' + str(np.min(self.__training_loss)))
+                print('Minimum training loss at epoch:\t' + str(idx_min_training_loss+1))
+
+                # We add one to the index, because the first basis correspond to the network intialization before training.
+                # The length of the losses list is one less the length of the bases_across_epochs.
+                best_basis = self.__bases_across_epochs[idx_min_training_loss+1]
+
+            elif method == 'min-validation-loss':
+
+                idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
+                idx_min_validation_loss = idx_min_validation_loss[0]
+
+                print('Minimum validation loss:\t\t' + str(np.min(self.__validation_loss)))
+                print('Minimum validation loss at epoch:\t' + str(idx_min_validation_loss+1))
+
+                # We add one to the index, because the first basis correspond to the network intialization before training.
+                # The length of the losses list is one less the length of the bases_across_epochs.
+                best_basis = self.__bases_across_epochs[idx_min_validation_loss+1]
+
+            elif method == 'last-epoch':
+
+                print('Validation loss at the last epoch:\t\t' + str(self.__validation_loss[-1]))
+
+                best_basis = self.__bases_across_epochs[-1]
+
+        else:
+
+            print('Model has not been trained yet!')
+
+        return best_basis
+
+# ------------------------------------------------------------------------------
+
+    def plot_losses(self, figure_size=(15,5)):
+        """
+        Plots training and validation losses.
+        """
+
+        if self.__trained:
+
+            plt.figure(figsize=figure_size)
+            plt.semilogy(self.__training_loss, 'k', lw=3, label='Training loss')
+            if self.__validation_perc != 0: plt.semilogy(self.__validation_loss, 'r', lw=2, label='Validation loss')
+
+            plt.xlabel('Epoch #', fontsize=font_labels)
+            plt.ylabel(self.__loss + ' loss', fontsize=font_labels)
+            plt.legend(frameon=False, ncol=1, fontsize=font_legend)
+            plt.grid(alpha=grid_opacity)
+
+            return plt
+
+        else:
+
+            print('Model has not been trained yet!')
