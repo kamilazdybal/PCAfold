@@ -232,6 +232,12 @@ class QoIAwareProjection:
 
         (n_input_observations, n_input_variables) = np.shape(input_data)
 
+        if not isinstance(n_components, int):
+            raise ValueError("Parameter `n_components` has to be of type `int`.")
+
+        if n_components < 1 or n_components >= n_input_variables:
+            raise ValueError("Parameter `n_components` has to be larger than 0 and smaller than the dimensionality of the input data.")
+
         if projection_independent_outputs is None:
             if projection_dependent_outputs is None:
                 raise ValueError("At least one of the parameters, `projection_independent_outputs` or `projection_dependent_outputs`, has to be of type `numpy.ndarray`.")
@@ -283,12 +289,16 @@ class QoIAwareProjection:
 
         # Determine initialization of weights in the encoder
         if encoder_weights_init is not None:
+            if not isinstance(encoder_weights_init, np.ndarray):
+                raise ValueError("Parameter `encoder_weights_init` has to be of type `numpy.ndarray`.")
             encoder_kernel_initializer = tf.constant_initializer(encoder_weights_init)
         else:
             encoder_kernel_initializer = 'glorot_uniform'
 
         # Determine initialization of weights in the decoder:
         if decoder_weights_init is not None:
+            if not isinstance(decoder_weights_init, np.ndarray):
+                raise ValueError("Parameter `decoder_weights_init` has to be of type `numpy.ndarray`.")
             decoder_kernel_initializer = tf.constant_initializer(decoder_weights_init)
         else:
             decoder_kernel_initializer = 'glorot_uniform'
@@ -359,6 +369,8 @@ class QoIAwareProjection:
 
         # Set random seed for neural network training reproducibility:
         if random_seed is not None:
+            if not isinstance(random_seed, int):
+                raise ValueError("Parameter `random_seed` has to be of type `int`.")
             tf.random.set_seed(random_seed)
 
         if not isinstance(verbose, bool):
