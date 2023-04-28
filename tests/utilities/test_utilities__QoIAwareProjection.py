@@ -1,0 +1,397 @@
+import unittest
+import numpy as np
+from PCAfold import preprocess
+from PCAfold import reduction
+from PCAfold import analysis
+from PCAfold import QoIAwareProjection
+
+class Utilities(unittest.TestCase):
+
+    def test_analysis__QoIAwareProjection__allowed_class_init(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        try:
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data)
+        except:
+            self.assertTrue(False)
+
+        try:
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            activation_decoder='sigmoid',
+                                            decoder_interior_architecture=(4,5,6),
+                                            encoder_weights_init=None,
+                                            decoder_weights_init=None,
+                                            hold_initialization=4,
+                                            hold_weights=2,
+                                            transformed_projection_dependent_outputs='symlog',
+                                            loss='MAE',
+                                            optimizer='Nadam',
+                                            batch_size=10,
+                                            n_epochs=20,
+                                            learning_rate=0.01,
+                                            validation_perc=0,
+                                            random_seed=100,
+                                            verbose=False)
+        except:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__training(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        try:
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            activation_decoder='sigmoid',
+                                            decoder_interior_architecture=(4,5),
+                                            encoder_weights_init=None,
+                                            decoder_weights_init=None,
+                                            hold_initialization=4,
+                                            hold_weights=2,
+                                            transformed_projection_dependent_outputs='symlog',
+                                            loss='MAE',
+                                            optimizer='Nadam',
+                                            batch_size=10,
+                                            n_epochs=6,
+                                            learning_rate=0.01,
+                                            validation_perc=0,
+                                            random_seed=100,
+                                            verbose=False)
+
+            projection.train()
+
+        except:
+
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__not_allowed_class_init(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data, n_components)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__wrong_init_type(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection([],
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            [],
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=[],
+                                            projection_dependent_outputs=output_data)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            activation_decoder=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            decoder_interior_architecture=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            encoder_weights_init=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            decoder_weights_init=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            hold_initialization=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            hold_weights=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            transformed_projection_dependent_outputs=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            loss=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            optimizer=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            batch_size=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            n_epochs=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            learning_rate=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            validation_perc=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            random_seed=[])
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            projection_dependent_outputs=output_data,
+                                            verbose=[])
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__access_attributes(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        try:
+            projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=output_data)
+            X = projection.input_data
+            X = projection.n_components
+            X = projection.projection_independent_outputs
+            X = projection.projection_dependent_outputs
+            X = projection.architecture
+            X = projection.n_total_outputs
+            X = projection.qoi_aware_encoder_decoder
+            X = projection.weights_and_biases_init
+            X = projection.weights_and_biases_trained
+            X = projection.training_loss
+            X = projection.validation_loss
+            X = projection.bases_across_epochs
+        except:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__either_projection_dependent_or_independent(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        try:
+            projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=output_data)
+            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=output_data)
+        except:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__attributes_not_available_before_training(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=output_data)
+
+        X = projection.weights_and_biases_trained
+        self.assertTrue(X is None)
+
+        X = projection.training_loss
+        self.assertTrue(X is None)
+
+        X = projection.validation_loss
+        self.assertTrue(X is None)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__attributes_available_after_training(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        n_epochs=2,)
+        projection.train()
+
+        X = projection.weights_and_biases_trained
+        self.assertTrue(X is not None)
+        self.assertTrue(isinstance(X, list))
+
+        X = projection.training_loss
+        self.assertTrue(X is not None)
+        self.assertTrue(isinstance(X, list))
+
+        X = projection.validation_loss
+        self.assertTrue(X is not None)
+        self.assertTrue(isinstance(X, list))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__number_of_losses_equal_to_n_epochs(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+        n_epochs = 5
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        n_epochs=n_epochs)
+        projection.train()
+
+        X = projection.training_loss
+        self.assertTrue(len(X)==n_epochs)
+
+        X = projection.validation_loss
+        self.assertTrue(len(X)==n_epochs)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__number_of_bases_equal_to_n_epochs_plus_one(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+        n_epochs = 5
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        n_epochs=n_epochs)
+        projection.train()
+
+        X = projection.bases_across_epochs
+        self.assertTrue(len(X)==n_epochs+1)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__check_architecture(self):
+
+        input_data = np.random.rand(100,7)
+        output_data = np.random.rand(100,5)
+        n_components = 3
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        projection_dependent_outputs=output_data,
+                                        decoder_interior_architecture=())
+
+        self.assertTrue(projection.architecture=='7-3-8')
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        projection_dependent_outputs=output_data,
+                                        decoder_interior_architecture=(4,5,6))
+
+        self.assertTrue(projection.architecture=='7-3-4-5-6-8')
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_dependent_outputs=output_data,
+                                        decoder_interior_architecture=(6,))
+
+        self.assertTrue(projection.architecture=='7-3-6-3')
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_dependent_outputs=output_data,
+                                        decoder_interior_architecture=(9,),
+                                        transformed_projection_dependent_outputs='symlog')
+
+        self.assertTrue(projection.architecture=='7-3-9-6')
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(11,),
+                                        transformed_projection_dependent_outputs='symlog')
+
+        self.assertTrue(projection.architecture=='7-3-11-5')
