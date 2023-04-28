@@ -46,7 +46,7 @@ class QoIAwareProjection:
         X = np.random.rand(100,8)
         S = np.random.rand(100,8)
 
-        # Create 2D encoder-decoder projection of the dataset:
+        # Request 2D QoI-aware encoder-decoder projection of the dataset:
         n_components = 2
 
         # Preprocess the dataset before passing it to the encoder-decoder:
@@ -179,7 +179,7 @@ class QoIAwareProjection:
     :param n_epochs: (optional)
         ``float`` specifying the learning rate passed to the optimizer.
     :param validation_perc: (optional)
-        ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number between 0 and 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
+        ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number larger than or equal to 0 and smaller than 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
     :param random_seed: (optional)
         ``int`` specifying the random seed to be used for any random operations. It is highly recommended to set a fixed random seed, as this allows for complete reproducibility of the results.
     :param verbose: (optional)
@@ -354,7 +354,7 @@ class QoIAwareProjection:
         if not isinstance(validation_perc, int):
             raise ValueError("Parameter `validation_perc` has to be of type `int`.")
 
-        if (validation_perc < 0) or (validation_perc > 100):
+        if (validation_perc < 0) or (validation_perc >= 100):
             raise ValueError("Parameter `validation_perc` has to be an integer between 0 and 100`.")
 
         # Set random seed for neural network training reproducibility:
@@ -427,6 +427,8 @@ class QoIAwareProjection:
         # Attributes available after model training:
         self.__training_loss = None
         self.__validation_loss = None
+        self.__idx_min_training_loss = None
+        self.__idx_min_validation_loss = None
         self.__bases_across_epochs = None
         self.__weights_and_biases_trained = None
 
@@ -770,6 +772,13 @@ class QoIAwareProjection:
         self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
         self.__trained = True
 
+        idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
+        self.__idx_min_training_loss = idx_min_training_loss[0]
+
+        if self.__validation_perc != 0:
+            idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
+            self.__idx_min_validation_loss = idx_min_validation_loss[0]
+
 # ------------------------------------------------------------------------------
 
     def print_weights_and_biases_init(self):
@@ -833,31 +842,33 @@ class QoIAwareProjection:
 
             if method == 'min-training-loss':
 
-                idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
-                idx_min_training_loss = idx_min_training_loss[0]
-
                 print('Minimum training loss:\t\t' + str(np.min(self.__training_loss)))
-                print('Minimum training loss at epoch:\t' + str(idx_min_training_loss+1))
+                print('Minimum training loss at epoch:\t' + str(self.__idx_min_training_loss+1))
 
                 # We add one to the index, because the first basis correspond to the network intialization before training.
                 # The length of the losses list is one less the length of the bases_across_epochs.
-                best_basis = self.__bases_across_epochs[idx_min_training_loss+1]
+                best_basis = self.__bases_across_epochs[self.__idx_min_training_loss+1]
 
             elif method == 'min-validation-loss':
 
-                idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
-                idx_min_validation_loss = idx_min_validation_loss[0]
+                if self.__validation_perc != 0:
 
-                print('Minimum validation loss:\t\t' + str(np.min(self.__validation_loss)))
-                print('Minimum validation loss at epoch:\t' + str(idx_min_validation_loss+1))
+                    print('Minimum validation loss:\t\t' + str(np.min(self.__validation_loss)))
+                    print('Minimum validation loss at epoch:\t' + str(self.__idx_min_validation_loss+1))
 
-                # We add one to the index, because the first basis correspond to the network intialization before training.
-                # The length of the losses list is one less the length of the bases_across_epochs.
-                best_basis = self.__bases_across_epochs[idx_min_validation_loss+1]
+                    # We add one to the index, because the first basis correspond to the network intialization before training.
+                    # The length of the losses list is one less the length of the bases_across_epochs.
+                    best_basis = self.__bases_across_epochs[self.__idx_min_validation_loss+1]
+
+                else:
+
+                    print('Validation loss not available.')
 
             elif method == 'last-epoch':
 
-                print('Validation loss at the last epoch:\t\t' + str(self.__validation_loss[-1]))
+                print('Training loss at the last epoch:\t\t' + str(self.__training_loss[-1]))
+
+                if self.__validation_perc != 0: print('Validation loss at the last epoch:\t\t' + str(self.__validation_loss[-1]))
 
                 best_basis = self.__bases_across_epochs[-1]
 
@@ -869,21 +880,29 @@ class QoIAwareProjection:
 
 # ------------------------------------------------------------------------------
 
-    def plot_losses(self, figure_size=(15,5)):
+    def plot_losses(self, markevery=100, figure_size=(15,5)):
         """
         Plots training and validation losses.
         """
 
         if self.__trained:
 
+            x_axis = [i for i in range(1,self.__n_epochs+1)]
+            x_ticks = [1] + [i for i in range(1,self.__n_epochs) if i%markevery==0] + [self.__n_epochs]
+
             plt.figure(figsize=figure_size)
-            plt.semilogy(self.__training_loss, 'k', lw=3, label='Training loss')
-            if self.__validation_perc != 0: plt.semilogy(self.__validation_loss, 'r', lw=2, label='Validation loss')
+            plt.semilogy(x_axis, self.__training_loss, 'k', lw=3, label='Training loss')
+            plt.scatter(self.__idx_min_training_loss+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
+
+            if self.__validation_perc != 0:
+                plt.semilogy(x_axis, self.__validation_loss, 'r--', lw=2, label='Validation loss')
+                plt.scatter(self.__idx_min_validation_loss+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
 
             plt.xlabel('Epoch #', fontsize=font_labels)
+            plt.xticks(x_ticks, rotation=90)
             plt.ylabel(self.__loss + ' loss', fontsize=font_labels)
             plt.legend(frameon=False, ncol=1, fontsize=font_legend)
-            plt.grid(alpha=grid_opacity)
+            plt.grid(alpha=grid_opacity, zorder=1)
 
             return plt
 
