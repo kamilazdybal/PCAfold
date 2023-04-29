@@ -336,6 +336,75 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
+    def test_analysis__QoIAwareProjection__wrong_encoder_weights_init_shape(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            encoder_weights_init=np.ones((3,2)))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            encoder_weights_init=np.ones((4,3)))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            encoder_weights_init=np.ones((10,10)))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__wrong_decoder_weights_init_shape(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            decoder_weights_init=(np.ones((3,2))),)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            decoder_interior_architecture=(5,6),
+                                            decoder_weights_init=(np.ones((2,5)),np.ones((5,6)),np.ones((6,6))),)
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__check_custom_weights_initialization(self):
+
+        input_data = np.random.rand(100,6)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(5,6),
+                                        encoder_weights_init=np.ones((6,2)),
+                                        decoder_weights_init=(2*np.ones((2,5)),3*np.ones((5,6)),4*np.ones((6,4))),)
+
+        weights_and_biases_init = projection.weights_and_biases_init
+
+        self.assertTrue(np.allclose(weights_and_biases_init[0], np.ones((6,2))))
+        self.assertTrue(np.allclose(weights_and_biases_init[2], 2*np.ones((2,5))))
+        self.assertTrue(np.allclose(weights_and_biases_init[4], 3*np.ones((5,6))))
+        self.assertTrue(np.allclose(weights_and_biases_init[6], 4*np.ones((6,4))))
+
+# ------------------------------------------------------------------------------
+
     def test_analysis__QoIAwareProjection__access_attributes(self):
 
         input_data = np.random.rand(100,4)

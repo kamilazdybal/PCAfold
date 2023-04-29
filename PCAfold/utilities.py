@@ -88,7 +88,7 @@ class QoIAwareProjection:
 
         QoI-aware encoder-decoder model summary...
 
-        (Model has been trained.)
+        (Model has been trained)
 
 
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -116,8 +116,8 @@ class QoIAwareProjection:
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Model validation:
 
-        	- Using 10% of input data as validation data.
-        	- Model will be trained on 90% of input data.
+        	- Using 10% of input data as validation data
+        	- Model will be trained on 90% of input data
 
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Hyperparameters:
@@ -129,15 +129,34 @@ class QoIAwareProjection:
         	- Loss function:	MSE
 
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Weights initialization in the encoder:
+
+        	- Glorot uniform
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        Weights initialization in the decoder:
+
+        	- Glorot uniform
+
+        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Weights updates in the encoder:
 
-        	- Initial weights in the encoder will be kept for 10 first epochs.
-        	- Weights in the encoder will change once every 2 epochs.
+        	- Initial weights in the encoder will be kept for 10 first epochs
+        	- Weights in the encoder will change once every 2 epochs
 
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         Results reproducibility:
 
-        	- Reproducible neural network training will be assured using random seed: 100.
+        	- Reproducible neural network training will be assured using random seed: 100
+
+        = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+        Training results:
+
+        	- Minimum training loss:		0.0852246955037117
+        	- Minimum training loss at epoch:	199
+
+        	- Minimum validation loss:		0.06681100279092789
+        	- Minimum validation loss at epoch:	182
 
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -159,9 +178,9 @@ class QoIAwareProjection:
         If set to an empty tuple, ``decoder_interior_architecture=()``, the overal network architecture will be ``(Input)-(Bottleneck)-(Output)``.
         Keep in mind that if you'd like to create just one interior layer, you should use a comma after the integer: ``decoder_interior_architecture=(4,)``.
     :param encoder_weights_init: (optional)
-        ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+        ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. It should be of size ``(n_variables, n_components)``. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
     :param decoder_weights_init: (optional)
-        ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+        ``tuple`` of ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. Each element in the tuple should have a shape that matches the architecture. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
     :param hold_initialization: (optional)
         ``int`` specifying the number of first epochs during which the initial weights in the encoder are held constant. If set to ``None``, weights in the encoder will change at the first epoch. This parameter can be used in conjunction with ``hold_weights``.
     :param hold_weights: (optional)
@@ -268,6 +287,23 @@ class QoIAwareProjection:
         else:
             n_projection_dependent_output_variables = 0
 
+        if transformed_projection_dependent_outputs is not None:
+            if not isinstance(transformed_projection_dependent_outputs, str):
+                raise ValueError("Parameter `transformed_projection_dependent_outputs` has to be of type `str`.")
+            if transformed_projection_dependent_outputs not in __projection_dependent_outputs_transformations:
+                raise ValueError("Parameter `transformed_projection_dependent_outputs` has to be 'symlog' or 'signed-square-root'.")
+
+            # The transformed projection dependent outputs can only be added IN ADDITION to the projection dependent outputs.
+            # This can be modified in future implementations.
+            if projection_dependent_outputs is not None:
+                n_transformed_projection_dependent_output_variables = n_components
+            else:
+                n_transformed_projection_dependent_output_variables = 0
+                warnings.warn("Parameter `transformed_projection_dependent_outputs` has been set, but no projection dependent outputs have been given! Transformed projection-dependent outputs will not be used at the decoder output.")
+
+        else:
+            n_transformed_projection_dependent_output_variables = 0
+
         if not isinstance(activation_decoder, str) and not isinstance(activation_decoder, tuple):
             raise ValueError("Parameter `activation_decoder` has to be of type `str` or `tuple`.")
 
@@ -287,21 +323,48 @@ class QoIAwareProjection:
             if len(activation_decoder) != len(decoder_interior_architecture) + 1:
                 raise ValueError("Parameter `activation_decoder` has to have as many elements as there are layers in the decoder.")
 
+        self.__n_total_outputs = n_projection_independent_output_variables + n_projection_dependent_output_variables + n_transformed_projection_dependent_output_variables
+
+        # Evaluate the architecture string:
+        if len(decoder_interior_architecture)==0:
+            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + str(self.__n_total_outputs)
+            neuron_count = [n_input_variables, n_components, self.__n_total_outputs]
+        else:
+            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + '-'.join([str(i) for i in decoder_interior_architecture]) + '-' + str(self.__n_total_outputs)
+            neuron_count = [n_input_variables, n_components] + [i for i in decoder_interior_architecture] + [self.__n_total_outputs]
+
+        self.__neuron_count = neuron_count
+
         # Determine initialization of weights in the encoder
         if encoder_weights_init is not None:
             if not isinstance(encoder_weights_init, np.ndarray):
                 raise ValueError("Parameter `encoder_weights_init` has to be of type `numpy.ndarray`.")
+            # Shape of this array should be (n_input_variables, n_components) to match Kears:
+            (n_encoder_weights_x, n_encoder_weights_y) = np.shape(encoder_weights_init)
+            if not n_encoder_weights_x==n_input_variables or not n_encoder_weights_y==n_components:
+                raise ValueError("Parameter `encoder_weights_init` has to have shape (n_input_variables, n_components).")
             encoder_kernel_initializer = tf.constant_initializer(encoder_weights_init)
         else:
             encoder_kernel_initializer = 'glorot_uniform'
 
         # Determine initialization of weights in the decoder:
         if decoder_weights_init is not None:
-            if not isinstance(decoder_weights_init, np.ndarray):
-                raise ValueError("Parameter `decoder_weights_init` has to be of type `numpy.ndarray`.")
-            decoder_kernel_initializer = tf.constant_initializer(decoder_weights_init)
+            if not isinstance(decoder_weights_init, tuple):
+                raise ValueError("Parameter `decoder_weights_init` has to be of type `tuple`.")
+
+            if len(decoder_weights_init) != len(decoder_interior_architecture)+1:
+                raise ValueError("Parameter `decoder_weights_init` should have " + str(len(decoder_interior_architecture)+1) + " elements given the current network architecture.")
+
+            for i, weight in enumerate(decoder_weights_init):
+                if not isinstance(weight, np.ndarray):
+                    raise ValueError("Elements of `decoder_weights_init` have to be of type `numpy.ndarray`.")
+
+                (d1, d2) = np.shape(weight)
+                if not d1==self.__neuron_count[1+i] or not d2==self.__neuron_count[i+2]:
+                    raise ValueError("Shapes of elements in `decoder_weights_init` do not match the decoder architecture.")
+            decoder_kernel_initializer = tuple([tf.constant_initializer(weight) for weight in decoder_weights_init])
         else:
-            decoder_kernel_initializer = 'glorot_uniform'
+            decoder_kernel_initializer = tuple(['glorot_uniform' for i in range(0,len(decoder_interior_architecture)+1)])
 
         if hold_initialization is not None:
             if not isinstance(hold_initialization, int):
@@ -310,23 +373,6 @@ class QoIAwareProjection:
         if hold_weights is not None:
             if not isinstance(hold_weights, int):
                 raise ValueError("Parameter `hold_weights` has to be of type `int`.")
-
-        if transformed_projection_dependent_outputs is not None:
-            if not isinstance(transformed_projection_dependent_outputs, str):
-                raise ValueError("Parameter `transformed_projection_dependent_outputs` has to be of type `str`.")
-            if transformed_projection_dependent_outputs not in __projection_dependent_outputs_transformations:
-                raise ValueError("Parameter `transformed_projection_dependent_outputs` has to be 'symlog' or 'signed-square-root'.")
-
-            # The transformed projection dependent outputs can only be added IN ADDITION to the projection dependent outputs.
-            # This can be modified in future implementations.
-            if projection_dependent_outputs is not None:
-                n_transformed_projection_dependent_output_variables = n_components
-            else:
-                n_transformed_projection_dependent_output_variables = 0
-                warnings.warn("Parameter `transformed_projection_dependent_outputs` has been set, but no projection dependent outputs have been given! Transformed projection-dependent outputs will not be used at the decoder output.")
-
-        else:
-            n_transformed_projection_dependent_output_variables = 0
 
         # Set the loss:
         if not isinstance(loss, str):
@@ -376,32 +422,20 @@ class QoIAwareProjection:
         if not isinstance(verbose, bool):
             raise ValueError("Parameter `verbose` has to be a boolean.")
 
-        self.__n_total_outputs = n_projection_independent_output_variables + n_projection_dependent_output_variables + n_transformed_projection_dependent_output_variables
-
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-        # Evaluate the architecture string:
-        if len(decoder_interior_architecture)==0:
-            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + str(self.__n_total_outputs)
-            neuron_count = [n_input_variables, n_components, self.__n_total_outputs]
-        else:
-            architecture = str(n_input_variables) + '-' + str(n_components) + '-' + '-'.join([str(i) for i in decoder_interior_architecture]) + '-' + str(self.__n_total_outputs)
-            neuron_count = [n_input_variables, n_components] + [i for i in decoder_interior_architecture] + [self.__n_total_outputs]
-
-        self.__neuron_count = neuron_count
 
         # Create an encoder-decoder neural network with a given architecture:
         qoi_aware_encoder_decoder = models.Sequential()
         qoi_aware_encoder_decoder.add(layers.Dense(n_components, input_dim=n_input_variables, activation='linear', kernel_initializer=encoder_kernel_initializer))
         for i, n_neurons in enumerate(decoder_interior_architecture):
             if isinstance(activation_decoder, str):
-                qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
+                qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer[i]))
             elif isinstance(activation_decoder, tuple):
-                qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder[i], kernel_initializer=decoder_kernel_initializer))
+                qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder[i], kernel_initializer=decoder_kernel_initializer[i]))
         if isinstance(activation_decoder, str):
-            qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer))
+            qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer[-1]))
         elif isinstance(activation_decoder, tuple):
-            qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder[-1], kernel_initializer=decoder_kernel_initializer))
+            qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder[-1], kernel_initializer=decoder_kernel_initializer[-1]))
 
         # Compile the neural network model:
         qoi_aware_encoder_decoder.compile(model_optimizer, loss=model_loss)
