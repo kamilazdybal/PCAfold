@@ -89,6 +89,114 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data, n_components)
 
+        smaller_output_data = np.random.rand(70,4)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=smaller_output_data)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=smaller_output_data)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=smaller_output_data, transformed_projection_dependent_outputs='symlog')
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__architecture_inconsistent_with_custom_activation_functions(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('tanh', 'tanh', 'tanh'),
+                                            decoder_interior_architecture=(4,))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('tanh',),
+                                            decoder_interior_architecture=(4,))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('tanh',),
+                                            decoder_interior_architecture=(4,5,6))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('tanh', 'tanh', 'tanh', 'tanh', 'tanh'),
+                                            decoder_interior_architecture=(4,5,6))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('tanh', 'sigmoid'),
+                                            decoder_interior_architecture=(4,5,6))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__invalid_string(self):
+
+        input_data = np.random.rand(100,4)
+        output_data = np.random.rand(100,4)
+        n_components = 2
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('tanh', 'name', 'tanh'),
+                                            decoder_interior_architecture=(4,5))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('name', 'tanh'),
+                                            decoder_interior_architecture=(4,))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder=('tanh', 'name'),
+                                            decoder_interior_architecture=(4,))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            activation_decoder='name',
+                                            decoder_interior_architecture=(4,5))
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            loss='name')
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_independent_outputs=output_data,
+                                            optimizer='name')
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data,
+                                            n_components,
+                                            projection_dependent_outputs=output_data,
+                                            transformed_projection_dependent_outputs='name')
+
 # ------------------------------------------------------------------------------
 
     def test_analysis__QoIAwareProjection__wrong_init_type(self):
