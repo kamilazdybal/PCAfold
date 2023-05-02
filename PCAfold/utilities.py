@@ -926,10 +926,31 @@ class QoIAwareProjection:
 
 # ------------------------------------------------------------------------------
 
-    def plot_losses(self, markevery=100, figure_size=(15,5)):
+    def plot_losses(self, markevery=100, figure_size=(15,5), save_filename=None):
         """
         Plots training and validation losses.
+
+        :param figure_size: (optional)
+            ``tuple`` specifying figure size.
+        :param save_filename: (optional)
+            ``str`` specifying plot save location/filename. If set to ``None``
+            plot will not be saved. You can also set a desired file extension,
+            for instance ``.pdf``. If the file extension is not specified, the default
+            is ``.png``.
+
+        :return:
+            - **plt** - ``matplotlib.pyplot`` plot handle.
         """
+
+        if not isinstance(markevery, int):
+            raise ValueError("Parameter `markevery` has to be of type `int`.")
+
+        if not isinstance(figure_size, tuple):
+            raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+        if save_filename is not None:
+            if not isinstance(save_filename, str):
+                raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
         if self.__trained:
 
@@ -949,6 +970,8 @@ class QoIAwareProjection:
             plt.ylabel(self.__loss + ' loss', fontsize=font_labels)
             plt.legend(frameon=False, ncol=1, fontsize=font_legend)
             plt.grid(alpha=grid_opacity, zorder=1)
+
+            if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
 
             return plt
 

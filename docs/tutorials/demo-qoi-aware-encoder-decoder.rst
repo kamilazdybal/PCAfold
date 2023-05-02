@@ -6,6 +6,12 @@ QoI-aware encoder decoder
 
 In this tutorial, we present the QoI-aware encoder-decoder dimensionality reduction strategy from the ``utilities`` module.
 
+Illustrative explanation of how the QoI-aware encoder-decoder works is presented in the figure below:
+
+.. image:: ../images/tutorial-qoi-aware-encoder-decoder.png
+  :width: 900
+  :align: center
+
 We import the necessary modules:
 
 .. code:: python
@@ -45,7 +51,7 @@ Train the QoI-aware encoder-decoder
 
 First, we are going to scale the state-space variables to a $\langle 0, 1 \rangle$ range. This is done to help the neural network training process.
 
-We are also going to apply an adequate scaling to the source terms. This is done for consistency in reduced-order modeling (see: [**Handling source terms**](https://pcafold.readthedocs.io/en/latest/tutorials/demo-handling-source-terms.html)). The scaled source terms will serve as projection-dependent variables.
+We are also going to apply an adequate scaling to the source terms. This is done for consistency in reduced-order modeling (see: `**Handling source terms** <https://pcafold.readthedocs.io/en/latest/tutorials/demo-handling-source-terms.html>`_). The scaled source terms will serve as projection-dependent variables.
 
 .. code:: python
 
@@ -199,7 +205,13 @@ We can visualize the MSE loss computed on training and validation data during tr
 .. code:: python
 
   projection.plot_losses(markevery=100,
-                         figure_size=(15, 3))
+                         figure_size=(15, 4),
+                         save_filename=save_filename)
+
+.. image:: ../images/tutorial-qoi-aware-encoder-decoder-losses.png
+ :width: 800
+ :align: center
+
 
 We extract the best lower-dimensional basis that corresponds to the epoch with the smallest training loss:
 
