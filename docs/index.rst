@@ -90,9 +90,10 @@ or using BibTeX:
    tutorials/demo-data-manipulation
    tutorials/demo-clustering
    tutorials/demo-sampling
-   tutorials/demo-plotting-pca
    tutorials/demo-global-vs-local-pca
+   tutorials/demo-plotting-pca
    tutorials/demo-pca-on-sampled-data-sets
+   tutorials/demo-qoi-aware-encoder-decoder
    tutorials/demo-handling-source-terms
    tutorials/demo-manifold-assessment
    tutorials/demo-cost-function
