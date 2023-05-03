@@ -55,9 +55,9 @@ We are going to generate 2D projections of the state-space:
 
   n_components = 2
 
-First, we are going to scale the state-space variables to a $\langle 0, 1 \rangle$ range. This is done to help the neural network training process.
+First, we are going to scale the state-space variables to a :math:`\langle 0, 1 \rangle` range. This is done to help the neural network training process.
 
-We are also going to apply an adequate scaling to the source terms. This is done for consistency in reduced-order modeling (see: `**Handling source terms** <https://pcafold.readthedocs.io/en/latest/tutorials/demo-handling-source-terms.html>`_). The scaled source terms will serve as projection-dependent variables.
+We are also going to apply an adequate scaling to the source terms. This is done for consistency in reduced-order modeling (see: `Handling source terms <https://pcafold.readthedocs.io/en/latest/tutorials/demo-handling-source-terms.html>`_). The scaled source terms will serve as projection-dependent variables.
 
 .. code:: python
 
