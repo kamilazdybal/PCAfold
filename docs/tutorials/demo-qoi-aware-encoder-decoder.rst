@@ -9,7 +9,7 @@ In this tutorial, we present the QoI-aware encoder-decoder dimensionality reduct
 Illustrative explanation of how the QoI-aware encoder-decoder works is presented in the figure below:
 
 .. image:: ../images/tutorial-qoi-aware-encoder-decoder.png
-  :width: 900
+  :width: 800
   :align: center
 
 We import the necessary modules:
@@ -32,22 +32,28 @@ and we set some initial parameters:
 Upload a combustion data set
 ************************************
 
-A data set representing combustion of syngas in air generated from steady laminar flamelet model using *Spitfire* and a chemical mechanism by Hawkes et al. is used as a demo data set.
+A data set representing combustion of hydrogen in air generated from steady laminar flamelet model using *Spitfire* is used as a demo data set.
 
 We begin by importing the data set composed of the original state space variables,
 :math:`\mathbf{X}`, and the corresponding source terms, :math:`\mathbf{S_X}`:
 
 .. code:: python
 
-  X = np.genfromtxt('data-state-space.csv', delimiter=',')
-  S_X = np.genfromtxt('data-state-space-sources.csv', delimiter=',')
-  X_names = ['T', 'H2', 'O2', 'O', 'OH', 'H2O', 'H', 'HO2', 'CO', 'CO2', 'HCO']
+  X = np.genfromtxt('H2-air-state-space.csv', delimiter=',')[:,0:-2]
+  S_X = np.genfromtxt('H2-air-state-space-sources.csv', delimiter=',')[:,0:-2]
+  X_names = np.genfromtxt('H2-air-state-space-names.csv', delimiter='\n', dtype=str)[0:-2]
 
   (n_observations, n_variables) = np.shape(X)
 
 ************************************
 Train the QoI-aware encoder-decoder
 ************************************
+
+We are going to generate 2D projections of the state-space:
+
+.. code:: python
+
+  n_components = 2
 
 First, we are going to scale the state-space variables to a $\langle 0, 1 \rangle$ range. This is done to help the neural network training process.
 
@@ -58,13 +64,29 @@ We are also going to apply an adequate scaling to the source terms. This is done
   (input_data, centers, scales) = preprocess.center_scale(X, scaling='0to1')
   projection_dependent_outputs = S_X / scales
 
-We are going to generate 2D projections of the state-space.
+We create a PCA-initialization of the encoder:
+
+.. code:: python
+
+  pca = reduction.PCA(X, n_components=n_components, scaling='auto')
+  encoder_weights_init = pca.A[:,0:n_components]
+
+We visualize the initial projection:
+
+.. code:: python
+
+  X_projected = np.dot(input_data, encoder_weights_init)
+  S_X_projected = np.dot(projection_dependent_outputs, encoder_weights_init)
+
+.. image:: ../images/tutorial-qoi-aware-encoder-decoder-initial-2D-projection.png
+  :width: 400
+  :align: center
 
 We select a couple of important state variables to be used as the projection-independent variables:
 
 .. code:: python
 
-  selected_state_variables = [0, 1, 2, 4, 5]
+  selected_state_variables = [0, 2, 4, 5, 6]
 
 First, we fix the random seed for results reproducibility:
 
@@ -77,7 +99,7 @@ We set several important hyper-parameters:
 .. code:: python
 
   activation_decoder = 'tanh'
-  decoder_interior_architecture = (6,8)
+  decoder_interior_architecture = (6,9)
   optimizer = 'Adam'
   learning_rate = 0.001
   loss = 'MSE'
@@ -95,7 +117,7 @@ We are going to train the model for 5000 epochs:
 
 .. code:: python
 
-  n_epochs = 1000
+  n_epochs = 5000
 
 We instantiate an object of the `QoIAwareProjection` class with various parameters:
 
@@ -211,7 +233,6 @@ We can visualize the MSE loss computed on training and validation data during tr
 .. image:: ../images/tutorial-qoi-aware-encoder-decoder-losses.png
  :width: 800
  :align: center
-
 
 We extract the best lower-dimensional basis that corresponds to the epoch with the smallest training loss:
 
