@@ -9,7 +9,7 @@ In this tutorial, we present the QoI-aware encoder-decoder dimensionality reduct
 Illustrative explanation of how the QoI-aware encoder-decoder works is presented in the figure below:
 
 .. image:: ../images/tutorial-qoi-aware-encoder-decoder.png
-  :width: 800
+  :width: 700
   :align: center
 
 We import the necessary modules:
@@ -164,12 +164,12 @@ Before we begin neural network training, we can print the summary of the current
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Encoder-decoder architecture:
 
-  	11-2-6-8-9
+  	9-2-6-9-9
 
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Activation functions:
 
-  	(11)--linear--(2)--tanh--(6)--tanh--(8)--tanh--(9)
+  	(9)--linear--(2)--tanh--(6)--tanh--(9)--tanh--(9)
 
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Variables at the decoder output:
@@ -187,8 +187,8 @@ Before we begin neural network training, we can print the summary of the current
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Hyperparameters:
 
-  	- Batch size:		50000
-  	- # of epochs:		1000
+  	- Batch size:		58101
+  	- # of epochs:		5000
   	- Optimizer:		Adam
   	- Learning rate:	0.001
   	- Loss function:	MSE
@@ -196,7 +196,7 @@ Before we begin neural network training, we can print the summary of the current
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Weights initialization in the encoder:
 
-  	- Glorot uniform
+  	- User-provided custom initialization of the encoder
 
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Weights initialization in the decoder:
@@ -233,6 +233,25 @@ We can visualize the MSE loss computed on training and validation data during tr
 .. image:: ../images/tutorial-qoi-aware-encoder-decoder-losses.png
  :width: 800
  :align: center
+
+After training, additional information is available in the model summary:
+
+.. code:: python
+
+  projection.summary()
+
+.. code-block:: text
+
+  = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+  Training results:
+
+  	- Minimum training loss:		0.0018488304922357202
+  	- Minimum training loss at epoch:	5000
+
+  	- Minimum validation loss:		0.0019012088887393475
+  	- Minimum validation loss at epoch:	5000
+
+  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 We extract the best lower-dimensional basis that corresponds to the epoch with the smallest training loss:
 
