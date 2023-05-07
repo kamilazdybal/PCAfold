@@ -16,6 +16,7 @@ import time
 import warnings
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+from termcolor import colored
 import tensorflow as tf
 from keras import layers, models
 from PCAfold.styles import *
@@ -978,3 +979,754 @@ class QoIAwareProjection:
         else:
 
             print('Model has not been trained yet!')
+
+# ------------------------------------------------------------------------------
+
+def manifold_informed_forward_variable_addition(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
+    """
+    Manifold-informed feature selection algorithm based on forward variable addition introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
+    select a meaningful subset of the original variables such that
+    undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
+    The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
+    for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
+    The algorithm can be bootstrapped in two ways:
+
+    - Automatic bootstrap when ``bootstrap_variables=None``: the first best variable is selected automatically as the one that gives the lowest cost.
+
+    - User-defined bootstrap when ``bootstrap_variables`` is set to a user-defined list of the bootstrap variables.
+
+    The algorithm iterates, adding a new variable that exhibits the lowest cost at each iteration.
+    The original variables in a data set get ordered according to their effect
+    on the manifold topology. Assuming that the original data set is composed of :math:`Q` variables,
+    the first output is a list of indices of the ordered
+    original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`. The second output is a list of indices of the selected
+    subset of the original variables, :math:`\\mathbf{X}_S = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
+
+    More information can be found in :cite:`Zdybal2022`.
+
+    .. note::
+
+        The algorithm can be very expensive (for large data sets) due to multiple computations of the normalized variance derivative.
+        Try running it on multiple cores or on a sampled data set.
+
+        In case the algorithm breaks when not being able to determine the peak
+        location, try increasing the range in the ``bandwidth_values`` parameter.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import manifold_informed_forward_variable_addition as FVA
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+        X_source = np.random.rand(100,10)
+
+        # Define original variables to add to the optimization:
+        target_variables = X[:,0:3]
+
+        # Specify variables names
+        variable_names = ['X_' + str(i) for i in range(0,10)]
+
+        # Specify the bandwidth values to compute the optimization on:
+        bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Run the subset selection algorithm:
+        (ordered, selected, min_cost, costs) = FVA(X,
+                                                   X_source,
+                                                   variable_names,
+                                                   scaling='auto',
+                                                   bandwidth_values=bandwidth_values,
+                                                   target_variables=target_variables,
+                                                   add_transformed_source=True,
+                                                   target_manifold_dimensionality=2,
+                                                   bootstrap_variables=None,
+                                                   penalty_function='peak',
+                                                   norm='max',
+                                                   integrate_to_peak=True,
+                                                   verbose=True)
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param X_source:
+        ``numpy.ndarray`` specifying the source terms, :math:`\\mathbf{S_X}`, corresponding to the state-space
+        variables in :math:`\\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`. It should be of size ``(n_observations,n_variables)``.
+    :param variable_names:
+        ``list`` of ``str`` specifying variables names.
+    :param scaling: (optional)
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+    :param bandwidth_values:
+        ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
+    :param target_variables: (optional)
+        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_target_variables)``.
+    :param add_transformed_source: (optional)
+        ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
+    :param target_manifold_dimensionality: (optional)
+        ``int`` specifying the target dimensionality of the PCA manifold.
+    :param bootstrap_variables: (optional)
+        ``list`` specifying the user-selected variables to bootstrap the algorithm with. If set to ``None``, automatic bootstrapping is performed.
+    :param penalty_function: (optional)
+        ``str`` specifying the weighting applied to each area.
+        Set ``penalty_function='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
+        Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``penalty_function=None``, the area is not weighted.
+    :param norm: (optional)
+        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
+    :param integrate_to_peak: (optional)
+        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **ordered_variables** - ``list`` specifying the indices of the ordered variables.
+        - **selected_variables** - ``list`` specifying the indices of the selected variables that correspond to the minimum cost :math:`\\mathcal{L}`.
+        - **optimized_cost** - ``float`` specifying the cost corresponding to the optimized subset.
+        - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
+    """
+
+    __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
+    __norms = ['average', 'cumulative', 'max', 'median', 'min']
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have shape `(n_observations,n_variables)`.")
+
+    if not isinstance(X_source, np.ndarray):
+        raise ValueError("Parameter `X_source` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_source, n_variables_source) = np.shape(X_source)
+    except:
+        raise ValueError("Parameter `X_source` has to have shape `(n_observations,n_variables)`.")
+
+    if n_variables_source != n_variables:
+        raise ValueError("Parameter `X_source` has different number of variables than `X`.")
+
+    if n_observations_source != n_observations:
+        raise ValueError("Parameter `X_source` has different number of observations than `X`.")
+
+    if not isinstance(variable_names, list):
+        raise ValueError("Parameter `variable_names` has to be of type `list`.")
+
+    if len(variable_names) != n_variables:
+        raise ValueError("Parameter `variable_names` has different number of variables than `X`.")
+
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be of type `str`.")
+
+    if not isinstance(bandwidth_values, np.ndarray):
+        raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
+
+    if target_variables is not None:
+        if not isinstance(target_variables, np.ndarray):
+            raise ValueError("Parameter `target_variables` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_d_hat_observations, n_target_variables) = np.shape(target_variables)
+            target_variables_names = ['X' + str(i) for i in range(0,n_target_variables)]
+        except:
+            raise ValueError("Parameter `target_variables` has to have shape `(n_observations,n_target_variables)`.")
+
+        if n_d_hat_observations != n_observations_source:
+            raise ValueError("Parameter `target_variables` has different number of observations than `X_source`.")
+
+    if not isinstance(add_transformed_source, bool):
+        raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
+
+    if target_variables is None:
+        if not add_transformed_source:
+            raise ValueError("Either `target_variables` has to be specified or `add_transformed_source` has to be set to True.")
+
+    if not isinstance(target_manifold_dimensionality, int):
+        raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
+
+    if bootstrap_variables is not None:
+        if not isinstance(bootstrap_variables, list):
+            raise ValueError("Parameter `bootstrap_variables` has to be of type `list`.")
+
+    if penalty_function is not None:
+
+        if not isinstance(penalty_function, str):
+            raise ValueError("Parameter `penalty_function` has to be of type `str`.")
+
+        if penalty_function not in __penalty_functions:
+            raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+
+    if not isinstance(norm, str):
+        raise ValueError("Parameter `norm` has to be of type `str`.")
+
+    if norm not in __norms:
+        raise ValueError("Parameter `norm` has to be one of the following: 'average', 'cumulative', 'max', 'median', 'min'.")
+
+    if not isinstance(integrate_to_peak, bool):
+        raise ValueError("Parameter `integrate_to_peak` has to be of type `bool`.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be of type `bool`.")
+
+    variables_indices = [i for i in range(0,n_variables)]
+
+    costs = []
+
+    # Automatic bootstrapping: -------------------------------------------------
+    if bootstrap_variables is None:
+
+        if verbose: print('Automatic bootstrapping...\n')
+
+        bootstrap_cost_function = []
+
+        bootstrap_tic = time.perf_counter()
+
+        for i_variable in variables_indices:
+
+            if verbose: print('\tCurrently checking variable:\t' + variable_names[i_variable])
+
+            PCs = X[:,[i_variable]]
+            PC_sources = X_source[:,[i_variable]]
+
+            if target_variables is None:
+                depvars = cp.deepcopy(PC_sources)
+                depvar_names = ['SZ1']
+            else:
+                if add_transformed_source:
+                    depvars = np.hstack((PC_sources, target_variables))
+                    depvar_names = ['SZ1'] + target_variables_names
+                else:
+                    depvars = target_variables
+                    depvar_names = target_variables_names
+
+            bootstrap_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+
+            bootstrap_area = analysis.cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+            if verbose: print('\tCost:\t%.4f' % bootstrap_area)
+            bootstrap_cost_function.append(bootstrap_area)
+
+        # Find a single best variable to bootstrap with:
+        (best_bootstrap_variable_index, ) = np.where(np.array(bootstrap_cost_function)==np.min(bootstrap_cost_function))
+        best_bootstrap_variable_index = int(best_bootstrap_variable_index)
+
+        costs.append(np.min(bootstrap_cost_function))
+
+        bootstrap_variables = [best_bootstrap_variable_index]
+
+        if verbose: print('\n\tVariable ' + variable_names[best_bootstrap_variable_index] + ' will be used as bootstrap.\n\tCost:\t%.4f' % np.min(bootstrap_cost_function) + '\n')
+
+        bootstrap_toc = time.perf_counter()
+        if verbose: print(f'Boostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    # Use user-defined bootstrapping: -----------------------------------------
+    else:
+
+        # Manifold dimensionality needs a fix here!
+        if verbose: print('User-defined bootstrapping...\n')
+
+        bootstrap_cost_function = []
+
+        bootstrap_tic = time.perf_counter()
+
+        if len(bootstrap_variables) < target_manifold_dimensionality:
+            n_components = len(bootstrap_variables)
+        else:
+            n_components = cp.deepcopy(target_manifold_dimensionality)
+
+        if verbose: print('\tUser-defined bootstrapping will be performed for a ' + str(n_components) + '-dimensional manifold.')
+
+        bootstrap_pca = reduction.PCA(X[:,bootstrap_variables], scaling=scaling, n_components=n_components)
+        PCs = bootstrap_pca.transform(X[:,bootstrap_variables])
+        PC_sources = bootstrap_pca.transform(X_source[:,bootstrap_variables], nocenter=True)
+
+        if target_variables is None:
+            depvars = cp.deepcopy(PC_sources)
+            depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
+        else:
+            if add_transformed_source:
+                depvars = np.hstack((PC_sources, target_variables))
+                depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + target_variables_names
+            else:
+                depvars = target_variables
+                depvar_names = target_variables_names
+
+        bootstrap_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+
+        bootstrap_area = analysis.cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+        bootstrap_cost_function.append(bootstrap_area)
+        costs.append(bootstrap_area)
+
+        if verbose: print('\n\tVariable(s) ' + ', '.join([variable_names[i] for i in bootstrap_variables]) + ' will be used as bootstrap\n\tCost:\t%.4f' % np.min(bootstrap_area) + '\n')
+
+        bootstrap_toc = time.perf_counter()
+        if verbose: print(f'Boostrapping time: {(bootstrap_toc - bootstrap_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    # Iterate the algorithm starting from the bootstrap selection: -------------
+    if verbose: print('Optimizing...\n')
+
+    total_tic = time.perf_counter()
+
+    ordered_variables = [i for i in bootstrap_variables]
+
+    remaining_variables_list = [i for i in range(0,n_variables) if i not in bootstrap_variables]
+    previous_area = np.min(bootstrap_cost_function)
+
+    loop_counter = 0
+
+    while len(remaining_variables_list) > 0:
+
+        iteration_tic = time.perf_counter()
+
+        loop_counter += 1
+
+        if verbose:
+            print('Iteration No.' + str(loop_counter))
+            print('Currently adding variables from the following list: ')
+            print([variable_names[i] for i in remaining_variables_list])
+
+        current_cost_function = []
+
+        for i_variable in remaining_variables_list:
+
+            if len(ordered_variables) < target_manifold_dimensionality:
+                n_components = len(ordered_variables) + 1
+            else:
+                n_components = cp.deepcopy(target_manifold_dimensionality)
+
+            if verbose: print('\tCurrently added variable: ' + variable_names[i_variable])
+
+            current_variables_list = ordered_variables + [i_variable]
+
+            pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=n_components)
+            PCs = pca.transform(X[:,current_variables_list])
+            PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
+
+            if target_variables is None:
+                depvars = cp.deepcopy(PC_sources)
+                depvar_names = ['SZ' + str(i) for i in range(0,n_components)]
+            else:
+                if add_transformed_source:
+                    depvars = np.hstack((PC_sources, target_variables))
+                    depvar_names = depvar_names = ['SZ' + str(i) for i in range(0,n_components)] + target_variables_names
+                else:
+                    depvars = target_variables
+                    depvar_names = target_variables_names
+
+            current_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
+            current_derivative, current_sigma, _ = analysis.normalized_variance_derivative(current_variance_data)
+
+            current_area = analysis.cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+            if verbose: print('\tCost:\t%.4f' % current_area)
+            current_cost_function.append(current_area)
+
+            if current_area <= previous_area:
+                if verbose: print(colored('\tSAME OR BETTER', 'green'))
+            else:
+                if verbose: print(colored('\tWORSE', 'red'))
+
+        min_area = np.min(current_cost_function)
+        (best_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
+        try:
+            best_variable_index = int(best_variable_index)
+        except:
+            best_variable_index = int(best_variable_index[0])
+
+        if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
+        ordered_variables.append(remaining_variables_list[best_variable_index])
+        remaining_variables_list = [i for i in range(0,n_variables) if i not in ordered_variables]
+        if min_area <= previous_area:
+            previous_area = min_area
+        costs.append(min_area)
+
+        iteration_toc = time.perf_counter()
+        if verbose: print(f'\tIteration time: {(iteration_toc - iteration_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    # Compute the optimal subset where the cost is minimized: ------------------
+    (min_cost_function_index, ) = np.where(costs==np.min(costs))
+    try:
+        min_cost_function_index = int(min_cost_function_index)
+    except:
+        min_cost_function_index = int(min_cost_function_index[0])
+
+    if min_cost_function_index+1 < target_manifold_dimensionality:
+        selected_variables = list(np.array(ordered_variables)[0:target_manifold_dimensionality])
+    else:
+        selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index+1])
+
+    if verbose:
+
+        print('Ordered variables:')
+        print(', '.join([variable_names[i] for i in ordered_variables]))
+        print(ordered_variables)
+        print('Final cost: %.4f' % min_area)
+
+        print('\nSelected variables:')
+        print(', '.join([variable_names[i] for i in selected_variables]))
+        print(selected_variables)
+        print('Lowest cost: %.4f' % previous_area)
+
+    total_toc = time.perf_counter()
+    if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    return ordered_variables, selected_variables, previous_area, costs
+
+# ------------------------------------------------------------------------------
+
+def manifold_informed_backward_variable_elimination(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
+    """
+    Manifold-informed feature selection algorithm based on backward variable elimination introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
+    select a meaningful subset of the original variables such that
+    undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
+    The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
+    for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
+
+    The algorithm iterates, removing another variable that has an effect of decreasing the cost the most at each iteration.
+    The original variables in a data set get ordered according to their effect
+    on the manifold topology. Assuming that the original data set is composed of :math:`Q` variables,
+    the first output is a list of indices of the ordered
+    original variables, :math:`\\mathbf{X} = [X_1, X_2, \\dots, X_Q]`. The second output is a list of indices of the selected
+    subset of the original variables, :math:`\\mathbf{X}_S = [X_1, X_2, \\dots, X_n]`, that correspond to the minimum cost, :math:`\\mathcal{L}`.
+
+    More information can be found in :cite:`Zdybal2022`.
+
+    .. note::
+
+        The algorithm can be very expensive (for large data sets) due to multiple computations of the normalized variance derivative.
+        Try running it on multiple cores or on a sampled data set.
+
+        In case the algorithm breaks when not being able to determine the peak
+        location, try increasing the range in the ``bandwidth_values`` parameter.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import manifold_informed_backward_variable_elimination as BVE
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+        X_source = np.random.rand(100,10)
+
+        # Define original variables to add to the optimization:
+        target_variables = X[:,0:3]
+
+        # Specify variables names
+        variable_names = ['X_' + str(i) for i in range(0,10)]
+
+        # Specify the bandwidth values to compute the optimization on:
+        bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Run the subset selection algorithm:
+        (ordered, selected, min_cost, costs) = BVE(X,
+                                                   X_source,
+                                                   variable_names,
+                                                   scaling='auto',
+                                                   bandwidth_values=bandwidth_values,
+                                                   target_variables=target_variables,
+                                                   add_transformed_source=True,
+                                                   target_manifold_dimensionality=2,
+                                                   penalty_function='peak',
+                                                   norm='max',
+                                                   integrate_to_peak=True,
+                                                   verbose=True)
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param X_source:
+        ``numpy.ndarray`` specifying the source terms, :math:`\\mathbf{S_X}`, corresponding to the state-space
+        variables in :math:`\\mathbf{X}`. This parameter is applicable to data sets
+        representing reactive flows. More information can be found in :cite:`Sutherland2009`. It should be of size ``(n_observations,n_variables)``.
+    :param variable_names:
+        ``list`` of ``str`` specifying variables names. Order of names in the ``variable_names`` list should match the order of variables (columns) in ``X``.
+    :param scaling: (optional)
+        ``str`` specifying the scaling methodology. It can be one of the following:
+        ``'none'``, ``''``, ``'auto'``, ``'std'``, ``'pareto'``, ``'vast'``, ``'range'``, ``'0to1'``,
+        ``'-1to1'``, ``'level'``, ``'max'``, ``'poisson'``, ``'vast_2'``, ``'vast_3'``, ``'vast_4'``.
+    :param bandwidth_values:
+        ``numpy.ndarray`` specifying the bandwidth values, :math:`\\sigma`, for :math:`\\hat{\\mathcal{D}}(\\sigma)` computation.
+    :param target_variables: (optional)
+        ``numpy.ndarray`` specifying the dependent variables that should be used in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation. It should be of size ``(n_observations,n_target_variables)``.
+    :param add_transformed_source: (optional)
+        ``bool`` specifying if the PCA-transformed source terms of the state-space variables should be added in :math:`\\hat{\\mathcal{D}}(\\sigma)` computation, alongside the user-defined dependent variables.
+    :param source_space: (optional)
+        ``str`` specifying the space to which the PC source terms should be transformed before computing the cost. It can be one of the following: ``symlog``, ``continuous-symlog``, ``original-and-symlog``, ``original-and-continuous-symlog``. If set to ``None``, PC source terms are kept in their original PCA-space.
+    :param target_manifold_dimensionality: (optional)
+        ``int`` specifying the target dimensionality of the PCA manifold.
+    :param penalty_function: (optional)
+        ``str`` specifying the weighting applied to each area.
+        Set ``penalty_function='peak'`` to weight each area by the rightmost peak location, :math:`\\sigma_{peak, i}`, for the :math:`i^{th}` dependent variable.
+        Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
+        Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
+        If ``penalty_function=None``, the area is not weighted.
+    :param norm: (optional)
+        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
+    :param integrate_to_peak: (optional)
+        ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **ordered_variables** - ``list`` specifying the indices of the ordered variables.
+        - **selected_variables** - ``list`` specifying the indices of the selected variables that correspond to the minimum cost :math:`\\mathcal{L}`.
+        - **optimized_cost** - ``float`` specifying the cost corresponding to the optimized subset.
+        - **costs** - ``list`` specifying the costs, :math:`\\mathcal{L}`, from each iteration.
+    """
+
+    __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
+    __norms = ['average', 'cumulative', 'max', 'median', 'min']
+    __source_spaces = ['symlog', 'continuous-symlog', 'original-and-symlog', 'original-and-continuous-symlog']
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have shape `(n_observations,n_variables)`.")
+
+    if not isinstance(X_source, np.ndarray):
+        raise ValueError("Parameter `X_source` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations_source, n_variables_source) = np.shape(X_source)
+    except:
+        raise ValueError("Parameter `X_source` has to have shape `(n_observations,n_variables)`.")
+
+    if n_variables_source != n_variables:
+        raise ValueError("Parameter `X_source` has different number of variables than `X`.")
+
+    # TODO: In the future, we might want to allow different number of observations, there is no reason why they should be equal.
+    if n_observations_source != n_observations:
+        raise ValueError("Parameter `X_source` has different number of observations than `X`.")
+
+    if not isinstance(variable_names, list):
+        raise ValueError("Parameter `variable_names` has to be of type `list`.")
+
+    if len(variable_names) != n_variables:
+        raise ValueError("Parameter `variable_names` has different number of variables than `X`.")
+
+    if not isinstance(scaling, str):
+        raise ValueError("Parameter `scaling` has to be of type `str`.")
+
+    if not isinstance(bandwidth_values, np.ndarray):
+        raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
+
+    if target_variables is not None:
+        if not isinstance(target_variables, np.ndarray):
+            raise ValueError("Parameter `target_variables` has to be of type `numpy.ndarray`.")
+        try:
+            (n_d_hat_observations, n_target_variables) = np.shape(target_variables)
+            target_variables_names = ['X' + str(i) for i in range(0,n_target_variables)]
+        except:
+            raise ValueError("Parameter `target_variables` has to have shape `(n_observations,n_target_variables)`.")
+
+        if n_d_hat_observations != n_observations_source:
+            raise ValueError("Parameter `target_variables` has different number of observations than `X_source`.")
+
+    if not isinstance(add_transformed_source, bool):
+        raise ValueError("Parameter `add_transformed_source` has to be of type `bool`.")
+
+    if target_variables is None:
+        if not add_transformed_source:
+            raise ValueError("Either `target_variables` has to be specified or `add_transformed_source` has to be set to True.")
+
+    if source_space is not None:
+        if not isinstance(source_space, str):
+            raise ValueError("Parameter `source_space` has to be of type `str`.")
+        if source_space.lower() not in __source_spaces:
+            raise ValueError("Parameter `source_space` has to be one of the following: symlog`, `continuous-symlog`.")
+
+    if not isinstance(target_manifold_dimensionality, int):
+        raise ValueError("Parameter `target_manifold_dimensionality` has to be of type `int`.")
+
+    if penalty_function is not None:
+        if not isinstance(penalty_function, str):
+            raise ValueError("Parameter `penalty_function` has to be of type `str`.")
+        if penalty_function not in __penalty_functions:
+            raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+
+    if not isinstance(norm, str):
+        raise ValueError("Parameter `norm` has to be of type `str`.")
+
+    if norm not in __norms:
+        raise ValueError("Parameter `norm` has to be one of the following: 'average', 'cumulative', 'max', 'median', 'min'.")
+
+    if not isinstance(integrate_to_peak, bool):
+        raise ValueError("Parameter `integrate_to_peak` has to be of type `bool`.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be of type `bool`.")
+
+    costs = []
+
+    if verbose: print('Optimizing...\n')
+
+    if verbose:
+        if add_transformed_source is not None:
+            if source_space is not None:
+                print('PC source terms will be assessed in the ' + source_space + ' space.\n')
+
+    total_tic = time.perf_counter()
+
+    remaining_variables_list = [i for i in range(0,n_variables)]
+
+    ordered_variables = []
+
+    loop_counter = 0
+
+    # Iterate the algorithm: ---------------------------------------------------
+    while len(remaining_variables_list) > target_manifold_dimensionality:
+
+        iteration_tic = time.perf_counter()
+
+        loop_counter += 1
+
+        if verbose:
+            print('Iteration No.' + str(loop_counter))
+            print('Currently eliminating variable from the following list: ')
+            print([variable_names[i] for i in remaining_variables_list])
+
+        current_cost_function = []
+
+        for i_variable in remaining_variables_list:
+
+            if verbose: print('\tCurrently eliminated variable: ' + variable_names[i_variable])
+
+            # Consider a subset with all variables but the currently eliminated one:
+            current_variables_list = [i for i in remaining_variables_list if i != i_variable]
+
+            if verbose:
+                print('\tRunning PCA for a subset:')
+                print('\t' + ', '.join([variable_names[i] for i in current_variables_list]))
+
+            pca = reduction.PCA(X[:,current_variables_list], scaling=scaling, n_components=target_manifold_dimensionality)
+            PCs = pca.transform(X[:,current_variables_list])
+            (PCs, _, _) = preprocess.center_scale(PCs, '-1to1')
+
+            if add_transformed_source:
+                PC_sources = pca.transform(X_source[:,current_variables_list], nocenter=True)
+                if source_space is not None:
+                    if source_space == 'original-and-symlog':
+                        transformed_PC_sources = preprocess.log_transform(PC_sources, method='symlog', threshold=1.e-4)
+                    elif source_space == 'original-and-continuous-symlog':
+                        transformed_PC_sources = preprocess.log_transform(PC_sources, method='continuous-symlog', threshold=1.e-4)
+                    else:
+                        transformed_PC_sources = preprocess.log_transform(PC_sources, method=source_space, threshold=1.e-4)
+
+            if target_variables is None:
+                if source_space == 'original-and-symlog' or source_space == 'original-and-continuous-symlog':
+                    depvars = np.hstack((PC_sources, transformed_PC_sources))
+                    depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
+                elif source_space == 'symlog' or source_space == 'continuous-symlog':
+                    depvars = cp.deepcopy(transformed_PC_sources)
+                    depvar_names = ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
+                else:
+                    depvars = cp.deepcopy(PC_sources)
+                    depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)]
+            else:
+                if add_transformed_source:
+                    if source_space == 'original-and-symlog' or source_space == 'original-and-continuous-symlog':
+                        depvars = np.hstack((PC_sources, transformed_PC_sources, target_variables))
+                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + target_variables_names
+                    elif source_space == 'symlog' or source_space == 'continuous-symlog':
+                        depvars = np.hstack((transformed_PC_sources, target_variables))
+                        depvar_names = ['symlog-SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + target_variables_names
+                    else:
+                        depvars = np.hstack((PC_sources, target_variables))
+                        depvar_names = ['SZ' + str(i) for i in range(0,target_manifold_dimensionality)] + target_variables_names
+                else:
+                    depvars = cp.deepcopy(target_variables)
+                    depvar_names = cp.deepcopy(target_variables_names)
+
+            current_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, scale_unit_box = False, bandwidth_values=bandwidth_values)
+            current_area = analysis.cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+            if verbose: print('\tCost:\t%.4f' % current_area)
+            current_cost_function.append(current_area)
+
+            # Starting from the second iteration, we can make a comparison with the previous iteration's results:
+            if loop_counter > 1:
+                if current_area <= previous_area:
+                    if verbose: print(colored('\tSAME OR BETTER', 'green'))
+                else:
+                    if verbose: print(colored('\tWORSE', 'red'))
+
+        min_area = np.min(current_cost_function)
+        costs.append(min_area)
+
+        # Search for the variable whose removal will decrease the cost the most:
+        (worst_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
+
+        # This handles cases where there are multiple minima with the same minimum cost value:
+        try:
+            worst_variable_index = int(worst_variable_index)
+        except:
+            worst_variable_index = int(worst_variable_index[0])
+
+        if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[worst_variable_index]] + ' is removed.\n\tCost:\t%.4f' % min_area + '\n')
+
+        # Append removed variable in the ascending order, this list is later flipped to have variables ordered from most to least important:
+        ordered_variables.append(remaining_variables_list[worst_variable_index])
+
+        # Create a new list of variables to loop over at the next iteration:
+        remaining_variables_list = [i for i in range(0,n_variables) if i not in ordered_variables]
+
+        if loop_counter > 1:
+            if min_area <= previous_area:
+                previous_area = min_area
+        else:
+            previous_area = min_area
+
+        iteration_toc = time.perf_counter()
+        if verbose: print(f'\tIteration time: {(iteration_toc - iteration_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    # Compute the optimal subset where the overal cost from all iterations is minimized: ------------------
+
+    # One last time remove the worst variable:
+    del current_cost_function[worst_variable_index]
+
+    for i in remaining_variables_list:
+        ordered_variables.append(i)
+
+    for i in range(0,len(remaining_variables_list)):
+        costs.append(current_cost_function[i])
+
+    # Invert lists to have variables ordered from most to least important:
+    ordered_variables = ordered_variables[::-1]
+    costs = costs[::-1]
+
+    (min_cost_function_index, ) = np.where(costs==np.min(costs))
+
+    # This handles cases where there are multiple minima with the same minimum cost value:
+    try:
+        min_cost_function_index = int(min_cost_function_index)
+    except:
+        min_cost_function_index = int(min_cost_function_index[0])
+
+    selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index])
+
+    optimized_cost = costs[min_cost_function_index]
+
+    if verbose:
+
+        print('Ordered variables:')
+        print(', '.join([variable_names[i] for i in ordered_variables]))
+        print(ordered_variables)
+        print('Final cost: %.4f' % min_area)
+
+        print('\nSelected variables:')
+        print(', '.join([variable_names[i] for i in selected_variables]))
+        print(selected_variables)
+        print('Lowest cost: %.4f' % optimized_cost)
+
+    total_toc = time.perf_counter()
+    if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
+
+    return ordered_variables, selected_variables, optimized_cost, costs
