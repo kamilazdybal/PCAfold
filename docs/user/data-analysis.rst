@@ -80,18 +80,6 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.cost_function_normalized_variance_derivative
 
-``manifold_informed_feature_selection``
-================================================
-
-.. autofunction:: PCAfold.analysis.manifold_informed_feature_selection
-
-``manifold_informed_backward_elimination``
-================================================
-
-.. autofunction:: PCAfold.analysis.manifold_informed_backward_elimination
-
---------------------------------------------------------------------------------
-
 ******************
 Kernel Regression
 ******************

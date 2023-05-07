@@ -43,6 +43,18 @@ Class ``QoIAwareProjection``
 
 .. autofunction:: PCAfold.utilities.QoIAwareProjection.plot_losses
 
+``manifold_informed_forward_variable_addition``
+===============================================
+
+.. autofunction:: PCAfold.utilities.manifold_informed_forward_variable_addition
+
+``manifold_informed_backward_variable_elimination``
+===================================================
+
+.. autofunction:: PCAfold.utilities.manifold_informed_backward_variable_elimination
+
+--------------------------------------------------------------------------------
+
 ************
 Bibliography
 ************
