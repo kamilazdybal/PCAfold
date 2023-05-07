@@ -4,9 +4,9 @@ from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import manifold_informed_backward_variable_elimination as BVE
 
-class Analysis(unittest.TestCase):
+class Utilities(unittest.TestCase):
 
-    def test_analysis__manifold_informed_backward_elimination__allowed_calls(self):
+    def test_utilities__manifold_informed_backward_elimination__allowed_calls(self):
 
         X = np.random.rand(100,5)
         X_source = np.random.rand(100,5)
@@ -63,7 +63,7 @@ class Analysis(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__manifold_informed_backward_elimination__not_allowed_calls(self):
+    def test_utilities__manifold_informed_backward_elimination__not_allowed_calls(self):
 
         X = np.random.rand(100,5)
         X_source = np.random.rand(100,5)
@@ -117,7 +117,7 @@ class Analysis(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__manifold_informed_backward_elimination__computation(self):
+    def test_utilities__manifold_informed_backward_elimination__computation(self):
 
         X = np.random.rand(100,5)
         X_source = np.random.rand(100,5)
@@ -168,3 +168,21 @@ class Analysis(unittest.TestCase):
             self.assertTrue(False)
 
 # ------------------------------------------------------------------------------
+
+    def test_utilities__manifold_informed_backward_elimination__changing_cost_function_hyper_parameters(self):
+
+        X = np.random.rand(100,5)
+        X_source = np.random.rand(100,5)
+        variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
+        scaling='auto'
+        bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
+
+        # Make sure that the ordered_variables entries are reasonable:
+        try:
+            (ordered_variables, selected_variables, optimized_cost, costs) = BVE(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, power=2, vertical_shift=2)
+            (ordered_variables, selected_variables, optimized_cost, costs) = BVE(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, power=0.5, vertical_shift=0.5)
+            (ordered_variables, selected_variables, optimized_cost, costs) = BVE(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, power=-0.5, vertical_shift=-0.5)
+            (ordered_variables, selected_variables, optimized_cost, costs) = BVE(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, power=-1, vertical_shift=-1)
+            (ordered_variables, selected_variables, optimized_cost, costs) = BVE(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, power=-2, vertical_shift=-2)
+        except Exception:
+            self.assertTrue(False)

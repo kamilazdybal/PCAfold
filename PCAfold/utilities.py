@@ -982,7 +982,7 @@ class QoIAwareProjection:
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_forward_variable_addition(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_forward_variable_addition(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, penalty_function=None, power=1, vertical_shift=1, norm='max', integrate_to_peak=False, verbose=False):
     """
     Manifold-informed feature selection algorithm based on forward variable addition introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
@@ -1075,6 +1075,10 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
         Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
         Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
         If ``penalty_function=None``, the area is not weighted.
+    :param power: (optional)
+        ``float`` or ``int`` specifying the power, :math:`r`. It can be used to control how much penalty should be applied to variance happening at the smallest length scales.
+    :param vertical_shift: (optional)
+        ``float`` or ``int`` specifying the vertical shift multiplier, :math:`b`. It can be used to control how much penalty should be applied to feature sizes.
     :param norm: (optional)
         ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
@@ -1162,6 +1166,12 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
         if penalty_function not in __penalty_functions:
             raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
 
+    if not isinstance(power, int) and not isinstance(power, float):
+        raise ValueError("Parameter `power` has to be of type `float` or `int`.")
+
+    if not isinstance(vertical_shift, int) and not isinstance(vertical_shift, float):
+        raise ValueError("Parameter `vertical_shift` has to be of type `float` or `int`.")
+
     if not isinstance(norm, str):
         raise ValueError("Parameter `norm` has to be of type `str`.")
 
@@ -1207,7 +1217,7 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
 
             bootstrap_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-            bootstrap_area = analysis.cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+            bootstrap_area = analysis.cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, power=power, vertical_shift=vertical_shift, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % bootstrap_area)
             bootstrap_cost_function.append(bootstrap_area)
 
@@ -1258,7 +1268,7 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
 
         bootstrap_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
 
-        bootstrap_area = analysis.cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+        bootstrap_area = analysis.cost_function_normalized_variance_derivative(bootstrap_variance_data, penalty_function=penalty_function, power=power, vertical_shift=vertical_shift, norm=norm, integrate_to_peak=integrate_to_peak)
         bootstrap_cost_function.append(bootstrap_area)
         costs.append(bootstrap_area)
 
@@ -1321,7 +1331,7 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
             current_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, bandwidth_values=bandwidth_values)
             current_derivative, current_sigma, _ = analysis.normalized_variance_derivative(current_variance_data)
 
-            current_area = analysis.cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+            current_area = analysis.cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, power=power, vertical_shift=vertical_shift, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
 
@@ -1378,7 +1388,7 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_backward_variable_elimination(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, penalty_function=None, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_backward_variable_elimination(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, penalty_function=None, power=1, vertical_shift=1, norm='max', integrate_to_peak=False, verbose=False):
     """
     Manifold-informed feature selection algorithm based on backward variable elimination introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
     select a meaningful subset of the original variables such that
@@ -1465,6 +1475,10 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
         Set ``penalty_function='sigma'`` to weight each area continuously by the bandwidth.
         Set ``penalty_function='log-sigma-over-peak'`` to weight each area continuously by the :math:`\\log_{10}` -transformed bandwidth, normalized by the right most peak location, :math:`\\sigma_{peak, i}`.
         If ``penalty_function=None``, the area is not weighted.
+    :param power: (optional)
+        ``float`` or ``int`` specifying the power, :math:`r`. It can be used to control how much penalty should be applied to variance happening at the smallest length scales.
+    :param vertical_shift: (optional)
+        ``float`` or ``int`` specifying the vertical shift multiplier, :math:`b`. It can be used to control how much penalty should be applied to feature sizes.
     :param norm: (optional)
         ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
         ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
@@ -1552,6 +1566,12 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
             raise ValueError("Parameter `penalty_function` has to be of type `str`.")
         if penalty_function not in __penalty_functions:
             raise ValueError("Parameter `penalty_function` has to be one of the following: 'peak', 'sigma', 'log-sigma-over-peak'.")
+
+    if not isinstance(power, int) and not isinstance(power, float):
+        raise ValueError("Parameter `power` has to be of type `float` or `int`.")
+
+    if not isinstance(vertical_shift, int) and not isinstance(vertical_shift, float):
+        raise ValueError("Parameter `vertical_shift` has to be of type `float` or `int`.")
 
     if not isinstance(norm, str):
         raise ValueError("Parameter `norm` has to be of type `str`.")
@@ -1647,7 +1667,7 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
                     depvar_names = cp.deepcopy(target_variables_names)
 
             current_variance_data = analysis.compute_normalized_variance(PCs, depvars, depvar_names=depvar_names, scale_unit_box = False, bandwidth_values=bandwidth_values)
-            current_area = analysis.cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, norm=norm, integrate_to_peak=integrate_to_peak)
+            current_area = analysis.cost_function_normalized_variance_derivative(current_variance_data, penalty_function=penalty_function, power=power, vertical_shift=vertical_shift, norm=norm, integrate_to_peak=integrate_to_peak)
             if verbose: print('\tCost:\t%.4f' % current_area)
             current_cost_function.append(current_area)
 
