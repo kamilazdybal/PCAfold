@@ -5,7 +5,7 @@
 Cost function for manifold topology assessment and optimization
 #######################################################################
 
-In this tutorial, we present the cost function from the ``analysis`` module which distills information from the normalized variance derivative into a single number. The cost function can be used for low-dimensional manifold topology assessment and manifold optimization. 
+In this tutorial, we present the cost function from the ``analysis`` module which distills information from the normalized variance derivative into a single number. The cost function can be used for low-dimensional manifold topology assessment and manifold optimization.
 
 We import the necessary modules:
 
@@ -14,6 +14,7 @@ We import the necessary modules:
   from PCAfold import preprocess
   from PCAfold import reduction
   from PCAfold import analysis
+  from PCAfold import manifold_informed_backward_variable_elimination as BVE
   import numpy as np
 
 and we set some initial parameters:
@@ -26,7 +27,7 @@ and we set some initial parameters:
 Upload a combustion data set
 ************************************
 
-A data set representing combustion of syngas in air generated from steady laminar flamelet model using *Spitfire* and a chemical mechanism by Hawkes et al. is used as a demo data set. 
+A data set representing combustion of syngas in air generated from steady laminar flamelet model using *Spitfire* and a chemical mechanism by Hawkes et al. is used as a demo data set.
 
 We begin by importing the data set composed of the original state space variables,
 :math:`\mathbf{X}`, and the corresponding source terms, :math:`\mathbf{S_X}`:
@@ -59,31 +60,31 @@ Below, we generate two- and three-dimensional projections of the original data s
 
 We visualize the generated manifolds:
 
-.. image:: ../images/tutorial-cost-function-2D-manifold-SZ1.svg
+.. image:: ../images/tutorial-cost-function-2D-manifold-SZ1.png
     :width: 300
     :align: center
 
-.. image:: ../images/tutorial-cost-function-2D-manifold-SZ2.svg
+.. image:: ../images/tutorial-cost-function-2D-manifold-SZ2.png
     :width: 300
     :align: center
 
-.. image:: ../images/tutorial-cost-function-3D-manifold-SZ1.svg
+.. image:: ../images/tutorial-cost-function-3D-manifold-SZ1.png
     :width: 300
     :align: center
 
-.. image:: ../images/tutorial-cost-function-3D-manifold-SZ2.svg
+.. image:: ../images/tutorial-cost-function-3D-manifold-SZ2.png
     :width: 300
     :align: center
-    
-.. image:: ../images/tutorial-cost-function-3D-manifold-SZ3.svg
+
+.. image:: ../images/tutorial-cost-function-3D-manifold-SZ3.png
     :width: 300
     :align: center
-    
+
 ****************************************************
 Manifold assessment using the cost function
 ****************************************************
 
-We are going to compute the cost function for the PC source terms as the target dependent variables. 
+We are going to compute the cost function for the PC source terms as the target dependent variables.
 
 We specify the penalty function to use:
 
@@ -117,8 +118,8 @@ The associated costs are computed from the generated object of the ``VarianceDat
 
 .. code:: python
 
-    costs_2D = analysis.cost_function_normalized_variance_derivative(variance_data_2D, 
-                                                                     penalty_function=penalty_function, 
+    costs_2D = analysis.cost_function_normalized_variance_derivative(variance_data_2D,
+                                                                     penalty_function=penalty_function,
                                                                      norm=None)
 
 We can print the individual costs:
@@ -137,15 +138,15 @@ Finally, we repeat the cost function computation for the three-dimensional PCA p
 
 .. code:: python
 
-    variance_data_3D = analysis.compute_normalized_variance(Z_3D, 
-                                                            S_Z_3D, 
+    variance_data_3D = analysis.compute_normalized_variance(Z_3D,
+                                                            S_Z_3D,
                                                             depvar_names=depvar_names_3D,
                                                             bandwidth_values=bandwidth_values)
 
 .. code:: python
 
-    costs_3D = analysis.cost_function_normalized_variance_derivative(variance_data_3D, 
-                                                                     penalty_function=penalty_function, 
+    costs_3D = analysis.cost_function_normalized_variance_derivative(variance_data_3D,
+                                                                     penalty_function=penalty_function,
                                                                      norm=None)
 
 and we print the individual costs:
@@ -194,7 +195,7 @@ Set the norm to take over all target dependent variables:
 .. code:: python
 
     norm = 'cumulative'
-    
+
 Set the target manifold dimensionality:
 
 .. code:: python
@@ -205,17 +206,17 @@ Run the algorithm:
 
 .. code:: python
 
-    _, selected_variables, _, _ = analysis.manifold_informed_backward_elimination(sampled_X,
-                                                                                  sampled_S_X,
-                                                                                  X_names,
-                                                                                  scaling='auto',
-                                                                                  bandwidth_values=bandwidth_values,
-                                                                                  target_variables=target_variables,
-                                                                                  add_transformed_source=True,
-                                                                                  target_manifold_dimensionality=q,
-                                                                                  penalty_function=penalty_function,
-                                                                                  norm=norm,
-                                                                                  verbose=True)
+  _, selected_variables, _, _ = BVE(sampled_X,
+                                    sampled_S_X,
+                                    X_names,
+                                    scaling='auto',
+                                    bandwidth_values=bandwidth_values,
+                                    target_variables=target_variables,
+                                    add_transformed_source=True,
+                                    target_manifold_dimensionality=q,
+                                    penalty_function=penalty_function,
+                                    norm=norm,
+                                    verbose=True)
 
 With ``verbose=True`` we will see additional information on costs at each iteration:
 
@@ -223,7 +224,7 @@ With ``verbose=True`` we will see additional information on costs at each iterat
 
     --------------------------------------------------
     Iteration No.4
-    Currently eliminating variable from the following list: 
+    Currently eliminating variable from the following list:
     ['T', 'H2', 'O2', 'O', 'OH', 'H2O', 'H', 'CO2']
         Currently eliminated variable: T
         Running PCA for a subset:
@@ -279,39 +280,39 @@ Finally, we generate the PCA projection of the optimized subset of the original 
     Z_optimized = pca_X_optimized.transform(X[:,selected_variables])
     S_Z_optimized = pca_X_optimized.transform(S_X[:,selected_variables], nocenter=True)
 
-.. image:: ../images/tutorial-cost-function-2D-optimized-manifold-SZ1.svg
+.. image:: ../images/tutorial-cost-function-2D-optimized-manifold-SZ1.png
     :width: 300
     :align: center
 
-.. image:: ../images/tutorial-cost-function-2D-optimized-manifold-SZ2.svg
+.. image:: ../images/tutorial-cost-function-2D-optimized-manifold-SZ2.png
     :width: 300
     :align: center
-    
+
 From the plots above, we observe that the optimized two-dimensional PCA projection exhibits much less overlap compared to the two-dimensional PCA projection that we computed earlier using the full data set.
 
 Below, we compute the costs for the two PC source terms again for this optimized projection:
 
 .. code:: python
 
-    variance_data_optimized = analysis.compute_normalized_variance(Z_optimized, 
-                                                               S_Z_optimized, 
+    variance_data_optimized = analysis.compute_normalized_variance(Z_optimized,
+                                                               S_Z_optimized,
                                                                depvar_names=depvar_names_2D,
                                                                bandwidth_values=bandwidth_values)
-    
+
 .. code:: python
 
-    costs_optimized = analysis.cost_function_normalized_variance_derivative(variance_data_optimized, 
-                                                                            penalty_function=penalty_function, 
+    costs_optimized = analysis.cost_function_normalized_variance_derivative(variance_data_optimized,
+                                                                            penalty_function=penalty_function,
                                                                             norm=None)
-    
+
 .. code:: python
 
     for i, variable in enumerate(depvar_names_2D):
         print(variable + ':\t' + str(round(costs_optimized[i],3)))
-    
+
 .. code-block:: text
 
     SZ1:	1.357
     SZ2:	0.831
-    
+
 We note that the costs for the two PC source terms are lower than the costs that we computed earlier using the full data set to generate the PCA projection.
