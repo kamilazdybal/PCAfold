@@ -34,6 +34,28 @@ class QoIAwareProjection:
     """
     Enables computing QoI-aware encoder-decoder projections.
 
+    The QoI-aware encoder-decoder is an autoencoder-like neural network that
+    reconstructs important quantities of interest (QoIs) at the output of a decoder.
+    The QoIs can be set to projection-independent variables (such as the original state variables)
+    or projection-dependent variables, whose definition changes during neural network training.
+
+    We introduce an intrusive modification to the neural network training process
+    such that at each epoch, a low-dimensional basis matrix is computed from the current weights in the encoder.
+    Any projection-dependent variables at the output get re-projected onto that basis.
+
+    The rationale for performing dimensionality reduction with the QoI-aware strategy is
+    that any poor topological behaviors on a low-dimensional projection will immediately increase the loss during training.
+    These behaviors could be non-uniqueness in representing QoIs due to overlaps on a projection,
+    or large gradients in QoIs caused by data compression in certain regions of a projection.
+    Thus, the QoI-aware strategy naturally promotes improved projection topologies and can
+    be useful in reduced-order modeling.
+
+    An illustrative explanation of how the QoI-aware encoder-decoder works is presented in the figure below:
+
+    .. image:: ../images/tutorial-qoi-aware-encoder-decoder.png
+        :width: 700
+        :align: center
+
     More information can be found in :cite:`Zdybal2023`.
 
     **Example:**
