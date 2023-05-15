@@ -9,6 +9,8 @@ __maintainer__ = ["Kamila Zdybal", "Elizabeth Armstrong"]
 __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "James.Sutherland@chemeng.utah.edu"]
 __status__ = "Production"
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import copy as cp
 from termcolor import colored
@@ -16,13 +18,16 @@ import time
 import warnings
 import matplotlib.pyplot as plt
 from tqdm import tqdm
-from termcolor import colored
+import pickle
 import tensorflow as tf
-from keras import layers, models
+from tensorflow.keras import layers, models
+import tensorflow.compat.v1 as tf_v1
+tf_v1.compat.v1.disable_eager_execution()
 from PCAfold.styles import *
 from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import analysis
+from PCAfold import reconstruction
 
 ################################################################################
 #
@@ -1772,3 +1777,413 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
     if verbose: print(f'\nOptimization time: {(total_toc - total_tic)/60:0.1f} minutes.' + '\n' + '-'*50)
 
     return ordered_variables, selected_variables, optimized_cost, costs
+
+# ------------------------------------------------------------------------------
+
+class QoIAwareProjectionPOUnet:
+    """
+    This is analogous to ``QoIAwareProjection`` but uses ``PartitionOfUnityNetwork`` as the decoder.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import init_uniform_partitions, PCA, QoIAwareProjectionPOUnet
+        import numpy as np
+        import tensorflow as tf
+
+        # generate dummy data set:
+        ivars = np.random.rand(100,3)
+
+        # initialize a projection (e.g., using PCA)
+        pca = PCA(ivars, scaling='none', n_components=2)
+        ivar_proj = pca.transform(ivars)
+
+        # initialize the QoIAwareProjectionPOUnet parameters
+        net = QoIAwareProjectionPOUnet(pca.A[:,:2], **init_uniform_partitions([5,7], ivar_proj), basis_type='linear')
+
+        # function for defining the training dependent variables (can include a projection)
+        dvar = np.vstack((ivars[:,0] + ivars[:,1], 2.*ivars[:,0] + 3.*ivars[:,1], 3.*ivars[:,0] + 5.*ivars[:,1])).T
+        def dvar_func(proj_weights):
+            temp = tf.Variable(np.expand_dims(dvar, axis=2), name='eval_qoi', dtype=net._reconstruction._dtype)
+            temp = net.tf_projection(temp, nobias=True)
+            return temp
+
+        # build the training graph with provided training data
+        net.build_training_graph(ivars, dvar_func)
+
+        # train the projection
+        net.train(1000)
+
+        # compute new projected variables
+        net.projection(ivars)
+
+        # evaluate the encoder-decoder
+        net(ivars)
+
+        # Save the data to a file
+        net.write_data_to_file('filename.pkl')
+
+        # reload projection data from file
+        net2 = QoIAwareProjectionPOUnet.load_from_file('filename.pkl')
+
+    :param projection_weights:
+        array of the projection matrix weights
+    :param partition_centers:
+        array size (number of partitions) x (number of ivar inputs) for partition locations
+    :param partition_shapes:
+        array size (number of partitions) x (number of ivar inputs) for partition shapes influencing the RBF widths
+    :param basis_type:
+        string (``'constant'``, ``'linear'``, or ``'quadratic'``) for the degree of polynomial basis
+    :param projection_biases:
+        (optional, default None) array of the biases (offsets) corresponding to the projection weights, if ``None`` the projections are offset by zeros
+    :param basis_coeffs:
+        (optional, default ``None``) if the array of polynomial basis coefficients is known, it may be provided here, 
+        otherwise it will be initialized with ``build_training_graph`` and trained with ``train``
+    :param dtype:
+        (optional, default ``'float64'``) string specifying either float type ``'float64'`` or ``'float32'``
+
+    **Attributes:**
+
+    - **projection_weights** - (read only) array of the current projection weights
+    - **projection_biases** - (read only) array of the projection biases
+    - **reconstruction_model** - (read only) the current POUnet decoder
+    - **partition_centers** - (read only) array of the current partition centers
+    - **partition_shapes** - (read only) array of the current partition shape parameters
+    - **basis_type** - (read only) string relaying the basis degree
+    - **basis_coeffs** - (read only) array of the current basis coefficients
+    - **proj_ivar_center** - (read only) array of the centering parameters used in the POUnet for the projected ivar inputs
+    - **proj_ivar_scale** - (read only) array of the scaling parameters used in the POUnet for the projected ivar inputs
+    - **dtype** - (read only) string relaying the data type (``'float64'`` or ``'float32'``)
+    - **training_archive** - (read only) dictionary of the errors and POUnet states archived during training
+    - **iterations** - (read only) array of the iterations archived during training
+    """
+
+    def __init__(self, 
+                 projection_weights,
+                 partition_centers,
+                 partition_shapes,
+                 basis_type,
+                 projection_biases=None,
+                 basis_coeffs=None,
+                 dtype='float64',
+                 **kwargs
+                ):
+        self._projection_weights = projection_weights.copy()
+        self._nstate = projection_weights.shape[0]
+        self._nproj = projection_weights.shape[1]
+        self._projection_biases = projection_biases.copy() if projection_biases is not None else np.zeros(partition_centers.shape[1])
+        if self._projection_biases.shape[0] != self._nproj:
+            raise ValueError("projection_biases size",self._projection_biases.shape[0],'must match dimensionality of projection weights',self._nproj)
+        self._reconstruction = reconstruction.PartitionOfUnityNetwork(
+                                                        partition_centers=partition_centers,
+                                                        partition_shapes=partition_shapes,
+                                                        basis_type=basis_type,
+                                                        ivar_center=None,
+                                                        ivar_scale=None,
+                                                        basis_coeffs=basis_coeffs,
+                                                        transform_power=1.,
+                                                        transform_shift=0.,
+                                                        transform_sign_shift=0.,
+                                                        dtype=dtype
+                                                       )
+        if self._nproj != self._reconstruction._nd:
+            raise ValueError("projection_weights dimensionality",self._nproj,"does not match reconstruction model input dimensionality",self._reconstruction._nd)
+        self._sess = tf_v1.Session()
+        self._lr = tf_v1.Variable(1.e-3, name='lr', dtype=self._reconstruction._dtype)
+        self._proj_ivar_center = kwargs['ivar_center'] if 'ivar_center' in kwargs else self._reconstruction.ivar_center
+        self._proj_inv_ivar_scale = 1./kwargs['ivar_scale'] if 'ivar_scale' in kwargs else 1./self._reconstruction.ivar_scale
+        self._t_proj_ivar_center = tf_v1.Variable(np.expand_dims(self._proj_ivar_center, axis=2), name='proj_centers', dtype=self._reconstruction._dtype)
+        self._t_proj_inv_ivar_scale = tf_v1.Variable(np.expand_dims(self._proj_inv_ivar_scale, axis=2), name='proj_scales', dtype=self._reconstruction._dtype)
+        self._t_projection_biases = tf_v1.constant(self._projection_biases, name='biases', dtype=self._reconstruction._dtype)
+        self._t_projection_weights = tf_v1.Variable(self._projection_weights, name='weights', dtype=self._reconstruction._dtype)
+        self._sess.run(tf_v1.global_variables_initializer())
+        self._built_graph = False
+    
+    @tf_v1.function
+    def tf_projection(self, y, nobias=False):
+        """
+        version of ``projection`` using tensorflow operations and Tensors
+        """
+        const = 0. if nobias else self._t_projection_biases
+        return tf_v1.reduce_sum(y * self._t_projection_weights, axis=1) + const
+
+    def projection(self, ivars, nobias=False):
+        """
+        Projects the independent variable inputs using the current projection weights and biases
+
+        :param ivars:
+            array of independent variable query points
+        :param nobias:
+            (optional, default False) whether or not to apply the projection bias. Analogous to ``nocenter`` in the PCA ``transform`` function.
+
+        :return:
+            array of the projected independent variable query points
+        """
+        if ivars.shape[1] != self._nstate:
+            raise ValueError("Dimensionality of inputs",y.shape[1],'does not match expected dimensionality',self._nstate)
+        tf_y = tf_v1.Variable(np.expand_dims(ivars, axis=2), name='eval_pts', dtype=self._reconstruction._dtype)
+        self._sess.run(tf_v1.variables_initializer([tf_y]))
+        return self._sess.run(self.tf_projection(tf_y, nobias))
+
+    def update_lr(self, lr):
+        """
+        update the learning rate for training
+
+        :param lr:
+            float for the learning rate
+        """
+        print('updating lr:', lr)
+        self._sess.run(self._lr.assign(lr))
+
+    def update_l2reg(self, l2reg):
+        """
+        update the least-squares regularization for training
+
+        :param l2reg:
+            float for the least-squares regularization
+        """
+        print('updating l2reg:', l2reg)
+        self._sess.run(self._reconstruction._l2reg.assign(l2reg))
+
+    def build_training_graph(self, ivars, dvars_function, error_type='abs', constrain_positivity=False, first_trainable_idx=0):
+        """
+        Construct the graph used during training (including defining the training errors) with the provided training data
+
+        :param ivars:
+            array of independent variables for training
+        :param dvars_function:
+            function (using tensorflow operations) for defining the dependent variable(s) for training.
+            This must take a single argument of the projection weights which, if used, will be evaluated with the weights as they are updated
+        :param error_type:
+            (optional, default ``'abs'``) the type of training error: relative ``'rel'`` or absolute ``'abs'``
+        :param constrain_positivity:
+            (optional, default False) when True, it penalizes the training error with :math:`f - |f|` for dependent variables :math:`f`. 
+            This can be useful for defining projected source term dependent variables, for example.
+        :param first_trainable_idx:
+            (optional, default 0) This separates the trainable projection weights (with index greater than or equal to ``first_trainable_idx``) from the nontrainable projection weights.
+        """
+        if ivars.shape[1] != self._nstate:
+            raise ValueError("Dimensionality of ivars",ivars.shape[1],'does not match expected dimensionality',self._nstate)
+        if error_type != 'rel' and error_type != 'abs':
+            raise ValueError("Supported error_type include rel and abs.")
+
+        if first_trainable_idx<0 or first_trainable_idx>self._nproj-1:
+            raise ValueError("first_trainable_idx must be greater than 0 and less than",self._nproj)
+        self._t_train_weights = tf_v1.Variable(self._projection_weights[:,first_trainable_idx:], name='train', dtype=self._reconstruction._dtype)
+        if first_trainable_idx != 0:
+            self._t_nontrain_weights = tf_v1.constant(self._projection_weights[:,:first_trainable_idx], name='nontrain', dtype=self._reconstruction._dtype)
+            self._t_projection_weights = tf_v1.squeeze(tf_v1.stack([self._t_nontrain_weights, self._t_train_weights], axis=1))
+        else:
+            self._t_projection_weights = self._t_train_weights
+
+        self._t_yt = tf_v1.Variable(np.expand_dims(ivars, axis=2), name='eval_pts', dtype=self._reconstruction._dtype)
+        self._t_xyt_prescale = tf_v1.expand_dims(self.tf_projection(self._t_yt), axis=2)
+
+        self._xytmin = tf_v1.reduce_min(self._t_xyt_prescale, axis=0, keepdims=True)
+        self._xytmax = tf_v1.reduce_max(self._t_xyt_prescale, axis=0, keepdims=True)
+        self._t_proj_ivar_center = self._xytmin
+        self._t_proj_inv_ivar_scale = 1./(self._xytmax - self._xytmin)
+        self._t_xyt = (self._t_xyt_prescale - self._t_proj_ivar_center) * self._t_proj_inv_ivar_scale
+
+        self._t_ft = dvars_function(self._t_projection_weights)
+        self._reconstruction.build_training_graph(self._t_xyt, self._t_ft, error_type, constrain_positivity, istensor=True)
+        
+        self._opt = tf_v1.train.AdamOptimizer(learning_rate=self._lr).minimize(self._reconstruction._train_err, var_list=[self._t_train_weights, self._reconstruction._t_xp, self._reconstruction._t_sp])
+
+        self._sess.run(tf_v1.global_variables_initializer())
+        self._built_graph = True
+        self._reconstruction._training_archive['data'] = list([self.__getstate__()])
+
+    def train(self, iterations, archive_rate=100, use_best_archive_sse=True, verbose=False):
+        """
+        Performs training using a least-squares gradient descent block coordinate descent strategy.
+        This alternates between updating the partition and projection parameters with gradient descent and updating the basis coefficients with least-squares.
+
+        :param iterations:
+            integer for number of training iterations to perform
+        :param archive_rate:
+            (optional, default 100) the rate at which the errors and parameters are archived during training. These can be accessed with the ``training_archive`` attribute
+        :param use_best_archive_sse:
+            (optional, default True) when True will set the POUnet parameters to those with the lowest error observed during training,
+            otherwise the parameters from the last iteration are used
+        :param verbose:
+            (optional, default False) when True will print progress
+        """
+        if not self._built_graph:
+            raise ValueError("Need to call build_training_graph before train.")
+        if use_best_archive_sse and archive_rate>iterations:
+            raise ValueError("Cannot archive the best parameters with archive_rate", archive_rate,'over',iterations,'iterations.')
+        
+        if verbose:
+            print('-' * 60)
+            print(f'  {"iteration":>10} | {"mean sqr":>10} | {"% max":>10}  | {"sum sqr":>10}')
+            print('-' * 60)
+
+        if use_best_archive_sse:
+            best_trainable_weights = self._sess.run(self._t_train_weights).copy()
+            best_error = self._sess.run(self._reconstruction._t_ssre).copy()
+            best_centers = self._sess.run(self._reconstruction._t_xp).copy()
+            best_shapes = self._sess.run(self._reconstruction._t_sp).copy()
+            best_coeffs = self._sess.run(self._reconstruction._t_basis_coeffs).copy()
+
+        for i in range(iterations):
+            self._sess.run(self._opt) # update partitions & projection
+            self._sess.run(self._reconstruction._lstsq) # update basis coefficients
+
+            if not (i + 1) % archive_rate:
+                msre, infre, ssre = self._sess.run(self._reconstruction._t_msre), self._sess.run(self._reconstruction._t_infre), self._sess.run(self._reconstruction._t_ssre)
+                if verbose:
+                    print(f'  {i + 1:10} | {msre:10.2e} | {100. * infre:10.2f}% | {ssre:10.2e}')
+                self._reconstruction._iterations.append(self._reconstruction._iterations[-1] + archive_rate)
+                self._reconstruction._training_archive['mse'].append(msre)
+                self._reconstruction._training_archive['inf'].append(infre)
+                self._reconstruction._training_archive['sse'].append(ssre)
+                self._reconstruction._training_archive['data'].append(self.__getstate__())
+
+                if use_best_archive_sse:
+                    if ssre < best_error:
+                        if verbose:
+                            print('resetting best error')
+                        best_error = ssre.copy()
+                        best_trainable_weights = self._sess.run(self._t_train_weights).copy()
+                        best_centers = self._sess.run(self._reconstruction._t_xp).copy()
+                        best_shapes = self._sess.run(self._reconstruction._t_sp).copy()
+                        best_coeffs = self._sess.run(self._reconstruction._t_basis_coeffs).copy()
+        if use_best_archive_sse:
+            self._sess.run(self._t_train_weights.assign(best_trainable_weights))
+            self._sess.run(self._reconstruction._t_xp.assign(best_centers))
+            self._sess.run(self._reconstruction._t_sp.assign(best_shapes))
+            self._sess.run(self._reconstruction._t_basis_coeffs.assign(best_coeffs))
+
+    def __call__(self, xeval):
+        """
+        evaluate the encoder-decoder
+
+        :param xeval:
+            array of independent variable query points
+
+        :return:
+            array of predictions
+        """
+        if xeval.shape[1] != self._nstate:
+                raise ValueError("Dimensionality of inputs",xeval.shape[1],'does not match expected dimensionality',self._nstate)
+        xeval_tf = tf_v1.Variable(np.expand_dims(xeval, axis=2), name='eval_pts', dtype=self._reconstruction._dtype)
+        self._sess.run(tf_v1.variables_initializer([xeval_tf]))
+        t_proj = tf_v1.expand_dims(self.tf_projection(xeval_tf), axis=2)
+        t_proj_scale = (t_proj - self._t_proj_ivar_center) * self._t_proj_inv_ivar_scale
+
+        pred = self._reconstruction.tf_call(t_proj_scale)
+        return self._sess.run(pred)
+
+    def __getstate__(self):
+        """dictionary of current encoder-decoder parameters"""
+        return dict(projection_weights=self.projection_weights,
+                    projection_biases=self.projection_biases,
+                    partition_centers=self.partition_centers,
+                    partition_shapes=self.partition_shapes,
+                    basis_type=self.basis_type,
+                    ivar_center=self.proj_ivar_center,
+                    ivar_scale=self.proj_ivar_scale,
+                    basis_coeffs=self.basis_coeffs,
+                    dtype=self.dtype
+                   )
+
+    def write_data_to_file(self, filename):
+        """
+        Save class data to a specified file using pickle. This does not include the archived data from training,
+        which can be separately accessed with training_archive and saved outside of ``QoIAwareProjectionPOUnet``.
+
+        :param filename:
+            string
+        """
+        with open(filename, 'wb') as file_output:
+            pickle.dump(self.__getstate__(), file_output)
+
+    @classmethod
+    def load_data_from_file(cls, filename):
+        """
+        Load data from a specified ``filename`` with pickle (following ``write_data_to_file``)
+
+        :param filename:
+            string
+
+        :return:
+            dictionary of the encoder-decoder data
+        """
+        with open(filename, 'rb') as file_input:
+            pickled_data = pickle.load(file_input)
+        return pickled_data
+
+    @classmethod
+    def load_from_file(cls, filename):
+        """Load class from a specified ``filename`` with pickle (following ``write_data_to_file``)
+
+        :param filename:
+            string
+
+        :return:
+            ``QoIAwareProjectionPOUnet``
+        """
+        return cls(**cls.load_data_from_file(filename))
+
+    @property
+    def projection_weights(self):
+        return self._sess.run(self._t_projection_weights)
+
+    @property
+    def projection_biases(self):
+        return self._sess.run(self._t_projection_biases)
+
+    @property
+    def iterations(self):
+        return self._reconstruction.iterations
+
+    @property
+    def training_archive(self):
+        return self._reconstruction.training_archive
+    
+    @property
+    def basis_type(self):
+        return self._reconstruction.basis_type
+
+    @property
+    def dtype(self):
+        return self._reconstruction.dtype
+
+    @property
+    def partition_centers(self):
+        return self._sess.run(self._reconstruction._t_xp)
+
+    @property
+    def partition_shapes(self):
+        return self._sess.run(self._reconstruction._t_sp)
+
+    @property
+    def basis_coeffs(self):
+        return self._sess.run(self._reconstruction._t_basis_coeffs)
+
+    @property
+    def proj_ivar_center(self):
+        return self._sess.run(self._t_proj_ivar_center)[:,:,0]
+    
+    @property
+    def proj_ivar_scale(self):
+        return 1./self._sess.run(self._t_proj_inv_ivar_scale)[:,:,0]
+    
+    @property
+    def reconstruction_model(self):
+        ivar_center = self.proj_ivar_center
+        ivar_scale = self.proj_ivar_scale
+        return reconstruction.PartitionOfUnityNetwork(
+                                        partition_centers=self.partition_centers,
+                                        partition_shapes=self.partition_shapes,
+                                        basis_type=self.basis_type,
+                                        ivar_center=ivar_center,
+                                        ivar_scale=ivar_scale,
+                                        basis_coeffs=self.basis_coeffs,
+                                        transform_power=1.,
+                                        transform_shift=0.,
+                                        transform_sign_shift=0.,
+                                        dtype=self.dtype
+                                        )

@@ -97,7 +97,12 @@ from .analysis import plot_normalized_variance_derivative
 from .analysis import plot_normalized_variance_derivative_comparison
 from .analysis import plot_stratified_metric
 
+# Module: `reconstruction`
+from .reconstruction import PartitionOfUnityNetwork
+from .reconstruction import init_uniform_partitions
+
 # Module: `utilities`
 from .utilities import QoIAwareProjection
 from .utilities import manifold_informed_forward_variable_addition
 from .utilities import manifold_informed_backward_variable_elimination
+from .utilities import QoIAwareProjectionPOUnet
