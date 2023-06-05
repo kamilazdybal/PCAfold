@@ -70,24 +70,6 @@ from .analysis import random_sampling_normalized_variance
 from .analysis import feature_size_map
 from .analysis import feature_size_map_smooth
 from .analysis import cost_function_normalized_variance_derivative
-from .analysis import RegressionAssessment
-from .analysis import coefficient_of_determination
-from .analysis import stratified_coefficient_of_determination
-from .analysis import stratified_mean_absolute_error
-from .analysis import stratified_mean_squared_error
-from .analysis import stratified_mean_squared_logarithmic_error
-from .analysis import stratified_root_mean_squared_error
-from .analysis import stratified_normalized_root_mean_squared_error
-from .analysis import mean_absolute_error
-from .analysis import max_absolute_error
-from .analysis import mean_squared_error
-from .analysis import mean_squared_logarithmic_error
-from .analysis import root_mean_squared_error
-from .analysis import normalized_root_mean_squared_error
-from .analysis import turning_points
-from .analysis import good_estimate
-from .analysis import good_direction_estimate
-from .analysis import generate_tex_table
 from .analysis import plot_2d_regression
 from .analysis import plot_2d_regression_scalar_field
 from .analysis import plot_2d_regression_streamplot
@@ -96,11 +78,29 @@ from .analysis import plot_normalized_variance
 from .analysis import plot_normalized_variance_comparison
 from .analysis import plot_normalized_variance_derivative
 from .analysis import plot_normalized_variance_derivative_comparison
-from .analysis import plot_stratified_metric
 
 # Module: `reconstruction`
 from .reconstruction import PartitionOfUnityNetwork
 from .reconstruction import init_uniform_partitions
+from .reconstruction import RegressionAssessment
+from .reconstruction import coefficient_of_determination
+from .reconstruction import stratified_coefficient_of_determination
+from .reconstruction import stratified_mean_absolute_error
+from .reconstruction import stratified_mean_squared_error
+from .reconstruction import stratified_mean_squared_logarithmic_error
+from .reconstruction import stratified_root_mean_squared_error
+from .reconstruction import stratified_normalized_root_mean_squared_error
+from .reconstruction import mean_absolute_error
+from .reconstruction import max_absolute_error
+from .reconstruction import mean_squared_error
+from .reconstruction import mean_squared_logarithmic_error
+from .reconstruction import root_mean_squared_error
+from .reconstruction import normalized_root_mean_squared_error
+from .reconstruction import turning_points
+from .reconstruction import good_estimate
+from .reconstruction import good_direction_estimate
+from .reconstruction import generate_tex_table
+from .reconstruction import plot_stratified_metric
 
 # Module: `utilities`
 from .utilities import QoIAwareProjection
