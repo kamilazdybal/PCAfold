@@ -312,6 +312,57 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
 # ------------------------------------------------------------------------------
 
+def power_transform(X, transform_power, transform_shift=0., transform_sign_shift=0., invert=False):
+    """
+    Performs a power transformation of the provided data.
+    The equation for the transformation of variable :math:`X` is
+
+    .. math::
+
+        (|X + s_1|)^\\alpha \\text{sign}(X + s_1) + s_2 \\text{sign}(X + s_1)
+
+    where :math:`\\alpha` is the ``transform_power``, :math:`s_1` is the ``transform_shift``, and :math:`s_2` is the ``transform_sign_shift``.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import power_transform
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,20) + 1
+
+        # Perform power transformation:
+        X_pow = power_transform(X, 0.5)
+
+        # undo the transformation:
+        X_orig = power_transform(X_pow, 0.5, invert=True)
+
+    :param X:
+        array of the variable(s) to be transformed
+    :param transform_power:
+        the power parameter used in the transformation equation
+    :param transform_shift:
+        (optional, default 0.) the shift parameter used in the transformation equation
+    :param transform_sign_shift:
+        (optional, default 0.) the signed shift parameter used in the transformation equation
+    :param invert: 
+        (optional, default False) when True, will undo the transformation
+            
+    :return:
+        array of the transformed variables
+    """
+    if invert:
+        o = transform_sign_shift*np.sign(X)
+        inter = np.sign(X-o) * np.power(np.abs(X-o), 1./transform_power)
+        return inter - transform_shift
+    else:
+        inter = X + transform_shift
+        return np.power(np.abs(inter), transform_power) * np.sign(inter) + transform_sign_shift*np.sign(inter)
+
+# ------------------------------------------------------------------------------
+
 def log_transform(X, method='log', threshold=1.e-6):
     """
     Performs log transformation of the original data set, :math:`\mathbf{X}`.
