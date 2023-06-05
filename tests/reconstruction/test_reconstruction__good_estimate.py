@@ -2,23 +2,23 @@ import unittest
 import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
-from PCAfold import analysis
+from PCAfold import reconstruction
 
 class Analysis(unittest.TestCase):
 
-    def test_analysis__stratified_mean_squared_logarithmic_error__allowed_calls(self):
+    def test_reconstruction__good_estimate__allowed_calls(self):
 
         pass
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__stratified_mean_squared_logarithmic_error__not_allowed_calls(self):
+    def test_reconstruction__good_estimate__not_allowed_calls(self):
 
         pass
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__stratified_mean_squared_logarithmic_error__computation(self):
+    def test_reconstruction__good_estimate__computation(self):
 
         pass
 

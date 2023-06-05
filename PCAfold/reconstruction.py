@@ -9,6 +9,12 @@ __maintainer__ = ["Kamila Zdybal", "Elizabeth Armstrong"]
 __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "James.Sutherland@chemeng.utah.edu"]
 __status__ = "Production"
 
+import matplotlib.pyplot as plt
+from PCAfold.styles import *
+from PCAfold import preprocess
+from PCAfold import reduction
+from matplotlib.colors import ListedColormap
+import time
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
@@ -2662,99 +2668,6 @@ def generate_tex_table(data_frame_table, float_format='.2f', caption='', label='
 
 # ------------------------------------------------------------------------------
 
-def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, metric_name=None, yscale='linear', ylim=None, figure_size=(10,5), title=None, save_filename=None):
-    """
-    This function plots a stratified metric across bins of a dependent variable.
-
-    **Example:**
-
-    .. code:: python
-
-        from PCAfold import PCA, variable_bins, stratified_coefficient_of_determination, plot_stratified_metric
-        import numpy as np
-
-        # Generate dummy data set:
-        X = np.random.rand(100,10)
-
-        # Instantiate PCA class object:
-        pca_X = PCA(X, scaling='auto', n_components=2)
-
-        # Approximate the data set:
-        X_rec = pca_X.reconstruct(pca_X.transform(X))
-
-        # Generate bins:
-        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
-
-        # Compute stratified R2 in 10 bins of the first variable in a data set:
-        r2_in_bins = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], idx=idx, use_global_mean=True, verbose=True)
-
-        # Visualize how R2 changes across bins:
-        plt = plot_stratified_metric(r2_in_bins,
-                                      bins_borders,
-                                      variable_name='$X_1$',
-                                      metric_name='$R^2$',
-                                      yscale='log',
-                                      figure_size=(10,5),
-                                      title='Stratified $R^2$',
-                                      save_filename='r2.pdf')
-        plt.close()
-
-    :param metric_in_bins:
-        ``list`` of metric values in each bin.
-    :param bins_borders:
-        ``list`` of bins borders that were created to stratify the dependent variable.
-    :param variable_name: (optional)
-        ``str`` specifying the name of the variable for which the metric was computed. If set to ``None``
-        label on the x-axis will not be plotted.
-    :param metric_name: (optional)
-        ``str`` specifying the name of the metric to be plotted on the y-axis. If set to ``None``
-        label on the x-axis will not be plotted.
-    :param yscale: (optional)
-        ``str`` specifying the scale for the y-axis.
-    :param figure_size: (optional)
-        ``tuple`` specifying figure size.
-    :param title: (optional)
-        ``str`` specifying plot title. If set to ``None`` title will not be
-        plotted.
-    :param save_filename: (optional)
-        ``str`` specifying plot save location/filename. If set to ``None``
-        plot will not be saved. You can also set a desired file extension,
-        for instance ``.pdf``. If the file extension is not specified, the default
-        is ``.png``.
-
-    :return:
-        - **plt** - ``matplotlib.pyplot`` plot handle.
-    """
-
-    if not isinstance(figure_size, tuple):
-        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
-
-    if title is not None:
-        if not isinstance(title, str):
-            raise ValueError("Parameter `title` has to be of type `str`.")
-
-    if save_filename is not None:
-        if not isinstance(save_filename, str):
-            raise ValueError("Parameter `save_filename` has to be of type `str`.")
-
-    bin_centers = []
-    for i in range(0,len(bins_borders)-1):
-        bin_length = bins_borders[i+1] - bins_borders[i]
-        bin_centers.append(bins_borders[i] + bin_length/2)
-
-    figure = plt.figure(figsize=figure_size)
-    plt.scatter(bin_centers, metric_in_bins, c='#191b27')
-    plt.grid(alpha=grid_opacity)
-    plt.xlim([bins_borders[0], bins_borders[-1]])
-    plt.yscale(yscale)
-    if ylim is not None: plt.ylim(ylim)
-    if variable_name is not None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
-    if metric_name is not None: plt.ylabel(metric_name, **csfont, fontsize=font_labels)
-
-    if title is not None: plt.title(title, fontsize=font_title, **csfont)
-    if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
-
-    return plt
 
 ################################################################################
 #
@@ -2773,6 +2686,17 @@ def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, met
 # Artificial neural network (ANN) regression
 #
 ################################################################################
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3731,3 +3655,1114 @@ class PartitionOfUnityNetwork:
     @property
     def ivar_scale(self):
         return 1./self._inv_ivar_scale
+
+################################################################################
+#
+# Plotting
+#
+################################################################################
+
+def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, color_observed=None, color_predicted=None, figure_size=(7,7), title=None, save_filename=None):
+    """
+    Plots the result of regression of a dependent variable on top
+    of a one-dimensional manifold defined by a single independent variable ``x``.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_2d_regression
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Obtain two-dimensional manifold from PCA:
+        pca_X = PCA(X)
+        PCs = pca_X.transform(X)
+        X_rec = pca_X.reconstruct(PCs)
+
+        # Plot the manifold:
+        plt = plot_2d_regression(X[:,0],
+                                 X[:,0],
+                                 X_rec[:,0],
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 color_observed='k',
+                                 color_predicted='r',
+                                 figure_size=(10,10),
+                                 title='2D regression',
+                                 save_filename='2d-regression.pdf')
+        plt.close()
+
+    :param x:
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param x_label: (optional)
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param color_observed: (optional)
+        ``str`` specifying the color of the plotted observed variable.
+    :param color_predicted: (optional)
+        ``str`` specifying the color of the plotted predicted variable.
+    :param figure_size: (optional)
+        ``tuple`` specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(x)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(x)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if n_x != n_observed:
+        raise ValueError("Parameter `observed` has different number of elements than `x`.")
+
+    if n_x != n_predicted:
+        raise ValueError("Parameter `predicted` has different number of elements than `x`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if color_observed is not None:
+        if not isinstance(color_observed, str):
+            raise ValueError("Parameter `color_observed` has to be of type `str`.")
+    else:
+        color_observed = '#191b27'
+
+    if color_predicted is not None:
+        if not isinstance(color_predicted, str):
+            raise ValueError("Parameter `color_predicted` has to be of type `str`.")
+    else:
+        color_predicted = '#C7254E'
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    fig = plt.figure(figsize=figure_size)
+
+    scat = plt.scatter(x.ravel(), observed.ravel(), c=color_observed, marker='o', s=scatter_point_size, alpha=0.1)
+    scat = plt.scatter(x.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=scatter_point_size, alpha=0.4)
+
+    if x_label != None: plt.xlabel(x_label, **csfont, fontsize=font_labels)
+    if y_label != None: plt.ylabel(y_label, **csfont, fontsize=font_labels)
+    plt.xticks(fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    plt.grid(alpha=grid_opacity)
+    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, loc="best")
+    lgnd.legendHandles[0]._sizes = [marker_size*5]
+    lgnd.legendHandles[1]._sizes = [marker_size*5]
+
+    if title != None: plt.title(title, **csfont, fontsize=font_title)
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=None, resolution=(10,10), extension=(0,0), x_label=None, y_label=None, s_field=None, s_manifold=None, manifold_color=None, colorbar_label=None, color_map='viridis', colorbar_range=None, manifold_alpha=1, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+    """
+    Plots a 2D field of a regressed scalar dependent variable.
+    A two-dimensional manifold can be additionally plotted on top of the field.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, KReg, plot_2d_regression_scalar_field
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,2)
+        Z = np.random.rand(100,1)
+
+        # Train the kernel regression model:
+        model = KReg(X, Z)
+
+        # Define the regression model:
+        def regression_model(query):
+
+            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[:,0]
+
+            return predicted
+
+        # Define the bounds for the scalar field:
+        grid_bounds = ([np.min(X[:,0]),np.max(X[:,0])],[np.min(X[:,1]),np.max(X[:,1])])
+
+        # Plot the regressed scalar field:
+        plt = plot_2d_regression_scalar_field(grid_bounds,
+                                            regression_model,
+                                            x=X[:,0],
+                                            y=X[:,1],
+                                            resolution=(100,100),
+                                            extension=(10,10),
+                                            x_label='$X_1$',
+                                            y_label='$X_2$',
+                                            s_field=4,
+                                            s_manifold=60,
+                                            manifold_color=Z,
+                                            colorbar_label='$Z_1$',
+                                            color_map='inferno',
+                                            colorbar_range=(0,1),
+                                            manifold_alpha=1,
+                                            grid_on=False,
+                                            figure_size=(10,6),
+                                            title='2D regressed scalar field',
+                                            save_filename='2D-regressed-scalar-field.pdf')
+        plt.close()
+
+    :param grid_bounds:
+        ``tuple`` of ``list`` specifying the bounds of the dependent variable on the :math:`x` and :math:`y` axis.
+    :param regression_model:
+        ``function`` that outputs the predicted vector using the regression model.
+        It should take as input a ``numpy.ndarray`` of size ``(1,2)``, where the two
+        elements specify the first and second independent variable values. It should output
+        a ``float`` specifying the regressed scalar value at that input.
+    :param x: (optional)
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+        It can be used to plot a 2D manifold on top of the streamplot.
+    :param y: (optional)
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+        It can be used to plot a 2D manifold on top of the streamplot.
+    :param resolution: (optional)
+        ``tuple`` of ``int`` specifying the resolution of the streamplot grid on the :math:`x` and :math:`y` axis.
+    :param extension: (optional)
+        ``tuple`` of ``float`` or ``int`` specifying a percentage by which the
+        dependent variable should be extended beyond on the :math:`x` and :math:`y` axis, beyond what has been specified by the ``grid_bounds`` parameter.
+    :param x_label: (optional)
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param s_field: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the scalar field.
+    :param s_manifold: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the manifold.
+    :param manifold_color: (optional)
+        vector or string specifying color for the manifold. If it is a
+        vector, it has to have length consistent with the number of observations
+        in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+        It can also be set to a string specifying the color directly, for
+        instance ``'r'`` or ``'#006778'``.
+        If not specified, manifold will be plotted in black.
+    :param colorbar_label: (optional)
+        ``str`` specifying colorbar label annotation.
+    :param color_map: (optional)
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param colorbar_range: (optional)
+        ``tuple`` specifying the lower and the upper bound for the colorbar range.
+    :param manifold_alpha: (optional)
+        ``float`` or ``int`` specifying the opacity of the plotted manifold.
+    :param grid_on:
+        ``bool`` specifying whether grid should be plotted.
+    :param figure_size: (optional)
+        ``tuple`` specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(grid_bounds, tuple):
+        raise ValueError("Parameter `grid_bounds` has to be of type `tuple`.")
+
+    if not callable(regression_model):
+        raise ValueError("Parameter `regression_model` has to be of type `function`.")
+
+    if x is not None:
+
+        if not isinstance(x, np.ndarray):
+            raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_x,) = np.shape(x)
+            n_var_x = 1
+        except:
+            (n_x, n_var_x) = np.shape(x)
+
+        if n_var_x != 1:
+            raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if y is not None:
+
+        if not isinstance(y, np.ndarray):
+            raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_y,) = np.shape(y)
+            n_var_y = 1
+        except:
+            (n_y, n_var_y) = np.shape(y)
+
+        if n_var_y != 1:
+            raise ValueError("Parameter `y` has to be a 0D or 1D vector.")
+
+        if n_x != n_y:
+            raise ValueError("Parameter `x` has different number of elements than `y`.")
+
+    if not isinstance(resolution, tuple):
+        raise ValueError("Parameter `resolution` has to be of type `tuple`.")
+
+    if not isinstance(extension, tuple):
+        raise ValueError("Parameter `extension` has to be of type `tuple`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if s_field is None:
+        s_field = scatter_point_size
+    else:
+        if not isinstance(s_field, int) and not isinstance(s_field, float):
+            raise ValueError("Parameter `s_field` has to be of type `int` or `float`.")
+
+    if s_manifold is None:
+        s_manifold = scatter_point_size
+    else:
+        if not isinstance(s_manifold, int) and not isinstance(s_manifold, float):
+            raise ValueError("Parameter `s_manifold` has to be of type `int` or `float`.")
+
+    if manifold_color is not None:
+        if not isinstance(manifold_color, str):
+            if not isinstance(manifold_color, np.ndarray):
+                raise ValueError("Parameter `manifold_color` has to be `None`, or of type `str` or `numpy.ndarray`.")
+
+    if isinstance(manifold_color, np.ndarray):
+
+        try:
+            (n_color,) = np.shape(manifold_color)
+            n_var_color = 1
+        except:
+            (n_color, n_var_color) = np.shape(manifold_color)
+
+        if n_var_color != 1:
+            raise ValueError("Parameter `manifold_color` has to be a 0D or 1D vector.")
+
+        if n_color != n_x:
+            raise ValueError("Parameter `manifold_color` has different number of elements than `x` and `y`.")
+
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
+    if colorbar_range is not None:
+        if not isinstance(colorbar_range, tuple):
+            raise ValueError("Parameter `colorbar_range` has to be of type `tuple`.")
+        else:
+            (cbar_min, cbar_max) = colorbar_range
+
+    if manifold_alpha is not None:
+        if not isinstance(manifold_alpha, float) and not isinstance(manifold_alpha, int):
+            raise ValueError("Parameter `manifold_alpha` has to be of type `float`.")
+
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    (x_extend, y_extend) = extension
+    (x_resolution, y_resolution) = resolution
+    ([x_minimum, x_maximum], [y_minimum, y_maximum]) = grid_bounds
+
+    # Create extension in both dimensions:
+    x_extension = x_extend/100.0 * abs(x_minimum - x_maximum)
+    y_extension = y_extend/100.0 * abs(y_minimum - y_maximum)
+
+    # Create grid points for the independent variables where regression will be applied:
+    x_grid = np.linspace(x_minimum-x_extension, x_maximum+x_extension, x_resolution)
+    y_grid = np.linspace(y_minimum-y_extension, y_maximum+y_extension, y_resolution)
+    xy_mesh = np.meshgrid(x_grid, y_grid, indexing='xy')
+
+    # Evaluate the predicted scalar using the regression model:
+    regressed_scalar = np.zeros((y_grid.size*x_grid.size,))
+
+    for i in range(0,y_grid.size*x_grid.size):
+
+                regression_input = np.reshape(np.array([xy_mesh[0].ravel()[i], xy_mesh[1].ravel()[i]]), [1,2])
+                regressed_scalar[i] = regression_model(regression_input)
+
+    fig = plt.figure(figsize=figure_size)
+
+    if colorbar_range is not None:
+        scat_field = plt.scatter(xy_mesh[0].ravel(), xy_mesh[1].ravel(), c=regressed_scalar, cmap=color_map, s=s_field, vmin=cbar_min, vmax=cbar_max)
+    else:
+        scat_field = plt.scatter(xy_mesh[0].ravel(), xy_mesh[1].ravel(), c=regressed_scalar, cmap=color_map, s=s_field)
+
+    if (x is not None) and (y is not None):
+
+        if manifold_color is None:
+            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
+        elif isinstance(manifold_color, str):
+            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color, cmap=color_map, marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
+        elif isinstance(manifold_color, np.ndarray):
+            if colorbar_range is not None:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=s_manifold, edgecolor='none', vmin=cbar_min, vmax=cbar_max, alpha=manifold_alpha)
+            else:
+                scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=s_manifold, edgecolor='none', vmin=np.min(regressed_scalar), vmax=np.max(regressed_scalar), alpha=manifold_alpha)
+
+    cb = fig.colorbar(scat_field)
+    cb.ax.tick_params(labelsize=font_colorbar_axes)
+    if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+    if colorbar_range is not None: plt.clim(cbar_min, cbar_max)
+
+    if x_label is not None: plt.xlabel(x_label, **csfont, fontsize=font_labels)
+    if y_label is not None: plt.ylabel(y_label, **csfont, fontsize=font_labels)
+    plt.xlim([np.min(x_grid),np.max(x_grid)])
+    plt.ylim([np.min(y_grid),np.max(y_grid)])
+    plt.xticks(fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    if grid_on: plt.grid(alpha=grid_opacity)
+
+    if title is not None: plt.title(title, **csfont, fontsize=font_title)
+    if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None, resolution=(10,10), extension=(0,0), color='k', x_label=None, y_label=None, s_manifold=None, manifold_color=None, colorbar_label=None, color_map='viridis', colorbar_range=None, manifold_alpha=1, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+    """
+    Plots a streamplot of a regressed vector field of a dependent variable.
+    A two-dimensional manifold can be additionally plotted on top of the streamplot.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, KReg, plot_2d_regression_streamplot
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+        S_X = np.random.rand(100,5)
+
+        # Obtain two-dimensional manifold from PCA:
+        pca_X = PCA(X, n_components=2)
+        PCs = pca_X.transform(X)
+        S_Z = pca_X.transform(S_X, nocenter=True)
+
+        # Train the kernel regression model:
+        model = KReg(PCs, S_Z)
+
+        # Define the regression model:
+        def regression_model(query):
+
+            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)
+
+            return predicted
+
+        # Define the bounds for the streamplot:
+        grid_bounds = ([np.min(PCs[:,0]),np.max(PCs[:,0])],[np.min(PCs[:,1]),np.max(PCs[:,1])])
+
+        # Plot the regression streamplot:
+        plt = plot_2d_regression_streamplot(grid_bounds,
+                                            regression_model,
+                                            x=PCs[:,0],
+                                            y=PCs[:,1],
+                                            resolution=(15,15),
+                                            extension=(20,20),
+                                            color='r',
+                                            x_label='$Z_1$',
+                                            y_label='$Z_2$',
+                                            manifold_color=X[:,0],
+                                            colorbar_label='$X_1$',
+                                            color_map='plasma',
+                                            colorbar_range=(0,1),
+                                            manifold_alpha=1,
+                                            grid_on=False,
+                                            figure_size=(10,6),
+                                            title='Streamplot',
+                                            save_filename='streamplot.pdf')
+        plt.close()
+
+    :param grid_bounds:
+        ``tuple`` of ``list`` specifying the bounds of the dependent variable on the :math:`x` and :math:`y` axis.
+    :param regression_model:
+        ``function`` that outputs the predicted vector using the regression model.
+        It should take as input a ``numpy.ndarray`` of size ``(1,2)``, where the two
+        elements specify the first and second independent variable values. It should output
+        a ``numpy.ndarray`` of size ``(1,2)``, where the two elements specify
+        the first and second regressed vector elements.
+    :param x: (optional)
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+        It can be used to plot a 2D manifold on top of the streamplot.
+    :param y: (optional)
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis.
+        It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+        It can be used to plot a 2D manifold on top of the streamplot.
+    :param resolution: (optional)
+        ``tuple`` of ``int`` specifying the resolution of the streamplot grid on the :math:`x` and :math:`y` axis.
+    :param extension: (optional)
+        ``tuple`` of ``float`` or ``int`` specifying a percentage by which the
+        dependent variable should be extended beyond on the :math:`x` and :math:`y` axis, beyond what has been specified by the ``grid_bounds`` parameter.
+    :param color: (optional)
+        ``str`` specifying the streamlines color.
+    :param x_label: (optional)
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param s_manifold: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the manifold.
+    :param manifold_color: (optional)
+        vector or string specifying color for the manifold. If it is a
+        vector, it has to have length consistent with the number of observations
+        in ``x`` and ``y`` vectors. It should be of type ``numpy.ndarray`` and size
+        ``(n_observations,)`` or ``(n_observations,1)``.
+        It can also be set to a string specifying the color directly, for
+        instance ``'r'`` or ``'#006778'``.
+        If not specified, manifold will be plotted in black.
+    :param colorbar_label: (optional)
+        ``str`` specifying colorbar label annotation.
+    :param color_map: (optional)
+        ``str`` or ``matplotlib.colors.ListedColormap`` specifying the colormap to use as per ``matplotlib.cm``. Default is ``'viridis'``.
+    :param colorbar_range: (optional)
+        ``tuple`` specifying the lower and the upper bound for the colorbar range.
+    :param manifold_alpha: (optional)
+        ``float`` or ``int`` specifying the opacity of the plotted manifold.
+    :param grid_on:
+        ``bool`` specifying whether grid should be plotted.
+    :param figure_size: (optional)
+        ``tuple`` specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(grid_bounds, tuple):
+        raise ValueError("Parameter `grid_bounds` has to be of type `tuple`.")
+
+    if not callable(regression_model):
+        raise ValueError("Parameter `regression_model` has to be of type `function`.")
+
+    if x is not None:
+
+        if not isinstance(x, np.ndarray):
+            raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_x,) = np.shape(x)
+            n_var_x = 1
+        except:
+            (n_x, n_var_x) = np.shape(x)
+
+        if n_var_x != 1:
+            raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if y is not None:
+
+        if not isinstance(y, np.ndarray):
+            raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+        try:
+            (n_y,) = np.shape(y)
+            n_var_y = 1
+        except:
+            (n_y, n_var_y) = np.shape(y)
+
+        if n_var_y != 1:
+            raise ValueError("Parameter `y` has to be a 0D or 1D vector.")
+
+        if n_x != n_y:
+            raise ValueError("Parameter `x` has different number of elements than `y`.")
+
+    if not isinstance(resolution, tuple):
+        raise ValueError("Parameter `resolution` has to be of type `tuple`.")
+
+    if not isinstance(extension, tuple):
+        raise ValueError("Parameter `extension` has to be of type `tuple`.")
+
+    if color is not None:
+        if not isinstance(color, str):
+            raise ValueError("Parameter `color` has to be of type `str`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if s_manifold is None:
+        s_manifold = scatter_point_size
+    else:
+        if not isinstance(s_manifold, int) and not isinstance(s_manifold, float):
+            raise ValueError("Parameter `s_manifold` has to be of type `int` or `float`.")
+
+    if manifold_color is not None:
+        if not isinstance(manifold_color, str):
+            if not isinstance(manifold_color, np.ndarray):
+                raise ValueError("Parameter `manifold_color` has to be `None`, or of type `str` or `numpy.ndarray`.")
+
+    if isinstance(manifold_color, np.ndarray):
+
+        try:
+            (n_color,) = np.shape(manifold_color)
+            n_var_color = 1
+        except:
+            (n_color, n_var_color) = np.shape(manifold_color)
+
+        if n_var_color != 1:
+            raise ValueError("Parameter `manifold_color` has to be a 0D or 1D vector.")
+
+        if n_color != n_x:
+            raise ValueError("Parameter `manifold_color` has different number of elements than `x` and `y`.")
+
+    if colorbar_label is not None:
+        if not isinstance(colorbar_label, str):
+            raise ValueError("Parameter `colorbar_label` has to be of type `str`.")
+
+    if not isinstance(color_map, str):
+        if not isinstance(color_map, ListedColormap):
+            raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
+
+    if colorbar_range is not None:
+        if not isinstance(colorbar_range, tuple):
+            raise ValueError("Parameter `colorbar_range` has to be of type `tuple`.")
+        else:
+            (cbar_min, cbar_max) = colorbar_range
+
+    if manifold_alpha is not None:
+        if not isinstance(manifold_alpha, float) and not isinstance(manifold_alpha, int):
+            raise ValueError("Parameter `manifold_alpha` has to be of type `float`.")
+
+    if not isinstance(grid_on, bool):
+        raise ValueError("Parameter `grid_on` has to be of type `bool`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    (x_extend, y_extend) = extension
+    (x_resolution, y_resolution) = resolution
+    ([x_minimum, x_maximum], [y_minimum, y_maximum]) = grid_bounds
+
+    # Create extension in both dimensions:
+    x_extension = x_extend/100.0 * abs(x_minimum - x_maximum)
+    y_extension = y_extend/100.0 * abs(y_minimum - y_maximum)
+
+    # Create grid points for the independent variables where regression will be applied:
+    x_grid = np.linspace(x_minimum-x_extension, x_maximum+x_extension, x_resolution)
+    y_grid = np.linspace(y_minimum-y_extension, y_maximum+y_extension, y_resolution)
+    xy_mesh = np.meshgrid(x_grid, y_grid, indexing='xy')
+
+    # Evaluate the predicted vectors using the regression model:
+    x_vector = np.zeros((y_grid.size, x_grid.size))
+    y_vector = np.zeros((y_grid.size, x_grid.size))
+
+    for j, x_variable in enumerate(x_grid):
+        for i, y_variable in enumerate(y_grid):
+
+                regression_input = np.reshape(np.array([x_variable, y_variable]), [1,2])
+
+                regressed_vector = regression_model(regression_input)
+
+                x_vector[i,j] = regressed_vector[0,0]
+                y_vector[i,j] = regressed_vector[0,1]
+
+    fig = plt.figure(figsize=figure_size)
+
+    if (x is not None) and (y is not None):
+
+        if manifold_color is None:
+            scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
+        elif isinstance(manifold_color, str):
+            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color, cmap=color_map, marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
+        elif isinstance(manifold_color, np.ndarray):
+            scat = plt.scatter(x.ravel(), y.ravel(), c=manifold_color.ravel(), cmap=color_map, marker='o', s=s_manifold, edgecolor='none', alpha=manifold_alpha)
+
+    if isinstance(manifold_color, np.ndarray):
+        if manifold_color is not None:
+            cb = fig.colorbar(scat)
+            cb.ax.tick_params(labelsize=font_colorbar_axes)
+            if colorbar_label is not None: cb.set_label(colorbar_label, fontsize=font_colorbar, rotation=0, horizontalalignment='left')
+            if colorbar_range is not None: plt.clim(cbar_min, cbar_max)
+
+    plt.streamplot(xy_mesh[0], xy_mesh[1], x_vector, y_vector, color=color, density=3, linewidth=1, arrowsize=1)
+
+    if x_label is not None: plt.xlabel(x_label, **csfont, fontsize=font_labels)
+    if y_label is not None: plt.ylabel(y_label, **csfont, fontsize=font_labels)
+    plt.xlim([np.min(x_grid),np.max(x_grid)])
+    plt.ylim([np.min(y_grid),np.max(y_grid)])
+    plt.xticks(fontsize=font_axes, **csfont)
+    plt.yticks(fontsize=font_axes, **csfont)
+    if grid_on: plt.grid(alpha=grid_opacity)
+
+    if title is not None: plt.title(title, **csfont, fontsize=font_title)
+    if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, clean=False, x_label=None, y_label=None, z_label=None, color_observed=None, color_predicted=None, s_observed=None, s_predicted=None, alpha_observed=None, alpha_predicted=None, figure_size=(7,7), title=None, save_filename=None):
+    """
+    Plots the result of regression of a dependent variable on top
+    of a two-dimensional manifold defined by two independent variables ``x`` and ``y``.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, plot_3d_regression
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Obtain three-dimensional manifold from PCA:
+        pca_X = PCA(X)
+        PCs = pca_X.transform(X)
+        X_rec = pca_X.reconstruct(PCs)
+
+        # Plot the manifold:
+        plt = plot_3d_regression(X[:,0],
+                                 X[:,1],
+                                 X[:,0],
+                                 X_rec[:,0],
+                                 elev=45,
+                                 azim=-45,
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 z_label='$z$',
+                                 color_observed='k',
+                                 color_predicted='r',
+                                 figure_size=(10,10),
+                                 title='3D regression',
+                                 save_filename='3d-regression.pdf')
+        plt.close()
+
+    :param x:
+        ``numpy.ndarray`` specifying the variable on the :math:`x`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param y:
+        ``numpy.ndarray`` specifying the variable on the :math:`y`-axis. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
+    :param observed:
+        ``numpy.ndarray`` specifying the observed values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param predicted:
+        ``numpy.ndarray`` specifying the predicted values of a single dependent variable.
+        It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
+    :param elev: (optional)
+        ``float`` or ``int`` specifying the elevation angle.
+    :param azim: (optional)
+        ``float`` or ``int`` specifying the azimuth angle.
+    :param clean: (optional)
+        ``bool`` specifying if a clean plot should be made. If set to ``True``, nothing else but the data points and the 3D axes is plotted.
+    :param x_label: (optional)
+        ``str`` specifying :math:`x`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param y_label: (optional)
+        ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param z_label: (optional)
+        ``str`` specifying :math:`z`-axis label annotation. If set to ``None``
+        label will not be plotted.
+    :param color_observed: (optional)
+        ``str`` specifying the color of the plotted observed variable.
+    :param color_predicted: (optional)
+        ``str`` specifying the color of the plotted predicted variable.
+    :param s_observed: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the observed variable.
+    :param s_predicted: (optional)
+        ``int`` or ``float`` specifying the scatter point size for the predicted variable.
+    :param alpha_observed: (optional)
+        ``int`` or ``float`` specifying the point opacity for the observed variable.
+    :param alpha_predicted: (optional)
+        ``int`` or ``float`` specifying the point opacity for the predicted variable.
+    :param figure_size: (optional)
+        ``tuple`` specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    from mpl_toolkits.mplot3d import Axes3D
+
+    if not isinstance(x, np.ndarray):
+        raise ValueError("Parameter `x` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_x,) = np.shape(x)
+        n_var_x = 1
+    except:
+        (n_x, n_var_x) = np.shape(x)
+
+    if n_var_x != 1:
+        raise ValueError("Parameter `x` has to be a 0D or 1D vector.")
+
+    if not isinstance(y, np.ndarray):
+        raise ValueError("Parameter `y` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_y,) = np.shape(y)
+        n_var_y = 1
+    except:
+        (n_y, n_var_y) = np.shape(y)
+
+    if n_var_y != 1:
+        raise ValueError("Parameter `y` has to be a 0D or 1D vector.")
+
+    if not isinstance(observed, np.ndarray):
+        raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observed,) = np.shape(observed)
+        n_var_observed = 1
+    except:
+        (n_observed, n_var_observed) = np.shape(observed)
+
+    if n_var_observed != 1:
+        raise ValueError("Parameter `observed` has to be a 0D or 1D vector.")
+
+    if not isinstance(predicted, np.ndarray):
+        raise ValueError("Parameter `predicted` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_predicted,) = np.shape(predicted)
+        n_var_predicted = 1
+    except:
+        (n_predicted, n_var_predicted) = np.shape(predicted)
+
+    if n_var_predicted != 1:
+        raise ValueError("Parameter `predicted` has to be a 0D or 1D vector.")
+
+    if n_observed != n_predicted:
+        raise ValueError("Parameter `observed` has different number of elements than `predicted`.")
+
+    if n_x != n_observed:
+        raise ValueError("Parameter `observed` has different number of elements than `x`, `y` and `z`.")
+
+    if n_x != n_predicted:
+        raise ValueError("Parameter `predicted` has different number of elements than `x`, `y` and `z`.")
+
+    if not isinstance(elev, float) and not isinstance(elev, int):
+        raise ValueError("Parameter `elev` has to be of type `int` or `float`.")
+
+    if not isinstance(azim, float) and not isinstance(azim, int):
+        raise ValueError("Parameter `azim` has to be of type `int` or `float`.")
+
+    if not isinstance(clean, bool):
+        raise ValueError("Parameter `clean` has to be of type `bool`.")
+
+    if x_label is not None:
+        if not isinstance(x_label, str):
+            raise ValueError("Parameter `x_label` has to be of type `str`.")
+
+    if y_label is not None:
+        if not isinstance(y_label, str):
+            raise ValueError("Parameter `y_label` has to be of type `str`.")
+
+    if z_label is not None:
+        if not isinstance(z_label, str):
+            raise ValueError("Parameter `z_label` has to be of type `str`.")
+
+    if color_observed is not None:
+        if not isinstance(color_observed, str):
+            raise ValueError("Parameter `color_observed` has to be of type `str`.")
+    else:
+        color_observed = '#191b27'
+
+    if color_predicted is not None:
+        if not isinstance(color_predicted, str):
+            raise ValueError("Parameter `color_predicted` has to be of type `str`.")
+    else:
+        color_predicted = '#C7254E'
+
+    if s_observed is None:
+        s_observed = scatter_point_size
+    else:
+        if not isinstance(s_observed, int) and not isinstance(s_observed, float):
+            raise ValueError("Parameter `s_observed` has to be of type `int` or `float`.")
+
+    if s_predicted is None:
+        s_predicted = scatter_point_size
+    else:
+        if not isinstance(s_predicted, int) and not isinstance(s_predicted, float):
+            raise ValueError("Parameter `s_predicted` has to be of type `int` or `float`.")
+
+    if alpha_observed is None:
+        alpha_observed = 0.1
+    else:
+        if not isinstance(alpha_observed, int) and not isinstance(alpha_observed, float):
+            raise ValueError("Parameter `alpha_observed` has to be of type `int` or `float`.")
+
+    if alpha_predicted is None:
+        alpha_predicted = 0.4
+    else:
+        if not isinstance(alpha_predicted, int) and not isinstance(alpha_predicted, float):
+            raise ValueError("Parameter `alpha_predicted` has to be of type `int` or `float`.")
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    fig = plt.figure(figsize=figure_size)
+    ax = fig.add_subplot(111, projection='3d')
+
+    scat = ax.scatter(x.ravel(), y.ravel(), observed.ravel(), c=color_observed, marker='o', s=s_observed, alpha=alpha_observed)
+    scat = ax.scatter(x.ravel(), y.ravel(), predicted.ravel(), c=color_predicted, marker='o', s=s_predicted, alpha=alpha_predicted)
+
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+    ax.xaxis.pane.set_edgecolor('w')
+    ax.yaxis.pane.set_edgecolor('w')
+    ax.zaxis.pane.set_edgecolor('w')
+    ax.view_init(elev=elev, azim=azim)
+
+    if clean:
+
+        plt.xticks([])
+        plt.yticks([])
+        ax.set_zticks([])
+        ax.spines["top"].set_visible(False)
+        ax.spines["bottom"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_visible(False)
+
+    else:
+
+        if x_label != None: ax.set_xlabel(x_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+        if y_label != None: ax.set_ylabel(y_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+        if z_label != None: ax.set_zlabel(z_label, **csfont, fontsize=font_labels, rotation=0, labelpad=20)
+
+        ax.tick_params(pad=5)
+        ax.grid(alpha=grid_opacity)
+
+        for label in (ax.get_xticklabels()):
+            label.set_fontsize(font_axes)
+        for label in (ax.get_yticklabels()):
+            label.set_fontsize(font_axes)
+        for label in (ax.get_zticklabels()):
+            label.set_fontsize(font_axes)
+
+    lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, bbox_to_anchor=(0.9,0.9), loc="upper left")
+    lgnd.legendHandles[0]._sizes = [marker_size*5]
+    lgnd.legendHandles[1]._sizes = [marker_size*5]
+
+    if title != None: ax.set_title(title, **csfont, fontsize=font_title)
+    if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt
+
+# ------------------------------------------------------------------------------
+
+def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, metric_name=None, yscale='linear', ylim=None, figure_size=(10,5), title=None, save_filename=None):
+    """
+    This function plots a stratified metric across bins of a dependent variable.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, variable_bins, stratified_coefficient_of_determination, plot_stratified_metric
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.random.rand(100,10)
+
+        # Instantiate PCA class object:
+        pca_X = PCA(X, scaling='auto', n_components=2)
+
+        # Approximate the data set:
+        X_rec = pca_X.reconstruct(pca_X.transform(X))
+
+        # Generate bins:
+        (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
+
+        # Compute stratified R2 in 10 bins of the first variable in a data set:
+        r2_in_bins = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], idx=idx, use_global_mean=True, verbose=True)
+
+        # Visualize how R2 changes across bins:
+        plt = plot_stratified_metric(r2_in_bins,
+                                      bins_borders,
+                                      variable_name='$X_1$',
+                                      metric_name='$R^2$',
+                                      yscale='log',
+                                      figure_size=(10,5),
+                                      title='Stratified $R^2$',
+                                      save_filename='r2.pdf')
+        plt.close()
+
+    :param metric_in_bins:
+        ``list`` of metric values in each bin.
+    :param bins_borders:
+        ``list`` of bins borders that were created to stratify the dependent variable.
+    :param variable_name: (optional)
+        ``str`` specifying the name of the variable for which the metric was computed. If set to ``None``
+        label on the x-axis will not be plotted.
+    :param metric_name: (optional)
+        ``str`` specifying the name of the metric to be plotted on the y-axis. If set to ``None``
+        label on the x-axis will not be plotted.
+    :param yscale: (optional)
+        ``str`` specifying the scale for the y-axis.
+    :param figure_size: (optional)
+        ``tuple`` specifying figure size.
+    :param title: (optional)
+        ``str`` specifying plot title. If set to ``None`` title will not be
+        plotted.
+    :param save_filename: (optional)
+        ``str`` specifying plot save location/filename. If set to ``None``
+        plot will not be saved. You can also set a desired file extension,
+        for instance ``.pdf``. If the file extension is not specified, the default
+        is ``.png``.
+
+    :return:
+        - **plt** - ``matplotlib.pyplot`` plot handle.
+    """
+
+    if not isinstance(figure_size, tuple):
+        raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+    if title is not None:
+        if not isinstance(title, str):
+            raise ValueError("Parameter `title` has to be of type `str`.")
+
+    if save_filename is not None:
+        if not isinstance(save_filename, str):
+            raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+    bin_centers = []
+    for i in range(0,len(bins_borders)-1):
+        bin_length = bins_borders[i+1] - bins_borders[i]
+        bin_centers.append(bins_borders[i] + bin_length/2)
+
+    figure = plt.figure(figsize=figure_size)
+    plt.scatter(bin_centers, metric_in_bins, c='#191b27')
+    plt.grid(alpha=grid_opacity)
+    plt.xlim([bins_borders[0], bins_borders[-1]])
+    plt.yscale(yscale)
+    if ylim is not None: plt.ylim(ylim)
+    if variable_name is not None: plt.xlabel(variable_name, **csfont, fontsize=font_labels)
+    if metric_name is not None: plt.ylabel(metric_name, **csfont, fontsize=font_labels)
+
+    if title is not None: plt.title(title, fontsize=font_title, **csfont)
+    if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+    return plt

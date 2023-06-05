@@ -3,6 +3,7 @@ import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import analysis
+from PCAfold import reconstruction
 
 class Analysis(unittest.TestCase):
 
@@ -13,13 +14,13 @@ class Analysis(unittest.TestCase):
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         try:
-            plt = analysis.plot_2d_regression(X[:,1], X[:,0], X_rec[:,0])
+            plt = reconstruction.plot_2d_regression(X[:,1], X[:,0], X_rec[:,0])
             plt.close()
         except Exception:
             self.assertTrue(False)
 
         try:
-            plt = analysis.plot_2d_regression(X[:,1],
+            plt = reconstruction.plot_2d_regression(X[:,1],
                                             X[:,0],
                                             X_rec[:,0],
                                             x_label='$x$',
@@ -31,7 +32,7 @@ class Analysis(unittest.TestCase):
             self.assertTrue(False)
 
         try:
-            plt = analysis.plot_2d_regression(X[:,1:2],
+            plt = reconstruction.plot_2d_regression(X[:,1:2],
                                             X[:,0:1],
                                             X_rec[:,0:1],
                                             x_label='$x$',
@@ -49,47 +50,47 @@ class Analysis(unittest.TestCase):
         X = np.random.rand(100,5)
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0:2], X[:,1], X[:,2])
+            plt = reconstruction.plot_2d_regression(X[:,0:2], X[:,1], X[:,2])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1:3], X[:,2])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1:3], X[:,2])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,2:4])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1], X[:,2:4])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression([1,2,3], X[:,1], X[:,1])
+            plt = reconstruction.plot_2d_regression([1,2,3], X[:,1], X[:,1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], [1,2,3], X[:,1])
+            plt = reconstruction.plot_2d_regression(X[:,0], [1,2,3], X[:,1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1], [1,2,3])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1], [1,2,3])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,1], x_label=[1])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1], X[:,1], x_label=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,1], y_label=[1])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1], X[:,1], y_label=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,1], figure_size=[1])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1], X[:,1], figure_size=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,1], title=[1])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1], X[:,1], title=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression(X[:,0], X[:,1], X[:,1], save_filename=[1])
+            plt = reconstruction.plot_2d_regression(X[:,0], X[:,1], X[:,1], save_filename=[1])
             plt.close()
 
 # ------------------------------------------------------------------------------

@@ -6,19 +6,19 @@ from PCAfold import analysis
 
 class Analysis(unittest.TestCase):
 
-    def test_analysis__turning_points__allowed_calls(self):
+    def test_reconstruction__turning_points__allowed_calls(self):
 
         pass
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__turning_points__not_allowed_calls(self):
+    def test_reconstruction__turning_points__not_allowed_calls(self):
 
         pass
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__turning_points__computation(self):
+    def test_reconstruction__turning_points__computation(self):
 
         pass
 

@@ -70,10 +70,6 @@ from .analysis import random_sampling_normalized_variance
 from .analysis import feature_size_map
 from .analysis import feature_size_map_smooth
 from .analysis import cost_function_normalized_variance_derivative
-from .analysis import plot_2d_regression
-from .analysis import plot_2d_regression_scalar_field
-from .analysis import plot_2d_regression_streamplot
-from .analysis import plot_3d_regression
 from .analysis import plot_normalized_variance
 from .analysis import plot_normalized_variance_comparison
 from .analysis import plot_normalized_variance_derivative
@@ -100,6 +96,10 @@ from .reconstruction import turning_points
 from .reconstruction import good_estimate
 from .reconstruction import good_direction_estimate
 from .reconstruction import generate_tex_table
+from .reconstruction import plot_2d_regression
+from .reconstruction import plot_2d_regression_scalar_field
+from .reconstruction import plot_2d_regression_streamplot
+from .reconstruction import plot_3d_regression
 from .reconstruction import plot_stratified_metric
 
 # Module: `utilities`
