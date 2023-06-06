@@ -2931,7 +2931,6 @@ class ANN:
         self.__validation_loss = None
         self.__idx_min_training_loss = None
         self.__idx_min_validation_loss = None
-        self.__bases_across_epochs = None
         self.__weights_and_biases_trained = None
 
     @property
