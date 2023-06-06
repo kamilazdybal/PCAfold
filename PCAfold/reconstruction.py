@@ -3117,8 +3117,19 @@ class ANN:
 # ------------------------------------------------------------------------------
 
     def predict(self, input_regressors):
+        """
+        Predicts the quantities of interest (QoIs) from the trained artificial neural network (ANN) model.
 
-        pass
+        :param input_regressors:
+            ``numpy.ndarray`` specifying the input data (regressors) to be used for predicting the quantities of interest (QoIs) from the trained ANN model. It should be of size ``(n_observations,n_input_variables)``, where ``n_observations`` can be different from the number of observations in the training dataset.
+
+        :return:
+            - **output_predictors** - predicted quantities of interest (QoIs).
+        """
+
+        output_predictors = self.__ann_model.predict(input_regressors)
+
+        return output_predictors
 
 # ------------------------------------------------------------------------------
 
@@ -3164,6 +3175,8 @@ class ANN:
         """
         Plots training and validation losses.
 
+        :param markevery: (optional)
+            ``int`` specifying how frequently the epoch number on the x-axis should be labelled.
         :param figure_size: (optional)
             ``tuple`` specifying figure size.
         :param save_filename: (optional)

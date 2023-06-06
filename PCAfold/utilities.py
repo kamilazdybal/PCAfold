@@ -958,6 +958,8 @@ class QoIAwareProjection:
         """
         Plots training and validation losses.
 
+        :param markevery: (optional)
+            ``int`` specifying how frequently the epoch number on the x-axis should be labelled.
         :param figure_size: (optional)
             ``tuple`` specifying figure size.
         :param save_filename: (optional)
