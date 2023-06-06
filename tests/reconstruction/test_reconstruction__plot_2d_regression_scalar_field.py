@@ -5,7 +5,7 @@ from PCAfold import reduction
 from PCAfold import analysis
 from PCAfold import reconstruction
 
-class Analysis(unittest.TestCase):
+class Reconstruction(unittest.TestCase):
 
     def test_analysis__plot_2d_regression_scalar_field__allowed_calls(self):
 

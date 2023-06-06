@@ -13,10 +13,35 @@ Class ``ANN``
 
 .. autoclass:: PCAfold.reconstruction.ANN
 
+``ANN.summary``
+===============
 
+.. autofunction:: PCAfold.reconstruction.ANN.summary
 
+``ANN.train``
+=============
 
+.. autofunction:: PCAfold.reconstruction.ANN.train
 
+``ANN.predict``
+===============
+
+.. autofunction:: PCAfold.reconstruction.ANN.predict
+
+``ANN.print_weights_and_biases_init``
+=====================================
+
+.. autofunction:: PCAfold.reconstruction.ANN.print_weights_and_biases_init
+
+``ANN.print_weights_and_biases_trained``
+========================================
+
+.. autofunction:: PCAfold.reconstruction.ANN.print_weights_and_biases_trained
+
+``ANN.plot_losses``
+===================
+
+.. autofunction:: PCAfold.reconstruction.ANN.plot_losses
 
 --------------------------------------------------------------------------------
 

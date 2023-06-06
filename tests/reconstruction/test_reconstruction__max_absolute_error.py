@@ -4,7 +4,7 @@ from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import reconstruction
 
-class Analysis(unittest.TestCase):
+class Reconstruction(unittest.TestCase):
 
     def test_reconstruction__max_absolute_error__allowed_calls(self):
 

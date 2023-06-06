@@ -10,7 +10,7 @@ try:
 except ImportError:
     pass
 
-class Analysis(unittest.TestCase):
+class Reconstruction(unittest.TestCase):
 
     def test_reconstruction__coefficient_of_determination__allowed_calls(self):
 

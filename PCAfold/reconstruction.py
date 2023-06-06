@@ -2689,15 +2689,15 @@ class ANN:
 
         # Generate dummy dataset:
         input_data = np.random.rand(100,8)
-        output_data = np.random.rand(100,8)
+        output_data = np.random.rand(100,3)
 
         # Instantiate ANN class object:
         ann_model = ANN(input_data,
                         output_data,
-                        interior_architecture=(5,8),
+                        interior_architecture=(5,4),
                         activation_functions=('tanh', 'tanh', 'linear'),
-                        weights_init=None,
-                        biases_init=None,
+                        weights_init='glorot_uniform',
+                        biases_init='zeros',
                         loss='MSE',
                         optimizer='Adam',
                         batch_size=100,
@@ -3096,6 +3096,9 @@ class ANN:
                                             validation_data=validation_data,
                                             verbose=0)
 
+            training_losses_across_epochs.append(history.history['loss'][0])
+            if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
+
         toc = time.perf_counter()
         if self.__verbose: print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
 
@@ -3110,6 +3113,12 @@ class ANN:
         if self.__validation_perc != 0:
             idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
             self.__idx_min_validation_loss = idx_min_validation_loss[0]
+
+# ------------------------------------------------------------------------------
+
+    def predict(self, input_regressors):
+
+        pass
 
 # ------------------------------------------------------------------------------
 
