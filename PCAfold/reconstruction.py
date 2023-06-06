@@ -2688,12 +2688,8 @@ class ANN:
         import numpy as np
 
         # Generate dummy dataset:
-        X = np.random.rand(100,8)
-        S = np.random.rand(100,8)
-
-        # Preprocess the dataset before passing it to the ANN:
-        (input_data, centers, scales) = center_scale(X, scaling='0to1')
-        output_data = S / scales
+        input_data = np.random.rand(100,8)
+        output_data = np.random.rand(100,8)
 
         # Instantiate ANN class object:
         ann_model = ANN(input_data,
@@ -2705,7 +2701,7 @@ class ANN:
                         loss='MSE',
                         optimizer='Adam',
                         batch_size=100,
-                        n_epochs=None,
+                        n_epochs=1000,
                         learning_rate=0.001,
                         validation_perc=10,
                         random_seed=100,
@@ -2891,15 +2887,12 @@ class ANN:
         # Create an artificial neural network with a given architecture:
         ann_model = models.Sequential()
 
-        print(neuron_count)
-        print(activation_functions)
-
         if isinstance(activation_functions, str):
-            ann_model.add(layers.Dense(neuron_count[1], input_dim=n_input_variables, activation=activation_functions, kernel_initializer=weights_init, bias_initializer=biases_init))
+            ann_model.add(layers.Dense(self.__neuron_count[1], input_dim=self.__neuron_count[0], activation=activation_functions, kernel_initializer=weights_init, bias_initializer=biases_init))
         elif isinstance(activation_functions, tuple):
-            ann_model.add(layers.Dense(neuron_count[1], input_dim=n_input_variables, activation=activation_functions[0], kernel_initializer=weights_init, bias_initializer=biases_init))
+            ann_model.add(layers.Dense(self.__neuron_count[1], input_dim=self.__neuron_count[0], activation=activation_functions[0], kernel_initializer=weights_init, bias_initializer=biases_init))
 
-        for i, n_neurons in enumerate(neuron_count[2::]):
+        for i, n_neurons in enumerate(self.__neuron_count[2::]):
             if isinstance(activation_functions, str):
                     ann_model.add(layers.Dense(n_neurons, activation=activation_functions, kernel_initializer=weights_init, bias_initializer=biases_init))
             elif isinstance(activation_functions, tuple):
@@ -3061,15 +3054,62 @@ class ANN:
 # ------------------------------------------------------------------------------
 
     def train(self):
+        """
+        Trains the artificial neural network (ANN) model.
+        """
 
-        pass
+        import tensorflow as tf
+        from tensorflow.keras import layers, models
 
+        if self.__verbose: print('Starting model training...\n\n')
 
+        if self.__random_seed is not None:
+            tf.random.set_seed(self.__random_seed)
 
+        training_losses_across_epochs = []
+        validation_losses_across_epochs = []
 
+        (n_observations, _) = np.shape(self.__input_data)
 
+        tic = time.perf_counter()
 
+        n_count_epochs = 0
 
+        if self.__validation_perc != 0:
+            sample_random = preprocess.DataSampler(np.zeros((n_observations,)).astype(int), random_seed=self.__random_seed, verbose=False)
+            (idx_train, idx_validation) = sample_random.random(100 - self.__validation_perc)
+            validation_data = (self.__input_data[idx_validation,:], self.__output_data[idx_validation,:])
+            if self.__verbose: print('Using ' + str(self.__validation_perc) + '% of input data as validation data. Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data.\n')
+        else:
+            sample_random = preprocess.DataSampler(np.zeros((n_observations,)).astype(int), random_seed=self.__random_seed, verbose=False)
+            (idx_train, _) = sample_random.random(100)
+            validation_data = None
+            if self.__verbose: print('No validation data is used at model training. Model will be trained on 100% of input data.\n')
+
+        for i_epoch in tqdm(self.__epochs_list):
+
+            history = self.__ann_model.fit(self.__input_data[idx_train,:],
+                                            self.__output_data[idx_train,:],
+                                            epochs=1,
+                                            batch_size=self.__batch_size,
+                                            shuffle=True,
+                                            validation_data=validation_data,
+                                            verbose=0)
+
+        toc = time.perf_counter()
+        if self.__verbose: print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
+
+        self.__training_loss = training_losses_across_epochs
+        self.__validation_loss = validation_losses_across_epochs
+        self.__weights_and_biases_trained = self.__ann_model.get_weights()
+        self.__trained = True
+
+        idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
+        self.__idx_min_training_loss = idx_min_training_loss[0]
+
+        if self.__validation_perc != 0:
+            idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
+            self.__idx_min_validation_loss = idx_min_validation_loss[0]
 
 # ------------------------------------------------------------------------------
 
