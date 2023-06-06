@@ -80,6 +80,8 @@ Class ``VarianceData``
 
 .. autofunction:: PCAfold.analysis.cost_function_normalized_variance_derivative
 
+--------------------------------------------------------------------------------
+
 ******************
 Kernel Regression
 ******************
@@ -122,112 +124,6 @@ Class ``KReg``
 =========================================================
 
 .. autofunction:: PCAfold.kernel_regression.KReg.compute_nearest_neighbors_bandwidth_anisotropic
-
---------------------------------------------------------------------------------
-
-***********************
-Regression assessment
-***********************
-
-Class ``RegressionAssessment``
-================================================
-
-.. autoclass:: PCAfold.analysis.RegressionAssessment
-
-``RegressionAssessment.print_metrics``
-================================================
-
-.. autofunction:: PCAfold.analysis.RegressionAssessment.print_metrics
-
-``RegressionAssessment.print_stratified_metrics``
-=================================================
-
-.. autofunction:: PCAfold.analysis.RegressionAssessment.print_stratified_metrics
-
-``coefficient_of_determination``
-================================
-
-.. autofunction:: PCAfold.analysis.coefficient_of_determination
-
-``stratified_coefficient_of_determination``
-===========================================
-
-.. autofunction:: PCAfold.analysis.stratified_coefficient_of_determination
-
-``mean_absolute_error``
-=======================
-
-.. autofunction:: PCAfold.analysis.mean_absolute_error
-
-``stratified_mean_absolute_error``
-==================================
-
-.. autofunction:: PCAfold.analysis.stratified_mean_absolute_error
-
-``max_absolute_error``
-=======================
-
-.. autofunction:: PCAfold.analysis.max_absolute_error
-
-``mean_squared_error``
-======================
-
-.. autofunction:: PCAfold.analysis.mean_squared_error
-
-``stratified_mean_squared_error``
-=================================
-
-.. autofunction:: PCAfold.analysis.stratified_mean_squared_error
-
-``mean_squared_logarithmic_error``
-==================================
-
-.. autofunction:: PCAfold.analysis.mean_squared_logarithmic_error
-
-``stratified_mean_squared_logarithmic_error``
-=============================================
-
-.. autofunction:: PCAfold.analysis.stratified_mean_squared_logarithmic_error
-
-``root_mean_squared_error``
-===========================
-
-.. autofunction:: PCAfold.analysis.root_mean_squared_error
-
-``stratified_root_mean_squared_error``
-======================================
-
-.. autofunction:: PCAfold.analysis.stratified_root_mean_squared_error
-
-``normalized_root_mean_squared_error``
-======================================
-
-.. autofunction:: PCAfold.analysis.normalized_root_mean_squared_error
-
-``stratified_normalized_root_mean_squared_error``
-=================================================
-
-.. autofunction:: PCAfold.analysis.stratified_normalized_root_mean_squared_error
-
-``turning_points``
-================================================
-
-.. autofunction:: PCAfold.analysis.turning_points
-
-``good_estimate``
-================================================
-
-.. autofunction:: PCAfold.analysis.good_estimate
-
-``good_direction_estimate``
-================================================
-
-.. autofunction:: PCAfold.analysis.good_direction_estimate
-
-``generate_tex_table``
-================================================
-
-.. autofunction:: PCAfold.analysis.generate_tex_table
 
 --------------------------------------------------------------------------------
 
