@@ -99,3 +99,5 @@ or using BibTeX:
    tutorials/demo-manifold-assessment
    tutorials/demo-cost-function
    tutorials/demo-regression
+   tutorials/demo-pounets
+   tutorials/demo-qoi-aware-encoder-pounet
