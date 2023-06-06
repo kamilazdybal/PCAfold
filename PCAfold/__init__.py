@@ -76,6 +76,7 @@ from .analysis import plot_normalized_variance_derivative
 from .analysis import plot_normalized_variance_derivative_comparison
 
 # Module: `reconstruction`
+from .reconstruction import ANN
 from .reconstruction import PartitionOfUnityNetwork
 from .reconstruction import init_uniform_partitions
 from .reconstruction import RegressionAssessment

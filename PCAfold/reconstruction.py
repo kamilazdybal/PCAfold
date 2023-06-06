@@ -9,10 +9,12 @@ __maintainer__ = ["Kamila Zdybal", "Elizabeth Armstrong"]
 __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "James.Sutherland@chemeng.utah.edu"]
 __status__ = "Production"
 
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 from PCAfold.styles import *
 from PCAfold import preprocess
 from PCAfold import reduction
+import pickle
 from matplotlib.colors import ListedColormap
 import time
 import os
@@ -2668,25 +2670,399 @@ def generate_tex_table(data_frame_table, float_format='.2f', caption='', label='
 
 # ------------------------------------------------------------------------------
 
-
-################################################################################
-#
-# Kernel regression (KReg)
-#
-################################################################################
-
-
-
-
-
-
-
 ################################################################################
 #
 # Artificial neural network (ANN) regression
 #
 ################################################################################
 
+class ANN:
+    """
+    Enables reconstruction of quantities of interest (QoIs) using artificial neural network (ANN).
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import ANN
+        import numpy as np
+
+        # Generate dummy dataset:
+        X = np.random.rand(100,8)
+        S = np.random.rand(100,8)
+
+        # Preprocess the dataset before passing it to the ANN:
+        (input_data, centers, scales) = center_scale(X, scaling='0to1')
+        output_data = S / scales
+
+        # Instantiate ANN class object:
+        ann_model = ANN(input_data,
+                        output_data,
+                        interior_architecture=(5,8),
+                        activation_functions=('tanh', 'tanh', 'linear'),
+                        weights_init=None,
+                        biases_init=None,
+                        loss='MSE',
+                        optimizer='Adam',
+                        batch_size=100,
+                        n_epochs=None,
+                        learning_rate=0.001,
+                        validation_perc=10,
+                        random_seed=100,
+                        verbose=True)
+
+        # Begin model training:
+        ann_model.train()
+
+    A summary of the current ANN model and its hyperparameter settings can be printed using the ``summary()`` function:
+
+    .. code:: python
+
+        # Print the ANN model summary
+        qoi_aware.summary()
+
+    .. code-block:: text
+
+        ANN model summary...
+
+    :param input_data:
+        ``numpy.ndarray`` specifying the data set used as the input (regressors) to the ANN. It should be of size ``(n_observations,n_input_variables)``.
+    :param output_data:
+        ``numpy.ndarray`` specifying the data set used as the output (predictors) to the ANN. It should be of size ``(n_observations,n_output_variables)``.
+    :param interior_architecture: (optional)
+        ``tuple`` of ``int`` specifying the number of neurons in the interior network architecture.
+        For example, if ``interior_architecture=(4,5)``, two interior layers will be created and the overal network architecture will be ``(Input)-(4)-(5)-(Output)``.
+        If set to an empty tuple, ``interior_architecture=()``, the overal network architecture will be ``(Input)-(Output)``.
+        Keep in mind that if you'd like to create just one interior layer, you should use a comma after the integer: ``interior_architecture=(4,)``.
+    :param activation_functions: (optional)
+        ``str`` or ``tuple`` specifying activation functions in all layers. If set to ``str``, the same activation function is used in all layers.
+        If set to a ``tuple`` of ``str``, a different activation function can be set at different layers. The number of elements in the ``tuple`` should match the number of layers!
+        ``str`` and ``str`` elements of the ``tuple`` can only be ``'linear'``, ``'sigmoid'``, or ``'tanh'``.
+    :param weights_init: (optional)
+        ``str`` specifying the initialization of weights in the network. If set to ``None``, weights will be initialized using the Glorot uniform distribution.
+    :param biases_init: (optional)
+        ``str`` specifying the initialization of biases in the network. If set to ``None``, biases will be initialized as zeros.
+    :param loss: (optional)
+        ``str`` specifying the loss function. It can be ``'MAE'`` or ``'MSE'``.
+    :param optimizer: (optional)
+        ``str`` specifying the optimizer used during training. It can be ``'Adam'`` or ``'Nadam'``.
+    :param batch_size: (optional)
+        ``int`` specifying the batch size.
+    :param n_epochs: (optional)
+        ``int`` specifying the number of epochs.
+    :param learning_rate: (optional)
+        ``float`` specifying the learning rate passed to the optimizer.
+    :param validation_perc: (optional)
+        ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number larger than or equal to 0 and smaller than 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
+    :param random_seed: (optional)
+        ``int`` specifying the random seed to be used for any random operations. It is highly recommended to set a fixed random seed, as this allows for complete reproducibility of the results.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    **Attributes:**
+
+    - **input_data** - (read only) ``numpy.ndarray`` specifying the data set used as the input to the ANN.
+    - **output_data** - (read only) ``numpy.ndarray`` specifying the data set used as the output to the ANN.
+    - **architecture** - (read only) ``str`` specifying the ANN architecture.
+    - **ann_model** - (read only) object of ``Keras.models.Sequential`` class that stores the artificial neural network model.
+    - **weights_and_biases_init** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases with which the ANN was intialized.
+    - **weights_and_biases_trained** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases after training the ANN. Only available after calling ``ANN.train()``.
+    - **training_loss** - (read only) ``list`` of losses computed on the training data. Only available after calling ``ANN.train()``.
+    - **validation_loss** - (read only) ``list`` of losses computed on the validation data. Only available after calling ``ANN.train()`` and only when ``validation_perc`` is not equal to 0.
+    """
+
+    def __init__(self,
+                input_data,
+                output_data,
+                interior_architecture=(),
+                activation_functions='tanh',
+                weights_init='glorot_uniform',
+                biases_init='zeros',
+                loss='MSE',
+                optimizer='Adam',
+                batch_size=200,
+                n_epochs=1000,
+                learning_rate=0.001,
+                validation_perc=10,
+                random_seed=None,
+                verbose=False):
+
+        import tensorflow as tf
+        from tensorflow.keras import layers, models
+
+        __weights_inits = ['glorot_uniform']
+        __biases_inits = ['zeros']
+        __activations = ['linear', 'sigmoid', 'tanh']
+        __optimizers = ['Adam', 'Nadam']
+        __losses = ['MSE', 'MAE']
+
+        if not isinstance(input_data, np.ndarray):
+            raise ValueError("Parameter `input_data` has to be of type `numpy.ndarray`.")
+
+        (n_input_observations, n_input_variables) = np.shape(input_data)
+
+        if not isinstance(output_data, np.ndarray):
+            raise ValueError("Parameter `output_data` has to be of type `numpy.ndarray`.")
+
+        (n_output_observations, n_output_variables) = np.shape(output_data)
+
+        if n_input_observations != n_output_observations:
+            raise ValueError("Parameters `input_data` and `output_data` have to have the same number of observations.")
+
+        if not isinstance(activation_functions, str) and not isinstance(activation_functions, tuple):
+            raise ValueError("Parameter `activation_functions` has to be of type `str` or `tuple`.")
+
+        if isinstance(activation_functions, str):
+            if activation_functions not in __activations:
+                raise ValueError("Parameter `activation_functions` can only be 'linear' 'sigmoid' or 'tanh'.")
+
+        if not isinstance(interior_architecture, tuple):
+            raise ValueError("Parameter `interior_architecture` has to be of type `tuple`.")
+
+        if isinstance(activation_functions, tuple):
+            for i in activation_functions:
+                if not isinstance(i, str):
+                    raise ValueError("Parameter `activation_functions` has to be a tuple of `str`.")
+                if i not in __activations:
+                    raise ValueError("Elements of the parameter `activation_functions` can only be 'linear' 'sigmoid' or 'tanh'.")
+            if len(activation_functions) != len(interior_architecture) + 1:
+                raise ValueError("Parameter `activation_functions` has to have as many elements as there are layers in the neural network.")
+
+        # Evaluate the architecture string:
+        if len(interior_architecture)==0:
+            architecture = str(n_input_variables) + '-' + str(n_output_variables)
+            neuron_count = [n_input_variables, n_output_variables]
+        else:
+            architecture = str(n_input_variables) + '-' + '-'.join([str(i) for i in interior_architecture]) + '-' + str(n_output_variables)
+            neuron_count = [n_input_variables] + [i for i in interior_architecture] + [n_output_variables]
+
+        self.__neuron_count = neuron_count
+
+        # Set the loss:
+        if not isinstance(loss, str):
+            raise ValueError("Parameter `loss` has to be of type `str`.")
+
+        if loss not in __losses:
+            raise ValueError("Parameter `loss` has to be 'MAE' or 'MSE'.")
+
+        if loss == 'MSE':
+            model_loss = tf.keras.losses.MeanSquaredError()
+        elif loss == 'MAE':
+            model_loss = tf.keras.losses.MeanAbsoluteError()
+
+        # Set the optimizer:
+        if not isinstance(optimizer, str):
+            raise ValueError("Parameter `optimizer` has to be of type `str`.")
+
+        if optimizer not in __optimizers:
+            raise ValueError("Parameter `optimizer` has to be 'Adam' or 'Nadam'.")
+
+        if optimizer == 'Adam':
+            model_optimizer = tf.optimizers.Adam(learning_rate)
+        elif optimizer == 'Nadam':
+            model_optimizer = tf.optimizers.Nadam(learning_rate)
+
+        if not isinstance(batch_size, int):
+            raise ValueError("Parameter `batch_size` has to be of type `int`.")
+
+        if not isinstance(n_epochs, int):
+            raise ValueError("Parameter `n_epochs` has to be of type `int`.")
+
+        if not isinstance(learning_rate, float):
+            raise ValueError("Parameter `learning_rate` has to be of type `float`.")
+
+        if not isinstance(validation_perc, int):
+            raise ValueError("Parameter `validation_perc` has to be of type `int`.")
+
+        if (validation_perc < 0) or (validation_perc >= 100):
+            raise ValueError("Parameter `validation_perc` has to be an integer between 0 and 100`.")
+
+        # Set random seed for neural network training reproducibility:
+        if random_seed is not None:
+            if not isinstance(random_seed, int):
+                raise ValueError("Parameter `random_seed` has to be of type `int`.")
+            tf.random.set_seed(random_seed)
+
+        if not isinstance(verbose, bool):
+            raise ValueError("Parameter `verbose` has to be a boolean.")
+
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        # Create an artificial neural network with a given architecture:
+        ann_model = models.Sequential()
+
+        print(neuron_count)
+        print(activation_functions)
+
+        if isinstance(activation_functions, str):
+            ann_model.add(layers.Dense(neuron_count[1], input_dim=n_input_variables, activation=activation_functions, kernel_initializer=weights_init, bias_initializer=biases_init))
+        elif isinstance(activation_functions, tuple):
+            ann_model.add(layers.Dense(neuron_count[1], input_dim=n_input_variables, activation=activation_functions[0], kernel_initializer=weights_init, bias_initializer=biases_init))
+
+        for i, n_neurons in enumerate(neuron_count[2::]):
+            if isinstance(activation_functions, str):
+                    ann_model.add(layers.Dense(n_neurons, activation=activation_functions, kernel_initializer=weights_init, bias_initializer=biases_init))
+            elif isinstance(activation_functions, tuple):
+                ann_model.add(layers.Dense(n_neurons, activation=activation_functions[i+1], kernel_initializer=weights_init, bias_initializer=biases_init))
+
+        # Compile the neural network model:
+        ann_model.compile(model_optimizer, loss=model_loss)
+
+        # Attributes coming from user inputs:
+        self.__input_data = input_data
+        self.__output_data = output_data
+        self.__activation_functions = activation_functions
+        self.__interior_architecture = interior_architecture
+        self.__weights_init = weights_init
+        self.__biases_init = biases_init
+        self.__loss = loss
+        self.__loss_function = model_loss
+        self.__optimizer = optimizer
+        self.__model_optimizer = model_optimizer
+        self.__batch_size = batch_size
+        self.__n_epochs = n_epochs
+        self.__learning_rate = learning_rate
+        self.__validation_perc = validation_perc
+        self.__random_seed = random_seed
+        self.__verbose = verbose
+
+        # Attributes computed at class object initialization:
+        self.__architecture = architecture
+        self.__ann_model = ann_model
+        self.__weights_and_biases_init = ann_model.get_weights()
+        self.__epochs_list = [e for e in range(0, n_epochs)]
+        self.__trained = False
+
+        # Attributes available after model training:
+        self.__training_loss = None
+        self.__validation_loss = None
+        self.__idx_min_training_loss = None
+        self.__idx_min_validation_loss = None
+        self.__bases_across_epochs = None
+        self.__weights_and_biases_trained = None
+
+    @property
+    def input_data(self):
+        return self.__input_data
+
+    @property
+    def output_data(self):
+        return self.__output_data
+
+    @property
+    def architecture(self):
+        return self.__architecture
+
+    @property
+    def ann_model(self):
+        return self.__ann_model
+
+    @property
+    def weights_and_biases_init(self):
+        return self.__weights_and_biases_init
+
+    @property
+    def weights_and_biases_trained(self):
+        return self.__weights_and_biases_trained
+
+    @property
+    def training_loss(self):
+        return self.__training_loss
+
+    @property
+    def validation_loss(self):
+        return self.__validation_loss
+
+# ------------------------------------------------------------------------------
+
+    def summary(self):
+        """
+        Prints the ANN model summary.
+        """
+
+        print('ANN model summary...\n')
+        if self.__trained:
+            print('(Model has been trained)\n\n')
+        else:
+            print('(Model has not been trained yet)\n\n')
+
+        print('- '*60)
+
+        print('ANN architecture:\n')
+        print('\t' + self.architecture)
+        print('\n' + '- '*60)
+
+        print('Activation functions:\n')
+        activation_function_string = '(' + str(self.__neuron_count[0]) + ')'
+        for i, n_neurons in enumerate(self.__neuron_count[1::]):
+            if isinstance(self.__activation_functions, str):
+                activation_function_string = activation_function_string + '--' + self.__activation_functions + '--'
+            elif isinstance(self.__activation_functions, tuple):
+                activation_function_string = activation_function_string + '--' + self.__activation_functions[i] + '--'
+            activation_function_string = activation_function_string + '(' + str(n_neurons) + ')'
+        print('\t' + activation_function_string)
+        print('\n' + '- '*60)
+
+        print('Model validation:\n')
+        if self.__validation_perc != 0:
+            print('\t- ' + 'Using ' + str(self.__validation_perc) + '% of input data as validation data')
+        else:
+            print('\t- ' + 'No validation data is used at model training')
+
+        print('\t- ' + 'Model will be trained on ' + str(100 - self.__validation_perc) + '% of input data')
+
+        print('\n' + '- '*60)
+
+        print('Hyperparameters:\n')
+        print('\t- ' + 'Batch size:\t\t' + str(self.__batch_size))
+        print('\t- ' + '# of epochs:\t\t' + str(self.__n_epochs))
+        print('\t- ' + 'Optimizer:\t\t' + self.__optimizer)
+        print('\t- ' + 'Learning rate:\t' + str(self.__learning_rate))
+        print('\t- ' + 'Loss function:\t' + self.__loss)
+        print('\n' + '- '*60)
+
+        print('Weights initialization:\n')
+        if self.__weights_init is None:
+            print('\t- ' + 'Glorot uniform')
+        else:
+            print('\t- ' + 'User-provided custom initialization of weights')
+        print('\n' + '- '*60)
+
+        print('Biases initialization:\n')
+        if self.__biases_init is None:
+            print('\t- ' + 'Zeros')
+        else:
+            print('\t- ' + 'User-provided custom initialization of biases')
+        print('\n' + '- '*60)
+
+        print('Results reproducibility:\n')
+        if self.__random_seed is not None:
+            print('\t- ' + 'Reproducible neural network training will be assured using random seed: ' + str(self.__random_seed))
+        else:
+            print('\t- ' + 'Random seed not set, neural network training results will not be reproducible!')
+        print('\n' + '= '*60)
+
+        if self.__trained:
+
+            idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
+            idx_min_training_loss = idx_min_training_loss[0]
+
+            print('Training results:\n')
+            print('\t- ' + 'Minimum training loss:\t\t' + str(np.min(self.__training_loss)))
+            print('\t- ' + 'Minimum training loss at epoch:\t' + str(idx_min_training_loss+1))
+            if self.__validation_perc != 0:
+                idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
+                idx_min_validation_loss = idx_min_validation_loss[0]
+                print('\n\t- ' + 'Minimum validation loss:\t\t' + str(np.min(self.__validation_loss)))
+                print('\t- ' + 'Minimum validation loss at epoch:\t' + str(idx_min_validation_loss+1))
+
+            print('\n' + '- '*60)
+
+# ------------------------------------------------------------------------------
+
+    def train(self):
+
+        pass
 
 
 
@@ -2695,15 +3071,98 @@ def generate_tex_table(data_frame_table, float_format='.2f', caption='', label='
 
 
 
+# ------------------------------------------------------------------------------
 
+    def print_weights_and_biases_init(self):
+        """
+        Prints initial weights and biases from all layers of the QoI-aware encoder-decoder.
+        """
 
+        for i in range(0,len(self.weights_and_biases_init)):
+            if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
+            if i%2==0:
+                print('\nWeight:')
+            else:
+                print('Bias:')
+            print(self.weights_and_biases_init[i])
+            print()
 
+# ------------------------------------------------------------------------------
 
+    def print_weights_and_biases_trained(self):
+        """
+        Prints trained weights and biases from all layers of the QoI-aware encoder-decoder.
+        """
 
+        if self.__trained:
 
+            for i in range(0,len(self.weights_and_biases_trained)):
+                if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
+                if i%2==0:
+                    print('\nWeight:')
+                else:
+                    print('Bias:')
+                print(self.weights_and_biases_trained[i])
+                print()
 
+        else:
 
+            print('Model has not been trained yet!')
 
+# ------------------------------------------------------------------------------
+
+    def plot_losses(self, markevery=100, figure_size=(15,5), save_filename=None):
+        """
+        Plots training and validation losses.
+
+        :param figure_size: (optional)
+            ``tuple`` specifying figure size.
+        :param save_filename: (optional)
+            ``str`` specifying plot save location/filename. If set to ``None``
+            plot will not be saved. You can also set a desired file extension,
+            for instance ``.pdf``. If the file extension is not specified, the default
+            is ``.png``.
+
+        :return:
+            - **plt** - ``matplotlib.pyplot`` plot handle.
+        """
+
+        if not isinstance(markevery, int):
+            raise ValueError("Parameter `markevery` has to be of type `int`.")
+
+        if not isinstance(figure_size, tuple):
+            raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
+
+        if save_filename is not None:
+            if not isinstance(save_filename, str):
+                raise ValueError("Parameter `save_filename` has to be of type `str`.")
+
+        if self.__trained:
+
+            x_axis = [i for i in range(1,self.__n_epochs+1)]
+            x_ticks = [1] + [i for i in range(1,self.__n_epochs) if i%markevery==0] + [self.__n_epochs]
+
+            plt.figure(figsize=figure_size)
+            plt.semilogy(x_axis, self.__training_loss, 'k', lw=3, label='Training loss')
+            plt.scatter(self.__idx_min_training_loss+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
+
+            if self.__validation_perc != 0:
+                plt.semilogy(x_axis, self.__validation_loss, 'r--', lw=2, label='Validation loss')
+                plt.scatter(self.__idx_min_validation_loss+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
+
+            plt.xlabel('Epoch #', fontsize=font_labels)
+            plt.xticks(x_ticks, rotation=90)
+            plt.ylabel(self.__loss + ' loss', fontsize=font_labels)
+            plt.legend(frameon=False, ncol=1, fontsize=font_legend)
+            plt.grid(alpha=grid_opacity, zorder=1)
+
+            if save_filename is not None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
+
+            return plt
+
+        else:
+
+            print('Model has not been trained yet!')
 
 ################################################################################
 #
