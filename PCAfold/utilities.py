@@ -223,7 +223,7 @@ class QoIAwareProjection:
         ``int`` specifying the batch size.
     :param n_epochs: (optional)
         ``int`` specifying the number of epochs.
-    :param n_epochs: (optional)
+    :param learning_rate: (optional)
         ``float`` specifying the learning rate passed to the optimizer.
     :param validation_perc: (optional)
         ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number larger than or equal to 0 and smaller than 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
@@ -1838,7 +1838,7 @@ class QoIAwareProjectionPOUnet:
     :param projection_biases:
         (optional, default None) array of the biases (offsets) corresponding to the projection weights, if ``None`` the projections are offset by zeros
     :param basis_coeffs:
-        (optional, default ``None``) if the array of polynomial basis coefficients is known, it may be provided here, 
+        (optional, default ``None``) if the array of polynomial basis coefficients is known, it may be provided here,
         otherwise it will be initialized with ``build_training_graph`` and trained with ``train``
     :param dtype:
         (optional, default ``'float64'``) string specifying either float type ``'float64'`` or ``'float32'``
@@ -1859,7 +1859,7 @@ class QoIAwareProjectionPOUnet:
     - **iterations** - (read only) array of the iterations archived during training
     """
 
-    def __init__(self, 
+    def __init__(self,
                  projection_weights,
                  partition_centers,
                  partition_shapes,
@@ -1899,7 +1899,7 @@ class QoIAwareProjectionPOUnet:
         self._t_projection_weights = tf_v1.Variable(self._projection_weights, name='weights', dtype=self._reconstruction._dtype)
         self._sess.run(tf_v1.global_variables_initializer())
         self._built_graph = False
-    
+
     @tf_v1.function
     def tf_projection(self, y, nobias=False):
         """
@@ -1958,7 +1958,7 @@ class QoIAwareProjectionPOUnet:
         :param error_type:
             (optional, default ``'abs'``) the type of training error: relative ``'rel'`` or absolute ``'abs'``
         :param constrain_positivity:
-            (optional, default False) when True, it penalizes the training error with :math:`f - |f|` for dependent variables :math:`f`. 
+            (optional, default False) when True, it penalizes the training error with :math:`f - |f|` for dependent variables :math:`f`.
             This can be useful for defining projected source term dependent variables, for example.
         :param first_trainable_idx:
             (optional, default 0) This separates the trainable projection weights (with index greater than or equal to ``first_trainable_idx``) from the nontrainable projection weights.
@@ -1988,7 +1988,7 @@ class QoIAwareProjectionPOUnet:
 
         self._t_ft = dvars_function(self._t_projection_weights)
         self._reconstruction.build_training_graph(self._t_xyt, self._t_ft, error_type, constrain_positivity, istensor=True)
-        
+
         self._opt = tf_v1.train.AdamOptimizer(learning_rate=self._lr).minimize(self._reconstruction._train_err, var_list=[self._t_train_weights, self._reconstruction._t_xp, self._reconstruction._t_sp])
 
         self._sess.run(tf_v1.global_variables_initializer())
@@ -2014,7 +2014,7 @@ class QoIAwareProjectionPOUnet:
             raise ValueError("Need to call build_training_graph before train.")
         if use_best_archive_sse and archive_rate>iterations:
             raise ValueError("Cannot archive the best parameters with archive_rate", archive_rate,'over',iterations,'iterations.')
-        
+
         if verbose:
             print('-' * 60)
             print(f'  {"iteration":>10} | {"mean sqr":>10} | {"% max":>10}  | {"sum sqr":>10}')
@@ -2142,7 +2142,7 @@ class QoIAwareProjectionPOUnet:
     @property
     def training_archive(self):
         return self._reconstruction.training_archive
-    
+
     @property
     def basis_type(self):
         return self._reconstruction.basis_type
@@ -2166,11 +2166,11 @@ class QoIAwareProjectionPOUnet:
     @property
     def proj_ivar_center(self):
         return self._sess.run(self._t_proj_ivar_center)[:,:,0]
-    
+
     @property
     def proj_ivar_scale(self):
         return 1./self._sess.run(self._t_proj_inv_ivar_scale)[:,:,0]
-    
+
     @property
     def reconstruction_model(self):
         ivar_center = self.proj_ivar_center
