@@ -228,6 +228,37 @@ Class ``RegressionAssessment``
 
 --------------------------------------------------------------------------------
 
+******************
+Plotting functions
+******************
+
+``plot_2d_regression``
+======================
+
+.. autofunction:: PCAfold.reconstruction.plot_2d_regression
+
+``plot_2d_regression_scalar_field``
+===================================
+
+.. autofunction:: PCAfold.reconstruction.plot_2d_regression_scalar_field
+
+``plot_2d_regression_streamplot``
+=================================
+
+.. autofunction:: PCAfold.reconstruction.plot_2d_regression_streamplot
+
+``plot_3d_regression``
+======================
+
+.. autofunction:: PCAfold.reconstruction.plot_3d_regression
+
+``plot_stratified_metric``
+==========================
+
+.. autofunction:: PCAfold.reconstruction.plot_stratified_metric
+
+--------------------------------------------------------------------------------
+
 ************
 Bibliography
 ************

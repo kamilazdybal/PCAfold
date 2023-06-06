@@ -131,26 +131,6 @@ Class ``KReg``
 Plotting functions
 ******************
 
-``plot_2d_regression``
-======================
-
-.. autofunction:: PCAfold.analysis.plot_2d_regression
-
-``plot_2d_regression_scalar_field``
-============================================
-
-.. autofunction:: PCAfold.analysis.plot_2d_regression_scalar_field
-
-``plot_2d_regression_streamplot``
-============================================
-
-.. autofunction:: PCAfold.analysis.plot_2d_regression_streamplot
-
-``plot_3d_regression``
-======================
-
-.. autofunction:: PCAfold.analysis.plot_3d_regression
-
 ``plot_normalized_variance``
 ============================
 
@@ -170,11 +150,6 @@ Plotting functions
 ===================================================
 
 .. autofunction:: PCAfold.analysis.plot_normalized_variance_derivative_comparison
-
-``plot_stratified_metric``
-===================================================
-
-.. autofunction:: PCAfold.analysis.plot_stratified_metric
 
 --------------------------------------------------------------------------------
 
