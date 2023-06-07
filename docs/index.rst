@@ -30,7 +30,7 @@ A general overview for using **PCAfold** modules is presented in the diagram
 below:
 
 .. image:: images/PCAfold-diagram.svg
-  :width: 700
+  :width: 800
   :align: center
 
 Each module's functionalities can also be used as a standalone tool for

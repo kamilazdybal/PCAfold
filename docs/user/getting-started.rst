@@ -103,7 +103,7 @@ functionalities of **PCAfold**. An overview for combining **PCAfold** modules
 into a complete workflow is presented in the diagram below:
 
 .. image:: ../images/PCAfold-software-architecture.svg
-  :width: 700
+  :width: 800
   :align: center
 
 Each module’s functionalities can also be used as a standalone tool for
