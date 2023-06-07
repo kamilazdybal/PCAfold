@@ -2,61 +2,61 @@ import unittest
 import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
-from PCAfold import analysis
+from PCAfold import reconstruction
 
-class Analysis(unittest.TestCase):
+class Reconstruction(unittest.TestCase):
 
-    def test_analysis__normalized_root_mean_squared_error__allowed_calls(self):
+    def test_reconstruction__max_absolute_error__allowed_calls(self):
 
         X = np.random.rand(100,5)
         pca_X = reduction.PCA(X, scaling='auto', n_components=2)
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         try:
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X_rec[:,0])
+            MSE = reconstruction.max_absolute_error(X[:,0], X_rec[:,0])
         except Exception:
             self.assertTrue(False)
 
         try:
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X[:,0])
+            MSE = reconstruction.max_absolute_error(X[:,0], X[:,0])
         except Exception:
             self.assertTrue(False)
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__normalized_root_mean_squared_error__not_allowed_calls(self):
+    def test_reconstruction__max_absolute_error__not_allowed_calls(self):
 
         X = np.random.rand(100,5)
 
         with self.assertRaises(ValueError):
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0:2], X[:,0])
+            MSE = reconstruction.max_absolute_error(X[:,0:2], X[:,0])
 
         with self.assertRaises(ValueError):
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X[:,0:2])
+            MSE = reconstruction.max_absolute_error(X[:,0], X[:,0:2])
 
         with self.assertRaises(ValueError):
-            NRMSE = analysis.normalized_root_mean_squared_error([1,2,3], X[:,0])
+            MSE = reconstruction.max_absolute_error([1,2,3], X[:,0])
 
         with self.assertRaises(ValueError):
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], [1,2,3])
+            MSE = reconstruction.max_absolute_error(X[:,0], [1,2,3])
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__normalized_root_mean_squared_error__computation(self):
+    def test_reconstruction__max_absolute_error__computation(self):
 
         X = np.random.rand(100,5)
         pca_X = reduction.PCA(X, scaling='auto', n_components=5)
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         try:
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X_rec[:,0])
-            self.assertTrue(NRMSE<10**-14)
+            MSE = reconstruction.max_absolute_error(X[:,0], X_rec[:,0])
+            self.assertTrue(MSE<10**-15)
         except Exception:
             self.assertTrue(False)
 
         try:
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X[:,0])
-            self.assertTrue(NRMSE<10**-15)
+            MSE = reconstruction.max_absolute_error(X[:,0], X[:,0])
+            self.assertTrue(MSE<10**-15)
         except Exception:
             self.assertTrue(False)
 
@@ -64,14 +64,14 @@ class Analysis(unittest.TestCase):
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         try:
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X_rec[:,0])
-            self.assertTrue(NRMSE>0)
+            MSE = reconstruction.max_absolute_error(X[:,0], X_rec[:,0])
+            self.assertTrue(MSE>0)
         except Exception:
             self.assertTrue(False)
 
         try:
-            NRMSE = analysis.normalized_root_mean_squared_error(X[:,0], X[:,1])
-            self.assertTrue(NRMSE>0)
+            MSE = reconstruction.max_absolute_error(X[:,0], X[:,1])
+            self.assertTrue(MSE>0)
         except Exception:
             self.assertTrue(False)
 

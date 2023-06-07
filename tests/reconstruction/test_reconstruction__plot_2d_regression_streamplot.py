@@ -3,8 +3,9 @@ import numpy as np
 from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import analysis
+from PCAfold import reconstruction
 
-class Analysis(unittest.TestCase):
+class Reconstruction(unittest.TestCase):
 
     def test_analysis__plot_2d_regression_streamplot__allowed_calls(self):
 
@@ -26,13 +27,13 @@ class Analysis(unittest.TestCase):
         grid_bounds = ([np.min(PCs[:,0]),np.max(PCs[:,0])],[np.min(PCs[:,1]),np.max(PCs[:,1])])
 
         try:
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model)
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model)
             plt.close()
         except:
             self.assertTrue(False)
 
         try:
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds,
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds,
                                                 regression_model,
                                                 x=PCs[:,0],
                                                 y=PCs[:,1],
@@ -76,79 +77,79 @@ class Analysis(unittest.TestCase):
         grid_bounds = ([np.min(PCs[:,0]),np.max(PCs[:,0])],[np.min(PCs[:,1]),np.max(PCs[:,1])])
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot([[0,1],[0,1]], regression_model)
+            plt = reconstruction.plot_2d_regression_streamplot([[0,1],[0,1]], regression_model)
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(([0,1],[0,1],[0,1]), regression_model)
+            plt = reconstruction.plot_2d_regression_streamplot(([0,1],[0,1],[0,1]), regression_model)
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, [1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, [1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, x=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, x=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, y=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, y=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, resolution=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, resolution=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, extension=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, extension=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, color=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, color=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, x_label=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, x_label=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, y_label=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, y_label=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, manifold_color=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, manifold_color=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, colorbar_label=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, colorbar_label=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, color_map=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, color_map=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, colorbar_range=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, colorbar_range=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, manifold_alpha=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, manifold_alpha=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, grid_on=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, grid_on=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, figure_size=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, figure_size=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, title=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, title=[1])
             plt.close()
 
         with self.assertRaises(ValueError):
-            plt = analysis.plot_2d_regression_streamplot(grid_bounds, regression_model, save_filename=[1])
+            plt = reconstruction.plot_2d_regression_streamplot(grid_bounds, regression_model, save_filename=[1])
             plt.close()
 
 # ------------------------------------------------------------------------------
