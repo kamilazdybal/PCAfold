@@ -108,7 +108,7 @@ into a complete workflow is presented in the diagram below:
 
 Each module’s functionalities can also be used as a standalone tool for
 performing a specific task and can easily combine with techniques from outside of
-this software, such as K-Means algorithm or Artificial Neural Networks.
+this software.
 
 The format for the user-supplied input data matrix
 :math:`\mathbf{X} \in \mathbb{R}^{N \times Q}`, common to all modules, is that
@@ -177,3 +177,17 @@ Once a low-dimensional manifold is obtained, the quality of the manifold can be
 assessed using functionalities available in the ``analysis`` module.
 It is worth noting that the manifold assessment metrics available can be
 equally applied to manifolds derived by means of techniques other than PCA.
+
+Reconstructing quantities of interest (QoIs)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Using the ``reconstruction`` module, quantities of interest (QoIs) can be reconstructed from the reduced
+data representations using kernel regression, artificial neural networks (ANN) and a novel 
+approach called partition of unity networks (POUnets).
+
+Improving projection topologies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Two novel algorithms based on the quantitative cost function are introduced in the ``utilities`` module that can help
+improve topologies of PCA projections through appropriate variable selection. We also introduce an autoencoder-like strategy
+that optimizes the projection topology directly based on the custom projection-independent and projection-dependent quantities of interest (QoIs).
