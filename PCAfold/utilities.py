@@ -215,6 +215,12 @@ class QoIAwareProjection:
         ``int`` specifying how frequently the weights should be changed in the encoder. For example, if set to ``hold_weights=2``, the weights in the encoder will only be updated once every two epochs throught the whole training process. If set to ``None``, weights in the encoder will change at every epoch. This parameter can be used in conjunction with ``hold_initialization``.
     :param transformed_projection_dependent_outputs: (optional)
         ``str`` specifying if any nonlinear transformation of the projection-dependent outputs should be added at the decoder output. It can be ``'symlog'`` or ``'signed-square-root'``.
+    :param transform_power: (optional)
+        ``int`` or ``float`` as per ``preprocess.power_transform()``.
+    :param transform_shift: (optional)
+        ``int`` or ``float`` as per ``preprocess.power_transform()``.
+    :param transform_sign_shift: (optional)
+        ``int`` or ``float`` as per ``preprocess.power_transform()``.
     :param loss: (optional)
         ``str`` specifying the loss function. It can be ``'MAE'`` or ``'MSE'``.
     :param optimizer: (optional)
@@ -260,6 +266,9 @@ class QoIAwareProjection:
                 hold_initialization=None,
                 hold_weights=None,
                 transformed_projection_dependent_outputs=None,
+                transform_power=0.5,
+                transform_shift=10**-4,
+                transform_sign_shift=0.0,
                 loss='MSE',
                 optimizer='Adam',
                 batch_size=200,
@@ -705,8 +714,7 @@ class QoIAwareProjection:
                 transformed_projection_dependent_outputs = preprocess.log_transform(current_projection_dependent_outputs, method='continuous-symlog', threshold=1.e-4)
                 decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
             elif self.__transformed_projection_dependent_outputs == 'signed-square-root':
-                transformed_projection_dependent_outputs = current_projection_dependent_outputs + 10**(-4)
-                transformed_projection_dependent_outputs = np.sign(transformed_projection_dependent_outputs) * np.sqrt(np.abs(transformed_projection_dependent_outputs))
+                transformed_projection_dependent_outputs = preprocess.power_transform(current_projection_dependent_outputs, transform_power=transform_power, transform_shift=transform_shift, transform_sign_shift=transform_sign_shift, invert=False)
                 decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
         # Normalize the dependent variables to match the output activation function range:
@@ -810,8 +818,7 @@ class QoIAwareProjection:
                     transformed_projection_dependent_outputs = preprocess.log_transform(current_projection_dependent_outputs, method='continuous-symlog', threshold=1.e-4)
                     decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
                 elif self.__transformed_projection_dependent_outputs == 'signed-square-root':
-                    transformed_projection_dependent_outputs = current_projection_dependent_outputs + 10**(-4)
-                    transformed_projection_dependent_outputs = np.sign(transformed_projection_dependent_outputs) * np.sqrt(np.abs(transformed_projection_dependent_outputs))
+                    transformed_projection_dependent_outputs = preprocess.power_transform(current_projection_dependent_outputs, transform_power=transform_power, transform_shift=transform_shift, transform_sign_shift=transform_sign_shift, invert=False)
                     decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
             # Normalize the dependent variables to match the output activation function range:
