@@ -14,14 +14,17 @@ We import the necessary modules:
   from PCAfold import preprocess
   from PCAfold import reduction
   from PCAfold import analysis
+  from PCAfold import utilities
   from PCAfold import manifold_informed_backward_variable_elimination as BVE
   import numpy as np
+  import time
 
 and we set some initial parameters:
 
 .. code:: python
 
     save_filename = None
+    random_seed = 100
 
 ************************************
 Upload a combustion data set
@@ -96,7 +99,21 @@ and the bandwidth values, :math:`\sigma`, for normalized variance derivative com
 
 .. code:: python
 
-    bandwidth_values = np.logspace(-7, 3, 200)
+    bandwidth_values = np.logspace(-7, 3, 50)
+
+We specify the cost function's hyper-parameters, the power :math:`r` and the vertical shift :math:`b`. Increasing the power parameter allows for a stronger penalty for non-uniqueness and increasing the vertical shift parameter allows for a stronger penalty for small feature sizes.
+
+.. code:: python
+
+    power = 1
+    vertical_shift = 1
+
+We sample the dataset to decrease the computational time of this tutorial:
+
+.. code:: python
+
+    sample_random = preprocess.DataSampler(np.zeros((n_observations,)).astype(int), random_seed=random_seed, verbose=False)
+    (idx_sample, _) = sample_random.random(50)
 
 We create lists of the target dependent variables names:
 
@@ -109,8 +126,8 @@ and we begin with computing the normalized variance derivative for the two-dimen
 
 .. code:: python
 
-    variance_data_2D = analysis.compute_normalized_variance(Z_2D,
-                                                            S_Z_2D,
+    variance_data_2D = analysis.compute_normalized_variance(Z_2D[idx_sample,:],
+                                                            S_Z_2D[idx_sample,:],
                                                             depvar_names=depvar_names_2D,
                                                             bandwidth_values=bandwidth_values)
 
@@ -118,8 +135,10 @@ The associated costs are computed from the generated object of the ``VarianceDat
 
 .. code:: python
 
-    costs_2D = analysis.cost_function_normalized_variance_derivative(variance_data_2D,
-                                                                     penalty_function=penalty_function,
+    costs_2D = analysis.cost_function_normalized_variance_derivative(variance_data_2D, 
+                                                                     penalty_function=penalty_function, 
+                                                                     power=power,
+                                                                     vertical_shift=vertical_shift,
                                                                      norm=None)
 
 We can print the individual costs:
@@ -131,22 +150,24 @@ We can print the individual costs:
 
 .. code-block:: text
 
-    SZ1:	3.621
-    SZ2:	1.249
+    SZ1:	4.238
+    SZ2:	1.567
 
 Finally, we repeat the cost function computation for the three-dimensional PCA projection:
 
 .. code:: python
 
-    variance_data_3D = analysis.compute_normalized_variance(Z_3D,
-                                                            S_Z_3D,
+    variance_data_3D = analysis.compute_normalized_variance(Z_3D[idx_sample,:],
+                                                            S_Z_3D[idx_sample,:],
                                                             depvar_names=depvar_names_3D,
                                                             bandwidth_values=bandwidth_values)
 
 .. code:: python
 
-    costs_3D = analysis.cost_function_normalized_variance_derivative(variance_data_3D,
+    costs_3D = analysis.cost_function_normalized_variance_derivative(variance_data_3D, 
                                                                      penalty_function=penalty_function,
+                                                                     power=power,
+                                                                     vertical_shift=verical_shift,
                                                                      norm=None)
 
 and we print the individual costs:
@@ -158,9 +179,9 @@ and we print the individual costs:
 
 .. code-block:: text
 
-    SZ1:	0.846
-    SZ2:	0.958
-    SZ3:	1.238
+    SZ1:	1.157
+    SZ2:	1.23
+    SZ3:	1.422
 
 The cost function provides us information about the quality of the low-dimensional data projection with respect to target dependent variables, which in this case were the PC source terms. A higher cost indicates a worse manifold topology. The two topological aspects that the cost function takes into account are non-uniqueness and feature sizes.
 
@@ -172,7 +193,7 @@ Moreover, for the two-dimensional PCA projection, the cost associated with the f
 Manifold optimization using the cost function
 ****************************************************
 
-The ``analysis.manifold_informed_backward_elimination`` function implements an iterative feature selection algorithm that uses the cost function as an objective function. The algorithm selects an optimal subset of the original state variables that result in an optimized PCA manifold topology. Below, we demonstrate the algorithm on a 10% sample of the original data. The data is sampled to speed-up the calculations for the purpose of this demonstration. In real applications it is recommended to use the full data set.
+The ``utilities.manifold_informed_backward_variable_elimination`` function implements an iterative feature selection algorithm that uses the cost function as an objective function. The algorithm selects an optimal subset of the original state variables that result in an optimized PCA manifold topology. Below, we demonstrate the algorithm on a 10% sample of the original data. The data is sampled to speed-up the calculations for the purpose of this demonstration. In real applications it is recommended to use the full data set.
 
 Sample the original data:
 
@@ -206,71 +227,72 @@ Run the algorithm:
 
 .. code:: python
 
-  _, selected_variables, _, _ = BVE(sampled_X,
-                                    sampled_S_X,
-                                    X_names,
-                                    scaling='auto',
-                                    bandwidth_values=bandwidth_values,
-                                    target_variables=target_variables,
-                                    add_transformed_source=True,
-                                    target_manifold_dimensionality=q,
-                                    penalty_function=penalty_function,
-                                    norm=norm,
-                                    verbose=True)
+    _, selected_variables, _, _ = BVE(sampled_X,
+                                      sampled_S_X,
+                                      X_names,
+                                      scaling='auto',
+                                      bandwidth_values=bandwidth_values,
+                                      target_variables=target_variables,
+                                      add_transformed_source=True,
+                                      target_manifold_dimensionality=q,
+                                      penalty_function=penalty_function,
+                                      power=power,
+                                      vertical_shift=vertical_shift,
+                                      norm=norm,
+                                      verbose=True)
 
 With ``verbose=True`` we will see additional information on costs at each iteration:
 
 .. code-block:: text
 
-    --------------------------------------------------
     Iteration No.4
-    Currently eliminating variable from the following list:
+    Currently eliminating variable from the following list: 
     ['T', 'H2', 'O2', 'O', 'OH', 'H2O', 'H', 'CO2']
         Currently eliminated variable: T
         Running PCA for a subset:
         H2, O2, O, OH, H2O, H, CO2
-        Cost:	9.3736
+        Cost:	11.4539
         WORSE
         Currently eliminated variable: H2
         Running PCA for a subset:
         T, O2, O, OH, H2O, H, CO2
-        Cost:	11.7484
+        Cost:	13.4908
         WORSE
         Currently eliminated variable: O2
         Running PCA for a subset:
         T, H2, O, OH, H2O, H, CO2
-        Cost:	12.4286
+        Cost:	14.8488
         WORSE
         Currently eliminated variable: O
         Running PCA for a subset:
         T, H2, O2, OH, H2O, H, CO2
-        Cost:	11.1713
+        Cost:	12.6549
         WORSE
         Currently eliminated variable: OH
         Running PCA for a subset:
         T, H2, O2, O, H2O, H, CO2
-        Cost:	8.4524
+        Cost:	10.0785
         SAME OR BETTER
         Currently eliminated variable: H2O
         Running PCA for a subset:
         T, H2, O2, O, OH, H, CO2
-        Cost:	8.7855
-        SAME OR BETTER
+        Cost:	10.7182
+        WORSE
         Currently eliminated variable: H
         Running PCA for a subset:
         T, H2, O2, O, OH, H2O, CO2
-        Cost:	10.0312
+        Cost:	11.8644
         WORSE
         Currently eliminated variable: CO2
         Running PCA for a subset:
         T, H2, O2, O, OH, H2O, H
-        Cost:	9.0420
+        Cost:	10.9898
         WORSE
 
         Variable OH is removed.
-        Cost:	8.4524
+        Cost:	10.0785
 
-        Iteration time: 2.6 minutes.
+        Iteration time: 0.8 minutes.
 
 Finally, we generate the PCA projection of the optimized subset of the original data set:
 
@@ -294,15 +316,18 @@ Below, we compute the costs for the two PC source terms again for this optimized
 
 .. code:: python
 
-    variance_data_optimized = analysis.compute_normalized_variance(Z_optimized,
-                                                               S_Z_optimized,
-                                                               depvar_names=depvar_names_2D,
-                                                               bandwidth_values=bandwidth_values)
+    variance_data_optimized = analysis.compute_normalized_variance(Z_optimized, 
+                                                                   S_Z_optimized, 
+                                                                   depvar_names=depvar_names_2D,
+                                                                   bandwidth_values=bandwidth_values)
+
 
 .. code:: python
 
-    costs_optimized = analysis.cost_function_normalized_variance_derivative(variance_data_optimized,
-                                                                            penalty_function=penalty_function,
+    costs_optimized = analysis.cost_function_normalized_variance_derivative(variance_data_optimized, 
+                                                                            penalty_function=penalty_function, 
+                                                                            power=power,
+                                                                            vertical_shift=vertical_shift,
                                                                             norm=None)
 
 .. code:: python
@@ -312,7 +337,7 @@ Below, we compute the costs for the two PC source terms again for this optimized
 
 .. code-block:: text
 
-    SZ1:	1.357
-    SZ2:	0.831
+    SZ1:	1.653
+    SZ2:	1.179
 
 We note that the costs for the two PC source terms are lower than the costs that we computed earlier using the full data set to generate the PCA projection.

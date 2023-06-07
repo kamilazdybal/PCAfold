@@ -14,6 +14,7 @@ We import the necessary modules:
   from PCAfold import preprocess
   from PCAfold import reduction
   from PCAfold import analysis
+  from PCAfold import reconstruction
   import numpy as np
 
 and we set some initial parameters:
@@ -52,14 +53,14 @@ Visualize the generated data set:
 
 .. code:: python
 
-    plt = reduction.plot_2d_manifold(x, 
-                                     y, 
-                                     color=phi, 
-                                     x_label='x', 
-                                     y_label='y', 
-                                     colorbar_label='$\phi$', 
-                                     color_map='inferno', 
-                                     figure_size=(8,4), 
+    plt = reduction.plot_2d_manifold(x,
+                                     y,
+                                     color=phi,
+                                     x_label='x',
+                                     y_label='y',
+                                     colorbar_label='$\phi$',
+                                     color_map='inferno',
+                                     figure_size=(8,4),
                                      save_filename=save_filename)
 
 .. image:: ../images/tutorial-regression-data-set.svg
@@ -124,12 +125,12 @@ We begin by visualizing the regressed (predicted) dependent variable :math:`\phi
 
 .. code:: python
 
-    plt = analysis.plot_2d_regression(x, 
-                                      phi, 
-                                      phi_predicted, 
-                                      x_label='$x$', 
-                                      y_label='$\phi$', 
-                                      figure_size=(10,4), 
+    plt = reconstruction.plot_2d_regression(x,
+                                      phi,
+                                      phi_predicted,
+                                      x_label='$x$',
+                                      y_label='$\phi$',
+                                      figure_size=(10,4),
                                       save_filename=save_filename)
 
 .. image:: ../images/tutorial-regression-result-2d.svg
@@ -137,19 +138,19 @@ We begin by visualizing the regressed (predicted) dependent variable :math:`\phi
     :align: center
 
 or in 3D:
-    
+
 .. code:: python
 
-    plt = analysis.plot_3d_regression(x, 
-                                      y, 
-                                      phi, 
-                                      phi_predicted, 
-                                      elev=20, 
-                                      azim=-100, 
-                                      x_label='$x$', 
-                                      y_label='$y$', 
-                                      z_label='$\phi$', 
-                                      figure_size=(10,7), 
+    plt = reconstruction.plot_3d_regression(x,
+                                      y,
+                                      phi,
+                                      phi_predicted,
+                                      elev=20,
+                                      azim=-100,
+                                      x_label='$x$',
+                                      y_label='$y$',
+                                      z_label='$\phi$',
+                                      figure_size=(10,7),
                                       save_filename=save_filename)
 
 .. image:: ../images/tutorial-regression-result.svg
@@ -159,7 +160,7 @@ or in 3D:
 Predicted 2D field for scalar quantities
 ===========================================
 
-When the predicted variable is a scalar quantity, a scatter plot for the regressed scalar field can be plotted using the function `plot_2d_regression_scalar_field`. Regression of the scalar field can be tested at any user-defined grid, also outside of the bounds of the training data. This can be of particular importance when generating reduced-order models, where the behavior of the regression should be tested outside of the training manifold. 
+When the predicted variable is a scalar quantity, a scatter plot for the regressed scalar field can be plotted using the function `plot_2d_regression_scalar_field`. Regression of the scalar field can be tested at any user-defined grid, also outside of the bounds of the training data. This can be of particular importance when generating reduced-order models, where the behavior of the regression should be tested outside of the training manifold.
 
 Below, we show an example on a combustion data set.
 
@@ -197,11 +198,11 @@ We first visualize the training manifold, colored by the dependent variable bein
 
 .. code:: python
 
-    reduction.plot_2d_manifold(PCs[:,0], 
-                               PCs[:,1], 
+    reduction.plot_2d_manifold(PCs[:,0],
+                               PCs[:,1],
                                x_label='$Z_1$',
                                y_label='$Z_2$',
-                               color=PC_sources[:,1], 
+                               color=PC_sources[:,1],
                                color_map='viridis',
                                colorbar_label='$S_{Z_2}$',
                                figure_size=(8,6),
@@ -210,7 +211,7 @@ We first visualize the training manifold, colored by the dependent variable bein
 .. image:: ../images/tutorial-regression-scalar-field-training-manifold.png
     :width: 500
     :align: center
-    
+
 Define the bounds for the scalar field:
 
 .. code:: python
@@ -221,7 +222,7 @@ Plot the regressed scalar field:
 
 .. code:: python
 
-    plt = analysis.plot_2d_regression_scalar_field(grid_bounds,
+    plt = reconstruction.plot_2d_regression_scalar_field(grid_bounds,
                                                    regression_model,
                                                    x=PCs[:,0],
                                                    y=PCs[:,1],
@@ -247,7 +248,7 @@ Plot the regressed scalar field:
 Streamplots for predicted vector quantities
 ===========================================
 
-In a special case, when the predicted variable is a vector, a streamplot of the regressed vector field can be plotted using the function ``plot_2d_regression_streamplot``. Regression of a vector field can be tested at any user-defined grid, also outside of the bounds of the training data. This can be of particular importance when generating reduced-order models, where the behavior of the regression should be tested outside of the training manifold. 
+In a special case, when the predicted variable is a vector, a streamplot of the regressed vector field can be plotted using the function ``plot_2d_regression_streamplot``. Regression of a vector field can be tested at any user-defined grid, also outside of the bounds of the training data. This can be of particular importance when generating reduced-order models, where the behavior of the regression should be tested outside of the training manifold.
 
 Below, we show an example on a synthetic data set:
 
@@ -261,7 +262,7 @@ Below, we show an example on a synthetic data set:
     S_Z = pca_X.transform(S_X, nocenter=True)
 
     vector_model = analysis.KReg(PCs, S_Z)
-    
+
 We define the regression model function that will make predictions for any query point:
 
 .. code:: python
@@ -282,7 +283,7 @@ Plot the regression streamplot:
 
 .. code:: python
 
-    plt = analysis.plot_2d_regression_streamplot(grid_bounds,
+    plt = reconstruction.plot_2d_regression_streamplot(grid_bounds,
                                         regression_model,
                                         x=PCs[:,0],
                                         y=PCs[:,1],
@@ -300,7 +301,7 @@ Plot the regression streamplot:
                                         figure_size=(10,6),
                                         title='Streamplot',
                                         save_filename=None)
-    
+
 .. image:: ../images/tutorial-regression-streamplot.svg
     :width: 600
     :align: center
@@ -322,14 +323,14 @@ An example of computing mean absolute error is shown below:
 
 .. code:: python
 
-    MAE = analysis.mean_absolute_error(phi, phi_predicted)
+    MAE = reconstruction.mean_absolute_error(phi, phi_predicted)
 
 We also compute the coefficient of determination, :math:`R^2`, values for the test data and entire data:
 
 .. code::
 
-  r2_test = analysis.coefficient_of_determination(phi_test, phi_test_predicted)
-  r2_all = analysis.coefficient_of_determination(phi, phi_predicted)
+  r2_test = reconstruction.coefficient_of_determination(phi_test, phi_test_predicted)
+  r2_all = reconstruction.coefficient_of_determination(phi, phi_predicted)
 
   print('All R2:\t\t' + str(round(r2_all, 6)) + '\nTest R2:\t' + str(round(r2_test, 6)))
 
@@ -344,24 +345,24 @@ By instantiating an object of the ``RegressionAssessment`` class, one can comput
 
 .. code:: python
 
-    regression_metrics = analysis.RegressionAssessment(phi, phi_predicted, variable_names=['$\phi$'], norm='std')
-    
+    regression_metrics = reconstruction.RegressionAssessment(phi, phi_predicted, variable_names=['$\phi$'], norm='std')
+
 As an example, mean absolute error can be accessed by:
-    
+
 .. code:: python
-    
+
     regression_metrics.mean_absolute_error
-    
+
 All computed metrics can be printed with the use of the ``RegressionAssessment.print_metrics`` function. Few output formats are available.
 
 Raw text format:
-    
+
 .. code:: python
 
     regression_metrics.print_metrics(table_format=['raw'], float_format='.4f')
-    
+
 .. code-block:: text
-    
+
     --------------------
     $\phi$
     R2:	0.9958
@@ -372,13 +373,13 @@ Raw text format:
     GDE:	nan
 
 ``tex`` format:
-    
+
 .. code:: python
-    
+
     regression_metrics.print_metrics(table_format=['tex'], float_format='.4f')
-    
+
 .. code-block:: text
-    
+
     \begin{table}[h!]
     \begin{center}
     \begin{tabular}{ll} \toprule
@@ -393,27 +394,27 @@ Raw text format:
     \caption{}\label{}
     \end{center}
     \end{table}
-    
+
 ``pandas.DataFrame`` format (most recommended for Jupyter notebooks):
 
 .. code:: python
 
     regression_metrics.print_metrics(table_format=['pandas'], float_format='.4f')
-    
+
 .. image:: ../images/tutorial-regression-metrics-4f.png
     :width: 400
     :align: center
-    
+
 Note that with the ``float_format`` parameter you can change the number of digits displayed:
-    
+
 .. code:: python
-    
+
     regression_metrics.print_metrics(table_format=['pandas'], float_format='.2f')
-    
+
 .. image:: ../images/tutorial-regression-metrics-2f.png
     :width: 400
     :align: center
-    
+
 Stratified error metrics
 ==========================
 
@@ -430,7 +431,7 @@ We will compute the stratified :math:`R^2` in 20 bins of :math:`\phi`:
 
     (idx, bins_borders) = preprocess.variable_bins(phi, k=n_bins, verbose=False)
 
-    r2_in_bins = analysis.stratified_coefficient_of_determination(phi, phi_predicted, idx=idx, use_global_mean=use_global_mean, verbose=verbose)
+    r2_in_bins = reconstruction.stratified_coefficient_of_determination(phi, phi_predicted, idx=idx, use_global_mean=use_global_mean, verbose=verbose)
 
 The code above will print:
 
@@ -461,12 +462,12 @@ We can plot the stratified :math:`R^2` values across bins centers:
 
 .. code:: python
 
-    plt = analysis.plot_stratified_metric(r2_in_bins, 
-                                          bins_borders, 
-                                          variable_name='$\phi$', 
-                                          metric_name='$R^2$', 
+    plt = reconstruction.plot_stratified_metric(r2_in_bins,
+                                          bins_borders,
+                                          variable_name='$\phi$',
+                                          metric_name='$R^2$',
                                           yscale='linear',
-                                          figure_size=(10,2), 
+                                          figure_size=(10,2),
                                           save_filename=save_filename)
 
 .. image:: ../images/tutorial-regression-stratified-r2.svg
@@ -486,7 +487,7 @@ We will create five bins:
 
     (idx, bins_borders) = preprocess.variable_bins(phi, k=5, verbose=False)
 
-    stratified_regression_metrics = analysis.RegressionAssessment(phi, phi_predicted, idx=idx, variable_names=['$\phi$'], norm='std')
+    stratified_regression_metrics = reconstruction.RegressionAssessment(phi, phi_predicted, idx=idx, variable_names=['$\phi$'], norm='std')
 
 All computed stratified metrics can be printed with the use of the ``RegressionAssessment.print_stratified_metrics`` function. Few output formats are available.
 
@@ -497,7 +498,7 @@ Raw text format:
     stratified_regression_metrics.print_stratified_metrics(table_format=['raw'], float_format='.4f')
 
 .. code-block:: text
-    
+
     -------------------------
     k1
     N. samples:	4500
@@ -546,7 +547,7 @@ Raw text format:
     stratified_regression_metrics.print_stratified_metrics(table_format=['tex'], float_format='.4f')
 
 .. code-block:: text
-   
+
     \\begin{table}[h!]
     \\begin{center}
     \\begin{tabular}{llllll} \\toprule
@@ -561,7 +562,7 @@ Raw text format:
     \\caption{}\\label{}
     \\end{center}
     \\end{table}
-   
+
 ``pandas.DataFrame`` format (most recommended for Jupyter notebooks):
 
 .. code:: python
@@ -587,7 +588,7 @@ Comparison can be done for the global metrics, where each variable will be compa
 
 .. code:: python
 
-    regression_metrics_comparison = analysis.RegressionAssessment(phi, phi_predicted_comparison, variable_names=['$\phi$'], norm='std')
+    regression_metrics_comparison = reconstruction.RegressionAssessment(phi, phi_predicted_comparison, variable_names=['$\phi$'], norm='std')
 
     regression_metrics.print_metrics(table_format=['pandas'], float_format='.4f', comparison=regression_metrics_comparison)
 
@@ -599,12 +600,12 @@ and for the stratified metrics, where each bin will be compared separately:
 
 .. code:: python
 
-    stratified_regression_metrics_comparison = analysis.RegressionAssessment(phi, phi_predicted_comparison, idx=idx)
+    stratified_regression_metrics_comparison = reconstruction.RegressionAssessment(phi, phi_predicted_comparison, idx=idx)
 
     stratified_regression_metrics.print_stratified_metrics(table_format=['raw'], float_format='.2f', comparison=stratified_regression_metrics_comparison)
 
 .. code-block:: text
-    
+
     -------------------------
     k1
     N. samples:	4500
