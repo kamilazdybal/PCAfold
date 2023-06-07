@@ -15,6 +15,7 @@ from PCAfold.styles import *
 from PCAfold import preprocess
 from PCAfold import reduction
 import pickle
+from termcolor import colored
 from matplotlib.colors import ListedColormap
 import time
 import os
