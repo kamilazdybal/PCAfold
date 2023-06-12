@@ -9,6 +9,6 @@ scipy
 termcolor
 pandas
 scikit-learn
-tensorflow==2.8.0
+tensorflow
 keras
 tqdm
