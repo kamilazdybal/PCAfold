@@ -18,7 +18,7 @@ Dependencies
   pip install termcolor
   pip install tqdm
   pip install scikit-learn
-  pip install tensorflow
+  pip install tensorflow==2.8.0
 
 Build from source
 ^^^^^^^^^^^^^^^^^
@@ -182,7 +182,7 @@ Reconstructing quantities of interest (QoIs)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Using the ``reconstruction`` module, quantities of interest (QoIs) can be reconstructed from the reduced
-data representations using kernel regression, artificial neural networks (ANN) and a novel 
+data representations using kernel regression, artificial neural networks (ANN) and a novel
 approach called partition of unity networks (POUnets).
 
 Improving projection topologies
