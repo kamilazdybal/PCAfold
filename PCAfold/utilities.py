@@ -489,6 +489,9 @@ class QoIAwareProjection:
         self.__hold_initialization = hold_initialization
         self.__hold_weights = hold_weights
         self.__transformed_projection_dependent_outputs = transformed_projection_dependent_outputs
+        self.__transform_power = transform_power
+        self.__transform_shift = transform_shift
+        self.__transform_sign_shift = transform_sign_shift
         self.__loss = loss
         self.__loss_function = model_loss
         self.__optimizer = optimizer
@@ -714,7 +717,7 @@ class QoIAwareProjection:
                 transformed_projection_dependent_outputs = preprocess.log_transform(current_projection_dependent_outputs, method='continuous-symlog', threshold=1.e-4)
                 decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
             elif self.__transformed_projection_dependent_outputs == 'signed-square-root':
-                transformed_projection_dependent_outputs = preprocess.power_transform(current_projection_dependent_outputs, transform_power=transform_power, transform_shift=transform_shift, transform_sign_shift=transform_sign_shift, invert=False)
+                transformed_projection_dependent_outputs = preprocess.power_transform(current_projection_dependent_outputs, transform_power=self.__transform_power, transform_shift=self.__transform_shift, transform_sign_shift=self.__transform_sign_shift, invert=False)
                 decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
         # Normalize the dependent variables to match the output activation function range:
@@ -818,7 +821,7 @@ class QoIAwareProjection:
                     transformed_projection_dependent_outputs = preprocess.log_transform(current_projection_dependent_outputs, method='continuous-symlog', threshold=1.e-4)
                     decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
                 elif self.__transformed_projection_dependent_outputs == 'signed-square-root':
-                    transformed_projection_dependent_outputs = preprocess.power_transform(current_projection_dependent_outputs, transform_power=transform_power, transform_shift=transform_shift, transform_sign_shift=transform_sign_shift, invert=False)
+                    transformed_projection_dependent_outputs = preprocess.power_transform(current_projection_dependent_outputs, transform_power=self.__transform_power, transform_shift=self.__transform_shift, transform_sign_shift=self.__transform_sign_shift, invert=False)
                     decoder_outputs = np.hstack((decoder_outputs, transformed_projection_dependent_outputs))
 
             # Normalize the dependent variables to match the output activation function range:

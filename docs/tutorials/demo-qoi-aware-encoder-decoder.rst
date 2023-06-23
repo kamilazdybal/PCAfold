@@ -139,25 +139,28 @@ We instantiate an object of the `QoIAwareProjection` class with various paramete
 
 .. code:: python
 
-  projection = utilities.QoIAwareProjection(input_data,
-                                            n_components=2,
-                                            projection_independent_outputs=input_data[:,selected_state_variables],
-                                            projection_dependent_outputs=projection_dependent_outputs,
-                                            activation_decoder=activation_decoder,
-                                            decoder_interior_architecture=decoder_interior_architecture,
-                                            encoder_weights_init=None,
-                                            decoder_weights_init=None,
-                                            hold_initialization=hold_initialization,
-                                            hold_weights=hold_weights,
-                                            transformed_projection_dependent_outputs='signed-square-root',
-                                            loss=loss,
-                                            optimizer=optimizer,
-                                            batch_size=batch_size,
-                                            n_epochs=n_epochs,
-                                            learning_rate=learning_rate,
-                                            validation_perc=validation_perc,
-                                            random_seed=random_seed,
-                                            verbose=True)
+    projection = utilities.QoIAwareProjection(input_data, 
+                                              n_components=n_components, 
+                                              projection_independent_outputs=input_data[:,selected_state_variables],
+                                              projection_dependent_outputs=projection_dependent_outputs,
+                                              activation_decoder=activation_decoder,
+                                              decoder_interior_architecture=decoder_interior_architecture,
+                                              encoder_weights_init=encoder_weights_init,
+                                              decoder_weights_init=None,
+                                              hold_initialization=hold_initialization,
+                                              hold_weights=hold_weights,
+                                              transformed_projection_dependent_outputs='signed-square-root',
+                                              transform_power=0.5,
+                                              transform_shift=10**-4,
+                                              transform_sign_shift=0,
+                                              loss=loss,
+                                              optimizer=optimizer,
+                                              batch_size=batch_size,
+                                              n_epochs=n_epochs,
+                                              learning_rate=learning_rate,
+                                              validation_perc=validation_perc,
+                                              random_seed=random_seed,
+                                              verbose=True)
 
 Before we begin neural network training, we can print the summary of the current Keras model:
 
@@ -258,16 +261,16 @@ After training, additional information is available in the model summary:
 
 .. code-block:: text
 
-  = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
-  Training results:
+    = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
+    Training results:
 
-  	- Minimum training loss:		0.0018488304922357202
-  	- Minimum training loss at epoch:	5000
+        - Minimum training loss:		0.0021419492550194263
+        - Minimum training loss at epoch:	5000
 
-  	- Minimum validation loss:		0.0019012088887393475
-  	- Minimum validation loss at epoch:	5000
+        - Minimum validation loss:		0.0021756552159786224
+        - Minimum validation loss at epoch:	5000
 
-  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
 We extract the best lower-dimensional basis that corresponds to the epoch with the smallest training loss:
 
