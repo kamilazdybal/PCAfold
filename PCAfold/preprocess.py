@@ -347,9 +347,9 @@ def power_transform(X, transform_power, transform_shift=0., transform_sign_shift
         (optional, default 0.) the shift parameter used in the transformation equation
     :param transform_sign_shift:
         (optional, default 0.) the signed shift parameter used in the transformation equation
-    :param invert: 
+    :param invert:
         (optional, default False) when True, will undo the transformation
-            
+
     :return:
         array of the transformed variables
     """
@@ -432,7 +432,7 @@ def log_transform(X, method='log', threshold=1.e-6):
         if not isinstance(threshold, int):
             raise ValueError("Parameter `threshold` has to be of type `float` or `int`.")
 
-    X_transformed = np.zeros_like(X)
+    X_transformed = np.zeros_like(X, dtype=float)
 
     if method == 'log':
 
@@ -460,6 +460,194 @@ def log_transform(X, method='log', threshold=1.e-6):
                     X_transformed[i,j] = np.sign(X[i,j]) * np.log10(1. + np.abs(X[i,j]/threshold))
 
     return(X_transformed)
+
+# ------------------------------------------------------------------------------
+
+def zero_pivot_transform(X, method='-1to1', verbose=False):
+    """
+    Scales negative and positive values according to a user-specified method, but preserves values that are zero.
+    This function treats zero values in a variable as pivots that remain unchanged by scaling.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import zero_pivot_transform
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.array([[1,10],
+                      [2,0],
+                      [3,30],
+                      [0,0],
+                      [-1,-10]])
+
+        # Perform transformation with zero pivot:
+        X_transformed, maximum_positive, minimum_negative = zero_pivot_transform(X, verbose=True)
+
+    :param X:
+        ``numpy.ndarray`` specifying the original data set, :math:`\mathbf{X}`. It should be of size ``(n_observations,n_variables)``.
+    :param method: (optional)
+        ``str`` specifying the log-transformation method. It can be one of the following: ``'-1to1'``.
+    :param verbose: (optional)
+        ``bool`` for printing verbose details.
+
+    :return:
+        - **X_transformed** - ``numpy.ndarray`` specifying the transformed data set. It has size ``(n_observations,n_variables)``.
+        - **maximum_positive** - ``numpy.ndarray`` specifying the maximum positive value in a dataset. It has size ``(n_variables,)``.
+        - **minimum_negative** - ``numpy.ndarray`` specifying the minimum negative value in a dataset. It has size ``(n_variables,)``.
+    """
+
+    __methods = ['-1to1']
+
+    if not isinstance(X, np.ndarray):
+        raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X)
+    except:
+        raise ValueError("Parameter `X` has to have size `(n_observations,n_variables)`.")
+
+    if not isinstance(method, str):
+        raise ValueError("Parameter `method` has to be a string.")
+    else:
+        if method.lower() not in __methods:
+            raise ValueError("Unrecognized transformation method.")
+
+    if not isinstance(verbose, bool):
+        raise ValueError("Parameter `verbose` has to be a boolean.")
+
+    X_transformed = np.zeros_like(X, dtype=float)
+
+    maximum_positive = np.max(X, axis=0)
+    minimum_negative = np.min(X, axis=0)
+
+    if verbose:
+
+        for j in range(0, n_variables):
+
+            idx_zero, = np.where(X[:,j]==0)
+
+            print('Variable at index ' + str(j) + ':')
+
+            if len(idx_zero)==0:
+                print('- Does not contain values that are exactly zero.')
+            elif len(idx_zero)==1:
+                print('- Contains ' + str(len(idx_zero)) + ' value that is exactly zero.')
+            else:
+                print('- Contains ' + str(len(idx_zero)) + ' values that are exactly zero.')
+
+            if maximum_positive[j] <= 0:
+                print('- Does not contain positive values.')
+            if minimum_negative[j] >= 0:
+                print('- Does not contain negative values.')
+
+            print('- '*20)
+
+    if method == '-1to1':
+
+        for j in range(0, n_variables):
+            for i in range(0,n_observations):
+
+                if X[i,j] == 0:
+                    X_transformed[i,j] = 0
+                elif X[i,j] > 0:
+                    X_transformed[i,j] = X[i,j]/maximum_positive[j]
+                elif X[i,j] < 0:
+                    X_transformed[i,j] = X[i,j]/np.abs(minimum_negative[j])
+
+    return X_transformed, maximum_positive, minimum_negative
+
+def invert_zero_pivot_transform(X_transformed, maximum_positive, minimum_negative, method='-1to1'):
+    """
+    Inverts the zero-pivot transform.
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import zero_pivot_transform, invert_zero_pivot_transform
+        import numpy as np
+
+        # Generate dummy data set:
+        X = np.array([[1,10],
+                      [2,0],
+                      [3,30],
+                      [0,0],
+                      [-1,-10]])
+
+        # Perform transformation with zero pivot:
+        X_transformed, maximum_positive, minimum_negative = zero_pivot_transform(X, verbose=True)
+
+        # Undo transformation with zero pivot:
+        X_back = invert_zero_pivot_transform(X_transformed, maximum_positive, minimum_negative)
+
+    :param X_transformed:
+        ``numpy.ndarray`` specifying the transformed data set, :math:`\\widetilde{\\mathbf{X}}`. It should be of size ``(n_observations,n_variables)``.
+    :param maximum_positive:
+        ``numpy.ndarray`` specifying the maximum positive value in a dataset. It should be of size ``(n_variables,)``.
+    :param minimum_negative:
+        ``numpy.ndarray`` specifying the minimum negative value in a dataset. It should be of size ``(n_variables,)``.
+    :param method: (optional)
+        ``str`` specifying the log-transformation method. It can be one of the following: ``'-1to1'``.
+
+    :return:
+        - **X** - ``numpy.ndarray`` specifying the original data set. It has size ``(n_observations,n_variables)``.
+    """
+
+    __methods = ['-1to1']
+
+    if not isinstance(X_transformed, np.ndarray):
+        raise ValueError("Parameter `X_transformed` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_variables) = np.shape(X_transformed)
+    except:
+        raise ValueError("Parameter `X_transformed` has to have size `(n_observations,n_variables)`.")
+
+    if not isinstance(maximum_positive, np.ndarray):
+        raise ValueError("Parameter `maximum_positive` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_variables_maximum_positive,) = np.shape(maximum_positive)
+    except:
+        raise ValueError("Parameter `maximum_positive` has to have size `(n_variables,)`.")
+
+    if not isinstance(minimum_negative, np.ndarray):
+        raise ValueError("Parameter `minimum_negative` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_variables_minimum_negative,) = np.shape(minimum_negative)
+    except:
+        raise ValueError("Parameter `minimum_negative` has to have size `(n_variables,)`.")
+
+    if n_variables_maximum_positive != n_variables:
+        raise ValueError("Parameter `maximum_positive` has to have size `(n_variables,)`.")
+
+    if n_variables_minimum_negative != n_variables:
+        raise ValueError("Parameter `minimum_negative` has to have size `(n_variables,)`.")
+
+    if not isinstance(method, str):
+        raise ValueError("Parameter `method` has to be a string.")
+    else:
+        if method.lower() not in __methods:
+            raise ValueError("Unrecognized transformation method.")
+
+    X = np.zeros_like(X_transformed, dtype=float)
+
+    if method == '-1to1':
+
+        for j in range(0, n_variables):
+            for i in range(0,n_observations):
+
+                if X_transformed[i,j] == 0:
+                    X[i,j] = 0
+                elif X_transformed[i,j] > 0:
+                    X[i,j] = X_transformed[i,j]*maximum_positive[j]
+                elif X_transformed[i,j] < 0:
+                    X[i,j] = X_transformed[i,j]*np.abs(minimum_negative[j])
+
+    return X
 
 # ------------------------------------------------------------------------------
 

@@ -62,6 +62,16 @@ as centering and scaling and outlier detection and removal.
 
 .. autofunction:: PCAfold.preprocess.log_transform
 
+``zero_pivot_transform``
+========================
+
+.. autofunction:: PCAfold.preprocess.zero_pivot_transform
+
+``invert_zero_pivot_transform``
+===============================
+
+.. autofunction:: PCAfold.preprocess.invert_zero_pivot_transform
+
 ``remove_constant_vars``
 ==========================
 
