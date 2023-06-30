@@ -32,12 +32,11 @@ Clone the **PCAfold** repository and move into the ``PCAfold`` directory created
   git clone http://gitlab.multiscale.utah.edu/common/PCAfold.git
   cd PCAfold
 
-Run the ``setup.py`` script as below to complete the installation:
+Run the installation:
 
 .. code-block:: text
 
-  python setup.py build_ext --inplace
-  python setup.py install
+  python -m pip install .
 
 If the installation was successful, you are ready to import **PCAfold**!
 In Python, you can now import all modules:
