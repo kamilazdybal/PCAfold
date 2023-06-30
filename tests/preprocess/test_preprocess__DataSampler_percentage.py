@@ -6,7 +6,7 @@ from PCAfold import analysis
 
 class Preprocess(unittest.TestCase):
 
-    def test__DataSampler_percentage__allowed_calls(self):
+    def test_preprocess__DataSampler_percentage__allowed_calls(self):
 
         idx_percentage = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
 
@@ -62,7 +62,7 @@ class Preprocess(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test__DataSampler_percentage__not_allowed_calls(self):
+    def test_preprocess__DataSampler_percentage__not_allowed_calls(self):
         idx_percentage = np.array([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1])
         sampling = preprocess.DataSampler(idx_percentage, idx_test=None, random_seed=None, verbose=False)
 

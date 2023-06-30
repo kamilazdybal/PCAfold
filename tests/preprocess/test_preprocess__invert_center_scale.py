@@ -6,7 +6,7 @@ from PCAfold import analysis
 
 class Preprocess(unittest.TestCase):
 
-    def test_invert_center_scale(self):
+    def test_preprocess__invert_center_scale(self):
         # This function tests all possible inversions of center_scale function:
         test_data_set = np.random.rand(200,20)
 
@@ -180,7 +180,7 @@ class Preprocess(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_invert_center_scale_not_allowed_calls(self):
+    def test_preprocess__invert_center_scale_not_allowed_calls(self):
 
         X_cs = np.random.rand(100,)
         X_center = np.array([0])
@@ -216,7 +216,7 @@ class Preprocess(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_invert_center_scale_on_1D_variable(self):
+    def test_preprocess__invert_center_scale_on_1D_variable(self):
         # This function tests all possible inversions of center_scale function:
         test_data_set = np.random.rand(200,1)
 
@@ -390,7 +390,7 @@ class Preprocess(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_invert_center_scale_single_variable(self):
+    def test_preprocess__invert_center_scale_single_variable(self):
 
         try:
             test_data_set = np.ones((200,1))

@@ -7,7 +7,7 @@ from PCAfold import reconstruction
 
 class Reconstruction(unittest.TestCase):
 
-    def test_analysis__plot_2d_regression__allowed_calls(self):
+    def test_reconstruction__plot_2d_regression__allowed_calls(self):
 
         X = np.random.rand(100,5)
         pca_X = reduction.PCA(X, scaling='auto', n_components=2)
@@ -45,7 +45,7 @@ class Reconstruction(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__plot_2d_regression__not_allowed_calls(self):
+    def test_reconstruction__plot_2d_regression__not_allowed_calls(self):
 
         X = np.random.rand(100,5)
 

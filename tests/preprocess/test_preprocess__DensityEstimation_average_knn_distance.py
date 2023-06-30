@@ -6,7 +6,7 @@ from PCAfold import analysis
 
 class Analysis(unittest.TestCase):
 
-    def test_analysis__average_knn_distance__allowed_calls(self):
+    def test_preprocess__DensityEstimation_average_knn_distance__allowed_calls(self):
 
         X = np.random.rand(100,20)
         pca_X = reduction.PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
@@ -21,7 +21,7 @@ class Analysis(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__average_knn_distance__not_allowed_calls(self):
+    def test_preprocess__DensityEstimation_average_knn_distance__not_allowed_calls(self):
 
         X = np.random.rand(100,20)
         pca_X = reduction.PCA(X, scaling='none', n_components=2, use_eigendec=True, nocenter=False)
@@ -34,7 +34,7 @@ class Analysis(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__average_knn_distance__computation(self):
+    def test_preprocess__DensityEstimation_average_knn_distance__computation(self):
 
         try:
             X = np.ones((100,2))

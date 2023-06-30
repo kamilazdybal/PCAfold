@@ -7,7 +7,7 @@ from PCAfold import reconstruction
 
 class Reconstruction(unittest.TestCase):
 
-    def test_analysis__plot_2d_regression_scalar_field__allowed_calls(self):
+    def test_reconstruction__plot_2d_regression_scalar_field__allowed_calls(self):
 
         # Generate dummy data set:
         X = np.random.rand(100,2)
@@ -57,7 +57,7 @@ class Reconstruction(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__plot_2d_regression_scalar_field__not_allowed_calls(self):
+    def test_reconstruction__plot_2d_regression_scalar_field__not_allowed_calls(self):
 
         # Generate dummy data set:
         X = np.random.rand(100,2)

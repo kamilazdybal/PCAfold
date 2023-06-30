@@ -7,7 +7,7 @@ from PCAfold import reconstruction
 
 class Reconstruction(unittest.TestCase):
 
-    def test_analysis__plot_2d_regression_streamplot__allowed_calls(self):
+    def test_reconstruction__plot_2d_regression_streamplot__allowed_calls(self):
 
         X = np.random.rand(100,5)
         S_X = np.random.rand(100,5)
@@ -57,7 +57,7 @@ class Reconstruction(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__plot_2d_regression_streamplot__not_allowed_calls(self):
+    def test_reconstruction__plot_2d_regression_streamplot__not_allowed_calls(self):
 
         X = np.random.rand(100,5)
         S_X = np.random.rand(100,5)
