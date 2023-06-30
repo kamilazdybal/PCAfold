@@ -12,3 +12,5 @@ build/
 *builddir/
 *_build
 *.so
+PCAfold.egg-info/
+dist/
