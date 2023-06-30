@@ -7,7 +7,7 @@ Installation
 Dependencies
 ^^^^^^^^^^^^
 
-**PCAfold** requires ``python3.7`` and the following packages:
+**PCAfold** requires Python>=3.8 and the latest versions of the following packages:
 
 .. code-block:: text
 
@@ -18,7 +18,7 @@ Dependencies
   pip install termcolor
   pip install pandas
   pip install scikit-learn
-  pip install tensorflow==2.8.0
+  pip install tensorflow
   pip install keras
   pip install tqdm
 
@@ -36,10 +36,19 @@ Run the ``setup.py`` script as below to complete the installation:
 
 .. code-block:: text
 
-  python3.7 setup.py build_ext --inplace
-  python3.7 setup.py install
+  python setup.py build_ext --inplace
+  python setup.py install
 
-If the installation was successful, you are ready to ``import PCAfold``!
+If the installation was successful, you are ready to import **PCAfold**!
+In Python, you can now import all modules:
+
+.. code-block:: python
+
+  from PCAfold import preprocess
+  from PCAfold import reduction
+  from PCAfold import analysis
+  from PCAfold import reconstruction
+  from PCAfold import utilities
 
 Testing
 ^^^^^^^
@@ -48,7 +57,7 @@ To run regression tests from the base repo directory run:
 
 .. code-block:: text
 
-  python3.7 -m unittest discover
+  python -m unittest discover
 
 To switch verbose on, use the ``-v`` flag.
 
@@ -93,7 +102,7 @@ This file can be updated with new settings that will be seen globally by all
 
 .. code-block:: text
 
-  python3.7 setup.py install
+  python setup.py install
 
 Note, that all plotting functions return handles to generated plots.
 

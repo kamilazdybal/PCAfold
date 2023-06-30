@@ -51,16 +51,20 @@ this software.
 
 ### Dependencies
 
-**PCAfold** requires `python3.7` and the following packages:
+**PCAfold** requires Python>=3.8 and the latest versions of the following packages:
 
-- `Cython`
-- `matplotlib`
-- `numpy`
-- `scipy`
-- `termcolor`
-- `tensorflow`
-- `keras`
-- `tqdm`
+```
+pip install Cython
+pip install matplotlib
+pip install numpy
+pip install scipy
+pip install termcolor
+pip install pandas
+pip install scikit-learn
+pip install tensorflow
+pip install keras
+pip install tqdm
+```
 
 ### Build from source
 
@@ -74,19 +78,26 @@ cd PCAfold
 Run the `setup.py` script as below to complete the installation:
 
 ```
-python3.7 setup.py build_ext --inplace
-python3.7 setup.py install
-
+python setup.py build_ext --inplace
+python setup.py install
 ```
 
-You are ready to `import PCAfold`!
+You are ready to import `PCAfold`! In Python, you can now import all modules:
+
+```python
+from PCAfold import preprocess
+from PCAfold import reduction
+from PCAfold import analysis
+from PCAfold import reconstruction
+from PCAfold import utilities
+```
 
 ### Testing
 
 To run regression tests from the base repo directory run:
 
 ```
-python3.7 -m unittest discover
+python -m unittest discover
 ```
 
 To switch verbose on, use the `-v` flag.
