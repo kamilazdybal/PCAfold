@@ -130,7 +130,7 @@ class Reconstruction(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__ANN__attributes_not_available_before_training(self):
+    def test_reconstruction__ANN__attributes_not_available_before_training(self):
 
         input_data = np.random.rand(100,6)
         output_data = np.random.rand(100,4)
@@ -148,7 +148,7 @@ class Reconstruction(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__ANN__attributes_available_after_training(self):
+    def test_reconstruction__ANN__attributes_available_after_training(self):
 
         input_data = np.random.rand(100,6)
         output_data = np.random.rand(100,4)
@@ -171,7 +171,7 @@ class Reconstruction(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__number_of_losses_equal_to_n_epochs(self):
+    def test_reconstruction__ANN__number_of_losses_equal_to_n_epochs(self):
 
         input_data = np.random.rand(100,6)
         output_data = np.random.rand(100,4)
@@ -189,7 +189,7 @@ class Reconstruction(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__check_architecture(self):
+    def test_reconstruction__ANN__check_architecture(self):
 
         input_data = np.random.rand(100,7)
         output_data = np.random.rand(100,5)
