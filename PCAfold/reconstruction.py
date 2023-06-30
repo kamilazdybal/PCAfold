@@ -4336,8 +4336,16 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, color
     plt.yticks(fontsize=font_axes, **csfont)
     plt.grid(alpha=grid_opacity)
     lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, loc="best")
-    lgnd.legendHandles[0]._sizes = [marker_size*5]
-    lgnd.legendHandles[1]._sizes = [marker_size*5]
+
+    try:
+        # This option will work with matplotlib>=3.7
+        lgnd.legend_handles[0]._sizes = [marker_size*5]
+        lgnd.legend_handles[1]._sizes = [marker_size*5]
+    except:
+        # This option will work with older matplotlib versions.
+        # We may decide to remove this option at some point.
+        lgnd.legendHandles[0]._sizes = [marker_size*5]
+        lgnd.legendHandles[1]._sizes = [marker_size*5]
 
     if title != None: plt.title(title, **csfont, fontsize=font_title)
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
@@ -5184,8 +5192,16 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, clean=False
             label.set_fontsize(font_axes)
 
     lgnd = plt.legend(['Observed', 'Predicted'], fontsize=font_legend, bbox_to_anchor=(0.9,0.9), loc="upper left")
-    lgnd.legendHandles[0]._sizes = [marker_size*5]
-    lgnd.legendHandles[1]._sizes = [marker_size*5]
+
+    try:
+        # This option will work with matplotlib>=3.7
+        lgnd.legend_handles[0]._sizes = [marker_size*5]
+        lgnd.legend_handles[1]._sizes = [marker_size*5]
+    except:
+        # This option will work with older matplotlib versions.
+        # We may decide to remove this option at some point.
+        lgnd.legendHandles[0]._sizes = [marker_size*5]
+        lgnd.legendHandles[1]._sizes = [marker_size*5]
 
     if title != None: ax.set_title(title, **csfont, fontsize=font_title)
     if save_filename != None: plt.savefig(save_filename, dpi=save_dpi, bbox_inches='tight')
