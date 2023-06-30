@@ -431,9 +431,9 @@ class QoIAwareProjection:
             raise ValueError("Parameter `optimizer` has to be 'Adam' or 'Nadam'.")
 
         if optimizer == 'Adam':
-            model_optimizer = tf.optimizers.Adam(learning_rate)
+            model_optimizer = tf.optimizers.legacy.Adam(learning_rate)
         elif optimizer == 'Nadam':
-            model_optimizer = tf.optimizers.Nadam(learning_rate)
+            model_optimizer = tf.optimizers.legacy.Nadam(learning_rate)
 
         if not isinstance(batch_size, int):
             raise ValueError("Parameter `batch_size` has to be of type `int`.")
