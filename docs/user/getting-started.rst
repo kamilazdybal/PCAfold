@@ -97,11 +97,11 @@ Plotting
 Some functions within **PCAfold** result in plot outputs. Global styles for the
 plots, such as font types and sizes, are set using the ``PCAfold/styles.py`` file.
 This file can be updated with new settings that will be seen globally by all
-**PCAfold** modules. Re-build the project after changing ``styles.py`` file:
+**PCAfold** modules. Re-install the project after changing ``styles.py`` file:
 
 .. code-block:: text
 
-  python setup.py install
+  python -m pip install .
 
 Note, that all plotting functions return handles to generated plots.
 
