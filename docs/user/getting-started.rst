@@ -16,9 +16,11 @@ Dependencies
   pip install numpy
   pip install scipy
   pip install termcolor
-  pip install tqdm
+  pip install pandas
   pip install scikit-learn
   pip install tensorflow==2.8.0
+  pip install keras
+  pip install tqdm
 
 Build from source
 ^^^^^^^^^^^^^^^^^
