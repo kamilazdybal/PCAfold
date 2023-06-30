@@ -3800,7 +3800,7 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
         if color is None:
             scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, str):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, np.ndarray):
             if norm is not None:
                 scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, norm=norm, marker='o', s=s, edgecolor='none', alpha=1, vmin=cbar_min, vmax=cbar_max)
@@ -3810,7 +3810,7 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
         if color is None:
             scat = plt.scatter(x.ravel(), y.ravel(), c='k', marker='o', s=s, edgecolor='none', alpha=1)
         elif isinstance(color, str):
-            scat = plt.scatter(x.ravel(), y.ravel(), c=color, cmap=color_map, marker='o', s=s, edgecolor='none', alpha=1)
+            scat = plt.scatter(x.ravel(), y.ravel(), c=color, marker='o', s=s, edgecolor='none', alpha=1)
         elif isinstance(color, np.ndarray):
             if norm is not None:
                 scat = plt.scatter(x.ravel(), y.ravel(), c=color.ravel(), cmap=color_map, norm=norm, marker='o', s=s, edgecolor='none', alpha=1)
@@ -4046,14 +4046,14 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, clean=False, x_labe
         if color is None:
             scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=s, alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, str):
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=s, alpha=1, vmin=cbar_min, vmax=cbar_max)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, marker='o', s=s, alpha=1, vmin=cbar_min, vmax=cbar_max)
         elif isinstance(color, np.ndarray):
             scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, alpha=1, vmin=cbar_min, vmax=cbar_max)
     else:
         if color is None:
             scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c='k', marker='o', s=s, alpha=1)
         elif isinstance(color, str):
-            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, cmap=color_map, marker='o', s=s, alpha=1)
+            scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color, marker='o', s=s, alpha=1)
         elif isinstance(color, np.ndarray):
             scat = ax.scatter(x.ravel(), y.ravel(), z.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=s, alpha=1)
 
@@ -4276,14 +4276,14 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
         if color is None:
             scat = ax.scatter(element[:,0], element[:,1], c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
         elif isinstance(color, str):
-            scat = ax.scatter(element[:,0], element[:,1], c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+            scat = ax.scatter(element[:,0], element[:,1], c=color, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
         elif isinstance(color, np.ndarray):
             scat = ax.scatter(element[:,0], element[:,1], c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
         elif isinstance(color, list):
             if isinstance(color[i], np.ndarray):
                 scat = ax.scatter(element[:,0], element[:,1], c=color[i].ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
             elif isinstance(color[i], str):
-                scat = ax.scatter(element[:,0], element[:,1], c=color[i], cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+                scat = ax.scatter(element[:,0], element[:,1], c=color[i], marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
             else:
                 raise ValueError("Parameter `color` should have elements of type `numpy.ndarray` or `str`.")
 
@@ -4464,7 +4464,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
     if color is None:
         scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c='k', marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
     elif isinstance(color, str):
-        scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c=color, cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
+        scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c=color, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
     elif isinstance(color, np.ndarray):
         scat = plt.scatter(variable.ravel(), variable_rec.ravel(), c=color.ravel(), cmap=color_map, marker='o', s=scatter_point_size, edgecolor='none', alpha=1)
 
