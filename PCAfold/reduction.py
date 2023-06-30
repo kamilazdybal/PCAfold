@@ -4859,8 +4859,6 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
-
     for i in range(0, len(eigenvectors_tuple)):
         try:
             (n_variables, n_components) = np.shape(eigenvectors_tuple[i])
@@ -4878,7 +4876,16 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
     (n_variables, ) = np.shape(eigenvectors_tuple[0])
 
-    color_map_colors = cm.get_cmap(color_map, n_sets)
+    try:
+        # This option will work with matplotlib>=3.7
+        from matplotlib import colormaps
+        color_map_colors = colormaps[color_map].resampled(n_sets)
+    except:
+        # This option will work with older matplotlib versions.
+        # We may decide to remove this option at some point.
+        from matplotlib import cm
+        color_map_colors = cm.get_cmap(color_map, n_sets)
+
     sets_colors = color_map_colors(np.linspace(0, 1, n_sets))
 
     # Create default labels for variables:
@@ -5083,8 +5090,6 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
         - **plt** - ``matplotlib.pyplot`` plot handle.
     """
 
-    from matplotlib import cm
-
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
@@ -5102,7 +5107,16 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
     (n_eigenvalues, ) = np.shape(eigenvalues_tuple[0])
     x_range = np.arange(1, n_eigenvalues+1)
 
-    color_map_colors = cm.get_cmap(color_map, n_sets)
+    try:
+        # This option will work with matplotlib>=3.7
+        from matplotlib import colormaps
+        color_map_colors = colormaps[color_map].resampled(n_sets)
+    except:
+        # This option will work with older matplotlib versions.
+        # We may decide to remove this option at some point.
+        from matplotlib import cm
+        color_map_colors = cm.get_cmap(color_map, n_sets)
+
     sets_colors = color_map_colors(np.linspace(0, 1, n_sets))
 
     # Create default labels for legend:

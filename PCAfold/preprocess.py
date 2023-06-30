@@ -4491,15 +4491,22 @@ def plot_2d_clustering(x, y, idx, clean=False, x_label=None, y_label=None, color
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
-
     n_clusters = len(np.unique(idx))
     populations = get_populations(idx)
 
     x = x.ravel()
     y = y.ravel()
 
-    color_map_colors = cm.get_cmap(color_map, n_clusters)
+    try:
+        # This option will work with matplotlib>=3.7
+        from matplotlib import colormaps
+        color_map_colors = colormaps[color_map].resampled(n_clusters)
+    except:
+        # This option will work with older matplotlib versions.
+        # We may decide to remove this option at some point.
+        from matplotlib import cm
+        color_map_colors = cm.get_cmap(color_map, n_clusters)
+
     cluster_colors = color_map_colors(np.linspace(0, 1, n_clusters))
 
     figure = plt.figure(figsize=figure_size)
@@ -4732,7 +4739,6 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
     from mpl_toolkits.mplot3d import Axes3D
 
     if not isinstance(x, np.ndarray):
@@ -4784,7 +4790,16 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
     y = y.ravel()
     z = z.ravel()
 
-    color_map_colors = cm.get_cmap(color_map, n_clusters)
+    try:
+        # This option will work with matplotlib>=3.7
+        from matplotlib import colormaps
+        color_map_colors = colormaps[color_map].resampled(n_clusters)
+    except:
+        # This option will work with older matplotlib versions.
+        # We may decide to remove this option at some point.
+        from matplotlib import cm
+        color_map_colors = cm.get_cmap(color_map, n_clusters)
+
     cluster_colors = color_map_colors(np.linspace(0, 1, n_clusters))
 
     fig = plt.figure(figsize=figure_size)
@@ -4984,15 +4999,22 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
-
     n_clusters = len(np.unique(idx))
     populations = get_populations(idx)
 
     x = x.ravel()
     y = y.ravel()
 
-    color_map_colors = cm.get_cmap(color_map, n_clusters)
+    try:
+        # This option will work with matplotlib>=3.7
+        from matplotlib import colormaps
+        color_map_colors = colormaps[color_map].resampled(n_clusters)
+    except:
+        # This option will work with older matplotlib versions.
+        # We may decide to remove this option at some point.
+        from matplotlib import cm
+        color_map_colors = cm.get_cmap(color_map, n_clusters)
+
     cluster_colors = color_map_colors(np.linspace(0, 1, n_clusters))
 
     figure = plt.figure(figsize=figure_size)

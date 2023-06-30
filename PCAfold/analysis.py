@@ -1127,8 +1127,8 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
-    color_map_colors = cm.get_cmap(color_map)
+    from matplotlib import colormaps
+    color_map_colors = colormaps[color_map]
 
     markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
 
@@ -1251,7 +1251,7 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
+    from matplotlib import colormaps
 
     markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
 
@@ -1261,7 +1261,7 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
 
     for variance_data, plot_variables, color_map in zip(variance_data_tuple, plot_variables_tuple, color_map_tuple):
 
-        color_map_colors = cm.get_cmap(color_map)
+        color_map_colors = colormaps[color_map]
 
         # Extract quantities from the VarianceData class object:
         variable_names = variance_data.variable_names
@@ -1372,8 +1372,8 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
-    color_map_colors = cm.get_cmap(color_map)
+    from matplotlib import colormaps
+    color_map_colors = colormaps[color_map]
 
     markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
 
@@ -1495,7 +1495,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
         if not isinstance(save_filename, str):
             raise ValueError("Parameter `save_filename` has to be of type `str`.")
 
-    from matplotlib import cm
+    from matplotlib import colormaps
 
     markers_list = ["o-","v-","^-","<-",">-","s-","p-","P-","*-","h-","H-","+-","x-","X-","D-","d-","|-","_-"]
 
@@ -1505,7 +1505,7 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
 
     for variance_data, plot_variables, color_map in zip(variance_data_tuple, plot_variables_tuple, color_map_tuple):
 
-        color_map_colors = cm.get_cmap(color_map)
+        color_map_colors = colormaps[color_map]
 
         # Extract quantities from the VarianceData class object:
         variable_names = variance_data.variable_names
