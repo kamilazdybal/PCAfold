@@ -35,11 +35,15 @@ this software.
 
 Reach out to the `Getting started <https://pcafold.readthedocs.io/en/latest/user/getting-started.html>`_
 section for more information on installing the software and for possible workflows that can be achieved with **PCAfold**.
-You can also download the `poster <https://gitlab.multiscale.utah.edu/common/PCAfold/-/raw/master/docs/outreach/PCAfold-poster.pdf>`_ below for a condensed overview of the available functionalities.
 
-.. image:: outreach/PCAfold-poster.png
-  :width: 300
-  :align: center
+--------------------------------------------------------------------------------
+
+YouTube tutorials
+=================
+
+Check out the YouTube tutorials on PCAfold:
+
+- `Prelude to PCAfold <https://youtu.be/oVF4QaLpc6k>`_
 
 --------------------------------------------------------------------------------
 
@@ -47,6 +51,7 @@ Citing PCAfold
 ==============
 
 **PCAfold** is published in the `SoftwareX journal <https://authors.elsevier.com/sd/article/S2352711020303435>`_.
+We have also recently published `PCAfold 2.0 <https://www.sciencedirect.com/science/article/pii/S2352711023001437>`_.
 If you use **PCAfold** in a scientific publication, you can cite the software as:
 
   Zdybał, K., Armstrong, E., Parente, A. and Sutherland, J.C., 2020. PCAfold: Python software to generate, analyze and improve PCA-derived low-dimensional manifolds. SoftwareX, 12, p.100630.
