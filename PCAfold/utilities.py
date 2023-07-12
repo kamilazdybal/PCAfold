@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import pickle
 import tensorflow as tf
-from tensorflow.keras import layers, models
+from tensorflow.keras import layers, models, initializers
 import tensorflow.compat.v1 as tf_v1
 tf_v1.compat.v1.disable_eager_execution()
 from PCAfold.styles import *
@@ -382,7 +382,10 @@ class QoIAwareProjection:
                 raise ValueError("Parameter `encoder_weights_init` has to have shape (n_input_variables, n_components).")
             encoder_kernel_initializer = tf.constant_initializer(encoder_weights_init)
         else:
-            encoder_kernel_initializer = 'glorot_uniform'
+            if random_seed is None:
+                encoder_kernel_initializer = 'glorot_uniform'
+            else:
+                encoder_kernel_initializer = initializers.glorot_uniform(seed=random_seed)
 
         # Determine initialization of weights in the decoder:
         if decoder_weights_init is not None:
@@ -401,7 +404,10 @@ class QoIAwareProjection:
                     raise ValueError("Shapes of elements in `decoder_weights_init` do not match the decoder architecture.")
             decoder_kernel_initializer = tuple([tf.constant_initializer(weight) for weight in decoder_weights_init])
         else:
-            decoder_kernel_initializer = tuple(['glorot_uniform' for i in range(0,len(decoder_interior_architecture)+1)])
+            if random_seed is None:
+                decoder_kernel_initializer = tuple(['glorot_uniform' for i in range(0,len(decoder_interior_architecture)+1)])
+            else:
+                decoder_kernel_initializer = tuple([initializers.glorot_uniform(seed=random_seed) for i in range(0,len(decoder_interior_architecture)+1)])
 
         if hold_initialization is not None:
             if not isinstance(hold_initialization, int):
