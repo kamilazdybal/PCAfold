@@ -19,28 +19,28 @@ ifont = {'fontname':'Arial', 'fontweight':'regular', 'style':'italic'}
 grid_opacity = 0.3
 
 # Set font size for axis ticks:
-font_axes = 16
+font_axes = 10
 
 # Set font size for axis labels:
-font_labels = 24
+font_labels = 16
 
 # Set font size for
-font_annotations = 20
+font_annotations = 12
 
 # Set font size for plot title:
-font_title = 24
+font_title = 16
 
 # Set font size for plotted text:
 font_text = 16
 
 # Set font size for legend entries:
-font_legend = 16
+font_legend = 12
 
 # Set font size for colorbar axis label:
-font_colorbar = 24
+font_colorbar = 16
 
 # Set font size for colorbar axis ticks:
-font_colorbar_axes = 18
+font_colorbar_axes = 10
 
 # Set marker size for all line markers:
 marker_size = 50
