@@ -784,3 +784,119 @@ class Utilities(unittest.TestCase):
 
         self.assertTrue(not np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
         self.assertTrue(np.allclose(bases_across_epochs[9], bases_across_epochs[10]))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__reproducible_network_initialization(self):
+
+        input_data = np.random.rand(100,7)
+        output_data = np.random.rand(100,5)
+        n_components = 3
+
+        # Initialize two QoIAwareProjection objects with the same random seed:
+
+        projection_1 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        random_seed=100)
+
+        projection_2 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        random_seed=100)
+
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[0], projection_2.weights_and_biases_init[0]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[1], projection_2.weights_and_biases_init[1]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[2], projection_2.weights_and_biases_init[2]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[3], projection_2.weights_and_biases_init[3]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[4], projection_2.weights_and_biases_init[4]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[5], projection_2.weights_and_biases_init[5]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[6], projection_2.weights_and_biases_init[6]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_init[7], projection_2.weights_and_biases_init[7]))
+
+        # Initialize two QoIAwareProjection objects with different random seeds:
+
+        projection_1 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        random_seed=100)
+
+        projection_2 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        random_seed=200)
+
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_init[0], projection_2.weights_and_biases_init[0]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_init[2], projection_2.weights_and_biases_init[2]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_init[4], projection_2.weights_and_biases_init[4]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_init[6], projection_2.weights_and_biases_init[6]))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__reproducible_network_training(self):
+
+        input_data = np.random.rand(100,7)
+        output_data = np.random.rand(100,5)
+        n_components = 3
+
+        # Initialize two QoIAwareProjection objects with the same random seed:
+
+        projection_1 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        n_epochs=20,
+                                        random_seed=100)
+
+        projection_1.train()
+
+        projection_2 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        n_epochs=20,
+                                        random_seed=100)
+
+        projection_2.train()
+
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[0], projection_2.weights_and_biases_trained[0]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[1], projection_2.weights_and_biases_trained[1]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[2], projection_2.weights_and_biases_trained[2]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[3], projection_2.weights_and_biases_trained[3]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[4], projection_2.weights_and_biases_trained[4]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[5], projection_2.weights_and_biases_trained[5]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[6], projection_2.weights_and_biases_trained[6]))
+        self.assertTrue(np.allclose(projection_1.weights_and_biases_trained[7], projection_2.weights_and_biases_trained[7]))
+
+        # Initialize two QoIAwareProjection objects with different random seeds:
+
+        projection_1 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        n_epochs=20,
+                                        random_seed=100)
+
+        projection_1.train()
+
+        projection_2 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        n_epochs=20,
+                                        random_seed=200)
+
+        projection_2.train()
+
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[0], projection_2.weights_and_biases_trained[0]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[1], projection_2.weights_and_biases_trained[1]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[2], projection_2.weights_and_biases_trained[2]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[3], projection_2.weights_and_biases_trained[3]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[4], projection_2.weights_and_biases_trained[4]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[5], projection_2.weights_and_biases_trained[5]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[6], projection_2.weights_and_biases_trained[6]))
+        self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[7], projection_2.weights_and_biases_trained[7]))
