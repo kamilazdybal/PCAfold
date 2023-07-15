@@ -215,3 +215,79 @@ class Reconstruction(unittest.TestCase):
         self.assertTrue(ann_model.architecture=='7-11-5')
 
 # ------------------------------------------------------------------------------
+
+    def test_analysis__ANN__reproducible_network_initialization(self):
+
+        input_data = np.random.rand(100,7)
+        output_data = np.random.rand(100,5)
+
+        # Initialize two ANN objects with the same random seed:
+
+        network_1 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), random_seed=100)
+
+        network_2 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), random_seed=100)
+
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[0], network_2.weights_and_biases_init[0]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[1], network_2.weights_and_biases_init[1]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[2], network_2.weights_and_biases_init[2]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[3], network_2.weights_and_biases_init[3]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[4], network_2.weights_and_biases_init[4]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[5], network_2.weights_and_biases_init[5]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[6], network_2.weights_and_biases_init[6]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_init[7], network_2.weights_and_biases_init[7]))
+
+        # Initialize two ANN objects with different random seeds:
+
+        network_1 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), random_seed=100)
+
+        network_2 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), random_seed=200)
+
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_init[0], network_2.weights_and_biases_init[0]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_init[2], network_2.weights_and_biases_init[2]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_init[4], network_2.weights_and_biases_init[4]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_init[6], network_2.weights_and_biases_init[6]))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__ANN__reproducible_network_training(self):
+
+        input_data = np.random.rand(100,7)
+        output_data = np.random.rand(100,5)
+
+        # Initialize two ANN objects with the same random seed:
+
+        network_1 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), n_epochs=10, random_seed=100)
+
+        network_1.train()
+
+        network_2 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), n_epochs=10, random_seed=100)
+
+        network_2.train()
+
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[0], network_2.weights_and_biases_trained[0]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[1], network_2.weights_and_biases_trained[1]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[2], network_2.weights_and_biases_trained[2]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[3], network_2.weights_and_biases_trained[3]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[4], network_2.weights_and_biases_trained[4]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[5], network_2.weights_and_biases_trained[5]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[6], network_2.weights_and_biases_trained[6]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[7], network_2.weights_and_biases_trained[7]))
+
+        # Initialize two ANN objects with different random seeds:
+
+        network_1 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8,8), n_epochs=10, random_seed=100)
+
+        network_1.train()
+
+        network_2 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8,8), n_epochs=10, random_seed=200)
+
+        network_2.train()
+
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[0], network_2.weights_and_biases_trained[0]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[1], network_2.weights_and_biases_trained[1]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[2], network_2.weights_and_biases_trained[2]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[3], network_2.weights_and_biases_trained[3]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[4], network_2.weights_and_biases_trained[4]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[5], network_2.weights_and_biases_trained[5]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[6], network_2.weights_and_biases_trained[6]))
+        self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[7], network_2.weights_and_biases_trained[7]))
