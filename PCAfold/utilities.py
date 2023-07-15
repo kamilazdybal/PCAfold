@@ -195,7 +195,7 @@ class QoIAwareProjection:
     :param projection_independent_outputs: (optional)
         ``numpy.ndarray`` specifying any projection-independent outputs at the decoder. It should be of size ``(n_observations,n_projection_independent_outputs)``.
     :param projection_dependent_outputs: (optional)
-        ``numpy.ndarray`` specifying any projection-dependent outputs at the decoder. During training, ``projection_dependent_outputs`` is projected onto the current basis matrix and the decoder outputs are updated accordingly. It should be of size ``(n_observations,n_projection_dependent_outputs)``.
+        ``numpy.ndarray`` specifying any projection-dependent outputs at the decoder. During training, ``projection_dependent_outputs`` is projected onto the current basis matrix and the decoder outputs are updated accordingly. It should be of size ``(n_observations,n_variables)``.
     :param activation_decoder: (optional)
         ``str`` or ``tuple`` specifying activation functions in all the decoding layers. If set to ``str``, the same activation function is used in all decoding layers.
         If set to a ``tuple`` of ``str``, a different activation function can be set at different decoding layers. The number of elements in the ``tuple`` should match the number of decoding layers!
@@ -316,7 +316,10 @@ class QoIAwareProjection:
 
             n_projection_dependent_output_variables = n_components
 
-            (n_projection_dependent_output_observations, _) = np.shape(projection_dependent_outputs)
+            (n_projection_dependent_output_observations, n_output_variables) = np.shape(projection_dependent_outputs)
+
+            if n_output_variables != n_input_variables:
+                raise ValueError("Parameter `projection_dependent_outputs` has to have the same number of columns as `input_data` since it will be projected using the same basis matrix.")
 
             if n_projection_dependent_output_observations != n_input_observations:
                 raise ValueError("Parameter `projection_dependent_outputs` has to have the same number of observations as parameter `input_data`.")

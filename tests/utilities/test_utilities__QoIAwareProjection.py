@@ -100,6 +100,20 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=smaller_output_data, transformed_projection_dependent_outputs='symlog')
 
+
+        # Mismatch between input_data and projection_dependent_outputs:
+
+        input_data = np.random.rand(100,6)
+        output_data = np.random.rand(100,3)
+        n_components = 2
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=output_data)
+
+        with self.assertRaises(ValueError):
+            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=output_data, transformed_projection_dependent_outputs='symlog')
+
+
 # ------------------------------------------------------------------------------
 
     def test_analysis__QoIAwareProjection__architecture_inconsistent_with_custom_activation_functions(self):
@@ -531,12 +545,12 @@ class Utilities(unittest.TestCase):
     def test_analysis__QoIAwareProjection__check_architecture(self):
 
         input_data = np.random.rand(100,7)
-        output_data = np.random.rand(100,5)
+        output_data = np.random.rand(100,7)
         n_components = 3
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
-                                        projection_independent_outputs=output_data,
+                                        projection_independent_outputs=output_data[:,0:5],
                                         projection_dependent_outputs=output_data,
                                         decoder_interior_architecture=())
 
@@ -544,11 +558,20 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
-                                        projection_independent_outputs=output_data,
+                                        projection_independent_outputs=output_data[:,0:5],
                                         projection_dependent_outputs=output_data,
                                         decoder_interior_architecture=(4,5,6))
 
         self.assertTrue(projection.architecture=='7-3-4-5-6-8')
+
+        projection = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data[:,0:5],
+                                        projection_dependent_outputs=output_data,
+                                        transformed_projection_dependent_outputs='symlog',
+                                        decoder_interior_architecture=(4,5,6))
+
+        self.assertTrue(projection.architecture=='7-3-4-5-6-11')
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
@@ -567,7 +590,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
-                                        projection_independent_outputs=output_data,
+                                        projection_independent_outputs=output_data[:,0:5],
                                         decoder_interior_architecture=(11,),
                                         transformed_projection_dependent_outputs='symlog')
 
