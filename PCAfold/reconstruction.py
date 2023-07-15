@@ -2785,7 +2785,7 @@ class ANN:
                 verbose=False):
 
         import tensorflow as tf
-        from tensorflow.keras import layers, models
+        from tensorflow.keras import layers, models, initializers
 
         __weights_inits = ['glorot_uniform']
         __biases_inits = ['zeros']
@@ -2834,6 +2834,20 @@ class ANN:
             neuron_count = [n_input_variables] + [i for i in interior_architecture] + [n_output_variables]
 
         self.__neuron_count = neuron_count
+
+        # Check weights initialization:
+        if weights_init is not None:
+            if not isinstance(weights_init, str):
+                raise ValueError("Parameter `weights_init` has to be of type `str`.")
+            if weights_init not in __weights_inits:
+                raise ValueError("Parameter `weights_init` has to be 'glorot_uniform'.")
+
+        # Set the weights initialization:
+        if (weights_init is None) or (weights_init == 'glorot_uniform'):
+            if random_seed is None:
+                weights_init = 'glorot_uniform'
+            else:
+                weights_init = initializers.glorot_uniform(seed=random_seed)
 
         # Set the loss:
         if not isinstance(loss, str):
