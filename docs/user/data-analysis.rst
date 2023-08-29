@@ -45,6 +45,12 @@ as introduced in :cite:`Armstrong2021` and :cite:`zdybal2022cost`.
 
 .. autofunction:: PCAfold.analysis.compute_normalized_variance
 
+``compute_normalized_range``
+================================================
+
+.. autofunction:: PCAfold.analysis.compute_normalized_range
+
+
 Class ``VarianceData``
 ======================
 
