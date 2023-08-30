@@ -66,6 +66,7 @@ from .reduction import plot_heatmap_sequence
 # Module: `analysis`
 from .kernel_regression import KReg
 from .analysis import compute_normalized_variance
+from .analysis import compute_normalized_range
 from .analysis import normalized_variance_derivative
 from .analysis import find_local_maxima
 from .analysis import random_sampling_normalized_variance

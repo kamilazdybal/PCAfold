@@ -284,32 +284,41 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
     Computes a normalized range for analyzing manifold quality for categorical data.
     This function is an alternate version of the normalized variance
     (more information can be found in :cite:`Armstrong2021`) that is more suited to dealing with categorical data.
-    We assume that class labels are used as the relevant dependent variable.
+    We assume that class labels are used as the categorical dependent variable (as opposed to continuous dependent variable).
     For categorical data, the exact class labels may not carry any meaning,
     thus we are only interested in the fact that two different classes overlap each other.
-    In contrast, the normalized variance computed as per `compute_normalized_variance`
-    will penalize overlap between classes "1" and "3" more than between classes "1" and "2",
-    simply because the difference between integers 1 and 3 is larger than between integers 1 and 2.
-    The definition of the normalized range available in the present function corrects for that
-    by passing each difference between class labels through an *activation function*
-    that returns 0 if two observations belong to the same class and a number larger than 0.0
-    but at most equal to 1.0 if two observations belong to two different classes.
-
-    In other words, the manifold will be assessed as having the same quality for the two cases depicted in the figure below:
+    As an illustrative example, the same 2D manifold will be assessed as having the same quality
+    for the two cases depicted in the figure below:
 
     .. image:: ../images/class-overlap.png
         :width: 800
         :align: center
 
+    In **Case 1**, class "1" overlaps class "2" and in **Case 2**, class "1" overlaps class "3".
+    The normalized range will detect the fact that two different classes overlap each other,
+    but it will neglect the fact which class labels those two classes have.
+    In contrast, the normalized variance computed as per ``compute_normalized_variance``
+    will penalize overlap between classes "1" and "3" more than between classes "1" and "2",
+    simply because the difference between integers 1 and 3 is larger than between integers 1 and 2.
+    The definition of the normalized range available in the present function corrects for that
+    by passing each difference between class labels through an *activation function*, :math:`\\mathcal{F}`,
+    that returns 0 if two observations belong to the same class and a number larger than 0.0
+    but at most equal to 1.0 if two observations belong to two different classes.
+
     The normalized range is computed as
 
     .. math::
 
-        \\mathcal{N}(\\sigma) = \\frac{\\sum_{i=1}^n \\mathcal{F}(\\Delta y_i)^2}{n}
+        \\mathcal{N}(\\sigma) = \\frac{\\sum_{i=1}^n \\mathcal{F}((\\Delta y_i|_{\\sigma})^2)}{n}
 
-    where :math:`\\Delta y_i` is the range in the class labels (:math:`\\min y_i - \\max y_i`) in the vicinity :math:`\\sigma` of the :math:`i`th point,
+    where :math:`\\Delta y_i|_{\\sigma}` is the range in the class labels (:math:`\\min y_i - \\max y_i`) in the vicinity :math:`\\sigma` of the :math:`i` th point,
     and :math:`\\mathcal{F}` is an activation function. :math:`n` is the total number of observations (data points).
     :math:`\\mathcal{N}(\\sigma)` is computed for each bandwidth in an array of bandwidth values.
+
+    .. note::
+
+        The numerator in the normalized range is at most equal to :math:`n`, thus we "normalize" the numerator by dividing by :math:`n` in the denominator.
+        This makes the normalized range bounded between 0.0 and 1.0.
 
     Two activation functions are available:
 
@@ -319,16 +328,24 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
         :width: 200
         :align: center
 
+    .. math::
+
+        \\mathcal{F}(x) = \\begin{cases}
+        0 &\\text{if x = 0}\\
+        1 &\\text{if x > 0}
+        \\end{cases}
+
     - If ``activation_function`` is set to ``'arctan'`` we use the following activation:
 
     .. image:: ../images/activation-function-arctan.png
         :width: 200
         :align: center
 
-    .. note::
+    .. math::
 
-        The numerator in the normalized range is at most equal to :math:`n`, thus we "normalize" the numerator by dividing by :math:`n` in the denominator.
-        This makes the normalized range bounded between 0.0 and 1.0.
+        \\mathcal{F}(x) = \\frac{\\arctan(mx)}{\\pi /2}
+
+    In the latter case, you can control how steep is the activation function using the ``multiplier`` parameter, :math:`m`.
 
     By default, the ``indepvars`` (:math:`x`) are centered and scaled to reside inside a unit box (resulting in :math:`\\hat{x}`) so that the bandwidths have the
     same meaning in each dimension. Therefore, the bandwidth and its involved calculations are applied in the normalized
@@ -336,7 +353,6 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
     The bandwidth values may be specified directly through ``bandwidth_values`` or default values will be calculated as a
     logspace from ``min_bandwidth`` to ``max_bandwidth`` with ``npts_bandwidth`` number of values. If left unspecified,
     ``min_bandwidth`` and ``max_bandwidth`` will be calculated as the minimum and maximum nonzero distance between points, respectively.
-
 
     **Example:**
 
@@ -357,35 +373,89 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
         idx[60:70] = 2
         idx[71::] = 3
 
-        # Compute normalized variance quantities:
-        variance_data = compute_normalized_range(principal_components, idx, bandwidth_values=np.logspace(-5, 1, 50), scale_unit_box=True, activation_function='step')
+        # Compute normalized range:
+        variance_data = compute_normalized_range(principal_components,
+                                                 idx,
+                                                 bandwidth_values=np.logspace(-5, 1, 50),
+                                                 scale_unit_box=True,
+                                                 activation_function='step')
 
     :param indepvars:
         ``numpy.ndarray`` specifying the independent variable values. It should be of size ``(n_observations,n_independent_variables)``.
     :param labels:
         ``numpy.ndarray`` specifying the dependent variable values (class labels). It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
-    :param npts_bandwidth:
-        (optional, default 25) number of points to build a logspace of bandwidth values
-    :param min_bandwidth:
-        (optional, default to minimum nonzero interpoint distance) minimum bandwidth
-    :param max_bandwidth:
-        (optional, default to estimated maximum interpoint distance) maximum bandwidth
-    :param bandwidth_values:
-        (optional) array of bandwidth values, i.e. filter widths for a Gaussian filter, to loop over
-    :param scale_unit_box:
-        (optional, default True) center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension
+    :param npts_bandwidth: (optional)
+        ``int`` specifying the number of points to build a logspace of bandwidth values.
+    :param min_bandwidth: (optional)
+        ``float`` specifying the minimum bandwidth.
+    :param max_bandwidth: (optional)
+        ``float`` specifying the maximum bandwidth
+    :param bandwidth_values: (optional)
+        ``numpy.ndarray`` specifying the array of bandwidth values, i.e., filter widths for a Gaussian filter, to loop over.
+    :param scale_unit_box: (optional)
+         ``bool`` specifying center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension.
     :param activation_function: (optional)
         ``str`` specifying the activation function. It should be ``'step'`` or ``'arctan'. If set to ``'arctan'``, you may also control the steepness of the activation function with the ``multiplier`` parameter.
-    :param activation_function: (optional)
-        ``int`` or ``float`` specifying the multiplier to control the steepneess of the ``'arctan'`` activation function. It is only used if ``activation_function`` is set to ``'arctan'``.
+    :param multiplier: (optional)
+        ``int`` or ``float`` specifying the multiplier, :math:`m`, to control the steepneess of the ``'arctan'`` activation function. It is only used if ``activation_function`` is set to ``'arctan'``.
 
     :return:
         - **variance_data** - an object of the ``VarianceData`` class.
     """
 
-    assert indepvars.ndim == 2, "independent variable array must be 2D: n_observations x n_variables."
-    assert (indepvars.shape[0] == labels.shape[
-        0]), "The number of observations for dependent and independent variables must match."
+    __activation_function = ['step', 'arctan']
+
+    if not isinstance(indepvars, np.ndarray):
+        raise ValueError("Parameter `indepvars` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(labels, np.ndarray):
+        raise ValueError("Parameter `labels` has to be of type `numpy.ndarray`.")
+
+    try:
+        (n_observations, n_independent_variables) = np.shape(indepvars)
+    except:
+        raise ValueError("Parameter `indepvars` has to have size `(n_observations,n_independent_variables)`.")
+
+    try:
+        (n_observations_labels, ) = np.shape(labels)
+        n_variables = 1
+        yi = labels.copy()[:,None]
+    except:
+        (n_observations_labels, n_variables) = np.shape(labels)
+        yi = labels.copy()
+
+    if n_variables != 1:
+        raise ValueError("Parameter `labels` has to have size `(n_observations,)` or `(n_observations,1)`.")
+
+    if n_observations != n_observations_labels:
+        raise ValueError("Parameter `labels` has different number of observations than parameter `indepvars`.")
+
+    if not isinstance(npts_bandwidth, int):
+        raise ValueError("Parameter `npts_bandwidth` has to be of type `int`.")
+
+    if min_bandwidth is not None:
+        if not isinstance(min_bandwidth, float):
+            raise ValueError("Parameter `min_bandwidth` has to be of type `float`.")
+
+    if max_bandwidth is not None:
+        if not isinstance(max_bandwidth, float):
+            raise ValueError("Parameter `max_bandwidth` has to be of type `float`.")
+
+    if bandwidth_values is not None:
+        if not isinstance(bandwidth_values, np.ndarray):
+            raise ValueError("Parameter `bandwidth_values` has to be of type `numpy.ndarray`.")
+
+    if not isinstance(scale_unit_box, bool):
+        raise ValueError("Parameter `scale_unit_box` has to be of type `bool`.")
+
+    if not isinstance(activation_function, str):
+        raise ValueError("Parameter `activation_function` has to be of type `str`.")
+
+    if activation_function not in __activation_function:
+        raise ValueError("Parameter `activation_function` can only be 'step' or 'arctan'.")
+
+    if not isinstance(multiplier, int) and not isinstance(multiplier, float):
+        raise ValueError("Parameter `multiplier` has to be of type `int` or `float`.")
 
     depvar_names = ['labels']
 
@@ -408,8 +478,6 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
         xi = (indepvars - np.min(indepvars, axis=0)) / (np.max(indepvars, axis=0) - np.min(indepvars, axis=0))
     else:
         xi = indepvars.copy()
-
-    yi = labels.copy()
 
     if bandwidth_values is None:
         if min_bandwidth is None:
@@ -435,15 +503,16 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
 
         lvar[si, :] = np.sum(F(neighborhood_range ** 2, activation_function=activation_function, multiplier=multiplier))
 
-    # saving the local variance for each yi...
+    # Saving the local range for each yi:
     local_var = dict({key: lvar[:, idx] for idx, key in enumerate(depvar_names)})
 
-    # saving the global variance for each yi...
+    # Computing the normalized range:
+    norm_local_var = dict({key: local_var[key] / indepvars.shape[0] for key in depvar_names})
+
+    # Computing the global range for each yi:
     global_var = dict({key: indepvars.shape[0] for idx, key in enumerate(depvar_names)})
 
-    norm_local_var = dict({key: local_var[key] / global_var[key] for key in depvar_names})
-
-    # computing normalized variance as bandwidth approaches zero to check for non-uniqueness
+    # Computing normalized range as bandwidth approaches zero to check for non-uniqueness:
     normvar_limit = dict({key: 0 for idx, key in enumerate(depvar_names)})
 
     solution_data = VarianceData(bandwidth_values, norm_local_var, global_var, [], depvar_names, normvar_limit, [], [])
