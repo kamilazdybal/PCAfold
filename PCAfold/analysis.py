@@ -331,7 +331,7 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
     .. math::
 
         \\mathcal{F}(x) = \\begin{cases}
-        0 &\\text{if x = 0}\\
+        0 &\\text{if x = 0} \\\\
         1 &\\text{if x > 0}
         \\end{cases}
 
@@ -395,7 +395,7 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
     :param scale_unit_box: (optional)
          ``bool`` specifying center/scale the independent variables between [0,1] for computing a normalized variance so the bandwidth values have the same meaning in each dimension.
     :param activation_function: (optional)
-        ``str`` specifying the activation function. It should be ``'step'`` or ``'arctan'. If set to ``'arctan'``, you may also control the steepness of the activation function with the ``multiplier`` parameter.
+        ``str`` specifying the activation function. It should be ``'step'`` or ``'arctan'``. If set to ``'arctan'``, you may also control the steepness of the activation function with the ``multiplier`` parameter.
     :param multiplier: (optional)
         ``int`` or ``float`` specifying the multiplier, :math:`m`, to control the steepneess of the ``'arctan'`` activation function. It is only used if ``activation_function`` is set to ``'arctan'``.
 
