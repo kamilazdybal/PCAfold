@@ -2893,6 +2893,7 @@ class ANN:
             if not isinstance(random_seed, int):
                 raise ValueError("Parameter `random_seed` has to be of type `int`.")
             tf.random.set_seed(random_seed)
+            tf.keras.utils.set_random_seed(random_seed)
 
         if not isinstance(verbose, bool):
             raise ValueError("Parameter `verbose` has to be a boolean.")
@@ -3079,6 +3080,7 @@ class ANN:
 
         if self.__random_seed is not None:
             tf.random.set_seed(self.__random_seed)
+            tf.keras.utils.set_random_seed(self.__random_seed)
 
         training_losses_across_epochs = []
         validation_losses_across_epochs = []

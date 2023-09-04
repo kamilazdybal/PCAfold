@@ -291,3 +291,29 @@ class Reconstruction(unittest.TestCase):
         self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[5], network_2.weights_and_biases_trained[5]))
         self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[6], network_2.weights_and_biases_trained[6]))
         self.assertTrue(not np.allclose(network_1.weights_and_biases_trained[7], network_2.weights_and_biases_trained[7]))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__ANN__reproducible_network_training_using_mini_batches(self):
+
+        input_data = np.random.rand(100,7)
+        output_data = np.random.rand(100,5)
+
+        # Initialize two ANN objects with the same random seed:
+
+        network_1 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), batch_size=20, n_epochs=10, random_seed=100)
+
+        network_1.train()
+
+        network_2 = reconstruction.ANN(input_data, output_data, interior_architecture=(8,8,8), batch_size=20, n_epochs=10, random_seed=100)
+
+        network_2.train()
+
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[0], network_2.weights_and_biases_trained[0]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[1], network_2.weights_and_biases_trained[1]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[2], network_2.weights_and_biases_trained[2]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[3], network_2.weights_and_biases_trained[3]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[4], network_2.weights_and_biases_trained[4]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[5], network_2.weights_and_biases_trained[5]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[6], network_2.weights_and_biases_trained[6]))
+        self.assertTrue(np.allclose(network_1.weights_and_biases_trained[7], network_2.weights_and_biases_trained[7]))
