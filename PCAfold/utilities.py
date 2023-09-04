@@ -701,7 +701,7 @@ class QoIAwareProjection:
 
         if self.__random_seed is not None:
             tf.random.set_seed(self.__random_seed)
-            tf.keras.utils.set_random_seed(random_seed)
+            tf.keras.utils.set_random_seed(self.__random_seed)
 
         bases_across_epochs = []
         training_losses_across_epochs = []
