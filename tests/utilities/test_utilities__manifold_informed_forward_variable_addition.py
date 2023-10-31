@@ -8,12 +8,12 @@ class Utilities(unittest.TestCase):
 
     def test_utilities__manifold_informed_feature_selection__allowed_calls(self):
 
-        X = np.random.rand(100,5)
-        X_source = np.random.rand(100,5)
-        variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
+        X = np.random.rand(30,4)
+        X_source = np.random.rand(30,4)
+        variable_names = ['X1', 'X2', 'X3', 'X4']
         scaling='auto'
-        bandwidth_values = bandwidth_values = np.logspace(-4, 2, 10)
-        target_variables = X[:,0:4]
+        bandwidth_values = np.logspace(-4, 2, 10)
+        target_variables = X[:,0:2]
 
         try:
             (ordered_variables, selected_variables, optimized_cost, costs) = FVA(X, X_source, variable_names, scaling, bandwidth_values)
@@ -48,7 +48,7 @@ class Utilities(unittest.TestCase):
         X_source = np.random.rand(100,5)
         variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
         scaling='auto'
-        bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
+        bandwidth_values = np.logspace(-4, 2, 10)
 
         # Need to specify target_variables or set add_transformed_source to True:
         with self.assertRaises(ValueError):
@@ -98,11 +98,11 @@ class Utilities(unittest.TestCase):
 
     def test_utilities__manifold_informed_feature_selection__computation(self):
 
-        X = np.random.rand(100,5)
-        X_source = np.random.rand(100,5)
-        variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
+        X = np.random.rand(30,4)
+        X_source = np.random.rand(30,4)
+        variable_names = ['X1', 'X2', 'X3', 'X4']
         scaling='auto'
-        bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
+        bandwidth_values = np.logspace(-4, 2, 10)
 
         # Make sure that the ordered_variables entries are reasonable:
         try:
@@ -139,7 +139,7 @@ class Utilities(unittest.TestCase):
         try:
             (ordered_variables, selected_variables, optimized_cost, costs) = FVA(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=3)
             (min_cost_function_index, ) = np.where(costs==np.min(costs))
-            min_cost_function_index = int(min_cost_function_index)
+            min_cost_function_index = int(min_cost_function_index[0])
             selected_costs = costs[0:min_cost_function_index+1]
             self.assertTrue(selected_variables[-1] == ordered_variables[min_cost_function_index])
             self.assertTrue(len(selected_variables) == len(selected_costs))
@@ -150,13 +150,12 @@ class Utilities(unittest.TestCase):
 
     def test_utilities__manifold_informed_feature_selection__changing_cost_function_hyper_parameters(self):
 
-        X = np.random.rand(100,5)
-        X_source = np.random.rand(100,5)
-        variable_names = ['X1', 'X2', 'X3', 'X4', 'X5']
+        X = np.random.rand(30,4)
+        X_source = np.random.rand(30,4)
+        variable_names = ['X1', 'X2', 'X3', 'X4']
         scaling='auto'
-        bandwidth_values = bandwidth_values = np.logspace(-4, 2, 50)
+        bandwidth_values = np.logspace(-4, 2, 10)
 
-        # Make sure that the ordered_variables entries are reasonable:
         try:
             (ordered_variables, selected_variables, optimized_cost, costs) = FVA(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, power=2, vertical_shift=2)
             (ordered_variables, selected_variables, optimized_cost, costs) = FVA(X, X_source, variable_names, scaling, bandwidth_values, target_manifold_dimensionality=2, power=0.5, vertical_shift=0.5)

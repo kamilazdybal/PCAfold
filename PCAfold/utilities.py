@@ -1273,7 +1273,8 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
 
         # Find a single best variable to bootstrap with:
         (best_bootstrap_variable_index, ) = np.where(np.array(bootstrap_cost_function)==np.min(bootstrap_cost_function))
-        best_bootstrap_variable_index = int(best_bootstrap_variable_index)
+        # This also handles cases where there are multiple minima with the same minimum value:
+        best_bootstrap_variable_index = int(best_bootstrap_variable_index[0])
 
         costs.append(np.min(bootstrap_cost_function))
 
@@ -1392,10 +1393,8 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
 
         min_area = np.min(current_cost_function)
         (best_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
-        try:
-            best_variable_index = int(best_variable_index)
-        except:
-            best_variable_index = int(best_variable_index[0])
+        # This also handles cases where there are multiple minima with the same minimum value:
+        best_variable_index = int(best_variable_index[0])
 
         if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[best_variable_index]] + ' is added.\n\tCost:\t%.4f' % min_area + '\n')
         ordered_variables.append(remaining_variables_list[best_variable_index])
@@ -1409,10 +1408,8 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
 
     # Compute the optimal subset where the cost is minimized: ------------------
     (min_cost_function_index, ) = np.where(costs==np.min(costs))
-    try:
-        min_cost_function_index = int(min_cost_function_index)
-    except:
-        min_cost_function_index = int(min_cost_function_index[0])
+    # This also handles cases where there are multiple minima with the same minimum value:
+    min_cost_function_index = int(min_cost_function_index[0])
 
     if min_cost_function_index+1 < target_manifold_dimensionality:
         selected_variables = list(np.array(ordered_variables)[0:target_manifold_dimensionality])
@@ -1733,12 +1730,8 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
 
         # Search for the variable whose removal will decrease the cost the most:
         (worst_variable_index, ) = np.where(np.array(current_cost_function)==min_area)
-
-        # This handles cases where there are multiple minima with the same minimum cost value:
-        try:
-            worst_variable_index = int(worst_variable_index)
-        except:
-            worst_variable_index = int(worst_variable_index[0])
+        # This also handles cases where there are multiple minima with the same minimum value:
+        worst_variable_index = int(worst_variable_index[0])
 
         if verbose: print('\n\tVariable ' + variable_names[remaining_variables_list[worst_variable_index]] + ' is removed.\n\tCost:\t%.4f' % min_area + '\n')
 
@@ -1773,12 +1766,8 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
     costs = costs[::-1]
 
     (min_cost_function_index, ) = np.where(costs==np.min(costs))
-
-    # This handles cases where there are multiple minima with the same minimum cost value:
-    try:
-        min_cost_function_index = int(min_cost_function_index)
-    except:
-        min_cost_function_index = int(min_cost_function_index[0])
+    # This also handles cases where there are multiple minima with the same minimum value:
+    min_cost_function_index = int(min_cost_function_index[0])
 
     selected_variables = list(np.array(ordered_variables)[0:min_cost_function_index])
 
