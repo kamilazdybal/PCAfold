@@ -19,7 +19,7 @@ class Reconstruction(unittest.TestCase):
         # Define the regression model:
         def regression_model(query):
 
-            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[:,0]
+            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[0,0]
 
             return predicted
 
@@ -69,7 +69,7 @@ class Reconstruction(unittest.TestCase):
         # Define the regression model:
         def regression_model(query):
 
-            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[:,0]
+            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[0,0]
 
             return predicted
 

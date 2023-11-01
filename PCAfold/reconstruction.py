@@ -4392,7 +4392,7 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
         # Define the regression model:
         def regression_model(query):
 
-            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[:,0]
+            predicted = model.predict(query, 'nearest_neighbors_isotropic', n_neighbors=1)[0,0]
 
             return predicted
 
