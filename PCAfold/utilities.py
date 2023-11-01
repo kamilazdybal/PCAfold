@@ -90,6 +90,7 @@ class QoIAwareProjection:
                                        decoder_interior_architecture=(5,8),
                                        encoder_weights_init=None,
                                        decoder_weights_init=None,
+                                       trainable_encoder_bias=True,
                                        hold_initialization=10,
                                        hold_weights=2,
                                        transformed_projection_dependent_outputs='signed-square-root',
@@ -209,6 +210,8 @@ class QoIAwareProjection:
         ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. It should be of size ``(n_variables, n_components)``. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
     :param decoder_weights_init: (optional)
         ``tuple`` of ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. Each element in the tuple should have a shape that matches the architecture. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+    :param trainable_encoder_bias: (optional)
+        ``bool`` specifying if the biases in the encoding layer should be trainable. Note, that for linear projections, bias does not change the projection quality and only acts to translate the projection along the low-dimensional coordinates.
     :param hold_initialization: (optional)
         ``int`` specifying the number of first epochs during which the initial weights in the encoder are held constant. If set to ``None``, weights in the encoder will change at the first epoch. This parameter can be used in conjunction with ``hold_weights``.
     :param hold_weights: (optional)
@@ -263,6 +266,7 @@ class QoIAwareProjection:
                 decoder_interior_architecture=(),
                 encoder_weights_init=None,
                 decoder_weights_init=None,
+                trainable_encoder_bias=True,
                 hold_initialization=None,
                 hold_weights=None,
                 transformed_projection_dependent_outputs=None,
@@ -412,6 +416,9 @@ class QoIAwareProjection:
             else:
                 decoder_kernel_initializer = tuple([initializers.glorot_uniform(seed=random_seed) for i in range(0,len(decoder_interior_architecture)+1)])
 
+        if not isinstance(trainable_encoder_bias, bool):
+            raise ValueError("Parameter `trainable_encoder_bias` has to be of type `bool`.")
+
         if hold_initialization is not None:
             if not isinstance(hold_initialization, int):
                 raise ValueError("Parameter `hold_initialization` has to be of type `int`.")
@@ -473,7 +480,7 @@ class QoIAwareProjection:
 
         # Create an encoder-decoder neural network with a given architecture:
         qoi_aware_encoder_decoder = models.Sequential()
-        qoi_aware_encoder_decoder.add(layers.Dense(n_components, input_dim=n_input_variables, activation='linear', kernel_initializer=encoder_kernel_initializer))
+        qoi_aware_encoder_decoder.add(layers.Dense(n_components, input_dim=n_input_variables, use_bias=trainable_encoder_bias, activation='linear', kernel_initializer=encoder_kernel_initializer))
         for i, n_neurons in enumerate(decoder_interior_architecture):
             if isinstance(activation_decoder, str):
                 qoi_aware_encoder_decoder.add(layers.Dense(n_neurons, activation=activation_decoder, kernel_initializer=decoder_kernel_initializer[i]))
@@ -496,6 +503,7 @@ class QoIAwareProjection:
         self.__decoder_interior_architecture = decoder_interior_architecture
         self.__encoder_weights_init = encoder_weights_init
         self.__decoder_weights_init = decoder_weights_init
+        self.__trainable_encoder_bias = trainable_encoder_bias
         self.__hold_initialization = hold_initialization
         self.__hold_weights = hold_weights
         self.__transformed_projection_dependent_outputs = transformed_projection_dependent_outputs

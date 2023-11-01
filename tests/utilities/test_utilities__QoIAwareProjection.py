@@ -923,3 +923,46 @@ class Utilities(unittest.TestCase):
         self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[5], projection_2.weights_and_biases_trained[5]))
         self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[6], projection_2.weights_and_biases_trained[6]))
         self.assertTrue(not np.allclose(projection_1.weights_and_biases_trained[7], projection_2.weights_and_biases_trained[7]))
+
+# ------------------------------------------------------------------------------
+
+    def test_analysis__QoIAwareProjection__trainable_encoder_bias(self):
+
+        input_data = np.random.rand(100,7)
+        output_data = np.random.rand(100,5)
+        n_components = 3
+
+        # No bias in the encoder:
+        projection_1 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        trainable_encoder_bias=False,
+                                        n_epochs=20,
+                                        random_seed=100)
+
+        self.assertTrue(projection_1.weights_and_biases_init[0].shape==(7,3))
+        self.assertTrue(projection_1.weights_and_biases_init[1].shape==(3,6))
+        self.assertTrue(projection_1.weights_and_biases_init[2].shape==(6,))
+        self.assertTrue(projection_1.weights_and_biases_init[3].shape==(6,6))
+        self.assertTrue(projection_1.weights_and_biases_init[4].shape==(6,))
+        self.assertTrue(projection_1.weights_and_biases_init[5].shape==(6,5))
+        self.assertTrue(projection_1.weights_and_biases_init[6].shape==(5,))
+
+        # With bias in the encoder:
+        projection_1 = QoIAwareProjection(input_data,
+                                        n_components,
+                                        projection_independent_outputs=output_data,
+                                        decoder_interior_architecture=(6,6),
+                                        trainable_encoder_bias=True,
+                                        n_epochs=20,
+                                        random_seed=100)
+
+        self.assertTrue(projection_1.weights_and_biases_init[0].shape==(7,3))
+        self.assertTrue(projection_1.weights_and_biases_init[1].shape==(3,))
+        self.assertTrue(projection_1.weights_and_biases_init[2].shape==(3,6))
+        self.assertTrue(projection_1.weights_and_biases_init[3].shape==(6,))
+        self.assertTrue(projection_1.weights_and_biases_init[4].shape==(6,6))
+        self.assertTrue(projection_1.weights_and_biases_init[5].shape==(6,))
+        self.assertTrue(projection_1.weights_and_biases_init[6].shape==(6,5))
+        self.assertTrue(projection_1.weights_and_biases_init[7].shape==(5,))
