@@ -1571,6 +1571,8 @@ class LPCA:
         The average is taken from each of the :math:`k` clusters.
         Correlation in the :math:`n^{th}` cluster is referred to as :math:`r_n(\\mathrm{PC}, \\phi)`.
 
+        This functionality has been used in :cite:`Zdybal2023Local`.
+
         Available correlation functions are:
 
         - Pearson correlation coefficient (PCC), set ``metric='pearson'``:
@@ -1837,6 +1839,8 @@ class VQPCA:
     evaluated for every observation as if that observation belonged to cluster *j* and next,
     the observation is assigned to the cluster for which the reconstruction
     error is smallest.
+
+    More information can be found in :cite:`Zdybal2023Local`.
 
     .. note::
 

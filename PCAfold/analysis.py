@@ -748,6 +748,8 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
     """
     Computes a map of local feature sizes on a manifold.
 
+    This technique has been introduced in :cite:`PCAfold2023`.
+
     **Example:**
 
     .. code:: python
