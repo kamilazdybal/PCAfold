@@ -38,7 +38,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.autosummary",
     'sphinxcontrib.bibtex',
-    '../PCAfold/kernel_regression_cython.pyx'
+    'kernel_regression_cython.pyx'
 ]
 
 autosectionlabel_prefix_document = True
