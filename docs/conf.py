@@ -68,6 +68,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
+# Path to bibliographic references:
+bibtex_bibfiles = "docs/user/data-preprocessing.bib"
 
 # -- Options for HTML output -------------------------------------------------
 
