@@ -1,6 +1,6 @@
-sphinx==5.3.0
-urllib3<2.0.0
-sphinxcontrib-bibtex<2.0.0
+sphinx
+urllib3
+sphinxcontrib-bibtex
 furo
 Cython
 matplotlib
