@@ -114,5 +114,5 @@ Class ``QoIAwareProjectionPOUnet``
 Bibliography
 ************
 
-.. bibliography:: utilities.bib
+.. bibliography:: ../references.bib
   :labelprefix: U

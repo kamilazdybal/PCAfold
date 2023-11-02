@@ -163,5 +163,5 @@ Plotting functions
 Bibliography
 ************
 
-.. bibliography:: data-analysis.bib
+.. bibliography:: ../references.bib
   :labelprefix: A

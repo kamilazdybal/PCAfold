@@ -349,5 +349,5 @@ Plotting functions
 Bibliography
 ************
 
-.. bibliography:: data-reduction.bib
+.. bibliography:: ../references.bib
   :labelprefix: R

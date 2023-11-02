@@ -263,5 +263,5 @@ Plotting functions
 Bibliography
 ************
 
-.. bibliography:: data-reconstruction.bib
-  :labelprefix: U
+.. bibliography:: ../references.bib
+  :labelprefix: E

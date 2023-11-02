@@ -306,5 +306,5 @@ or plotting the conditional statistics.
 Bibliography
 ************
 
-.. bibliography:: data-preprocessing.bib
+.. bibliography:: ../references.bib
   :labelprefix: P
