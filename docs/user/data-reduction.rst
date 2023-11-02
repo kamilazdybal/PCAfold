@@ -349,5 +349,6 @@ Plotting functions
 Bibliography
 ************
 
-.. bibliography:: ../references.bib
+.. bibliography::
+  :cited:
   :labelprefix: R

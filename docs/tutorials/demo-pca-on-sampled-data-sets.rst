@@ -420,5 +420,6 @@ current manual sampling:
 Bibliography
 ************
 
-.. bibliography:: ../references.bib
+.. bibliography::
+  :cited:
   :labelprefix: DEMOS

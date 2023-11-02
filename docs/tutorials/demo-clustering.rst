@@ -506,5 +506,6 @@ positive or high negative magnitudes.
 Bibliography
 **********************
 
-.. bibliography:: ../references.bib
+.. bibliography::
+  :cited:
   :labelprefix: DEMOC

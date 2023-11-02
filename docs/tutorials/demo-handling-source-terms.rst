@@ -124,5 +124,6 @@ in the previous section.
 Bibliography
 **********************
 
-.. bibliography:: ../references.bib
+.. bibliography::
+  :cited:
   :labelprefix: DEMOT

@@ -370,5 +370,6 @@ The result of this reconstruction can be seen below:
 Bibliography
 **********************
 
-.. bibliography:: ../references.bib
+.. bibliography::
+  :cited:
   :labelprefix: DEMOM

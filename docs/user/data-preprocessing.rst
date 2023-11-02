@@ -306,5 +306,6 @@ or plotting the conditional statistics.
 Bibliography
 ************
 
-.. bibliography:: ../references.bib
+.. bibliography::
+  :cited:
   :labelprefix: P

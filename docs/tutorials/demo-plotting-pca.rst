@@ -287,5 +287,6 @@ Similarly as in the ``plot_2d_manifold`` function, you can select the colormap t
 Bibliography
 **********************
 
-.. bibliography:: ../references.bib
+.. bibliography::
+  :cited:
   :labelprefix: DEMOP
