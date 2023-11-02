@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
 from numpy import get_include as numpy_include
@@ -55,6 +56,15 @@ kreg_cython = cythonize(Extension(name='PCAfold.kernel_regression',
                                   sources=[os.path.join('..', 'PCAfold', 'kernel_regression_cython.pyx')],
                                   extra_compile_args=cython_extra_compile_args,
                                   language='c++'))
+
+setup(name='PCAfold',
+      version='2.0.0',
+      license='MIT',
+      zip_safe=False,
+      description='PCAfold is a Python library for generating, improving and analyzing PCA-derived low-dimensional manifolds',
+      author='Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland',
+      packages=['PCAfold'],
+      ext_modules=kreg_cython)
 
 autosectionlabel_prefix_document = True
 # Add any paths that contain templates here, relative to this directory.
