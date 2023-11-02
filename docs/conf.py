@@ -41,6 +41,8 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.mathjax",
     "sphinx.ext.autosummary",
+    'myst_parser',
+    'recommonmark',
     'sphinxcontrib.bibtex',
 ]
 
