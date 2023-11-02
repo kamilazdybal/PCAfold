@@ -1804,6 +1804,8 @@ class QoIAwareProjectionPOUnet:
     """
     This is analogous to ``QoIAwareProjection`` but uses ``PartitionOfUnityNetwork`` as the decoder.
 
+    More information can be found in :cite:`Armstrong2023`.
+
     **Example:**
 
     .. code:: python
