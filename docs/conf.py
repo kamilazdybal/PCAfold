@@ -69,7 +69,19 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 
 # Path to bibliographic references:
-bibtex_bibfiles = ['user/references.bib']
+bibtex_bibfiles = [
+        'user/data-analysis.bib',
+        'user/data-preprocessing.bib',
+        'user/data-reconstruction.bib',
+        'user/data-reduction.bib',
+        'user/references.bib',
+        'user/utilities.bib',
+        'tutorials/demo-clustering-bib.bib',
+        'tutorials/demo-data-manipulation-bib.bib',
+        'tutorials/demo-handling-source-terms.bib',
+        'tutorials/demo-pca-on-sampled-data-sets-bib.bib',
+        'tutorials/demo-plotting-pca-bib.bib',
+]
 
 # -- Options for HTML output -------------------------------------------------
 
