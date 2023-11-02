@@ -12,3 +12,4 @@ scikit-learn
 tensorflow
 keras
 tqdm
+PCAfold
