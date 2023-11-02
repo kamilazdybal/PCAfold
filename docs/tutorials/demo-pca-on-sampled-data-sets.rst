@@ -421,4 +421,4 @@ Bibliography
 ************
 
 .. bibliography:: ../references.bib
-  :labelprefix: S
+  :labelprefix: DEMOS

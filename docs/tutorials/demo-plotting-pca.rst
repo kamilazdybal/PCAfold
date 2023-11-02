@@ -288,4 +288,4 @@ Bibliography
 **********************
 
 .. bibliography:: ../references.bib
-  :labelprefix: PL
+  :labelprefix: DEMOP

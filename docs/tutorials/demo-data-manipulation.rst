@@ -371,4 +371,4 @@ Bibliography
 **********************
 
 .. bibliography:: ../references.bib
-  :labelprefix: M
+  :labelprefix: DEMOM

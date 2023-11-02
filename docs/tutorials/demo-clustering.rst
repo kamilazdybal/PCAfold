@@ -507,4 +507,4 @@ Bibliography
 **********************
 
 .. bibliography:: ../references.bib
-  :labelprefix: C
+  :labelprefix: DEMOC

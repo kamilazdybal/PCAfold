@@ -125,4 +125,4 @@ Bibliography
 **********************
 
 .. bibliography:: ../references.bib
-  :labelprefix: T
+  :labelprefix: DEMOT
