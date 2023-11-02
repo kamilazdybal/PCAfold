@@ -12,7 +12,6 @@
 #
 import os
 import sys
-from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
 from numpy import get_include as numpy_include
