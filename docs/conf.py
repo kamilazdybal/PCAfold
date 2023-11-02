@@ -12,11 +12,11 @@
 #
 import os
 import sys
-from distutils.extension import Extension
-from Cython.Build import cythonize
-from numpy import get_include as numpy_include
-import platform
-sys.path.insert(0, os.path.abspath('..'))
+# from distutils.extension import Extension
+# from Cython.Build import cythonize
+# from numpy import get_include as numpy_include
+# import platform
+sys.path.insert(0, os.path.abspath('../PCAfold/'))
 
 # -- Project information -----------------------------------------------------
 
@@ -44,17 +44,17 @@ extensions = [
     'sphinxcontrib.bibtex',
 ]
 
-# Cython:
-cython_extra_compile_args = ['-O3', '-g', '-I' + numpy_include(), '-ffast-math']
-
-is_mac = platform.system() == 'Darwin'
-if is_mac:
-    cython_extra_compile_args += ['-stdlib=libc++']
-
-kreg_cython = cythonize(Extension(name='kernel_regression',
-                                  sources=[os.path.join('..', 'PCAfold', 'kernel_regression_cython.pyx')],
-                                  extra_compile_args=cython_extra_compile_args,
-                                  language='c++'))
+# # Cython:
+# cython_extra_compile_args = ['-O3', '-g', '-I' + numpy_include(), '-ffast-math']
+#
+# is_mac = platform.system() == 'Darwin'
+# if is_mac:
+#     cython_extra_compile_args += ['-stdlib=libc++']
+#
+# kreg_cython = cythonize(Extension(name='kernel_regression',
+#                                   sources=[os.path.join('..', 'PCAfold', 'kernel_regression_cython.pyx')],
+#                                   extra_compile_args=cython_extra_compile_args,
+#                                   language='c++'))
 
 autosectionlabel_prefix_document = True
 # Add any paths that contain templates here, relative to this directory.
