@@ -124,5 +124,5 @@ in the previous section.
 Bibliography
 **********************
 
-.. bibliography:: demo-handling-source-terms.bib
+.. bibliography:: ../references.bib
   :labelprefix: T

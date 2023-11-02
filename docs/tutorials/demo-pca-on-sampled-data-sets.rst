@@ -420,5 +420,5 @@ current manual sampling:
 Bibliography
 ************
 
-.. bibliography:: demo-pca-on-sampled-data-sets-bib.bib
+.. bibliography:: ../references.bib
   :labelprefix: S

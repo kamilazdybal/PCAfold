@@ -108,7 +108,7 @@ and retrieve different conditional statistics. For instance, the conditional mea
 The conditional statistics can also be ploted using a dedicated function:
 
 .. code:: python
-    
+
     plt = preprocess.plot_conditional_statistics(X[:,0], Z, k=20, x_label='Mixture fraction [-]', y_label='$T$ [K]', color='#c0c0c0', statistics_to_plot=['mean', 'max', 'min'], figure_size=(10,4), save_filename=save_filename)
 
 .. image:: ../images/conditional-statistics.svg
@@ -370,5 +370,5 @@ The result of this reconstruction can be seen below:
 Bibliography
 **********************
 
-.. bibliography:: demo-data-manipulation-bib.bib
+.. bibliography:: ../references.bib
   :labelprefix: M

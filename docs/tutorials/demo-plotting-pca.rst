@@ -14,7 +14,7 @@ We import the necessary modules:
   from PCAfold import PCA
   from PCAfold import reduction
   import numpy as np
-  
+
 and we set some initial parameters:
 
 .. code:: python
@@ -165,7 +165,7 @@ Two eigenvalue normalizations are available:
 
 - Normalized to 1. To use this variant set ``normalized=True``. Example can be seen below:
 
-.. code:: 
+.. code::
 
     plt = reduction.plot_eigenvalue_distribution_comparison((pca_X_Auto.L, pca_X_Range.L, pca_X_Vast.L, pca_X_Pareto.L), legend_labels=['Auto', 'Range', 'Vast', 'Pareto'], normalized=True, color_map='coolwarm', save_filename=save_filename)
 
@@ -222,7 +222,7 @@ colored by the first variable in the data set (in this case, the temperature). N
 .. image:: ../images/plotting-pca-2d-manifold-inferno.svg
     :width: 500
     :align: center
-    
+
 Example of an uncolored plot:
 
 .. code::
@@ -287,5 +287,5 @@ Similarly as in the ``plot_2d_manifold`` function, you can select the colormap t
 Bibliography
 **********************
 
-.. bibliography:: demo-plotting-pca-bib.bib
+.. bibliography:: ../references.bib
   :labelprefix: PL
