@@ -69,7 +69,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 pygments_style = 'sphinx'
 
 # Path to bibliographic references:
-bibtex_bibfiles = "docs/user/data-preprocessing.bib"
+bibtex_bibfiles = ['user/references.bib']
 
 # -- Options for HTML output -------------------------------------------------
 
