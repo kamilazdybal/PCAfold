@@ -1,8 +1,9 @@
 .. note:: This tutorial was generated from a Jupyter notebook that can be
           accessed `here <https://mybinder.org/v2/git/https%3A%2F%2Fgitlab.multiscale.utah.edu%2Fcommon%2FPCAfold/master?filepath=docs%2Ftutorials%2Fdemo-pca-on-sampled-data-sets.ipynb>`_.
 
+##################################
 PCA on sampled data sets
-========================
+##################################
 
 In this tutorial, we present how PCA can be performed on sampled data sets using
 various helpful functions from the ``preprocess`` and the ``reduction`` module. Those functions essentially allow to compare PCA done on the original full data set, :math:`\mathbf{X}`, and on the sampled data set, :math:`\mathbf{X_r}`. We are first going to present major functionalities for performing and analyzing PCA on a sampled data set using a special case of sampling - by taking equal number of samples from each cluster. Next, we are going to show a more general way to
@@ -42,8 +43,9 @@ and we set some initial parameters:
 
 --------------------------------------------------------------------------------
 
+************************************
 Load and cluster the data set
------------------------------
+************************************
 
 As an example, we will use a data set representing combustion of syngas in air generated from the steady laminar flamelet model using chemical mechanism by Hawkes et al. :cite:`Hawkes2007`.
 This data set has 11 variables and 50,000 observations. The data set was generated
@@ -87,8 +89,9 @@ Visualize the result of clustering:
 
 --------------------------------------------------------------------------------
 
+***********************************************
 Special case of PCA on sampled data sets
--------------------------------------------
+***********************************************
 
 In this section, we present the special case for performing PCA on data sets formed by taking equal number of samples from local clusters.
 
@@ -329,8 +332,9 @@ the sampled data set. Example of a plot:
 
 --------------------------------------------------------------------------------
 
+***********************************************
 Generalization of PCA on sampled data sets
-------------------------------------------
+***********************************************
 
 A more general approach to performing PCA on sampled data sets (instead of using the
 ``reduction.EquilibratedSamplePCA`` class) is to use the
