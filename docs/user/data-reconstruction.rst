@@ -256,13 +256,3 @@ Plotting functions
 ==========================
 
 .. autofunction:: PCAfold.reconstruction.plot_stratified_metric
-
---------------------------------------------------------------------------------
-
-************
-Bibliography
-************
-
-.. bibliography::
-  :cited:
-  :labelprefix: E

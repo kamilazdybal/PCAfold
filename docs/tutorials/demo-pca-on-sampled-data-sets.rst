@@ -413,13 +413,3 @@ current manual sampling:
 .. image:: ../images/generalize-sampling-re-sampled-manifold.svg
     :width: 500
     :align: center
-
---------------------------------------------------------------------------------
-
-************
-Bibliography
-************
-
-.. bibliography::
-  :cited:
-  :labelprefix: DEMOS

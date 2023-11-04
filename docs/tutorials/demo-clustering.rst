@@ -499,13 +499,3 @@ positive or high negative magnitudes.
 .. image:: ../images/tutorial-clustering-close-to-zero-source-terms-manifold.svg
   :width: 590
   :align: center
-
---------------------------------------------------------------------------------
-
-**********************
-Bibliography
-**********************
-
-.. bibliography::
-  :cited:
-  :labelprefix: DEMOC

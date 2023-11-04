@@ -280,13 +280,3 @@ and we generate a parity plot which visualizes the reconstruction of the first v
     :align: center
 
 Similarly as in the ``plot_2d_manifold`` function, you can select the colormap to use.
-
---------------------------------------------------------------------------------
-
-**********************
-Bibliography
-**********************
-
-.. bibliography::
-  :cited:
-  :labelprefix: DEMOP

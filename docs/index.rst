@@ -84,6 +84,7 @@ or using BibTeX:
    user/data-analysis
    user/data-reconstruction
    user/utilities
+   user/bibliography
 
 .. toctree::
    :maxdepth: 2

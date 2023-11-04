@@ -299,13 +299,3 @@ or plotting the conditional statistics.
 ===============================
 
 .. autofunction:: PCAfold.preprocess.plot_conditional_statistics
-
---------------------------------------------------------------------------------
-
-************
-Bibliography
-************
-
-.. bibliography::
-  :cited:
-  :labelprefix: P

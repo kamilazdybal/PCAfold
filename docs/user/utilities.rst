@@ -107,13 +107,3 @@ Class ``QoIAwareProjectionPOUnet``
 ============================================
 
 .. autofunction:: PCAfold.utilities.QoIAwareProjectionPOUnet.load_from_file
-
---------------------------------------------------------------------------------
-
-************
-Bibliography
-************
-
-.. bibliography::
-  :cited:
-  :labelprefix: U

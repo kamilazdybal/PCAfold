@@ -342,13 +342,3 @@ Plotting functions
 ============================
 
 .. autofunction:: PCAfold.reduction.plot_heatmap_sequence
-
---------------------------------------------------------------------------------
-
-************
-Bibliography
-************
-
-.. bibliography::
-  :cited:
-  :labelprefix: R

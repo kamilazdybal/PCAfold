@@ -156,13 +156,3 @@ Plotting functions
 ===================================================
 
 .. autofunction:: PCAfold.analysis.plot_normalized_variance_derivative_comparison
-
---------------------------------------------------------------------------------
-
-************
-Bibliography
-************
-
-.. bibliography::
-  :cited:
-  :labelprefix: A

@@ -363,13 +363,3 @@ The result of this reconstruction can be seen below:
 .. image:: ../images/kernel-density-multi-x2.svg
   :width: 350
   :align: center
-
---------------------------------------------------------------------------------
-
-**********************
-Bibliography
-**********************
-
-.. bibliography::
-  :cited:
-  :labelprefix: DEMOM

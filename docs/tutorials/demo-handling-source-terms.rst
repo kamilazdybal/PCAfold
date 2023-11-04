@@ -117,13 +117,3 @@ should be applied when transforming source terms.
 With that setting, only scales :math:`\mathbf{D}` will be applied when transforming :math:`\mathbf{S_X}`
 to the new basis defined by :math:`\mathbf{A}` and thus the transformation will be consistent with the discussion presented
 in the previous section.
-
---------------------------------------------------------------------------------
-
-**********************
-Bibliography
-**********************
-
-.. bibliography::
-  :cited:
-  :labelprefix: DEMOT
