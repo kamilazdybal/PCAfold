@@ -4497,7 +4497,7 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, ylim=None, figure_size=None, title=None, save_filename=None):
+def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, ylim=None, highlight_weights=None, highlight_color=None, figure_size=None, title=None, save_filename=None):
     """
     Plots weights on a generic mode.
 
@@ -4517,13 +4517,18 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
 
         # Plot second and third eigenvector:
         plt = plot_mode(eigenvectors[:,0],
-                         variable_names=['$a_1$', '$a_2$', '$a_3$'],
-                         plot_absolute=False,
-                         rotate_label=True,
-                         bar_color=None,
-                         figure_size=(5,3),
-                         title='PCA on X',
-                         save_filename='PCA-X.pdf')
+                        mode_name='PC',
+                        variable_names=['$a_1$', '$a_2$', '$a_3$'],
+                        plot_absolute=True,
+                        rotate_label=True,
+                        bar_color=None,
+                        ylim=None,
+                        highlight_weights=[0,1],
+                        highlight_color=['red', 'blue'],
+                        figure_size=(5,3),
+                        title='PCA on X',
+                        save_filename='PCA-X.pdf')
+
         plt.close()
 
     :param mode:
@@ -4541,6 +4546,10 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
         ``str`` specifying color of bars.
     :param ylim: (optional)
         ``list`` specifying limits on the y-axis.
+    :param highlight_weights: (optional)
+        ``list`` of ``int`` specifying which variables to highlight with a different color.
+    :param highlight_color: (optional)
+        ``str`` or ``list`` of ``str`` specifying the color(s) for the highlighted variables. By default, variables are highlighted in red.
     :param figure_size: (optional)
         tuple specifying figure size.
     :param title: (optional)
@@ -4593,6 +4602,21 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
         if not isinstance(ylim, list):
             raise ValueError("Parameter `ylim` has to be of type `list`.")
 
+    if highlight_weights is not None:
+        if not isinstance(highlight_weights, list):
+            raise ValueError("Parameter `highlight_weights` has to be of type `list`.")
+
+    if highlight_color is not None:
+        if not isinstance(highlight_color, str) and not isinstance(highlight_color, list):
+            raise ValueError("Parameter `highlight_color` has to be of type `str` or `list` of `str`.")
+
+    if highlight_color is not None and highlight_weights is not None:
+        if len(highlight_color) != len(highlight_weights):
+            raise ValueError("Parameter `highlight_color` has to have the same number of elements as `highlight_weights`.")
+
+    if highlight_color is None and highlight_weights is not None:
+        highlight_color = ['red' for i in range(0,len(highlight_weights))]
+
     if figure_size is not None:
         if not isinstance(figure_size, tuple):
             raise ValueError("Parameter `figure_size` has to be of type `tuple`.")
@@ -4613,9 +4637,13 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
         fig, ax = plt.subplots(figsize=figure_size)
 
     if plot_absolute:
-        plt.bar(x_range, abs(mode.ravel()), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
+        barlist = plt.bar(x_range, abs(mode.ravel()), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
     else:
-        plt.bar(x_range, mode.ravel(), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
+        barlist = plt.bar(x_range, mode.ravel(), width=eigenvector_bar_width, color=bar_color, edgecolor=bar_color, align='center', zorder=2)
+
+    if highlight_weights is not None:
+        for i, value in enumerate(highlight_weights):
+            barlist[value].set_color(highlight_color[i])
 
     if rotate_label:
         plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont, rotation=90)
@@ -4623,9 +4651,9 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
         plt.xticks(x_range, variable_names, fontsize=font_axes, **csfont)
 
     if plot_absolute:
-        plt.ylabel('Absolute ' + mode_name + ' [-]', fontsize=font_labels, **csfont)
+        plt.ylabel('Absolute ' + mode_name + ' [$-$]', fontsize=font_labels, **csfont)
     else:
-        plt.ylabel(mode_name + ' [-]', fontsize=font_labels, **csfont)
+        plt.ylabel(mode_name + ' [$-$]', fontsize=font_labels, **csfont)
 
     plt.grid(alpha=grid_opacity, zorder=0)
     plt.xlim(0, n_variables+1)
