@@ -4610,12 +4610,15 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
         if not isinstance(highlight_color, str) and not isinstance(highlight_color, list):
             raise ValueError("Parameter `highlight_color` has to be of type `str` or `list` of `str`.")
 
+    if highlight_color is None and highlight_weights is not None:
+        highlight_color = ['red' for i in range(0,len(highlight_weights))]
+
+    if isinstance(highlight_color, str) and highlight_weights is not None:
+        highlight_color = [highlight_color for i in range(0,len(highlight_weights))]
+
     if highlight_color is not None and highlight_weights is not None:
         if len(highlight_color) != len(highlight_weights):
             raise ValueError("Parameter `highlight_color` has to have the same number of elements as `highlight_weights`.")
-
-    if highlight_color is None and highlight_weights is not None:
-        highlight_color = ['red' for i in range(0,len(highlight_weights))]
 
     if figure_size is not None:
         if not isinstance(figure_size, tuple):
