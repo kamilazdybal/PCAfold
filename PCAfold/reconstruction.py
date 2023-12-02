@@ -2742,7 +2742,7 @@ class ANN:
     :param loss: (optional)
         ``str`` specifying the loss function. It can be ``'MAE'`` or ``'MSE'``.
     :param optimizer: (optional)
-        ``str`` specifying the optimizer used during training. It can be ``'Adam'`` or ``'Nadam'``.
+        ``str`` specifying the optimizer used during training. It can be ``'Adam'``,``'Nadam'``, or ``'RMSprop'``.
     :param batch_size: (optional)
         ``int`` specifying the batch size.
     :param n_epochs: (optional)
@@ -2787,10 +2787,10 @@ class ANN:
         import tensorflow as tf
         from tensorflow.keras import layers, models, initializers
 
-        __weights_inits = ['glorot_uniform']
+        __weights_inits = ['glorot_uniform', 'random_normal']
         __biases_inits = ['zeros']
         __activations = ['linear', 'sigmoid', 'tanh']
-        __optimizers = ['Adam', 'Nadam']
+        __optimizers = ['Adam', 'Nadam', 'RMSprop']
         __losses = ['MSE', 'MAE']
 
         if not isinstance(input_data, np.ndarray):
@@ -2840,7 +2840,7 @@ class ANN:
             if not isinstance(weights_init, str):
                 raise ValueError("Parameter `weights_init` has to be of type `str`.")
             if weights_init not in __weights_inits:
-                raise ValueError("Parameter `weights_init` has to be 'glorot_uniform'.")
+                raise ValueError("Parameter `weights_init` has to be 'glorot_uniform' or 'random_normal'.")
 
         # Set the weights initialization:
         if (weights_init is None) or (weights_init == 'glorot_uniform'):
@@ -2848,6 +2848,12 @@ class ANN:
                 weights_init = 'glorot_uniform'
             else:
                 weights_init = initializers.glorot_uniform(seed=random_seed)
+
+        if weights_init == 'random_normal':
+            if random_seed is None:
+                weights_init = 'random_normal'
+            else:
+                weights_init = initializers.random_normal(seed=random_seed)
 
         # Set the loss:
         if not isinstance(loss, str):
@@ -2872,6 +2878,8 @@ class ANN:
             model_optimizer = tf.optimizers.legacy.Adam(learning_rate)
         elif optimizer == 'Nadam':
             model_optimizer = tf.optimizers.legacy.Nadam(learning_rate)
+        elif optimizer == 'RMSprop':
+            model_optimizer = tf.optimizers.legacy.RMSprop(learning_rate)
 
         if not isinstance(batch_size, int):
             raise ValueError("Parameter `batch_size` has to be of type `int`.")
