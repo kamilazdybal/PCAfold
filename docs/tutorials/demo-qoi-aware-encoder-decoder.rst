@@ -136,7 +136,7 @@ We are going to train the model for 5000 epochs:
 
   n_epochs = 5000
 
-We instantiate an object of the `QoIAwareProjection` class with various parameters:
+We instantiate an object of the ``QoIAwareProjection`` class with various parameters:
 
 .. code:: python
 
@@ -156,7 +156,6 @@ We instantiate an object of the `QoIAwareProjection` class with various paramete
                                               transform_shift=10**-4,
                                               transform_sign_shift=0,
                                               loss=loss,
-                                              optimizer=optimizer,
                                               batch_size=batch_size,
                                               n_epochs=n_epochs,
                                               validation_perc=validation_perc,
