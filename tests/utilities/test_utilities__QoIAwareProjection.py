@@ -8,7 +8,7 @@ from tensorflow import optimizers
 
 class Utilities(unittest.TestCase):
 
-    def test_analysis__QoIAwareProjection__allowed_class_init(self):
+    def test_utilities__QoIAwareProjection__allowed_class_init(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -47,7 +47,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__training(self):
+    def test_utilities__QoIAwareProjection__training(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -82,7 +82,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__not_allowed_class_init(self):
+    def test_utilities__QoIAwareProjection__not_allowed_class_init(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -118,7 +118,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__architecture_inconsistent_with_custom_activation_functions(self):
+    def test_utilities__QoIAwareProjection__architecture_inconsistent_with_custom_activation_functions(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -166,7 +166,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__invalid_string(self):
+    def test_utilities__QoIAwareProjection__invalid_string(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -226,7 +226,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__wrong_init_type(self):
+    def test_utilities__QoIAwareProjection__wrong_init_type(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -373,7 +373,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__wrong_encoder_weights_init_shape(self):
+    def test_utilities__QoIAwareProjection__wrong_encoder_weights_init_shape(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -402,7 +402,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__wrong_decoder_weights_init_shape(self):
+    def test_utilities__QoIAwareProjection__wrong_decoder_weights_init_shape(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -425,7 +425,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__check_custom_weights_initialization(self):
+    def test_utilities__QoIAwareProjection__check_custom_weights_initialization(self):
 
         input_data = np.random.rand(100,6)
         output_data = np.random.rand(100,4)
@@ -448,7 +448,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__access_attributes(self):
+    def test_utilities__QoIAwareProjection__access_attributes(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -473,7 +473,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__either_projection_dependent_or_independent(self):
+    def test_utilities__QoIAwareProjection__either_projection_dependent_or_independent(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -487,7 +487,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__attributes_not_available_before_training(self):
+    def test_utilities__QoIAwareProjection__attributes_not_available_before_training(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -506,7 +506,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__attributes_available_after_training(self):
+    def test_utilities__QoIAwareProjection__attributes_available_after_training(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -533,7 +533,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__number_of_losses_equal_to_n_epochs(self):
+    def test_utilities__QoIAwareProjection__number_of_losses_equal_to_n_epochs(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -555,7 +555,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__number_of_bases_equal_to_n_epochs_plus_one(self):
+    def test_utilities__QoIAwareProjection__number_of_bases_equal_to_n_epochs_plus_one(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -574,7 +574,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__check_architecture(self):
+    def test_utilities__QoIAwareProjection__check_architecture(self):
 
         input_data = np.random.rand(100,7)
         output_data = np.random.rand(100,7)
@@ -636,7 +636,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__holding_weights(self):
+    def test_utilities__QoIAwareProjection__holding_weights(self):
 
         input_data = np.random.rand(100,7)
         output_data = np.random.rand(100,7)
@@ -848,7 +848,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__reproducible_network_initialization(self):
+    def test_utilities__QoIAwareProjection__reproducible_network_initialization(self):
 
         input_data = np.random.rand(100,7)
         output_data = np.random.rand(100,5)
@@ -902,7 +902,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__reproducible_network_training(self):
+    def test_utilities__QoIAwareProjection__reproducible_network_training(self):
 
         input_data = np.random.rand(100,7)
         output_data = np.random.rand(100,5)
@@ -972,7 +972,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__trainable_encoder_bias(self):
+    def test_utilities__QoIAwareProjection__trainable_encoder_bias(self):
 
         input_data = np.random.rand(100,7)
         output_data = np.random.rand(100,5)
@@ -1017,7 +1017,7 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_analysis__QoIAwareProjection__reduce_memory(self):
+    def test_utilities__QoIAwareProjection__reduce_memory(self):
 
         # Generate dummy dataset:
         x = np.linspace(0,10,100)[:,None]
@@ -1098,7 +1098,7 @@ class Utilities(unittest.TestCase):
         except:
             self.assertTrue(False)
 
-    def test_analysis__QoIAwareProjection__optimizers(self):
+    def test_utilities__QoIAwareProjection__optimizers(self):
 
 
         # Generate dummy dataset:
@@ -1126,7 +1126,7 @@ class Utilities(unittest.TestCase):
 
             projection = QoIAwareProjection(input_data,
                                            n_components,
-                                           optimizers.legacy.Adam(0.001),
+                                           optimizers.legacy.Nadam(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
@@ -1138,7 +1138,7 @@ class Utilities(unittest.TestCase):
 
             projection = QoIAwareProjection(input_data,
                                            n_components,
-                                           optimizers.legacy.Adam(0.001),
+                                           optimizers.legacy.RMSprop(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
@@ -1150,7 +1150,7 @@ class Utilities(unittest.TestCase):
 
             projection = QoIAwareProjection(input_data,
                                            n_components,
-                                           optimizers.legacy.Adam(0.001),
+                                           optimizers.legacy.Adadelta(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
@@ -1162,7 +1162,7 @@ class Utilities(unittest.TestCase):
 
             projection = QoIAwareProjection(input_data,
                                            n_components,
-                                           optimizers.legacy.Adam(0.001),
+                                           optimizers.legacy.Adagrad(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
@@ -1174,7 +1174,7 @@ class Utilities(unittest.TestCase):
 
             projection = QoIAwareProjection(input_data,
                                            n_components,
-                                           optimizers.legacy.Adam(0.001),
+                                           optimizers.legacy.Adamax(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
@@ -1186,7 +1186,7 @@ class Utilities(unittest.TestCase):
 
             projection = QoIAwareProjection(input_data,
                                            n_components,
-                                           optimizers.legacy.Adam(0.001),
+                                           optimizers.legacy.SGD(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),

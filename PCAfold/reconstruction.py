@@ -2687,6 +2687,7 @@ class ANN:
 
         from PCAfold import ANN
         import numpy as np
+        from tensorflow import optimizers
 
         # Generate dummy dataset:
         input_data = np.random.rand(100,8)
@@ -2695,15 +2696,14 @@ class ANN:
         # Instantiate ANN class object:
         ann_model = ANN(input_data,
                         output_data,
+                        optimizer=optimizers.legacy.Adam(learning_rate=0.001),
                         interior_architecture=(5,4),
                         activation_functions=('tanh', 'tanh', 'linear'),
                         weights_init='glorot_uniform',
                         biases_init='zeros',
                         loss='MSE',
-                        optimizer='Adam',
                         batch_size=100,
                         n_epochs=1000,
-                        learning_rate=0.001,
                         validation_perc=10,
                         random_seed=100,
                         verbose=True)
@@ -2726,6 +2726,8 @@ class ANN:
         ``numpy.ndarray`` specifying the data set used as the input (regressors) to the ANN. It should be of size ``(n_observations,n_input_variables)``.
     :param output_data:
         ``numpy.ndarray`` specifying the data set used as the output (predictors) to the ANN. It should be of size ``(n_observations,n_output_variables)``.
+    :param optimizer:
+        ``tf.optimizers`` or ``tf.optimizers.legacy`` or ``str`` specifying the optimizer to use along with its parameters.
     :param interior_architecture: (optional)
         ``tuple`` of ``int`` specifying the number of neurons in the interior network architecture.
         For example, if ``interior_architecture=(4,5)``, two interior layers will be created and the overal network architecture will be ``(Input)-(4)-(5)-(Output)``.
@@ -2741,14 +2743,10 @@ class ANN:
         ``str`` specifying the initialization of biases in the network. If set to ``None``, biases will be initialized as zeros.
     :param loss: (optional)
         ``str`` specifying the loss function. It can be ``'MAE'`` or ``'MSE'``.
-    :param optimizer: (optional)
-        ``str`` specifying the optimizer used during training. It can be ``'Adam'``,``'Nadam'``, or ``'RMSprop'``.
     :param batch_size: (optional)
         ``int`` specifying the batch size.
     :param n_epochs: (optional)
         ``int`` specifying the number of epochs.
-    :param learning_rate: (optional)
-        ``float`` specifying the learning rate passed to the optimizer.
     :param validation_perc: (optional)
         ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number larger than or equal to 0 and smaller than 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
     :param random_seed: (optional)
@@ -2771,15 +2769,14 @@ class ANN:
     def __init__(self,
                 input_data,
                 output_data,
+                optimizer,
                 interior_architecture=(),
                 activation_functions='tanh',
                 weights_init='glorot_uniform',
                 biases_init='zeros',
                 loss='MSE',
-                optimizer='Adam',
                 batch_size=200,
                 n_epochs=1000,
-                learning_rate=0.001,
                 validation_perc=10,
                 random_seed=None,
                 verbose=False):
@@ -2790,7 +2787,6 @@ class ANN:
         __weights_inits = ['glorot_uniform', 'random_normal']
         __biases_inits = ['zeros']
         __activations = ['linear', 'sigmoid', 'tanh']
-        __optimizers = ['Adam', 'Nadam', 'RMSprop']
         __losses = ['MSE', 'MAE']
 
         if not isinstance(input_data, np.ndarray):
@@ -2867,28 +2863,11 @@ class ANN:
         elif loss == 'MAE':
             model_loss = tf.keras.losses.MeanAbsoluteError()
 
-        # Set the optimizer:
-        if not isinstance(optimizer, str):
-            raise ValueError("Parameter `optimizer` has to be of type `str`.")
-
-        if optimizer not in __optimizers:
-            raise ValueError("Parameter `optimizer` has to be 'Adam' or 'Nadam'.")
-
-        if optimizer == 'Adam':
-            model_optimizer = tf.optimizers.legacy.Adam(learning_rate)
-        elif optimizer == 'Nadam':
-            model_optimizer = tf.optimizers.legacy.Nadam(learning_rate)
-        elif optimizer == 'RMSprop':
-            model_optimizer = tf.optimizers.legacy.RMSprop(learning_rate)
-
         if not isinstance(batch_size, int):
             raise ValueError("Parameter `batch_size` has to be of type `int`.")
 
         if not isinstance(n_epochs, int):
             raise ValueError("Parameter `n_epochs` has to be of type `int`.")
-
-        if not isinstance(learning_rate, float):
-            raise ValueError("Parameter `learning_rate` has to be of type `float`.")
 
         if not isinstance(validation_perc, int):
             raise ValueError("Parameter `validation_perc` has to be of type `int`.")
@@ -2923,7 +2902,7 @@ class ANN:
                 ann_model.add(layers.Dense(n_neurons, activation=activation_functions[i+1], kernel_initializer=weights_init, bias_initializer=biases_init))
 
         # Compile the neural network model:
-        ann_model.compile(model_optimizer, loss=model_loss)
+        ann_model.compile(optimizer, loss=model_loss)
 
         # Attributes coming from user inputs:
         self.__input_data = input_data
@@ -2934,11 +2913,9 @@ class ANN:
         self.__biases_init = biases_init
         self.__loss = loss
         self.__loss_function = model_loss
-        self.__optimizer = optimizer
-        self.__model_optimizer = model_optimizer
+        self.__model_optimizer = optimizer
         self.__batch_size = batch_size
         self.__n_epochs = n_epochs
-        self.__learning_rate = learning_rate
         self.__validation_perc = validation_perc
         self.__random_seed = random_seed
         self.__verbose = verbose
@@ -3032,8 +3009,7 @@ class ANN:
         print('Hyperparameters:\n')
         print('\t- ' + 'Batch size:\t\t' + str(self.__batch_size))
         print('\t- ' + '# of epochs:\t\t' + str(self.__n_epochs))
-        print('\t- ' + 'Optimizer:\t\t' + self.__optimizer)
-        print('\t- ' + 'Learning rate:\t' + str(self.__learning_rate))
+        print('\t- ' + 'Optimizer:\t\t' + str(self.__model_optimizer))
         print('\t- ' + 'Loss function:\t' + self.__loss)
         print('\n' + '- '*60)
 
