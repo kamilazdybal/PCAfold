@@ -4,7 +4,7 @@ __author__ = "Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C
 __copyright__ = "Copyright (c) 2020-2023, Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
 __credits__ = ["Department of Chemical Engineering, University of Utah, Salt Lake City, Utah, USA", "Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
 __license__ = "MIT"
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 __maintainer__ = ["Kamila Zdybal", "Elizabeth Armstrong"]
 __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "James.Sutherland@chemeng.utah.edu"]
 __status__ = "Production"
@@ -69,6 +69,7 @@ class QoIAwareProjection:
 
         from PCAfold import center_scale, QoIAwareProjection
         import numpy as np
+        from tensorflow import optimizers
 
         # Generate dummy dataset:
         X = np.random.rand(100,8)
@@ -84,6 +85,7 @@ class QoIAwareProjection:
         # Instantiate QoIAwareProjection class object:
         qoi_aware = QoIAwareProjection(input_data,
                                        n_components,
+                                       optimizer=optimizers.legacy.Adam(learning_rate=0.001),
                                        projection_independent_outputs=input_data[:,0:3],
                                        projection_dependent_outputs=projection_dependent_outputs,
                                        activation_decoder=('tanh', 'tanh', 'linear'),
@@ -95,10 +97,8 @@ class QoIAwareProjection:
                                        hold_weights=2,
                                        transformed_projection_dependent_outputs='signed-square-root',
                                        loss='MSE',
-                                       optimizer='Adam',
                                        batch_size=100,
                                        n_epochs=200,
-                                       learning_rate=0.001,
                                        validation_perc=10,
                                        reduce_memory=True,
                                        random_seed=100,
@@ -154,8 +154,7 @@ class QoIAwareProjection:
 
         	- Batch size:		100
         	- # of epochs:		200
-        	- Optimizer:		Adam
-        	- Learning rate:	0.001
+        	- Optimizer:		<keras.src.optimizers.legacy.adam.Adam object at 0x7f9e0f29f310>
         	- Loss function:	MSE
 
         - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -194,6 +193,8 @@ class QoIAwareProjection:
         ``numpy.ndarray`` specifying the data set used as the input to the encoder-decoder. It should be of size ``(n_observations,n_variables)``.
     :param n_components:
         ``int`` specifying the dimensionality of the QoI-aware encoder-decoder projection. This is equal to the number of neurons in the bottleneck layer.
+    :param optimizer:
+        ``tf.optimizers`` or ``tf.optimizers.legacy`` or ``str`` specifying the optimizer to use along with its parameters.
     :param projection_independent_outputs: (optional)
         ``numpy.ndarray`` specifying any projection-independent outputs at the decoder. It should be of size ``(n_observations,n_projection_independent_outputs)``.
     :param projection_dependent_outputs: (optional)
@@ -227,14 +228,10 @@ class QoIAwareProjection:
         ``int`` or ``float`` as per ``preprocess.power_transform()``.
     :param loss: (optional)
         ``str`` specifying the loss function. It can be ``'MAE'`` or ``'MSE'``.
-    :param optimizer: (optional)
-        ``str`` specifying the optimizer used during training. It can be ``'Adam'`` or ``'Nadam'``.
     :param batch_size: (optional)
         ``int`` specifying the batch size.
     :param n_epochs: (optional)
         ``int`` specifying the number of epochs.
-    :param learning_rate: (optional)
-        ``float`` specifying the learning rate passed to the optimizer.
     :param validation_perc: (optional)
         ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number larger than or equal to 0 and smaller than 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
     :param reduce_memory: (optional)
@@ -263,6 +260,7 @@ class QoIAwareProjection:
     def __init__(self,
                 input_data,
                 n_components,
+                optimizer,
                 projection_independent_outputs=None,
                 projection_dependent_outputs=None,
                 activation_decoder='tanh',
@@ -277,10 +275,8 @@ class QoIAwareProjection:
                 transform_shift=10**-4,
                 transform_sign_shift=0.0,
                 loss='MSE',
-                optimizer='Adam',
                 batch_size=200,
                 n_epochs=1000,
-                learning_rate=0.001,
                 validation_perc=10,
                 reduce_memory=False,
                 random_seed=None,
@@ -288,7 +284,6 @@ class QoIAwareProjection:
 
         __activations = ['linear', 'sigmoid', 'tanh']
         __projection_dependent_outputs_transformations = ['symlog', 'signed-square-root']
-        __optimizers = ['Adam', 'Nadam']
         __losses = ['MSE', 'MAE']
 
         if not isinstance(input_data, np.ndarray):
@@ -443,26 +438,11 @@ class QoIAwareProjection:
         elif loss == 'MAE':
             model_loss = tf.keras.losses.MeanAbsoluteError()
 
-        # Set the optimizer:
-        if not isinstance(optimizer, str):
-            raise ValueError("Parameter `optimizer` has to be of type `str`.")
-
-        if optimizer not in __optimizers:
-            raise ValueError("Parameter `optimizer` has to be 'Adam' or 'Nadam'.")
-
-        if optimizer == 'Adam':
-            model_optimizer = tf.optimizers.legacy.Adam(learning_rate)
-        elif optimizer == 'Nadam':
-            model_optimizer = tf.optimizers.legacy.Nadam(learning_rate)
-
         if not isinstance(batch_size, int):
             raise ValueError("Parameter `batch_size` has to be of type `int`.")
 
         if not isinstance(n_epochs, int):
             raise ValueError("Parameter `n_epochs` has to be of type `int`.")
-
-        if not isinstance(learning_rate, float):
-            raise ValueError("Parameter `learning_rate` has to be of type `float`.")
 
         if not isinstance(validation_perc, int):
             raise ValueError("Parameter `validation_perc` has to be of type `int`.")
@@ -499,7 +479,7 @@ class QoIAwareProjection:
             qoi_aware_encoder_decoder.add(layers.Dense(self.__n_total_outputs, activation=activation_decoder[-1], kernel_initializer=decoder_kernel_initializer[-1]))
 
         # Compile the neural network model:
-        qoi_aware_encoder_decoder.compile(model_optimizer, loss=model_loss)
+        qoi_aware_encoder_decoder.compile(optimizer, loss=model_loss)
 
         # Attributes coming from user inputs:
         self.__input_data = input_data
@@ -519,11 +499,9 @@ class QoIAwareProjection:
         self.__transform_sign_shift = transform_sign_shift
         self.__loss = loss
         self.__loss_function = model_loss
-        self.__optimizer = optimizer
-        self.__model_optimizer = model_optimizer
+        self.__model_optimizer = optimizer
         self.__batch_size = batch_size
         self.__n_epochs = n_epochs
-        self.__learning_rate = learning_rate
         self.__validation_perc = validation_perc
         self.__reduce_memory = reduce_memory
         self.__random_seed = random_seed
@@ -663,8 +641,7 @@ class QoIAwareProjection:
         print('Hyperparameters:\n')
         print('\t- ' + 'Batch size:\t\t' + str(self.__batch_size))
         print('\t- ' + '# of epochs:\t\t' + str(self.__n_epochs))
-        print('\t- ' + 'Optimizer:\t\t' + self.__optimizer)
-        print('\t- ' + 'Learning rate:\t' + str(self.__learning_rate))
+        print('\t- ' + 'Optimizer:\t\t' + str(self.__model_optimizer))
         print('\t- ' + 'Loss function:\t' + self.__loss)
         print('\n' + '- '*60)
 

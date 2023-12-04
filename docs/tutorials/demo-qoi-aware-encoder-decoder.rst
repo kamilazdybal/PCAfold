@@ -37,6 +37,7 @@ We import the necessary modules:
   from PCAfold import analysis
   from PCAfold import utilities
   import numpy as np
+  from tensorflow import optimizers
 
 and we set some initial parameters:
 
@@ -116,7 +117,7 @@ We set several important hyper-parameters:
 
   activation_decoder = 'tanh'
   decoder_interior_architecture = (6,9)
-  optimizer = 'Adam'
+  optimizer = optimizers.legacy.Adam(learning_rate=0.001)
   learning_rate = 0.001
   loss = 'MSE'
   batch_size = n_observations
@@ -141,6 +142,7 @@ We instantiate an object of the `QoIAwareProjection` class with various paramete
 
     projection = utilities.QoIAwareProjection(input_data, 
                                               n_components=n_components, 
+                                              optimizer=optimizer,
                                               projection_independent_outputs=input_data[:,selected_state_variables],
                                               projection_dependent_outputs=projection_dependent_outputs,
                                               activation_decoder=activation_decoder,
@@ -157,7 +159,6 @@ We instantiate an object of the `QoIAwareProjection` class with various paramete
                                               optimizer=optimizer,
                                               batch_size=batch_size,
                                               n_epochs=n_epochs,
-                                              learning_rate=learning_rate,
                                               validation_perc=validation_perc,
                                               random_seed=random_seed,
                                               verbose=True)
@@ -208,8 +209,7 @@ Before we begin neural network training, we can print the summary of the current
 
   	- Batch size:		58101
   	- # of epochs:		5000
-  	- Optimizer:		Adam
-  	- Learning rate:	0.001
+  	- Optimizer:		<keras.src.optimizers.legacy.adam.Adam object at 0x7f9e0f29f310>
   	- Loss function:	MSE
 
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -264,11 +264,11 @@ After training, additional information is available in the model summary:
     = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = 
     Training results:
 
-        - Minimum training loss:		0.0021419492550194263
-        - Minimum training loss at epoch:	5000
-
-        - Minimum validation loss:		0.0021756552159786224
-        - Minimum validation loss at epoch:	5000
+    	- Minimum training loss:		0.0016817295690998435
+    	- Minimum training loss at epoch:	5000
+    
+    	- Minimum validation loss:		0.0017386721447110176
+    	- Minimum validation loss at epoch:	5000
 
     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 

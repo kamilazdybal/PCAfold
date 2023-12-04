@@ -4,6 +4,7 @@ from PCAfold import preprocess
 from PCAfold import reduction
 from PCAfold import analysis
 from PCAfold import QoIAwareProjection
+from tensorflow import optimizers
 
 class Utilities(unittest.TestCase):
 
@@ -16,6 +17,7 @@ class Utilities(unittest.TestCase):
         try:
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data)
         except:
             self.assertTrue(False)
@@ -23,6 +25,7 @@ class Utilities(unittest.TestCase):
         try:
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Nadam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             activation_decoder='sigmoid',
@@ -33,10 +36,8 @@ class Utilities(unittest.TestCase):
                                             hold_weights=2,
                                             transformed_projection_dependent_outputs='symlog',
                                             loss='MAE',
-                                            optimizer='Nadam',
                                             batch_size=10,
                                             n_epochs=20,
-                                            learning_rate=0.01,
                                             validation_perc=0,
                                             reduce_memory=False,
                                             random_seed=100,
@@ -55,6 +56,7 @@ class Utilities(unittest.TestCase):
         try:
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Nadam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             activation_decoder='sigmoid',
@@ -65,10 +67,8 @@ class Utilities(unittest.TestCase):
                                             hold_weights=2,
                                             transformed_projection_dependent_outputs='symlog',
                                             loss='MAE',
-                                            optimizer='Nadam',
                                             batch_size=10,
                                             n_epochs=6,
-                                            learning_rate=0.01,
                                             validation_perc=0,
                                             reduce_memory=False,
                                             random_seed=100,
@@ -89,18 +89,18 @@ class Utilities(unittest.TestCase):
         n_components = 2
 
         with self.assertRaises(ValueError):
-            projection = QoIAwareProjection(input_data, n_components)
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001))
 
         smaller_output_data = np.random.rand(70,4)
 
         with self.assertRaises(ValueError):
-            projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=smaller_output_data)
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_independent_outputs=smaller_output_data)
 
         with self.assertRaises(ValueError):
-            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=smaller_output_data)
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_dependent_outputs=smaller_output_data)
 
         with self.assertRaises(ValueError):
-            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=smaller_output_data, transformed_projection_dependent_outputs='symlog')
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_dependent_outputs=smaller_output_data, transformed_projection_dependent_outputs='symlog')
 
 
         # Mismatch between input_data and projection_dependent_outputs:
@@ -110,10 +110,10 @@ class Utilities(unittest.TestCase):
         n_components = 2
 
         with self.assertRaises(ValueError):
-            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=output_data)
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_dependent_outputs=output_data)
 
         with self.assertRaises(ValueError):
-            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=output_data, transformed_projection_dependent_outputs='symlog')
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_dependent_outputs=output_data, transformed_projection_dependent_outputs='symlog')
 
 
 # ------------------------------------------------------------------------------
@@ -127,6 +127,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('tanh', 'tanh', 'tanh'),
                                             decoder_interior_architecture=(4,))
@@ -134,6 +135,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('tanh',),
                                             decoder_interior_architecture=(4,))
@@ -141,6 +143,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('tanh',),
                                             decoder_interior_architecture=(4,5,6))
@@ -148,6 +151,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('tanh', 'tanh', 'tanh', 'tanh', 'tanh'),
                                             decoder_interior_architecture=(4,5,6))
@@ -155,6 +159,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('tanh', 'sigmoid'),
                                             decoder_interior_architecture=(4,5,6))
@@ -170,6 +175,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('tanh', 'name', 'tanh'),
                                             decoder_interior_architecture=(4,5))
@@ -177,6 +183,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('name', 'tanh'),
                                             decoder_interior_architecture=(4,))
@@ -184,6 +191,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder=('tanh', 'name'),
                                             decoder_interior_architecture=(4,))
@@ -191,6 +199,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             activation_decoder='name',
                                             decoder_interior_architecture=(4,5))
@@ -198,18 +207,20 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             loss='name')
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
-                                            projection_independent_outputs=output_data,
-                                            optimizer='name')
+                                            'name',
+                                            projection_independent_outputs=output_data)
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_dependent_outputs=output_data,
                                             transformed_projection_dependent_outputs='name')
 
@@ -224,30 +235,35 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection([],
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data)
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             [],
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data)
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=[],
                                             projection_dependent_outputs=output_data)
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=[])
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             activation_decoder=[])
@@ -255,6 +271,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             decoder_interior_architecture=[])
@@ -262,6 +279,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             encoder_weights_init=[])
@@ -269,6 +287,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             decoder_weights_init=[])
@@ -276,6 +295,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             hold_initialization=[])
@@ -283,6 +303,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             hold_weights=[])
@@ -290,6 +311,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             transformed_projection_dependent_outputs=[])
@@ -297,6 +319,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             loss=[])
@@ -304,13 +327,14 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            'none',
                                             projection_independent_outputs=output_data,
-                                            projection_dependent_outputs=output_data,
-                                            optimizer=[])
+                                            projection_dependent_outputs=output_data,)
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             batch_size=[])
@@ -318,6 +342,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             n_epochs=[])
@@ -325,13 +350,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
-                                            projection_independent_outputs=output_data,
-                                            projection_dependent_outputs=output_data,
-                                            learning_rate=[])
-
-        with self.assertRaises(ValueError):
-            projection = QoIAwareProjection(input_data,
-                                            n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             validation_perc=[])
@@ -339,6 +358,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             random_seed=[])
@@ -346,6 +366,7 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             projection_dependent_outputs=output_data,
                                             verbose=[])
@@ -361,18 +382,21 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             encoder_weights_init=np.ones((3,2)))
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             encoder_weights_init=np.ones((4,3)))
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             encoder_weights_init=np.ones((10,10)))
 
@@ -387,12 +411,14 @@ class Utilities(unittest.TestCase):
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             decoder_weights_init=(np.ones((3,2))),)
 
         with self.assertRaises(ValueError):
             projection = QoIAwareProjection(input_data,
                                             n_components,
+                                            optimizers.legacy.Adam(0.001),
                                             projection_independent_outputs=output_data,
                                             decoder_interior_architecture=(5,6),
                                             decoder_weights_init=(np.ones((2,5)),np.ones((5,6)),np.ones((6,6))),)
@@ -407,6 +433,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(5,6),
                                         encoder_weights_init=np.ones((6,2)),
@@ -428,7 +455,7 @@ class Utilities(unittest.TestCase):
         n_components = 2
 
         try:
-            projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=output_data)
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_independent_outputs=output_data)
             X = projection.input_data
             X = projection.n_components
             X = projection.projection_independent_outputs
@@ -453,8 +480,8 @@ class Utilities(unittest.TestCase):
         n_components = 2
 
         try:
-            projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=output_data)
-            projection = QoIAwareProjection(input_data, n_components, projection_dependent_outputs=output_data)
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_independent_outputs=output_data)
+            projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_dependent_outputs=output_data)
         except:
             self.assertTrue(False)
 
@@ -466,7 +493,7 @@ class Utilities(unittest.TestCase):
         output_data = np.random.rand(100,4)
         n_components = 2
 
-        projection = QoIAwareProjection(input_data, n_components, projection_independent_outputs=output_data)
+        projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_independent_outputs=output_data)
 
         X = projection.weights_and_biases_trained
         self.assertTrue(X is None)
@@ -487,6 +514,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         n_epochs=2,)
         projection.train()
@@ -514,6 +542,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         n_epochs=n_epochs)
         projection.train()
@@ -535,6 +564,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         n_epochs=n_epochs)
         projection.train()
@@ -552,6 +582,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data[:,0:5],
                                         projection_dependent_outputs=output_data,
                                         decoder_interior_architecture=())
@@ -560,6 +591,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data[:,0:5],
                                         projection_dependent_outputs=output_data,
                                         decoder_interior_architecture=(4,5,6))
@@ -568,6 +600,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data[:,0:5],
                                         projection_dependent_outputs=output_data,
                                         transformed_projection_dependent_outputs='symlog',
@@ -577,6 +610,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_dependent_outputs=output_data,
                                         decoder_interior_architecture=(6,))
 
@@ -584,6 +618,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_dependent_outputs=output_data,
                                         decoder_interior_architecture=(9,),
                                         transformed_projection_dependent_outputs='symlog')
@@ -592,6 +627,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data[:,0:5],
                                         decoder_interior_architecture=(11,),
                                         transformed_projection_dependent_outputs='symlog')
@@ -608,6 +644,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         hold_initialization=5,
@@ -630,6 +667,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         hold_initialization=5,
@@ -653,6 +691,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         hold_initialization=5,
@@ -678,6 +717,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         hold_weights=2,
@@ -705,6 +745,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         encoder_weights_init=np.random.random((7,2)),
@@ -728,6 +769,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         encoder_weights_init=np.random.random((7,2)),
@@ -752,6 +794,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         encoder_weights_init=np.random.random((7,2)),
@@ -778,6 +821,7 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         projection_dependent_outputs=output_data,
                                         encoder_weights_init=np.random.random((7,2)),
@@ -814,12 +858,14 @@ class Utilities(unittest.TestCase):
 
         projection_1 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         random_seed=100)
 
         projection_2 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         random_seed=100)
@@ -837,12 +883,14 @@ class Utilities(unittest.TestCase):
 
         projection_1 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         random_seed=100)
 
         projection_2 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         random_seed=200)
@@ -864,6 +912,7 @@ class Utilities(unittest.TestCase):
 
         projection_1 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         n_epochs=20,
@@ -873,6 +922,7 @@ class Utilities(unittest.TestCase):
 
         projection_2 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         n_epochs=20,
@@ -893,6 +943,7 @@ class Utilities(unittest.TestCase):
 
         projection_1 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         n_epochs=20,
@@ -902,6 +953,7 @@ class Utilities(unittest.TestCase):
 
         projection_2 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         n_epochs=20,
@@ -929,6 +981,7 @@ class Utilities(unittest.TestCase):
         # No bias in the encoder:
         projection_1 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         trainable_encoder_bias=False,
@@ -946,6 +999,7 @@ class Utilities(unittest.TestCase):
         # With bias in the encoder:
         projection_1 = QoIAwareProjection(input_data,
                                         n_components,
+                                        optimizers.legacy.Adam(0.001),
                                         projection_independent_outputs=output_data,
                                         decoder_interior_architecture=(6,6),
                                         trainable_encoder_bias=True,
@@ -978,16 +1032,15 @@ class Utilities(unittest.TestCase):
         try:
             projection = QoIAwareProjection(input_data,
                                            n_components,
+                                           optimizers.legacy.Adam(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
                                            decoder_interior_architecture=(5,8),
                                            transformed_projection_dependent_outputs='signed-square-root',
                                            loss='MSE',
-                                           optimizer='Adam',
                                            batch_size=100,
                                            n_epochs=100,
-                                           learning_rate=0.001,
                                            validation_perc=10,
                                            reduce_memory=True,
                                            random_seed=100,
@@ -998,16 +1051,15 @@ class Utilities(unittest.TestCase):
         try:
             projection = QoIAwareProjection(input_data,
                                            n_components,
+                                           optimizers.legacy.Adam(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
                                            decoder_interior_architecture=(5,8),
                                            transformed_projection_dependent_outputs='signed-square-root',
                                            loss='MSE',
-                                           optimizer='Adam',
                                            batch_size=100,
                                            n_epochs=300,
-                                           learning_rate=0.001,
                                            validation_perc=10,
                                            reduce_memory=True,
                                            random_seed=100,
@@ -1024,16 +1076,15 @@ class Utilities(unittest.TestCase):
         try:
             projection = QoIAwareProjection(input_data,
                                            n_components,
+                                           optimizers.legacy.Adam(0.001),
                                            projection_independent_outputs=input_data[:,0:2],
                                            projection_dependent_outputs=S,
                                            activation_decoder=('tanh', 'tanh', 'tanh'),
                                            decoder_interior_architecture=(5,8),
                                            transformed_projection_dependent_outputs='signed-square-root',
                                            loss='MSE',
-                                           optimizer='Adam',
                                            batch_size=100,
                                            n_epochs=100,
-                                           learning_rate=0.001,
                                            validation_perc=10,
                                            reduce_memory=True,
                                            random_seed=100,
@@ -1043,6 +1094,107 @@ class Utilities(unittest.TestCase):
             self.assertTrue(len(projection.training_loss) == 100)
             self.assertTrue(len(projection.validation_loss) == 100)
             self.assertTrue(len(projection.bases_across_epochs) == 100)
+
+        except:
+            self.assertTrue(False)
+
+    def test_analysis__QoIAwareProjection__optimizers(self):
+
+
+        # Generate dummy dataset:
+        x = np.linspace(0,10,100)[:,None]
+        y = np.logspace(1,2,100)[:,None]
+        z = np.sqrt(np.linspace(10,100,100)[:,None])
+        X = np.hstack((x, y, z))
+        S = np.hstack((x**2, x, y**2))
+        n_components = 1
+
+        (input_data, centers, scales) = preprocess.center_scale(X, scaling='0to1')
+
+        try:
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=10,
+                                           random_seed=100)
+
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=10,
+                                           random_seed=100)
+
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=10,
+                                           random_seed=100)
+
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=10,
+                                           random_seed=100)
+
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=10,
+                                           random_seed=100)
+
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=10,
+                                           random_seed=100)
+
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=10,
+                                           random_seed=100)
 
         except:
             self.assertTrue(False)
