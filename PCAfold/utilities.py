@@ -100,6 +100,7 @@ class QoIAwareProjection:
                                        n_epochs=200,
                                        learning_rate=0.001,
                                        validation_perc=10,
+                                       reduce_memory=True,
                                        random_seed=100,
                                        verbose=True)
 
@@ -236,6 +237,8 @@ class QoIAwareProjection:
         ``float`` specifying the learning rate passed to the optimizer.
     :param validation_perc: (optional)
         ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number larger than or equal to 0 and smaller than 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
+    :param reduce_memory: (optional)
+        ``bool`` specifying if memory should be reduced. If set to true, training data will be cleared every time the training loss drops by an order of magnitude. Variables that are cleared are: ``training_losses_across_epochs``, ``validation_losses_across_epochs``, and ``bases_across_epochs``.
     :param random_seed: (optional)
         ``int`` specifying the random seed to be used for any random operations. It is highly recommended to set a fixed random seed, as this allows for complete reproducibility of the results.
     :param verbose: (optional)
@@ -279,6 +282,7 @@ class QoIAwareProjection:
                 n_epochs=1000,
                 learning_rate=0.001,
                 validation_perc=10,
+                reduce_memory=False,
                 random_seed=None,
                 verbose=False):
 
@@ -466,6 +470,9 @@ class QoIAwareProjection:
         if (validation_perc < 0) or (validation_perc >= 100):
             raise ValueError("Parameter `validation_perc` has to be an integer between 0 and 100`.")
 
+        if not isinstance(reduce_memory, bool):
+            raise ValueError("Parameter `reduce_memory` has to be a boolean.")
+
         # Set random seed for neural network training reproducibility:
         if random_seed is not None:
             if not isinstance(random_seed, int):
@@ -518,6 +525,7 @@ class QoIAwareProjection:
         self.__n_epochs = n_epochs
         self.__learning_rate = learning_rate
         self.__validation_perc = validation_perc
+        self.__reduce_memory = reduce_memory
         self.__random_seed = random_seed
         self.__verbose = verbose
 
@@ -533,8 +541,12 @@ class QoIAwareProjection:
         self.__validation_loss = None
         self.__idx_min_training_loss = None
         self.__idx_min_validation_loss = None
+        self.__training_loss_at_first_epoch = None
+        self.__validation_loss_at_first_epoch = None
         self.__bases_across_epochs = None
         self.__weights_and_biases_trained = None
+        self.__memory_was_cleared = False
+        self.__memory_cleared_at_epoch = None
 
     @property
     def input_data(self):
@@ -583,6 +595,14 @@ class QoIAwareProjection:
     @property
     def bases_across_epochs(self):
         return self.__bases_across_epochs
+
+    @property
+    def training_loss_at_first_epoch(self):
+        return self.__training_loss_at_first_epoch
+
+    @property
+    def validation_loss_at_first_epoch(self):
+        return self.__validation_loss_at_first_epoch
 
 # ------------------------------------------------------------------------------
 
@@ -717,8 +737,7 @@ class QoIAwareProjection:
 
         # Determine the first basis:
         basis_init = self.weights_and_biases_init[0]
-        basis_init = basis_init / np.linalg.norm(basis_init, axis=0)
-        bases_across_epochs.append(basis_init)
+        basis_init = basis_init # / np.linalg.norm(basis_init, axis=0)
 
         if self.projection_independent_outputs is not None:
             decoder_outputs = cp.deepcopy(self.projection_independent_outputs)
@@ -819,10 +838,7 @@ class QoIAwareProjection:
 
             # Determine the current basis:
             basis_current = self.__qoi_aware_encoder_decoder.get_weights()[0]
-            basis_current = basis_current / np.linalg.norm(basis_current, axis=0)
-            bases_across_epochs.append(basis_current)
-
-            # print(self.__qoi_aware_encoder_decoder.get_weights()[0])
+            # basis_current = basis_current / np.linalg.norm(basis_current, axis=0)
 
             if self.projection_independent_outputs is not None:
                 decoder_outputs = self.projection_independent_outputs
@@ -863,8 +879,30 @@ class QoIAwareProjection:
             if self.__validation_perc != 0:
                 validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
 
+            # Clear memory:
+            if (i_epoch > 0) and (self.__reduce_memory > 0) and (training_losses_across_epochs[0] / history.history['loss'][0] > 10):
+
+                if self.__verbose: print('Clearing memory at epoch: ' + str(i_epoch))
+
+                del bases_across_epochs
+                del training_losses_across_epochs
+                del validation_losses_across_epochs
+
+                bases_across_epochs = []
+                training_losses_across_epochs = []
+                validation_losses_across_epochs = []
+
+                self.__memory_was_cleared = True
+                self.__memory_cleared_at_epoch = i_epoch
+
+            bases_across_epochs.append(basis_current)
             training_losses_across_epochs.append(history.history['loss'][0])
             if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
+
+            # Save the training and validation loss at the first epoch to have a reference point:
+            if i_epoch == 0:
+                self.__training_loss_at_first_epoch = history.history['loss'][0]
+                if self.__validation_perc != 0: self.__validation_loss_at_first_epoch = history.history['val_loss'][0]
 
         toc = time.perf_counter()
         if self.__verbose: print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
@@ -946,22 +984,26 @@ class QoIAwareProjection:
             if method == 'min-training-loss':
 
                 print('Minimum training loss:\t\t' + str(np.min(self.__training_loss)))
-                print('Minimum training loss at epoch:\t' + str(self.__idx_min_training_loss+1))
 
-                # We add one to the index, because the first basis correspond to the network intialization before training.
-                # The length of the losses list is one less the length of the bases_across_epochs.
-                best_basis = self.__bases_across_epochs[self.__idx_min_training_loss+1]
+                if self.__memory_was_cleared:
+                    best_basis = self.__bases_across_epochs[self.__idx_min_training_loss]
+                    print('Minimum training loss at epoch:\t' + str(self.__memory_cleared_at_epoch + self.__idx_min_training_loss + 1))
+                else:
+                    best_basis = self.__bases_across_epochs[self.__idx_min_training_loss]
+                    print('Minimum training loss at epoch:\t' + str(self.__idx_min_training_loss + 1))
 
             elif method == 'min-validation-loss':
 
                 if self.__validation_perc != 0:
 
                     print('Minimum validation loss:\t\t' + str(np.min(self.__validation_loss)))
-                    print('Minimum validation loss at epoch:\t' + str(self.__idx_min_validation_loss+1))
 
-                    # We add one to the index, because the first basis correspond to the network intialization before training.
-                    # The length of the losses list is one less the length of the bases_across_epochs.
-                    best_basis = self.__bases_across_epochs[self.__idx_min_validation_loss+1]
+                    if self.__memory_was_cleared:
+                        best_basis = self.__bases_across_epochs[self.__idx_min_validation_loss]
+                        print('Minimum validation loss at epoch:\t' + str(self.__memory_cleared_at_epoch + self.__idx_min_validation_loss + 1))
+                    else:
+                        best_basis = self.__bases_across_epochs[self.__idx_min_validation_loss]
+                        print('Minimum validation loss at epoch:\t' + str(self.__idx_min_validation_loss + 1))
 
                 else:
 
@@ -1013,16 +1055,30 @@ class QoIAwareProjection:
 
         if self.__trained:
 
-            x_axis = [i for i in range(1,self.__n_epochs+1)]
+            if self.__memory_was_cleared:
+                x_axis = [i for i in range(self.__memory_cleared_at_epoch+1,self.__n_epochs+1)]
+            else:
+                x_axis = [i for i in range(1,self.__n_epochs+1)]
+
             x_ticks = [1] + [i for i in range(1,self.__n_epochs) if i%markevery==0] + [self.__n_epochs]
 
             plt.figure(figsize=figure_size)
             plt.semilogy(x_axis, self.__training_loss, 'k', lw=3, label='Training loss')
-            plt.scatter(self.__idx_min_training_loss+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
+            if self.__memory_was_cleared:
+                plt.scatter(self.__memory_cleared_at_epoch + self.__idx_min_validation_loss + 1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
+            else:
+                plt.scatter(self.__idx_min_training_loss+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
 
             if self.__validation_perc != 0:
                 plt.semilogy(x_axis, self.__validation_loss, 'r--', lw=2, label='Validation loss')
-                plt.scatter(self.__idx_min_validation_loss+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
+                if self.__memory_was_cleared:
+                    plt.scatter(self.__memory_cleared_at_epoch + self.__idx_min_validation_loss + 1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
+                else:
+                    plt.scatter(self.__idx_min_validation_loss+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
+
+            if self.__memory_was_cleared:
+                plt.scatter(1, self.__training_loss_at_first_epoch, c='k', s=40, label='Initial training loss', zorder=20)
+                if self.__validation_perc != 0: plt.scatter(1, self.__validation_loss_at_first_epoch, c='r', s=20, label='Initial validation loss', zorder=20)
 
             plt.xlabel('Epoch #', fontsize=font_labels)
             plt.xticks(x_ticks, rotation=90)
