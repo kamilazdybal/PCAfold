@@ -39,7 +39,6 @@ class Utilities(unittest.TestCase):
                                             batch_size=10,
                                             n_epochs=20,
                                             validation_perc=0,
-                                            reduce_memory=False,
                                             random_seed=100,
                                             verbose=False)
         except:
@@ -70,7 +69,6 @@ class Utilities(unittest.TestCase):
                                             batch_size=10,
                                             n_epochs=6,
                                             validation_perc=0,
-                                            reduce_memory=False,
                                             random_seed=100,
                                             verbose=False)
 
@@ -1016,87 +1014,6 @@ class Utilities(unittest.TestCase):
         self.assertTrue(projection_1.weights_and_biases_init[7].shape==(5,))
 
 # ------------------------------------------------------------------------------
-
-    def test_utilities__QoIAwareProjection__reduce_memory(self):
-
-        # Generate dummy dataset:
-        x = np.linspace(0,10,100)[:,None]
-        y = np.logspace(1,2,100)[:,None]
-        z = np.sqrt(np.linspace(10,100,100)[:,None])
-        X = np.hstack((x, y, z))
-        S = np.hstack((x**2, x, y**2))
-        n_components = 1
-
-        (input_data, centers, scales) = preprocess.center_scale(X, scaling='0to1')
-
-        try:
-            projection = QoIAwareProjection(input_data,
-                                           n_components,
-                                           optimizers.legacy.Adam(0.001),
-                                           projection_independent_outputs=input_data[:,0:2],
-                                           projection_dependent_outputs=S,
-                                           activation_decoder=('tanh', 'tanh', 'tanh'),
-                                           decoder_interior_architecture=(5,8),
-                                           transformed_projection_dependent_outputs='signed-square-root',
-                                           loss='MSE',
-                                           batch_size=100,
-                                           n_epochs=100,
-                                           validation_perc=10,
-                                           reduce_memory=True,
-                                           random_seed=100,
-                                           verbose=False)
-        except:
-            self.assertTrue(False)
-
-        try:
-            projection = QoIAwareProjection(input_data,
-                                           n_components,
-                                           optimizers.legacy.Adam(0.001),
-                                           projection_independent_outputs=input_data[:,0:2],
-                                           projection_dependent_outputs=S,
-                                           activation_decoder=('tanh', 'tanh', 'tanh'),
-                                           decoder_interior_architecture=(5,8),
-                                           transformed_projection_dependent_outputs='signed-square-root',
-                                           loss='MSE',
-                                           batch_size=100,
-                                           n_epochs=300,
-                                           validation_perc=10,
-                                           reduce_memory=True,
-                                           random_seed=100,
-                                           verbose=False)
-
-            projection.train()
-            self.assertTrue(len(projection.training_loss) < 300)
-            self.assertTrue(len(projection.validation_loss) < 300)
-            self.assertTrue(len(projection.bases_across_epochs) < 300)
-
-        except:
-            self.assertTrue(False)
-
-        try:
-            projection = QoIAwareProjection(input_data,
-                                           n_components,
-                                           optimizers.legacy.Adam(0.001),
-                                           projection_independent_outputs=input_data[:,0:2],
-                                           projection_dependent_outputs=S,
-                                           activation_decoder=('tanh', 'tanh', 'tanh'),
-                                           decoder_interior_architecture=(5,8),
-                                           transformed_projection_dependent_outputs='signed-square-root',
-                                           loss='MSE',
-                                           batch_size=100,
-                                           n_epochs=100,
-                                           validation_perc=10,
-                                           reduce_memory=True,
-                                           random_seed=100,
-                                           verbose=False)
-
-            projection.train()
-            self.assertTrue(len(projection.training_loss) == 100)
-            self.assertTrue(len(projection.validation_loss) == 100)
-            self.assertTrue(len(projection.bases_across_epochs) == 100)
-
-        except:
-            self.assertTrue(False)
 
     def test_utilities__QoIAwareProjection__optimizers(self):
 
