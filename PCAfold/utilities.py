@@ -70,6 +70,7 @@ class QoIAwareProjection:
         from PCAfold import center_scale, QoIAwareProjection
         import numpy as np
         from tensorflow import optimizers
+        from tensorflow.keras import initializers
 
         # Generate dummy dataset:
         X = np.random.rand(100,8)
@@ -92,6 +93,8 @@ class QoIAwareProjection:
                                        decoder_interior_architecture=(5,8),
                                        encoder_weights_init=None,
                                        decoder_weights_init=None,
+                                       encoder_kernel_initializer=initializers.RandomNormal(seed=100),
+                                       decoder_kernel_initializer=initializers.GlorotUniform(seed=100),
                                        trainable_encoder_bias=True,
                                        hold_initialization=10,
                                        hold_weights=2,
@@ -208,9 +211,13 @@ class QoIAwareProjection:
         If set to an empty tuple, ``decoder_interior_architecture=()``, the overal network architecture will be ``(Input)-(Bottleneck)-(Output)``.
         Keep in mind that if you'd like to create just one interior layer, you should use a comma after the integer: ``decoder_interior_architecture=(4,)``.
     :param encoder_weights_init: (optional)
-        ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. It should be of size ``(n_variables, n_components)``. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+        ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. It should be of size ``(n_variables, n_components)``. If set to ``None`` and ``encoder_kernel_initializer`` is set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
     :param decoder_weights_init: (optional)
-        ``tuple`` of ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. Each element in the tuple should have a shape that matches the architecture. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+        ``tuple`` of ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. Each element in the tuple should have a shape that matches the architecture. If set to ``None`` and ``decoder_kernel_initializer`` is set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+    :param encoder_kernel_initializer: (optional)
+        ``tf.keras.initializers`` specifying the initialization of the weights in the encoder. Only used when ``encoder_weights_init`` is set to ``None``. If set to ``None`` and ``encoder_weights_init`` is set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution. To assure fully reproducible training, pass a random seed to the initializer, e.g., ``tf.keras.initializers.GlorotUniform(seed=100)``.
+    :param decoder_kernel_initializer: (optional)
+        ``tf.keras.initializers`` specifying the initialization of the weights in the decoder. Only used when ``decoder_weights_init`` is set to ``None``. If set to ``None`` and ``decoder_weights_init`` is set to ``None``, weights in the decoder will be initialized using the Glorot uniform distribution. To assure fully reproducible training, pass a random seed to the initializer, e.g., ``tf.keras.initializers.GlorotUniform(seed=100)``.
     :param trainable_encoder_bias: (optional)
         ``bool`` specifying if the biases in the encoding layer should be trainable. Note, that for linear projections, bias does not change the projection quality and only acts to translate the projection along the low-dimensional coordinates.
     :param hold_initialization: (optional)
@@ -264,6 +271,8 @@ class QoIAwareProjection:
                 decoder_interior_architecture=(),
                 encoder_weights_init=None,
                 decoder_weights_init=None,
+                encoder_kernel_initializer=None,
+                decoder_kernel_initializer=None,
                 trainable_encoder_bias=True,
                 hold_initialization=None,
                 hold_weights=None,
@@ -383,11 +392,14 @@ class QoIAwareProjection:
             if not n_encoder_weights_x==n_input_variables or not n_encoder_weights_y==n_components:
                 raise ValueError("Parameter `encoder_weights_init` has to have shape (n_input_variables, n_components).")
             encoder_kernel_initializer = tf.constant_initializer(encoder_weights_init)
-        else:
+
+        elif (encoder_weights_init is None) and (encoder_kernel_initializer is None):
             if random_seed is None:
                 encoder_kernel_initializer = 'glorot_uniform'
             else:
                 encoder_kernel_initializer = initializers.glorot_uniform(seed=random_seed)
+
+        self.__encoder_kernel_initializer = encoder_kernel_initializer
 
         # Determine initialization of weights in the decoder:
         if decoder_weights_init is not None:
@@ -405,11 +417,17 @@ class QoIAwareProjection:
                 if not d1==self.__neuron_count[1+i] or not d2==self.__neuron_count[i+2]:
                     raise ValueError("Shapes of elements in `decoder_weights_init` do not match the decoder architecture.")
             decoder_kernel_initializer = tuple([tf.constant_initializer(weight) for weight in decoder_weights_init])
-        else:
+        elif (decoder_weights_init is None) and (decoder_kernel_initializer is None):
             if random_seed is None:
                 decoder_kernel_initializer = tuple(['glorot_uniform' for i in range(0,len(decoder_interior_architecture)+1)])
             else:
                 decoder_kernel_initializer = tuple([initializers.glorot_uniform(seed=random_seed) for i in range(0,len(decoder_interior_architecture)+1)])
+
+        elif (decoder_weights_init is None) and (decoder_kernel_initializer is not None):
+
+            decoder_kernel_initializer = tuple([decoder_kernel_initializer for i in range(0,len(decoder_interior_architecture)+1)])
+
+        self.__decoder_kernel_initializer = decoder_kernel_initializer
 
         if not isinstance(trainable_encoder_bias, bool):
             raise ValueError("Parameter `trainable_encoder_bias` has to be of type `bool`.")
@@ -483,6 +501,8 @@ class QoIAwareProjection:
         self.__decoder_interior_architecture = decoder_interior_architecture
         self.__encoder_weights_init = encoder_weights_init
         self.__decoder_weights_init = decoder_weights_init
+        self.__encoder_kernel_initializer = encoder_kernel_initializer
+        self.__decoder_kernel_initializer = decoder_kernel_initializer
         self.__trainable_encoder_bias = trainable_encoder_bias
         self.__hold_initialization = hold_initialization
         self.__hold_weights = hold_weights
