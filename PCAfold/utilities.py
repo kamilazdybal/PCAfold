@@ -509,8 +509,6 @@ class QoIAwareProjection:
         # Attributes available after model training:
         self.__training_loss = None
         self.__validation_loss = None
-        self.__idx_min_training_loss = None
-        self.__idx_min_validation_loss = None
         self.__weights_and_biases_best = None
         self.__weights_and_biases_trained = None
         self.__best_epoch_counter = None
@@ -881,13 +879,6 @@ class QoIAwareProjection:
         self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
         self.__trained = True
 
-        idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
-        self.__idx_min_training_loss = idx_min_training_loss[0]
-
-        if self.__validation_perc != 0:
-            idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
-            self.__idx_min_validation_loss = idx_min_validation_loss[0]
-
 # ------------------------------------------------------------------------------
 
     def print_weights_and_biases_init(self):
@@ -995,11 +986,13 @@ class QoIAwareProjection:
 
             plt.figure(figsize=figure_size)
             plt.semilogy(x_axis, self.__training_loss, 'k', lw=3, label='Training loss')
-            plt.scatter(self.__idx_min_training_loss+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
+            idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
+            plt.scatter(idx_min_training_loss[0]+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
 
             if self.__validation_perc != 0:
+                idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
                 plt.semilogy(x_axis, self.__validation_loss, 'r--', lw=2, label='Validation loss')
-                plt.scatter(self.__idx_min_validation_loss+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
+                plt.scatter(idx_min_validation_loss[0]+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
 
             plt.xlabel('Epoch #', fontsize=font_labels)
             plt.xticks(x_ticks, rotation=90)

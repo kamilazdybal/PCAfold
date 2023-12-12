@@ -463,9 +463,11 @@ class Utilities(unittest.TestCase):
             X = projection.qoi_aware_encoder_decoder
             X = projection.weights_and_biases_init
             X = projection.weights_and_biases_trained
+            X = projection.weights_and_biases_best
             X = projection.training_loss
             X = projection.validation_loss
-            X = projection.bases_across_epochs
+            X = projection.best_epoch_counter
+            X = projection.best_training_loss
         except:
             self.assertTrue(False)
 
@@ -493,13 +495,22 @@ class Utilities(unittest.TestCase):
 
         projection = QoIAwareProjection(input_data, n_components, optimizers.legacy.Adam(0.001), projection_independent_outputs=output_data)
 
-        X = projection.weights_and_biases_trained
-        self.assertTrue(X is None)
-
         X = projection.training_loss
         self.assertTrue(X is None)
 
         X = projection.validation_loss
+        self.assertTrue(X is None)
+
+        X = projection.weights_and_biases_best
+        self.assertTrue(X is None)
+
+        X = projection.weights_and_biases_trained
+        self.assertTrue(X is None)
+
+        X = projection.best_epoch_counter
+        self.assertTrue(X is None)
+
+        X = projection.best_training_loss
         self.assertTrue(X is None)
 
 # ------------------------------------------------------------------------------
@@ -517,21 +528,34 @@ class Utilities(unittest.TestCase):
                                         n_epochs=2,)
         projection.train()
 
+
+        X = projection.training_loss
+        self.assertTrue(X is not None)
+        self.assertTrue(isinstance(X, list))
+
+        X = projection.validation_loss
+        self.assertTrue(X is not None)
+        self.assertTrue(isinstance(X, list))
+
+        X = projection.weights_and_biases_best
+        self.assertTrue(X is not None)
+        self.assertTrue(isinstance(X, list))
+
         X = projection.weights_and_biases_trained
         self.assertTrue(X is not None)
         self.assertTrue(isinstance(X, list))
 
-        X = projection.training_loss
+        X = projection.best_epoch_counter
         self.assertTrue(X is not None)
-        self.assertTrue(isinstance(X, list))
+        self.assertTrue(isinstance(X, int))
 
-        X = projection.validation_loss
+        X = projection.best_training_loss
         self.assertTrue(X is not None)
-        self.assertTrue(isinstance(X, list))
+        self.assertTrue(isinstance(X, float))
 
 # ------------------------------------------------------------------------------
 
-    def test_utilities__QoIAwareProjection__number_of_losses_equal_to_n_epochs(self):
+    def test_utilities__QoIAwareProjection__number_of_losses_equal_to_n_epochs_plus_one(self):
 
         input_data = np.random.rand(100,4)
         output_data = np.random.rand(100,4)
@@ -546,29 +570,10 @@ class Utilities(unittest.TestCase):
         projection.train()
 
         X = projection.training_loss
-        self.assertTrue(len(X)==n_epochs)
+        self.assertTrue(len(X)==n_epochs+1)
 
         X = projection.validation_loss
-        self.assertTrue(len(X)==n_epochs)
-
-# ------------------------------------------------------------------------------
-
-    def test_utilities__QoIAwareProjection__number_of_bases_equal_to_n_epochs_plus_one(self):
-
-        input_data = np.random.rand(100,4)
-        output_data = np.random.rand(100,4)
-        n_components = 2
-        n_epochs = 5
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        n_epochs=n_epochs)
-        projection.train()
-
-        X = projection.bases_across_epochs
-        self.assertTrue(len(X)==n_epochs)
+        self.assertTrue(len(X)==n_epochs+1)
 
 # ------------------------------------------------------------------------------
 
@@ -634,215 +639,217 @@ class Utilities(unittest.TestCase):
 
 # ------------------------------------------------------------------------------
 
-    def test_utilities__QoIAwareProjection__holding_weights(self):
+    # We cannot test this with the current implementation.
 
-        input_data = np.random.rand(100,7)
-        output_data = np.random.rand(100,7)
-        n_components = 2
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        hold_initialization=5,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        hold_initialization=5,
-                                        hold_weights=2,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        hold_initialization=5,
-                                        hold_weights=2,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
-        self.assertTrue(np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
-        self.assertTrue(np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        hold_weights=2,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(not np.allclose(bases_across_epochs[1], bases_across_epochs[2]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[2], bases_across_epochs[3]))
-        self.assertTrue(not np.allclose(bases_across_epochs[3], bases_across_epochs[4]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[4], bases_across_epochs[5]))
-        self.assertTrue(not np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
-        self.assertTrue(not np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
-
-        # Check that holding weights works even if we initialize the encoder and decoder weights:
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        encoder_weights_init=np.random.random((7,2)),
-                                        hold_initialization=5,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        encoder_weights_init=np.random.random((7,2)),
-                                        hold_initialization=5,
-                                        hold_weights=2,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        encoder_weights_init=np.random.random((7,2)),
-                                        hold_initialization=5,
-                                        hold_weights=2,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
-        self.assertTrue(np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
-        self.assertTrue(np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
-
-        self.assertTrue(not np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
-
-        projection = QoIAwareProjection(input_data,
-                                        n_components,
-                                        optimizers.legacy.Adam(0.001),
-                                        projection_independent_outputs=output_data,
-                                        projection_dependent_outputs=output_data,
-                                        encoder_weights_init=np.random.random((7,2)),
-                                        hold_weights=2,
-                                        n_epochs=10)
-
-        projection.train()
-
-        bases_across_epochs = projection.bases_across_epochs
-
-        self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
-        self.assertTrue(not np.allclose(bases_across_epochs[1], bases_across_epochs[2]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[2], bases_across_epochs[3]))
-        self.assertTrue(not np.allclose(bases_across_epochs[3], bases_across_epochs[4]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[4], bases_across_epochs[5]))
-        self.assertTrue(not np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
-        self.assertTrue(not np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
-
-        self.assertTrue(np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
+    # def test_utilities__QoIAwareProjection__holding_weights(self):
+    #
+    #     input_data = np.random.rand(100,7)
+    #     output_data = np.random.rand(100,7)
+    #     n_components = 2
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     hold_initialization=5,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     hold_initialization=5,
+    #                                     hold_weights=2,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     hold_initialization=5,
+    #                                     hold_weights=2,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     hold_weights=2,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[1], bases_across_epochs[2]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[2], bases_across_epochs[3]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[3], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[4], bases_across_epochs[5]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
+    #
+    #     # Check that holding weights works even if we initialize the encoder and decoder weights:
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     encoder_weights_init=np.random.random((7,2)),
+    #                                     hold_initialization=5,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     encoder_weights_init=np.random.random((7,2)),
+    #                                     hold_initialization=5,
+    #                                     hold_weights=2,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[6]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[7]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[8]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[9]))
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     encoder_weights_init=np.random.random((7,2)),
+    #                                     hold_initialization=5,
+    #                                     hold_weights=2,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[2]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[3]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[0], bases_across_epochs[5]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
+    #     self.assertTrue(np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
+    #
+    #     self.assertTrue(not np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
+    #
+    #     projection = QoIAwareProjection(input_data,
+    #                                     n_components,
+    #                                     optimizers.legacy.Adam(0.001),
+    #                                     projection_independent_outputs=output_data,
+    #                                     projection_dependent_outputs=output_data,
+    #                                     encoder_weights_init=np.random.random((7,2)),
+    #                                     hold_weights=2,
+    #                                     n_epochs=10)
+    #
+    #     projection.train()
+    #
+    #     bases_across_epochs = projection.bases_across_epochs
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[0], bases_across_epochs[1]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[1], bases_across_epochs[2]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[2], bases_across_epochs[3]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[3], bases_across_epochs[4]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[4], bases_across_epochs[5]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[5], bases_across_epochs[6]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[6], bases_across_epochs[7]))
+    #     self.assertTrue(not np.allclose(bases_across_epochs[7], bases_across_epochs[8]))
+    #
+    #     self.assertTrue(np.allclose(bases_across_epochs[8], bases_across_epochs[9]))
 
 # ------------------------------------------------------------------------------
 
