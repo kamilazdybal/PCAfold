@@ -251,7 +251,7 @@ class QoIAwareProjection:
     - **weights_and_biases_trained** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases after training the QoI-aware encoder-decoder. Only available after calling ``QoIAwareProjection.train()``.
     - **training_loss** - (read only) ``list`` of losses computed on the training data. Only available after calling ``QoIAwareProjection.train()``.
     - **validation_loss** - (read only) ``list`` of losses computed on the validation data. Only available after calling ``QoIAwareProjection.train()`` and only when ``validation_perc`` was not equal to 0.
-    - **bases_across_epochs** - (read only) ``list`` of ``numpy.ndarray`` specifying all basis matrices from all epochs. Only available after calling ``QoIAwareProjection.train()``.
+    - **weights_and_biases_best** - (read only) ``list`` of ``numpy.ndarray`` specifying all weights and biases corresponding to the epoch at which the training loss was the smallest. Only available after calling ``QoIAwareProjection.train()``.
     """
 
     def __init__(self,
@@ -513,7 +513,7 @@ class QoIAwareProjection:
         self.__idx_min_validation_loss = None
         self.__training_loss_at_first_epoch = None
         self.__validation_loss_at_first_epoch = None
-        self.__bases_across_epochs = None
+        self.__weights_and_biases_best = None
         self.__weights_and_biases_trained = None
 
     @property
@@ -553,16 +553,16 @@ class QoIAwareProjection:
         return self.__weights_and_biases_trained
 
     @property
+    def weights_and_biases_best(self):
+        return self.__weights_and_biases_best
+
+    @property
     def training_loss(self):
         return self.__training_loss
 
     @property
     def validation_loss(self):
         return self.__validation_loss
-
-    @property
-    def bases_across_epochs(self):
-        return self.__bases_across_epochs
 
     @property
     def training_loss_at_first_epoch(self):
@@ -698,7 +698,6 @@ class QoIAwareProjection:
             tf.random.set_seed(self.__random_seed)
             tf.keras.utils.set_random_seed(self.__random_seed)
 
-        bases_across_epochs = []
         training_losses_across_epochs = []
         validation_losses_across_epochs = []
 
@@ -846,7 +845,6 @@ class QoIAwareProjection:
             if self.__validation_perc != 0:
                 validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
 
-            bases_across_epochs.append(basis_current)
             training_losses_across_epochs.append(history.history['loss'][0])
             if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
 
@@ -860,7 +858,6 @@ class QoIAwareProjection:
 
         self.__training_loss = training_losses_across_epochs
         self.__validation_loss = validation_losses_across_epochs
-        self.__bases_across_epochs = bases_across_epochs
         self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
         self.__trained = True
 
@@ -911,47 +908,34 @@ class QoIAwareProjection:
 
 # ------------------------------------------------------------------------------
 
-    def get_best_basis(self, method='min-training-loss'):
+    def print_weights_and_biases_best(self):
         """
-        Returns the best low-dimensional basis according to the selected method.
-
-        :param method: (optional)
-            ``str`` specifying the method used to select the best basis. It should be ``'min-training-loss'``, ``'min-validation-loss'``, or ``'last-epoch'``.
-
-        :return:
-            - **best_basis** - ``numpy.ndarray`` specifying the best basis extracted from the ``bases_across_epochs`` attribute.
+        Prints the best weights and biases from all layers of the QoI-aware encoder-decoder.
         """
-
-        __methods = ['min-training-loss', 'last-epoch']
-
-        if not isinstance(method, str):
-            raise ValueError("Parameter `method` has to be of type `str`.")
-
-        if method not in __methods:
-            raise ValueError("Parameter `method` can only be 'min-training-loss', 'min-validation-loss', or 'last-epoch'.")
 
         if self.__trained:
 
-            if method == 'min-training-loss':
-
-                print('Minimum training loss:\t\t' + str(np.min(self.__training_loss)))
-
-                best_basis = self.__bases_across_epochs[self.__idx_min_training_loss]
-                print('Minimum training loss at epoch:\t' + str(self.__idx_min_training_loss + 1))
-
-            elif method == 'last-epoch':
-
-                print('Training loss at the last epoch:\t\t' + str(self.__training_loss[-1]))
-
-                if self.__validation_perc != 0: print('Validation loss at the last epoch:\t\t' + str(self.__validation_loss[-1]))
-
-                best_basis = self.__bases_across_epochs[-1]
+            for i in range(0,len(self.weights_and_biases_best)):
+                if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
+                if i%2==0:
+                    print('\nWeight:')
+                else:
+                    print('Bias:')
+                print(self.weights_and_biases_best[i])
+                print()
 
         else:
 
             print('Model has not been trained yet!')
 
-        return best_basis
+# ------------------------------------------------------------------------------
+
+    def save_weights_and_biases(self):
+        """
+        Saves weights and biases from all layers of the QoI-aware encoder-decoder to a ``.h5`` file.
+        """
+
+        pass
 
 # ------------------------------------------------------------------------------
 
