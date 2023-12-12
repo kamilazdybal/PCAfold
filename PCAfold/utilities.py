@@ -511,10 +511,10 @@ class QoIAwareProjection:
         self.__validation_loss = None
         self.__idx_min_training_loss = None
         self.__idx_min_validation_loss = None
-        self.__training_loss_at_first_epoch = None
-        self.__validation_loss_at_first_epoch = None
         self.__weights_and_biases_best = None
         self.__weights_and_biases_trained = None
+        self.__best_epoch_counter = None
+        self.__best_training_loss = None
 
     @property
     def input_data(self):
@@ -565,12 +565,12 @@ class QoIAwareProjection:
         return self.__validation_loss
 
     @property
-    def training_loss_at_first_epoch(self):
-        return self.__training_loss_at_first_epoch
+    def best_epoch_counter(self):
+        return self.__best_epoch_counter
 
     @property
-    def validation_loss_at_first_epoch(self):
-        return self.__validation_loss_at_first_epoch
+    def best_training_loss(self):
+        return self.__best_training_loss
 
 # ------------------------------------------------------------------------------
 
@@ -698,12 +698,8 @@ class QoIAwareProjection:
             tf.random.set_seed(self.__random_seed)
             tf.keras.utils.set_random_seed(self.__random_seed)
 
-        training_losses_across_epochs = []
-        validation_losses_across_epochs = []
-
         # Determine the first basis:
         basis_init = self.weights_and_biases_init[0]
-        basis_init = basis_init # / np.linalg.norm(basis_init, axis=0)
 
         if self.projection_independent_outputs is not None:
             decoder_outputs = cp.deepcopy(self.projection_independent_outputs)
@@ -764,7 +760,15 @@ class QoIAwareProjection:
             validation_data = None
             if self.__verbose: print('No validation data is used at model training. Model will be trained on 100% of input data.\n')
 
+        # Instantiate variables that measure network performance:
+        training_losses_across_epochs = []
+        validation_losses_across_epochs = []
+        previous_best_training_loss = self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_train,:], decoder_outputs_normalized[idx_train,:], verbose=0)
+
         for i_epoch in tqdm(self.__epochs_list):
+
+            # Capture weights prior to optimization:
+            weights_prior_to_optimization = self.__qoi_aware_encoder_decoder.get_weights()
 
             history = self.__qoi_aware_encoder_decoder.fit(self.__input_data[idx_train,:],
                                                            decoder_outputs_normalized[idx_train,:],
@@ -800,21 +804,16 @@ class QoIAwareProjection:
                         self.__qoi_aware_encoder_decoder.set_weights(weights_and_biases)
                         n_count_epochs += 1
 
-            # Update the projection-dependent output variables - - - - - - - - -
-
-            # Determine the current basis:
-            basis_current = self.__qoi_aware_encoder_decoder.get_weights()[0]
-            # basis_current = basis_current / np.linalg.norm(basis_current, axis=0)
-
+            # Update the projection-dependent output variables for the next epoch:
             if self.projection_independent_outputs is not None:
                 decoder_outputs = self.projection_independent_outputs
 
                 if self.projection_dependent_outputs is not None:
-                    current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_current)
+                    current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, self.__qoi_aware_encoder_decoder.get_weights()[0])
                     decoder_outputs = np.hstack((decoder_outputs, current_projection_dependent_outputs))
 
             else:
-                current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_current)
+                current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, self.__qoi_aware_encoder_decoder.get_weights()[0])
                 decoder_outputs = current_projection_dependent_outputs
 
             if self.projection_dependent_outputs is not None:
@@ -841,23 +840,44 @@ class QoIAwareProjection:
                 elif self.__activation_decoder[-1] == 'linear':
                     decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
-            # Determine the new validation data:
+            # Update the validation data for the next epoch:
             if self.__validation_perc != 0:
                 validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
 
-            training_losses_across_epochs.append(history.history['loss'][0])
+            # Save losses:
+            training_losses_across_epochs.append(history.history['loss'][0]) # Training loss corresponds to weights before optimization
             if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
 
-            # Save the training and validation loss at the first epoch to have a reference point:
-            if i_epoch == 0:
-                self.__training_loss_at_first_epoch = history.history['loss'][0]
-                if self.__validation_perc != 0: self.__validation_loss_at_first_epoch = history.history['val_loss'][0]
+            # Overwrite the whole trained network corresponding to the so far best training loss:
+            if (i_epoch > 0) and (training_losses_across_epochs[-1] < previous_best_training_loss):
+
+                self.__weights_and_biases_best = weights_prior_to_optimization
+
+                previous_best_training_loss = training_losses_across_epochs[-1]
+                best_epoch_counter = i_epoch
+
+        # Append training and validation loss corresponding to the final weights in the trained network:
+        training_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_train,:], decoder_outputs_normalized[idx_train,:], verbose=0))
+        if self.__validation_perc != 0: validation_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:], verbose=0))
+
+        if training_losses_across_epochs[-1] < previous_best_training_loss:
+
+            self.__weights_and_biases_best = self.__qoi_aware_encoder_decoder.get_weights()
+            previous_best_training_loss = training_losses_across_epochs[-1]
+            if self.__verbose: print('Best basis is the final one')
+            best_epoch_counter += 1
+
+        else:
+
+            if self.__verbose: print('Best basis at epoch: ' + str(best_epoch_counter))
 
         toc = time.perf_counter()
         if self.__verbose: print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
 
         self.__training_loss = training_losses_across_epochs
         self.__validation_loss = validation_losses_across_epochs
+        self.__best_epoch_counter = best_epoch_counter
+        self.__best_training_loss = previous_best_training_loss
         self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
         self.__trained = True
 
