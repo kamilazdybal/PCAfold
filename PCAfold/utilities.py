@@ -193,6 +193,7 @@ class QoIAwareProjection:
 
     :param input_data:
         ``numpy.ndarray`` specifying the data set used as the input to the encoder-decoder. It should be of size ``(n_observations,n_variables)``.
+        Note that input data is not preprocessed inside the ``QoIAwareProjection`` class in any way. If the input data should be centered and scaled, you need to take care of this before passing it as a parameter.
     :param n_components:
         ``int`` specifying the dimensionality of the QoI-aware encoder-decoder projection. This is equal to the number of neurons in the bottleneck layer.
     :param optimizer:
@@ -789,6 +790,9 @@ class QoIAwareProjection:
         validation_losses_across_epochs = []
         previous_best_training_loss = self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_train,:], decoder_outputs_normalized[idx_train,:], verbose=0)
 
+        # Append validation loss corresponding to the initial basis:
+        if self.__validation_perc != 0: validation_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:], verbose=0))
+
         for i_epoch in tqdm(self.__epochs_list):
 
             # Capture weights prior to optimization:
@@ -865,12 +869,11 @@ class QoIAwareProjection:
                     decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
             # Update the validation data for the next epoch:
-            if self.__validation_perc != 0:
-                validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
+            if self.__validation_perc != 0: validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
 
             # Save losses:
-            training_losses_across_epochs.append(history.history['loss'][0]) # Training loss corresponds to weights before optimization
-            if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
+            training_losses_across_epochs.append(history.history['loss'][0]) # Training loss corresponds to weights prior to the current optimization step
+            if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0]) # Validation loss corresponds to weights after the current optimization step
 
             # Overwrite the whole trained network corresponding to the so far best training loss:
             if (i_epoch > 0) and (training_losses_across_epochs[-1] < previous_best_training_loss):
@@ -880,10 +883,10 @@ class QoIAwareProjection:
                 previous_best_training_loss = training_losses_across_epochs[-1]
                 best_epoch_counter = i_epoch
 
-        # Append training and validation loss corresponding to the final weights in the trained network:
+        # Append training loss corresponding to the final weights in the trained network:
         training_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_train,:], decoder_outputs_normalized[idx_train,:], verbose=0))
-        if self.__validation_perc != 0: validation_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:], verbose=0))
 
+        # Overwrite the whole trained network in case the final trained network is still better than anything computed thus far:
         if training_losses_across_epochs[-1] < previous_best_training_loss:
 
             self.__weights_and_biases_best = self.__qoi_aware_encoder_decoder.get_weights()
@@ -1006,19 +1009,19 @@ class QoIAwareProjection:
 
         if self.__trained:
 
-            x_axis = [i for i in range(1,self.__n_epochs+1)]
+            x_axis = [i for i in range(0,self.__n_epochs+1)]
 
-            x_ticks = [1] + [i for i in range(1,self.__n_epochs) if i%markevery==0] + [self.__n_epochs]
+            x_ticks = [0] + [i for i in range(1,self.__n_epochs) if i%markevery==0] + [self.__n_epochs]
 
             plt.figure(figsize=figure_size)
             plt.semilogy(x_axis, self.__training_loss, 'k', lw=3, label='Training loss')
             idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
-            plt.scatter(idx_min_training_loss[0]+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
+            plt.scatter(idx_min_training_loss[0], np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
 
             if self.__validation_perc != 0:
                 idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
                 plt.semilogy(x_axis, self.__validation_loss, 'r--', lw=2, label='Validation loss')
-                plt.scatter(idx_min_validation_loss[0]+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
+                plt.scatter(idx_min_validation_loss[0], np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
 
             plt.xlabel('Epoch #', fontsize=font_labels)
             plt.xticks(x_ticks, rotation=90)
