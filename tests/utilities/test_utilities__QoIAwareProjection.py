@@ -1122,3 +1122,44 @@ class Utilities(unittest.TestCase):
 
         except:
             self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_utilities__QoIAwareProjection__best_trained_network(self):
+
+        # Generate dummy dataset:
+        x = np.linspace(0,10,100)[:,None]
+        y = np.logspace(1,2,100)[:,None]
+        z = np.sqrt(np.linspace(10,100,100)[:,None])
+        X = np.hstack((x, y, z))
+        S = np.hstack((x**2, x, y**2))
+        n_components = 1
+        n_epochs = 10
+
+        (input_data, centers, scales) = preprocess.center_scale(X, scaling='0to1')
+
+        try:
+            projection = QoIAwareProjection(input_data,
+                                           n_components,
+                                           optimizers.legacy.Adam(0.001),
+                                           projection_independent_outputs=input_data[:,0:2],
+                                           projection_dependent_outputs=S,
+                                           activation_decoder=('tanh', 'tanh', 'tanh'),
+                                           decoder_interior_architecture=(5,8),
+                                           transformed_projection_dependent_outputs='signed-square-root',
+                                           batch_size=100,
+                                           n_epochs=n_epochs,
+                                           random_seed=100)
+
+            projection.train()
+
+            best_epoch_counter = projection.best_epoch_counter
+            min_loss_idx, = np.where(projection.training_loss==np.min(projection.training_loss))
+            self.assertTrue(best_epoch_counter==min_loss_idx[0])
+            self.assertTrue(projection.best_training_loss==np.min(projection.training_loss))
+
+            if best_epoch_counter==n_epochs:
+                self.assertTrue(np.array_equal(projection.weights_and_biases_trained[0], projection.weights_and_biases_best[0]))
+
+        except:
+            self.assertTrue(False)
