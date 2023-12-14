@@ -2688,6 +2688,7 @@ class ANN:
         from PCAfold import ANN
         import numpy as np
         from tensorflow import optimizers
+        from tensorflow.keras import initializers
 
         # Generate dummy dataset:
         input_data = np.random.rand(100,8)
@@ -2699,8 +2700,8 @@ class ANN:
                         optimizer=optimizers.legacy.Adam(learning_rate=0.001),
                         interior_architecture=(5,4),
                         activation_functions=('tanh', 'tanh', 'linear'),
-                        weights_init='glorot_uniform',
-                        biases_init='zeros',
+                        kernel_initializer=initializers.GlorotUniform(seed=100),
+                        bias_initializer=initializers.Ones(),
                         loss='MSE',
                         batch_size=100,
                         n_epochs=1000,
@@ -2737,10 +2738,10 @@ class ANN:
         ``str`` or ``tuple`` specifying activation functions in all layers. If set to ``str``, the same activation function is used in all layers.
         If set to a ``tuple`` of ``str``, a different activation function can be set at different layers. The number of elements in the ``tuple`` should match the number of layers!
         ``str`` and ``str`` elements of the ``tuple`` can only be ``'linear'``, ``'sigmoid'``, or ``'tanh'``.
-    :param weights_init: (optional)
-        ``str`` specifying the initialization of weights in the network. If set to ``None``, weights will be initialized using the Glorot uniform distribution.
-    :param biases_init: (optional)
-        ``str`` specifying the initialization of biases in the network. If set to ``None``, biases will be initialized as zeros.
+    :param kernel_initializer: (optional)
+        ``tf.keras.initializers`` specifying the initialization of weights in the network. If set to ``None``, weights will be initialized using the Glorot uniform distribution.
+    :param bias_initializer: (optional)
+        ``tf.keras.initializers`` specifying the initialization of biases in the network. If set to ``None``, biases will be initialized as zeros.
     :param loss: (optional)
         ``str`` specifying the loss function. It can be ``'MAE'`` or ``'MSE'``.
     :param batch_size: (optional)
@@ -2772,8 +2773,8 @@ class ANN:
                 optimizer,
                 interior_architecture=(),
                 activation_functions='tanh',
-                weights_init='glorot_uniform',
-                biases_init='zeros',
+                kernel_initializer=None,
+                bias_initializer=None,
                 loss='MSE',
                 batch_size=200,
                 n_epochs=1000,
@@ -2784,8 +2785,6 @@ class ANN:
         import tensorflow as tf
         from tensorflow.keras import layers, models, initializers
 
-        __weights_inits = ['glorot_uniform', 'random_normal']
-        __biases_inits = ['zeros']
         __activations = ['linear', 'sigmoid', 'tanh']
         __losses = ['MSE', 'MAE']
 
@@ -2831,25 +2830,20 @@ class ANN:
 
         self.__neuron_count = neuron_count
 
-        # Check weights initialization:
-        if weights_init is not None:
-            if not isinstance(weights_init, str):
-                raise ValueError("Parameter `weights_init` has to be of type `str`.")
-            if weights_init not in __weights_inits:
-                raise ValueError("Parameter `weights_init` has to be 'glorot_uniform' or 'random_normal'.")
-
         # Set the weights initialization:
-        if (weights_init is None) or (weights_init == 'glorot_uniform'):
+        if kernel_initializer is None:
             if random_seed is None:
-                weights_init = 'glorot_uniform'
+                self.__kernel_initializer = 'glorot_uniform'
             else:
-                weights_init = initializers.glorot_uniform(seed=random_seed)
+                self.__kernel_initializer = initializers.glorot_uniform(seed=random_seed)
+        else:
+            self.__kernel_initializer = kernel_initializer
 
-        if weights_init == 'random_normal':
-            if random_seed is None:
-                weights_init = 'random_normal'
-            else:
-                weights_init = initializers.random_normal(seed=random_seed)
+        # Set the bias initialization:
+        if bias_initializer is None:
+            self.__bias_initializer = 'zeros'
+        else:
+            self.__bias_initializer = bias_initializer
 
         # Set the loss:
         if not isinstance(loss, str):
@@ -2891,15 +2885,15 @@ class ANN:
         ann_model = models.Sequential()
 
         if isinstance(activation_functions, str):
-            ann_model.add(layers.Dense(self.__neuron_count[1], input_dim=self.__neuron_count[0], activation=activation_functions, kernel_initializer=weights_init, bias_initializer=biases_init))
+            ann_model.add(layers.Dense(self.__neuron_count[1], input_dim=self.__neuron_count[0], activation=activation_functions, kernel_initializer=self.__kernel_initializer, bias_initializer=self.__bias_initializer))
         elif isinstance(activation_functions, tuple):
-            ann_model.add(layers.Dense(self.__neuron_count[1], input_dim=self.__neuron_count[0], activation=activation_functions[0], kernel_initializer=weights_init, bias_initializer=biases_init))
+            ann_model.add(layers.Dense(self.__neuron_count[1], input_dim=self.__neuron_count[0], activation=activation_functions[0], kernel_initializer=self.__kernel_initializer, bias_initializer=self.__bias_initializer))
 
         for i, n_neurons in enumerate(self.__neuron_count[2::]):
             if isinstance(activation_functions, str):
-                    ann_model.add(layers.Dense(n_neurons, activation=activation_functions, kernel_initializer=weights_init, bias_initializer=biases_init))
+                    ann_model.add(layers.Dense(n_neurons, activation=activation_functions, kernel_initializer=self.__kernel_initializer, bias_initializer=self.__bias_initializer))
             elif isinstance(activation_functions, tuple):
-                ann_model.add(layers.Dense(n_neurons, activation=activation_functions[i+1], kernel_initializer=weights_init, bias_initializer=biases_init))
+                ann_model.add(layers.Dense(n_neurons, activation=activation_functions[i+1], kernel_initializer=self.__kernel_initializer, bias_initializer=self.__bias_initializer))
 
         # Compile the neural network model:
         ann_model.compile(optimizer, loss=model_loss)
@@ -2909,8 +2903,6 @@ class ANN:
         self.__output_data = output_data
         self.__activation_functions = activation_functions
         self.__interior_architecture = interior_architecture
-        self.__weights_init = weights_init
-        self.__biases_init = biases_init
         self.__loss = loss
         self.__loss_function = model_loss
         self.__model_optimizer = optimizer
@@ -3014,17 +3006,17 @@ class ANN:
         print('\n' + '- '*60)
 
         print('Weights initialization:\n')
-        if self.__weights_init is None:
+        if self.__kernel_initializer is None:
             print('\t- ' + 'Glorot uniform')
         else:
-            print('\t- ' + 'User-provided custom initialization of weights')
+            print('\t- ' + str(self.__kernel_initializer))
         print('\n' + '- '*60)
 
         print('Biases initialization:\n')
-        if self.__biases_init is None:
+        if self.__bias_initializer is None:
             print('\t- ' + 'Zeros')
         else:
-            print('\t- ' + 'User-provided custom initialization of biases')
+            print('\t- ' + str(self.__bias_initializer))
         print('\n' + '- '*60)
 
         print('Results reproducibility:\n')
