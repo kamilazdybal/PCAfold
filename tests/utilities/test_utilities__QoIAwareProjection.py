@@ -5,6 +5,7 @@ from PCAfold import reduction
 from PCAfold import analysis
 from PCAfold import QoIAwareProjection
 from tensorflow import optimizers
+from tensorflow.keras import initializers
 
 class Utilities(unittest.TestCase):
 
@@ -1163,3 +1164,101 @@ class Utilities(unittest.TestCase):
 
         except:
             self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_utilities__QoIAwareProjection__check_various_initializations_of_weights(self):
+
+        import tensorflow as tf
+        from keras.models import Model
+        from keras.layers import Input, Lambda, Dense, concatenate
+        from PCAfold import center_scale
+
+
+        random_seed = 200
+        X = np.random.rand(100,5)
+        S = np.random.rand(100,5)
+
+        tf.random.set_seed(random_seed)
+        tf.keras.utils.set_random_seed(random_seed)
+
+        encoder_kernel_initializer = tf.keras.initializers.RandomNormal(seed=random_seed)
+        decoder_kernel_initializer = tf.keras.initializers.RandomUniform(seed=random_seed)
+
+        # Create an encoding-decoding model manually
+        input_layer = Input(shape=(5,))
+        encoder = Dense(2, activation='linear', kernel_initializer=encoder_kernel_initializer)(input_layer)
+        decoder_1 = Dense(5, activation='tanh', kernel_initializer=decoder_kernel_initializer)(encoder)
+        decoder_2 = Dense(10, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_1)
+        decoder_3 = Dense(10, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_2)
+        output_layer = Dense(2, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_3)
+        manual_model = Model(input_layer, output_layer)
+
+        # Create an encoding-decoding model using PCAfold:
+        qoi_aware = QoIAwareProjection(X,
+                                       n_components=2,
+                                       optimizer=optimizers.legacy.Adam(learning_rate=0.001),
+                                       projection_independent_outputs=None,
+                                       projection_dependent_outputs=S,
+                                       activation_decoder=('tanh', 'tanh', 'tanh', 'tanh'),
+                                       decoder_interior_architecture=(5,10,10),
+                                       encoder_kernel_initializer=encoder_kernel_initializer,
+                                       decoder_kernel_initializer=decoder_kernel_initializer,
+                                       random_seed=random_seed)
+
+        for i in range(0,10):
+            self.assertTrue(np.array_equal(qoi_aware.weights_and_biases_init[i], manual_model.get_weights()[i]))
+
+        encoder_kernel_initializer = tf.keras.initializers.LecunNormal(seed=random_seed)
+        decoder_kernel_initializer = tf.keras.initializers.HeUniform(seed=random_seed)
+
+        # Create an encoding-decoding model manually
+        input_layer = Input(shape=(5,))
+        encoder = Dense(2, activation='linear', kernel_initializer=encoder_kernel_initializer)(input_layer)
+        decoder_1 = Dense(5, activation='tanh', kernel_initializer=decoder_kernel_initializer)(encoder)
+        decoder_2 = Dense(10, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_1)
+        decoder_3 = Dense(10, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_2)
+        output_layer = Dense(2, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_3)
+        manual_model = Model(input_layer, output_layer)
+
+        # Create an encoding-decoding model using PCAfold:
+        qoi_aware = QoIAwareProjection(X,
+                                       n_components=2,
+                                       optimizer=optimizers.legacy.Adam(learning_rate=0.001),
+                                       projection_independent_outputs=None,
+                                       projection_dependent_outputs=S,
+                                       activation_decoder=('tanh', 'tanh', 'tanh', 'tanh'),
+                                       decoder_interior_architecture=(5,10,10),
+                                       encoder_kernel_initializer=encoder_kernel_initializer,
+                                       decoder_kernel_initializer=decoder_kernel_initializer,
+                                       random_seed=random_seed)
+
+        for i in range(0,10):
+            self.assertTrue(np.array_equal(qoi_aware.weights_and_biases_init[i], manual_model.get_weights()[i]))
+
+        encoder_kernel_initializer = tf.keras.initializers.GlorotUniform(seed=random_seed)
+        decoder_kernel_initializer = tf.keras.initializers.GlorotUniform(seed=random_seed)
+
+        # Create an encoding-decoding model manually
+        input_layer = Input(shape=(5,))
+        encoder = Dense(2, activation='linear', kernel_initializer=encoder_kernel_initializer)(input_layer)
+        decoder_1 = Dense(5, activation='tanh', kernel_initializer=decoder_kernel_initializer)(encoder)
+        decoder_2 = Dense(10, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_1)
+        decoder_3 = Dense(10, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_2)
+        output_layer = Dense(2, activation='tanh', kernel_initializer=decoder_kernel_initializer)(decoder_3)
+        manual_model = Model(input_layer, output_layer)
+
+        # Create an encoding-decoding model using PCAfold:
+        qoi_aware = QoIAwareProjection(X,
+                                       n_components=2,
+                                       optimizer=optimizers.legacy.Adam(learning_rate=0.001),
+                                       projection_independent_outputs=None,
+                                       projection_dependent_outputs=S,
+                                       activation_decoder=('tanh', 'tanh', 'tanh', 'tanh'),
+                                       decoder_interior_architecture=(5,10,10),
+                                       encoder_kernel_initializer=encoder_kernel_initializer,
+                                       decoder_kernel_initializer=decoder_kernel_initializer,
+                                       random_seed=random_seed)
+
+        for i in range(0,10):
+            self.assertTrue(np.array_equal(qoi_aware.weights_and_biases_init[i], manual_model.get_weights()[i]))
