@@ -789,6 +789,7 @@ class QoIAwareProjection:
         training_losses_across_epochs = []
         validation_losses_across_epochs = []
         previous_best_training_loss = self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_train,:], decoder_outputs_normalized[idx_train,:], verbose=0)
+        best_epoch_counter = 0
 
         # Append validation loss corresponding to the initial basis:
         if self.__validation_perc != 0: validation_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:], verbose=0))
