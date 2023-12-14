@@ -17,7 +17,7 @@ kreg_cython = cythonize(Extension(name='PCAfold.kernel_regression',
                                   language='c++'))
 
 setup(name='PCAfold',
-      version='2.1.0',
+      version='2.2.0',
       license='MIT',
       zip_safe=False,
       description='PCAfold is a Python library for generating, improving and analyzing PCA-derived low-dimensional manifolds',

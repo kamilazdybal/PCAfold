@@ -50,8 +50,8 @@ class Reconstruction(unittest.TestCase):
                             optimizers.legacy.Adam(0.001),
                             interior_architecture=(5,4),
                             activation_functions=('tanh', 'tanh', 'linear'),
-                            weights_init='glorot_uniform',
-                            biases_init='zeros',
+                            kernel_initializer='glorot_uniform',
+                            bias_initializer='zeros',
                             loss='MSE',
                             batch_size=100,
                             n_epochs=1000,
@@ -84,10 +84,10 @@ class Reconstruction(unittest.TestCase):
             ann_model = reconstruction.ANN(input_data, output_data, optimizers.legacy.Adam(0.001), activation_functions=[])
 
         with self.assertRaises(ValueError):
-            ann_model = reconstruction.ANN(input_data, output_data, optimizers.legacy.Adam(0.001), weights_init=[])
+            ann_model = reconstruction.ANN(input_data, output_data, optimizers.legacy.Adam(0.001), kernel_initializer=[])
 
         with self.assertRaises(ValueError):
-            ann_model = reconstruction.ANN(input_data, output_data, optimizers.legacy.Adam(0.001), biases_init=[])
+            ann_model = reconstruction.ANN(input_data, output_data, optimizers.legacy.Adam(0.001), bias_initializer=[])
 
         with self.assertRaises(ValueError):
             ann_model = reconstruction.ANN(input_data, output_data, optimizers.legacy.Adam(0.001), loss=[])
@@ -336,3 +336,152 @@ class Reconstruction(unittest.TestCase):
 
         except Exception:
             self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_reconstruction__ANN__kernel_initializers(self):
+
+        from tensorflow.keras import initializers
+
+        input_data = np.random.rand(100,6)
+        output_data = np.random.rand(100,4)
+
+        try:
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.RandomUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.RandomNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.LecunUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.LecunNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.GlorotUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.GlorotNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.HeUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.HeNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.Ones())
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            kernel_initializer=initializers.Zeros())
+
+        except Exception:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------
+
+    def test_reconstruction__ANN__bias_initializers(self):
+
+        from tensorflow.keras import initializers
+
+        input_data = np.random.rand(100,6)
+        output_data = np.random.rand(100,4)
+
+        try:
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.RandomUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.RandomNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.LecunUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.LecunNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.GlorotUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.GlorotNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.HeUniform(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.HeNormal(seed=100))
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.Ones())
+
+            ann_model = reconstruction.ANN(input_data,
+                                            output_data,
+                                            optimizers.legacy.Adam(0.001),
+                                            n_epochs=5,
+                                            bias_initializer=initializers.Zeros())
+
+        except Exception:
+            self.assertTrue(False)
+
+# ------------------------------------------------------------------------------

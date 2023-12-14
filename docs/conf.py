@@ -21,9 +21,9 @@ sys.path.insert(0, os.path.abspath('../PCAfold/'))
 # -- Project information -----------------------------------------------------
 
 project = 'PCAfold'
-copyright = '2020-2023, Elizabeth Armstrong, Alessandro Parente, James C. Sutherland, Kamila Zdybał'
+copyright = '2020-2024, Elizabeth Armstrong, Alessandro Parente, James C. Sutherland, Kamila Zdybał'
 author = 'Elizabeth Armstrong, Alessandro Parente, James C. Sutherland, Kamila Zdybał'
-release = '2.1.0'
+release = '2.2.0'
 
 # -- General configuration ---------------------------------------------------
 

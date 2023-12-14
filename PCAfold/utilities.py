@@ -1,10 +1,10 @@
 """utilities.py: module for manifold optimization utilities."""
 
 __author__ = "Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
-__copyright__ = "Copyright (c) 2020-2023, Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
+__copyright__ = "Copyright (c) 2020-2024, Kamila Zdybal, Elizabeth Armstrong, Alessandro Parente and James C. Sutherland"
 __credits__ = ["Department of Chemical Engineering, University of Utah, Salt Lake City, Utah, USA", "Universite Libre de Bruxelles, Aero-Thermo-Mechanics Laboratory, Brussels, Belgium"]
 __license__ = "MIT"
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 __maintainer__ = ["Kamila Zdybal", "Elizabeth Armstrong"]
 __email__ = ["kamilazdybal@gmail.com", "Elizabeth.Armstrong@chemeng.utah.edu", "James.Sutherland@chemeng.utah.edu"]
 __status__ = "Production"
@@ -70,6 +70,7 @@ class QoIAwareProjection:
         from PCAfold import center_scale, QoIAwareProjection
         import numpy as np
         from tensorflow import optimizers
+        from tensorflow.keras import initializers
 
         # Generate dummy dataset:
         X = np.random.rand(100,8)
@@ -92,6 +93,8 @@ class QoIAwareProjection:
                                        decoder_interior_architecture=(5,8),
                                        encoder_weights_init=None,
                                        decoder_weights_init=None,
+                                       encoder_kernel_initializer=initializers.RandomNormal(seed=100),
+                                       decoder_kernel_initializer=initializers.GlorotUniform(seed=100),
                                        trainable_encoder_bias=True,
                                        hold_initialization=10,
                                        hold_weights=2,
@@ -100,7 +103,6 @@ class QoIAwareProjection:
                                        batch_size=100,
                                        n_epochs=200,
                                        validation_perc=10,
-                                       reduce_memory=True,
                                        random_seed=100,
                                        verbose=True)
 
@@ -191,6 +193,7 @@ class QoIAwareProjection:
 
     :param input_data:
         ``numpy.ndarray`` specifying the data set used as the input to the encoder-decoder. It should be of size ``(n_observations,n_variables)``.
+        Note that input data is not preprocessed inside the ``QoIAwareProjection`` class in any way. If the input data should be centered and scaled, you need to take care of this before passing it as a parameter.
     :param n_components:
         ``int`` specifying the dimensionality of the QoI-aware encoder-decoder projection. This is equal to the number of neurons in the bottleneck layer.
     :param optimizer:
@@ -209,9 +212,13 @@ class QoIAwareProjection:
         If set to an empty tuple, ``decoder_interior_architecture=()``, the overal network architecture will be ``(Input)-(Bottleneck)-(Output)``.
         Keep in mind that if you'd like to create just one interior layer, you should use a comma after the integer: ``decoder_interior_architecture=(4,)``.
     :param encoder_weights_init: (optional)
-        ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. It should be of size ``(n_variables, n_components)``. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+        ``numpy.ndarray`` specifying the custom initalization of the weights in the encoder. It should be of size ``(n_variables, n_components)``. If set to ``None`` and ``encoder_kernel_initializer`` is set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
     :param decoder_weights_init: (optional)
-        ``tuple`` of ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. Each element in the tuple should have a shape that matches the architecture. If set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+        ``tuple`` of ``numpy.ndarray`` specifying the custom initalization of the weights in the decoder. Each element in the tuple should have a shape that matches the architecture. If set to ``None`` and ``decoder_kernel_initializer`` is set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution.
+    :param encoder_kernel_initializer: (optional)
+        ``tf.keras.initializers`` specifying the initialization of the weights in the encoder. Only used when ``encoder_weights_init`` is set to ``None``. If set to ``None`` and ``encoder_weights_init`` is set to ``None``, weights in the encoder will be initialized using the Glorot uniform distribution. To assure fully reproducible training, pass a random seed to the initializer, e.g., ``tf.keras.initializers.GlorotUniform(seed=100)``.
+    :param decoder_kernel_initializer: (optional)
+        ``tf.keras.initializers`` specifying the initialization of the weights in the decoder. Only used when ``decoder_weights_init`` is set to ``None``. If set to ``None`` and ``decoder_weights_init`` is set to ``None``, weights in the decoder will be initialized using the Glorot uniform distribution. To assure fully reproducible training, pass a random seed to the initializer, e.g., ``tf.keras.initializers.GlorotUniform(seed=100)``.
     :param trainable_encoder_bias: (optional)
         ``bool`` specifying if the biases in the encoding layer should be trainable. Note, that for linear projections, bias does not change the projection quality and only acts to translate the projection along the low-dimensional coordinates.
     :param hold_initialization: (optional)
@@ -234,8 +241,6 @@ class QoIAwareProjection:
         ``int`` specifying the number of epochs.
     :param validation_perc: (optional)
         ``int`` specifying the percentage of the input data to be used as validation data during training. It should be a number larger than or equal to 0 and smaller than 100. Note, that if it is set above 0, not all of the input data will be used as training data. Note, that validation data does not impact model training!
-    :param reduce_memory: (optional)
-        ``bool`` specifying if memory should be reduced. If set to true, training data will be cleared every time the training loss drops by an order of magnitude. Variables that are cleared are: ``training_losses_across_epochs``, ``validation_losses_across_epochs``, and ``bases_across_epochs``.
     :param random_seed: (optional)
         ``int`` specifying the random seed to be used for any random operations. It is highly recommended to set a fixed random seed, as this allows for complete reproducibility of the results.
     :param verbose: (optional)
@@ -254,7 +259,7 @@ class QoIAwareProjection:
     - **weights_and_biases_trained** - (read only) ``list`` of ``numpy.ndarray`` specifying weights and biases after training the QoI-aware encoder-decoder. Only available after calling ``QoIAwareProjection.train()``.
     - **training_loss** - (read only) ``list`` of losses computed on the training data. Only available after calling ``QoIAwareProjection.train()``.
     - **validation_loss** - (read only) ``list`` of losses computed on the validation data. Only available after calling ``QoIAwareProjection.train()`` and only when ``validation_perc`` was not equal to 0.
-    - **bases_across_epochs** - (read only) ``list`` of ``numpy.ndarray`` specifying all basis matrices from all epochs. Only available after calling ``QoIAwareProjection.train()``.
+    - **weights_and_biases_best** - (read only) ``list`` of ``numpy.ndarray`` specifying all weights and biases corresponding to the epoch at which the training loss was the smallest. Only available after calling ``QoIAwareProjection.train()``.
     """
 
     def __init__(self,
@@ -267,6 +272,8 @@ class QoIAwareProjection:
                 decoder_interior_architecture=(),
                 encoder_weights_init=None,
                 decoder_weights_init=None,
+                encoder_kernel_initializer=None,
+                decoder_kernel_initializer=None,
                 trainable_encoder_bias=True,
                 hold_initialization=None,
                 hold_weights=None,
@@ -278,7 +285,6 @@ class QoIAwareProjection:
                 batch_size=200,
                 n_epochs=1000,
                 validation_perc=10,
-                reduce_memory=False,
                 random_seed=None,
                 verbose=False):
 
@@ -387,11 +393,14 @@ class QoIAwareProjection:
             if not n_encoder_weights_x==n_input_variables or not n_encoder_weights_y==n_components:
                 raise ValueError("Parameter `encoder_weights_init` has to have shape (n_input_variables, n_components).")
             encoder_kernel_initializer = tf.constant_initializer(encoder_weights_init)
-        else:
+
+        elif (encoder_weights_init is None) and (encoder_kernel_initializer is None):
             if random_seed is None:
                 encoder_kernel_initializer = 'glorot_uniform'
             else:
                 encoder_kernel_initializer = initializers.glorot_uniform(seed=random_seed)
+
+        self.__encoder_kernel_initializer = encoder_kernel_initializer
 
         # Determine initialization of weights in the decoder:
         if decoder_weights_init is not None:
@@ -409,11 +418,17 @@ class QoIAwareProjection:
                 if not d1==self.__neuron_count[1+i] or not d2==self.__neuron_count[i+2]:
                     raise ValueError("Shapes of elements in `decoder_weights_init` do not match the decoder architecture.")
             decoder_kernel_initializer = tuple([tf.constant_initializer(weight) for weight in decoder_weights_init])
-        else:
+        elif (decoder_weights_init is None) and (decoder_kernel_initializer is None):
             if random_seed is None:
                 decoder_kernel_initializer = tuple(['glorot_uniform' for i in range(0,len(decoder_interior_architecture)+1)])
             else:
                 decoder_kernel_initializer = tuple([initializers.glorot_uniform(seed=random_seed) for i in range(0,len(decoder_interior_architecture)+1)])
+
+        elif (decoder_weights_init is None) and (decoder_kernel_initializer is not None):
+
+            decoder_kernel_initializer = tuple([decoder_kernel_initializer for i in range(0,len(decoder_interior_architecture)+1)])
+
+        self.__decoder_kernel_initializer = decoder_kernel_initializer
 
         if not isinstance(trainable_encoder_bias, bool):
             raise ValueError("Parameter `trainable_encoder_bias` has to be of type `bool`.")
@@ -449,9 +464,6 @@ class QoIAwareProjection:
 
         if (validation_perc < 0) or (validation_perc >= 100):
             raise ValueError("Parameter `validation_perc` has to be an integer between 0 and 100`.")
-
-        if not isinstance(reduce_memory, bool):
-            raise ValueError("Parameter `reduce_memory` has to be a boolean.")
 
         # Set random seed for neural network training reproducibility:
         if random_seed is not None:
@@ -490,6 +502,8 @@ class QoIAwareProjection:
         self.__decoder_interior_architecture = decoder_interior_architecture
         self.__encoder_weights_init = encoder_weights_init
         self.__decoder_weights_init = decoder_weights_init
+        self.__encoder_kernel_initializer = encoder_kernel_initializer
+        self.__decoder_kernel_initializer = decoder_kernel_initializer
         self.__trainable_encoder_bias = trainable_encoder_bias
         self.__hold_initialization = hold_initialization
         self.__hold_weights = hold_weights
@@ -503,7 +517,6 @@ class QoIAwareProjection:
         self.__batch_size = batch_size
         self.__n_epochs = n_epochs
         self.__validation_perc = validation_perc
-        self.__reduce_memory = reduce_memory
         self.__random_seed = random_seed
         self.__verbose = verbose
 
@@ -517,14 +530,10 @@ class QoIAwareProjection:
         # Attributes available after model training:
         self.__training_loss = None
         self.__validation_loss = None
-        self.__idx_min_training_loss = None
-        self.__idx_min_validation_loss = None
-        self.__training_loss_at_first_epoch = None
-        self.__validation_loss_at_first_epoch = None
-        self.__bases_across_epochs = None
+        self.__weights_and_biases_best = None
         self.__weights_and_biases_trained = None
-        self.__memory_was_cleared = False
-        self.__memory_cleared_at_epoch = None
+        self.__best_epoch_counter = None
+        self.__best_training_loss = None
 
     @property
     def input_data(self):
@@ -563,6 +572,10 @@ class QoIAwareProjection:
         return self.__weights_and_biases_trained
 
     @property
+    def weights_and_biases_best(self):
+        return self.__weights_and_biases_best
+
+    @property
     def training_loss(self):
         return self.__training_loss
 
@@ -571,16 +584,12 @@ class QoIAwareProjection:
         return self.__validation_loss
 
     @property
-    def bases_across_epochs(self):
-        return self.__bases_across_epochs
+    def best_epoch_counter(self):
+        return self.__best_epoch_counter
 
     @property
-    def training_loss_at_first_epoch(self):
-        return self.__training_loss_at_first_epoch
-
-    @property
-    def validation_loss_at_first_epoch(self):
-        return self.__validation_loss_at_first_epoch
+    def best_training_loss(self):
+        return self.__best_training_loss
 
 # ------------------------------------------------------------------------------
 
@@ -647,14 +656,20 @@ class QoIAwareProjection:
 
         print('Weights initialization in the encoder:\n')
         if self.__encoder_weights_init is None:
-            print('\t- ' + 'Glorot uniform')
+            if self.__encoder_kernel_initializer is not None:
+                print('\t- ' + str(self.__encoder_kernel_initializer))
+            else:
+                print('\t- ' + 'Glorot uniform')
         else:
             print('\t- ' + 'User-provided custom initialization of the encoder')
         print('\n' + '- '*60)
 
         print('Weights initialization in the decoder:\n')
         if self.__decoder_weights_init is None:
-            print('\t- ' + 'Glorot uniform')
+            if self.__decoder_kernel_initializer is not None:
+                print('\t- ' + str(self.__decoder_kernel_initializer[0]))
+            else:
+                print('\t- ' + 'Glorot uniform')
         else:
             print('\t- ' + 'User-provided custom initialization of the decoder')
         print('\n' + '- '*60)
@@ -708,13 +723,8 @@ class QoIAwareProjection:
             tf.random.set_seed(self.__random_seed)
             tf.keras.utils.set_random_seed(self.__random_seed)
 
-        bases_across_epochs = []
-        training_losses_across_epochs = []
-        validation_losses_across_epochs = []
-
         # Determine the first basis:
         basis_init = self.weights_and_biases_init[0]
-        basis_init = basis_init # / np.linalg.norm(basis_init, axis=0)
 
         if self.projection_independent_outputs is not None:
             decoder_outputs = cp.deepcopy(self.projection_independent_outputs)
@@ -775,7 +785,18 @@ class QoIAwareProjection:
             validation_data = None
             if self.__verbose: print('No validation data is used at model training. Model will be trained on 100% of input data.\n')
 
+        # Instantiate variables that measure network performance:
+        training_losses_across_epochs = []
+        validation_losses_across_epochs = []
+        previous_best_training_loss = self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_train,:], decoder_outputs_normalized[idx_train,:], verbose=0)
+
+        # Append validation loss corresponding to the initial basis:
+        if self.__validation_perc != 0: validation_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:], verbose=0))
+
         for i_epoch in tqdm(self.__epochs_list):
+
+            # Capture weights prior to optimization:
+            weights_prior_to_optimization = self.__qoi_aware_encoder_decoder.get_weights()
 
             history = self.__qoi_aware_encoder_decoder.fit(self.__input_data[idx_train,:],
                                                            decoder_outputs_normalized[idx_train,:],
@@ -811,21 +832,16 @@ class QoIAwareProjection:
                         self.__qoi_aware_encoder_decoder.set_weights(weights_and_biases)
                         n_count_epochs += 1
 
-            # Update the projection-dependent output variables - - - - - - - - -
-
-            # Determine the current basis:
-            basis_current = self.__qoi_aware_encoder_decoder.get_weights()[0]
-            # basis_current = basis_current / np.linalg.norm(basis_current, axis=0)
-
+            # Update the projection-dependent output variables for the next epoch:
             if self.projection_independent_outputs is not None:
                 decoder_outputs = self.projection_independent_outputs
 
                 if self.projection_dependent_outputs is not None:
-                    current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_current)
+                    current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, self.__qoi_aware_encoder_decoder.get_weights()[0])
                     decoder_outputs = np.hstack((decoder_outputs, current_projection_dependent_outputs))
 
             else:
-                current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, basis_current)
+                current_projection_dependent_outputs = np.dot(self.projection_dependent_outputs, self.__qoi_aware_encoder_decoder.get_weights()[0])
                 decoder_outputs = current_projection_dependent_outputs
 
             if self.projection_dependent_outputs is not None:
@@ -852,50 +868,45 @@ class QoIAwareProjection:
                 elif self.__activation_decoder[-1] == 'linear':
                     decoder_outputs_normalized = cp.deepcopy(decoder_outputs)
 
-            # Determine the new validation data:
-            if self.__validation_perc != 0:
-                validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
+            # Update the validation data for the next epoch:
+            if self.__validation_perc != 0: validation_data = (self.__input_data[idx_validation,:], decoder_outputs_normalized[idx_validation,:])
 
-            # Clear memory:
-            if (i_epoch > 0) and (self.__reduce_memory > 0) and (training_losses_across_epochs[0] / history.history['loss'][0] > 10):
+            # Save losses:
+            training_losses_across_epochs.append(history.history['loss'][0]) # Training loss corresponds to weights prior to the current optimization step
+            if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0]) # Validation loss corresponds to weights after the current optimization step
 
-                if self.__verbose: print('Clearing memory at epoch: ' + str(i_epoch))
+            # Overwrite the whole trained network corresponding to the so far best training loss:
+            if (i_epoch > 0) and (training_losses_across_epochs[-1] < previous_best_training_loss):
 
-                del bases_across_epochs
-                del training_losses_across_epochs
-                del validation_losses_across_epochs
+                self.__weights_and_biases_best = weights_prior_to_optimization
 
-                bases_across_epochs = []
-                training_losses_across_epochs = []
-                validation_losses_across_epochs = []
+                previous_best_training_loss = training_losses_across_epochs[-1]
+                best_epoch_counter = i_epoch
 
-                self.__memory_was_cleared = True
-                self.__memory_cleared_at_epoch = i_epoch
+        # Append training loss corresponding to the final weights in the trained network:
+        training_losses_across_epochs.append(self.__qoi_aware_encoder_decoder.evaluate(self.__input_data[idx_train,:], decoder_outputs_normalized[idx_train,:], verbose=0))
 
-            bases_across_epochs.append(basis_current)
-            training_losses_across_epochs.append(history.history['loss'][0])
-            if self.__validation_perc != 0: validation_losses_across_epochs.append(history.history['val_loss'][0])
+        # Overwrite the whole trained network in case the final trained network is still better than anything computed thus far:
+        if training_losses_across_epochs[-1] < previous_best_training_loss:
 
-            # Save the training and validation loss at the first epoch to have a reference point:
-            if i_epoch == 0:
-                self.__training_loss_at_first_epoch = history.history['loss'][0]
-                if self.__validation_perc != 0: self.__validation_loss_at_first_epoch = history.history['val_loss'][0]
+            self.__weights_and_biases_best = self.__qoi_aware_encoder_decoder.get_weights()
+            previous_best_training_loss = training_losses_across_epochs[-1]
+            if self.__verbose: print('Best basis is the final one')
+            best_epoch_counter += 1
+
+        else:
+
+            if self.__verbose: print('Best basis at epoch: ' + str(best_epoch_counter))
 
         toc = time.perf_counter()
         if self.__verbose: print(f'Time it took: {(toc - tic)/60:0.1f} minutes.\n')
 
         self.__training_loss = training_losses_across_epochs
         self.__validation_loss = validation_losses_across_epochs
-        self.__bases_across_epochs = bases_across_epochs
+        self.__best_epoch_counter = best_epoch_counter
+        self.__best_training_loss = previous_best_training_loss
         self.__weights_and_biases_trained = self.__qoi_aware_encoder_decoder.get_weights()
         self.__trained = True
-
-        idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
-        self.__idx_min_training_loss = idx_min_training_loss[0]
-
-        if self.__validation_perc != 0:
-            idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
-            self.__idx_min_validation_loss = idx_min_validation_loss[0]
 
 # ------------------------------------------------------------------------------
 
@@ -937,68 +948,34 @@ class QoIAwareProjection:
 
 # ------------------------------------------------------------------------------
 
-    def get_best_basis(self, method='min-training-loss'):
+    def print_weights_and_biases_best(self):
         """
-        Returns the best low-dimensional basis according to the selected method.
-
-        :param method: (optional)
-            ``str`` specifying the method used to select the best basis. It should be ``'min-training-loss'``, ``'min-validation-loss'``, or ``'last-epoch'``.
-
-        :return:
-            - **best_basis** - ``numpy.ndarray`` specifying the best basis extracted from the ``bases_across_epochs`` attribute.
+        Prints the best weights and biases from all layers of the QoI-aware encoder-decoder.
         """
-
-        __methods = ['min-training-loss', 'min-validation-loss', 'last-epoch']
-
-        if not isinstance(method, str):
-            raise ValueError("Parameter `method` has to be of type `str`.")
-
-        if method not in __methods:
-            raise ValueError("Parameter `method` can only be 'min-training-loss', 'min-validation-loss', or 'last-epoch'.")
 
         if self.__trained:
 
-            if method == 'min-training-loss':
-
-                print('Minimum training loss:\t\t' + str(np.min(self.__training_loss)))
-
-                if self.__memory_was_cleared:
-                    best_basis = self.__bases_across_epochs[self.__idx_min_training_loss]
-                    print('Minimum training loss at epoch:\t' + str(self.__memory_cleared_at_epoch + self.__idx_min_training_loss + 1))
+            for i in range(0,len(self.weights_and_biases_best)):
+                if i%2==0: print('Layers ' + str(int(i/2) + 1) + ' -- ' + str(int(i/2) + 2) + ': ' + '- '*20)
+                if i%2==0:
+                    print('\nWeight:')
                 else:
-                    best_basis = self.__bases_across_epochs[self.__idx_min_training_loss]
-                    print('Minimum training loss at epoch:\t' + str(self.__idx_min_training_loss + 1))
-
-            elif method == 'min-validation-loss':
-
-                if self.__validation_perc != 0:
-
-                    print('Minimum validation loss:\t\t' + str(np.min(self.__validation_loss)))
-
-                    if self.__memory_was_cleared:
-                        best_basis = self.__bases_across_epochs[self.__idx_min_validation_loss]
-                        print('Minimum validation loss at epoch:\t' + str(self.__memory_cleared_at_epoch + self.__idx_min_validation_loss + 1))
-                    else:
-                        best_basis = self.__bases_across_epochs[self.__idx_min_validation_loss]
-                        print('Minimum validation loss at epoch:\t' + str(self.__idx_min_validation_loss + 1))
-
-                else:
-
-                    print('Validation loss not available.')
-
-            elif method == 'last-epoch':
-
-                print('Training loss at the last epoch:\t\t' + str(self.__training_loss[-1]))
-
-                if self.__validation_perc != 0: print('Validation loss at the last epoch:\t\t' + str(self.__validation_loss[-1]))
-
-                best_basis = self.__bases_across_epochs[-1]
+                    print('Bias:')
+                print(self.weights_and_biases_best[i])
+                print()
 
         else:
 
             print('Model has not been trained yet!')
 
-        return best_basis
+# ------------------------------------------------------------------------------
+
+    def save_weights_and_biases(self):
+        """
+        Saves weights and biases from all layers of the QoI-aware encoder-decoder to a ``.h5`` file.
+        """
+
+        pass
 
 # ------------------------------------------------------------------------------
 
@@ -1032,30 +1009,19 @@ class QoIAwareProjection:
 
         if self.__trained:
 
-            if self.__memory_was_cleared:
-                x_axis = [i for i in range(self.__memory_cleared_at_epoch+1,self.__n_epochs+1)]
-            else:
-                x_axis = [i for i in range(1,self.__n_epochs+1)]
+            x_axis = [i for i in range(0,self.__n_epochs+1)]
 
-            x_ticks = [1] + [i for i in range(1,self.__n_epochs) if i%markevery==0] + [self.__n_epochs]
+            x_ticks = [0] + [i for i in range(1,self.__n_epochs) if i%markevery==0] + [self.__n_epochs]
 
             plt.figure(figsize=figure_size)
             plt.semilogy(x_axis, self.__training_loss, 'k', lw=3, label='Training loss')
-            if self.__memory_was_cleared:
-                plt.scatter(self.__memory_cleared_at_epoch + self.__idx_min_validation_loss + 1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
-            else:
-                plt.scatter(self.__idx_min_training_loss+1, np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
+            idx_min_training_loss, = np.where(self.__training_loss==np.min(self.__training_loss))
+            plt.scatter(idx_min_training_loss[0], np.min(self.__training_loss), c='k', s=200, label='Min training loss', zorder=10)
 
             if self.__validation_perc != 0:
+                idx_min_validation_loss, = np.where(self.__validation_loss==np.min(self.__validation_loss))
                 plt.semilogy(x_axis, self.__validation_loss, 'r--', lw=2, label='Validation loss')
-                if self.__memory_was_cleared:
-                    plt.scatter(self.__memory_cleared_at_epoch + self.__idx_min_validation_loss + 1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
-                else:
-                    plt.scatter(self.__idx_min_validation_loss+1, np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
-
-            if self.__memory_was_cleared:
-                plt.scatter(1, self.__training_loss_at_first_epoch, c='k', s=40, label='Initial training loss', zorder=20)
-                if self.__validation_perc != 0: plt.scatter(1, self.__validation_loss_at_first_epoch, c='r', s=20, label='Initial validation loss', zorder=20)
+                plt.scatter(idx_min_validation_loss[0], np.min(self.__validation_loss), c='r', s=100, label='Min validation loss', zorder=20)
 
             plt.xlabel('Epoch #', fontsize=font_labels)
             plt.xticks(x_ticks, rotation=90)
