@@ -655,14 +655,20 @@ class QoIAwareProjection:
 
         print('Weights initialization in the encoder:\n')
         if self.__encoder_weights_init is None:
-            print('\t- ' + 'Glorot uniform')
+            if self.__encoder_kernel_initializer is not None:
+                print('\t- ' + str(self.__encoder_kernel_initializer))
+            else:
+                print('\t- ' + 'Glorot uniform')
         else:
             print('\t- ' + 'User-provided custom initialization of the encoder')
         print('\n' + '- '*60)
 
         print('Weights initialization in the decoder:\n')
         if self.__decoder_weights_init is None:
-            print('\t- ' + 'Glorot uniform')
+            if self.__decoder_kernel_initializer is not None:
+                print('\t- ' + str(self.__decoder_kernel_initializer[0]))
+            else:
+                print('\t- ' + 'Glorot uniform')
         else:
             print('\t- ' + 'User-provided custom initialization of the decoder')
         print('\n' + '- '*60)
