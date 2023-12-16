@@ -38,6 +38,7 @@ We import the necessary modules:
   from PCAfold import utilities
   import numpy as np
   from tensorflow import optimizers
+  from tensorflow.keras import initializers
 
 and we set some initial parameters:
 
@@ -149,6 +150,7 @@ We instantiate an object of the ``QoIAwareProjection`` class with various parame
                                               decoder_interior_architecture=decoder_interior_architecture,
                                               encoder_weights_init=encoder_weights_init,
                                               decoder_weights_init=None,
+                                              decoder_kernel_initializer=initializers.GlorotUniform(seed=random_seed),
                                               hold_initialization=hold_initialization,
                                               hold_weights=hold_weights,
                                               transformed_projection_dependent_outputs='signed-square-root',
@@ -219,7 +221,7 @@ Before we begin neural network training, we can print the summary of the current
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Weights initialization in the decoder:
 
-  	- Glorot uniform
+    - <keras.src.initializers.initializers.GlorotUniform object at 0x7fce4ff75a50>
 
   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   Weights updates in the encoder:
