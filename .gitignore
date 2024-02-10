@@ -14,3 +14,4 @@ build/
 *.so
 PCAfold.egg-info/
 dist/
+.idea/
