@@ -1060,7 +1060,7 @@ def manifold_informed_forward_variable_addition(X,
     The goal of the algorithm is to select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
     The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
-    for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
+    for the selected :math:`n_{dep}` dependent variables (as per ``analysis.cost_function_normalized_variance_derivative`` function).
     The algorithm can be bootstrapped in two ways:
 
     - Automatic bootstrap when ``bootstrap_variables=None``: the first best variable is selected automatically as the one that gives the lowest cost.
@@ -1485,7 +1485,7 @@ def manifold_informed_backward_variable_elimination(X,
     The goal of the algorithm is to select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
     The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
-    for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
+    for the selected :math:`n_{dep}` dependent variables (as per ``analysis.cost_function_normalized_variance_derivative`` function).
 
     The algorithm iterates, removing another variable that has an effect of decreasing the cost the most at each iteration.
     The original variables in a data set get ordered according to their effect
