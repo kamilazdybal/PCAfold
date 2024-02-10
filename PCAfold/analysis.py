@@ -991,7 +991,13 @@ def feature_size_map_smooth(indepvars, feature_size_map, method='median', n_neig
 
 # ------------------------------------------------------------------------------
 
-def cost_function_normalized_variance_derivative(variance_data, penalty_function=None, power=1, vertical_shift=1, norm=None, integrate_to_peak=False, rightmost_peak_shift=None):
+def cost_function_normalized_variance_derivative(variance_data,
+                                                 penalty_function=None,
+                                                 power=1,
+                                                 vertical_shift=1,
+                                                 norm=None,
+                                                 integrate_to_peak=False,
+                                                 rightmost_peak_shift=None):
     """
     Defines a cost function for manifold topology assessment based on the areas, or weighted (penalized) areas, under
     the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`, for the selected :math:`n_{dep}` dependent variables.
@@ -1085,15 +1091,19 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
     Otherwise, the final cost, :math:`\\mathcal{L}`, can be computed from all :math:`A_i` in a few ways,
     where :math:`n_{dep}` is the number of dependent variables stored in the ``variance_data`` object:
 
+    - If ``norm='cumulative'``, :math:`\\mathcal{L} = \\sum_{i = 1}^{n_{dep}} A_i`.
+
     - If ``norm='average'``, :math:`\\mathcal{L} = \\frac{1}{n_{dep}} \\sum_{i = 1}^{n_{dep}} A_i`.
 
-    - If ``norm='cumulative'``, :math:`\\mathcal{L} = \\sum_{i = 1}^{n_{dep}} A_i`.
+    - If ``norm='L2'``, :math:`\\mathcal{L} = \\sqrt{\\sum_{i = 1}^{n_{dep}} A_i^2}`.
+
+    - If ``norm='normalized-L2'``, :math:`\\mathcal{L} = \\frac{1}{n_{dep}} \\sqrt{\\sum_{i = 1}^{n_{dep}} A_i^2}`.
 
     - If ``norm='max'``, :math:`\\mathcal{L} = \\text{max} (A_i)`.
 
-    - If ``norm='median'``, :math:`\\mathcal{L} = \\text{median} (A_i)`.
-
     - If ``norm='min'``, :math:`\\mathcal{L} = \\text{min} (A_i)`.
+
+    - If ``norm='median'``, :math:`\\mathcal{L} = \\text{median} (A_i)`.
 
     **Example:**
 
@@ -1143,8 +1153,15 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
     :param vertical_shift: (optional)
         ``float`` or ``int`` specifying the vertical shift multiplier, :math:`b`. It can be used to control how much penalty should be applied to feature sizes.
     :param norm: (optional)
-        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
-        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area. If ``norm=None``, a list of costs for all depedent variables is returned.
+        ``str`` specifying the norm to apply for all areas :math:`A_i`.
+        ``norm='cumulative'`` uses the :math:`L_{1}` norm,
+        ``norm='average'`` uses an arithmetic average,
+        ``norm='L2'`` uses the :math:`L_{2}` norm,
+        ``norm='normalized-L2'`` uses the :math:`L_{2}` norm divided by the number of target variables,
+        ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='min'`` uses a minimum area, and
+        ``norm='median'`` uses a median area.
+        If ``norm=None``, a list of individual costs for all depedent variables is returned.
     :param integrate_to_peak: (optional)
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
     :param rightmost_peak_shift: (optional)
@@ -1155,7 +1172,7 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
     """
 
     __penalty_functions = ['peak', 'sigma', 'log-sigma', 'log-sigma-over-peak']
-    __norms = ['average', 'cumulative', 'max', 'median', 'min']
+    __norms = ['cumulative', 'average', 'L2', 'normalized-L2', 'max', 'min', 'median']
 
     if not isinstance(variance_data, VarianceData):
         raise ValueError("Parameter `variance_data` has to be an instance of class `PCAfold.analysis.VarianceData`.")
@@ -1270,15 +1287,30 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
     else:
 
-        if norm == 'max':
+        if norm == 'cumulative':
 
-            # Take L-infinity norm over all costs:
-            normalized_cost = np.max(costs)
+            # Take the cumulative sum over all costs:
+            normalized_cost = np.sum(costs)
 
         elif norm == 'average':
 
             # Take the arithmetic average norm over all costs:
             normalized_cost = np.mean(costs)
+
+        elif norm == 'L2':
+
+            # Take the L2 norm over all costs:
+            normalized_cost = np.sqrt(np.sum([i**2 for i in costs]))
+
+        elif norm == 'normalized-L2':
+
+            # Take the normalized L2 norm over all costs:
+            normalized_cost = 1/(len(costs)) * np.sqrt(np.sum([i**2 for i in costs]))
+
+        elif norm == 'max':
+
+            # Take L-infinity norm over all costs:
+            normalized_cost = np.max(costs)
 
         elif norm == 'min':
 
@@ -1289,11 +1321,6 @@ def cost_function_normalized_variance_derivative(variance_data, penalty_function
 
             # Take the median norm over all costs:
             normalized_cost = np.median(costs)
-
-        elif norm == 'cumulative':
-
-            # Take the cumulative sum over all costs:
-            normalized_cost = np.sum(costs)
 
         return normalized_cost
 

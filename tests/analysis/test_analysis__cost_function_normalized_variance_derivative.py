@@ -111,7 +111,7 @@ class Analysis(unittest.TestCase):
         try:
             cost = analysis.cost_function_normalized_variance_derivative(variance_data,
                                                                 penalty_function=None,
-                                                                norm=None,
+                                                                norm='cumulative',
                                                                 integrate_to_peak=True)
             cost = analysis.cost_function_normalized_variance_derivative(variance_data,
                                                                 penalty_function=None,
@@ -119,7 +119,11 @@ class Analysis(unittest.TestCase):
                                                                 integrate_to_peak=True)
             cost = analysis.cost_function_normalized_variance_derivative(variance_data,
                                                                 penalty_function=None,
-                                                                norm='cumulative',
+                                                                norm='L2',
+                                                                integrate_to_peak=True)
+            cost = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function=None,
+                                                                norm='normalized-L2',
                                                                 integrate_to_peak=True)
             cost = analysis.cost_function_normalized_variance_derivative(variance_data,
                                                                 penalty_function=None,
@@ -127,11 +131,15 @@ class Analysis(unittest.TestCase):
                                                                 integrate_to_peak=True)
             cost = analysis.cost_function_normalized_variance_derivative(variance_data,
                                                                 penalty_function=None,
+                                                                norm='min',
+                                                                integrate_to_peak=True)
+            cost = analysis.cost_function_normalized_variance_derivative(variance_data,
+                                                                penalty_function=None,
                                                                 norm='median',
                                                                 integrate_to_peak=True)
             cost = analysis.cost_function_normalized_variance_derivative(variance_data,
                                                                 penalty_function=None,
-                                                                norm='min',
+                                                                norm=None,
                                                                 integrate_to_peak=True)
         except:
             self.assertTrue(False)
