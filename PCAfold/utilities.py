@@ -1040,10 +1040,24 @@ class QoIAwareProjection:
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_forward_variable_addition(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, target_manifold_dimensionality=3, bootstrap_variables=None, penalty_function=None, power=1, vertical_shift=1, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_forward_variable_addition(X,
+                                                X_source,
+                                                variable_names,
+                                                scaling,
+                                                bandwidth_values,
+                                                target_variables=None,
+                                                add_transformed_source=True,
+                                                target_manifold_dimensionality=3,
+                                                bootstrap_variables=None,
+                                                penalty_function=None,
+                                                power=1,
+                                                vertical_shift=1,
+                                                norm='max',
+                                                integrate_to_peak=False,
+                                                verbose=False):
     """
-    Manifold-informed feature selection algorithm based on forward variable addition introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
-    select a meaningful subset of the original variables such that
+    Manifold-informed feature selection algorithm based on forward variable addition introduced in :cite:`Zdybal2022`.
+    The goal of the algorithm is to select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
     The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
     for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
@@ -1138,8 +1152,14 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
     :param vertical_shift: (optional)
         ``float`` or ``int`` specifying the vertical shift multiplier, :math:`b`. It can be used to control how much penalty should be applied to feature sizes.
     :param norm: (optional)
-        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
-        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
+        ``str`` specifying the norm to apply for all areas :math:`A_i`.
+        ``norm='cumulative'`` uses the :math:`L_{1}` norm,
+        ``norm='average'`` uses an arithmetic average,
+        ``norm='L2'`` uses the :math:`L_{2}` norm,
+        ``norm='normalized-L2'`` uses the :math:`L_{2}` norm divided by the number of target variables,
+        ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='min'`` uses a minimum area, and
+        ``norm='median'`` uses a median area.
     :param integrate_to_peak: (optional)
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
     :param verbose: (optional)
@@ -1153,7 +1173,7 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
     """
 
     __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
-    __norms = ['average', 'cumulative', 'max', 'median', 'min']
+    __norms = ['cumulative', 'average', 'L2', 'normalized-L2', 'max', 'min', 'median']
 
     if not isinstance(X, np.ndarray):
         raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -1443,10 +1463,24 @@ def manifold_informed_forward_variable_addition(X, X_source, variable_names, sca
 
 # ------------------------------------------------------------------------------
 
-def manifold_informed_backward_variable_elimination(X, X_source, variable_names, scaling, bandwidth_values, target_variables=None, add_transformed_source=True, source_space=None, target_manifold_dimensionality=3, penalty_function=None, power=1, vertical_shift=1, norm='max', integrate_to_peak=False, verbose=False):
+def manifold_informed_backward_variable_elimination(X,
+                                                    X_source,
+                                                    variable_names,
+                                                    scaling,
+                                                    bandwidth_values,
+                                                    target_variables=None,
+                                                    add_transformed_source=True,
+                                                    source_space=None,
+                                                    target_manifold_dimensionality=3,
+                                                    penalty_function=None,
+                                                    power=1,
+                                                    vertical_shift=1,
+                                                    norm='max',
+                                                    integrate_to_peak=False,
+                                                    verbose=False):
     """
-    Manifold-informed feature selection algorithm based on backward variable elimination introduced in :cite:`Zdybal2022`. The goal of the algorithm is to
-    select a meaningful subset of the original variables such that
+    Manifold-informed feature selection algorithm based on backward variable elimination introduced in :cite:`Zdybal2022`.
+    The goal of the algorithm is to select a meaningful subset of the original variables such that
     undesired behaviors on a PCA-derived manifold of a given dimensionality are minimized.
     The algorithm uses the cost function, :math:`\\mathcal{L}`, based on minimizing the area under the normalized variance derivatives curves, :math:`\\hat{\\mathcal{D}}(\\sigma)`,
     for the selected :math:`n_{dep}` dependent variables (as per ``cost_function_normalized_variance_derivative`` function).
@@ -1535,8 +1569,14 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
     :param vertical_shift: (optional)
         ``float`` or ``int`` specifying the vertical shift multiplier, :math:`b`. It can be used to control how much penalty should be applied to feature sizes.
     :param norm: (optional)
-        ``str`` specifying the norm to apply for all areas :math:`A_i`. ``norm='average'`` uses an arithmetic average, ``norm='max'`` uses the :math:`L_{\\infty}` norm,
-        ``norm='median'`` uses a median area, ``norm='cumulative'`` uses a cumulative area and ``norm='min'`` uses a minimum area.
+        ``str`` specifying the norm to apply for all areas :math:`A_i`.
+        ``norm='cumulative'`` uses the :math:`L_{1}` norm,
+        ``norm='average'`` uses an arithmetic average,
+        ``norm='L2'`` uses the :math:`L_{2}` norm,
+        ``norm='normalized-L2'`` uses the :math:`L_{2}` norm divided by the number of target variables,
+        ``norm='max'`` uses the :math:`L_{\\infty}` norm,
+        ``norm='min'`` uses a minimum area, and
+        ``norm='median'`` uses a median area.
     :param integrate_to_peak: (optional)
         ``bool`` specifying whether an individual area for the :math:`i^{th}` dependent variable should be computed only up the the rightmost peak location.
     :param verbose: (optional)
@@ -1550,7 +1590,7 @@ def manifold_informed_backward_variable_elimination(X, X_source, variable_names,
     """
 
     __penalty_functions = ['peak', 'sigma', 'log-sigma-over-peak']
-    __norms = ['average', 'cumulative', 'max', 'median', 'min']
+    __norms = ['cumulative', 'average', 'L2', 'normalized-L2', 'max', 'min', 'median']
     __source_spaces = ['symlog', 'continuous-symlog', 'original-and-symlog', 'original-and-continuous-symlog']
 
     if not isinstance(X, np.ndarray):
