@@ -75,7 +75,16 @@ git clone http://gitlab.multiscale.utah.edu/common/PCAfold.git
 cd PCAfold
 ```
 
-Run the installation:
+Run installation from ``setup.py``:
+
+```
+python setup.py build_ext --inplace
+python setup.py install
+```
+
+Note, that this will be deprecated in the future, but should still work.
+
+Alternatively, run installation using ``pip``:
 
 ```
 python -m pip install .

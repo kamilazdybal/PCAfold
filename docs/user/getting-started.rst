@@ -32,7 +32,16 @@ Clone the **PCAfold** repository and move into the ``PCAfold`` directory created
   git clone http://gitlab.multiscale.utah.edu/common/PCAfold.git
   cd PCAfold
 
-Run the installation:
+Run the installation from ``setup.py``:
+
+.. code-block:: text
+
+    python setup.py build_ext --inplace
+    python setup.py install
+
+Note, that this will be deprecated in the future, but should still work.
+
+Alternatively, run the installation using ``pip``:
 
 .. code-block:: text
 
