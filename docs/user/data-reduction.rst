@@ -39,60 +39,16 @@ Class ``PCA``
 =============
 
 .. autoclass:: PCAfold.reduction.PCA
-
-``PCA.transform``
-=================
-
 .. autofunction:: PCAfold.reduction.PCA.transform
-
-``PCA.reconstruct``
-===================
-
 .. autofunction:: PCAfold.reduction.PCA.reconstruct
-
-``PCA.get_weights_dictionary``
-==============================
-
 .. autofunction:: PCAfold.reduction.PCA.get_weights_dictionary
-
-``PCA.u_scores``
-================
-
 .. autofunction:: PCAfold.reduction.PCA.u_scores
-
-``PCA.w_scores``
-================
-
 .. autofunction:: PCAfold.reduction.PCA.w_scores
-
-``PCA.calculate_r2``
-====================
-
 .. autofunction:: PCAfold.reduction.PCA.calculate_r2
-
-``PCA.r2_convergence``
-======================
-
 .. autofunction:: PCAfold.reduction.PCA.r2_convergence
-
-``PCA.set_retained_eigenvalues``
-================================
-
 .. autofunction:: PCAfold.reduction.PCA.set_retained_eigenvalues
-
-``PCA.principal_variables``
-===========================
-
 .. autofunction:: PCAfold.reduction.PCA.principal_variables
-
-``PCA.data_consistency_check``
-==============================
-
 .. autofunction:: PCAfold.reduction.PCA.data_consistency_check
-
-``PCA.save_to_txt``
-==========================
-
 .. autofunction:: PCAfold.reduction.PCA.save_to_txt
 
 --------------------------------------------------------------------------------
@@ -105,10 +61,6 @@ Class ``LPCA``
 ==============
 
 .. autoclass:: PCAfold.reduction.LPCA
-
-``LPCA.local_correlation``
-============================
-
 .. autofunction:: PCAfold.reduction.LPCA.local_correlation
 
 --------------------------------------------------------------------------------
@@ -149,19 +101,8 @@ Class ``EquilibratedSamplePCA``
 
 .. autofunction:: PCAfold.reduction.EquilibratedSamplePCA
 
-``analyze_centers_change``
-==========================
-
 .. autofunction:: PCAfold.reduction.analyze_centers_change
-
-``analyze_eigenvector_weights_change``
-======================================
-
 .. autofunction:: PCAfold.reduction.analyze_eigenvector_weights_change
-
-``analyze_eigenvalue_distribution``
-===================================
-
 .. autofunction:: PCAfold.reduction.analyze_eigenvalue_distribution
 
 --------------------------------------------------------------------------------
@@ -283,62 +224,15 @@ These steps are presented graphically below:
 Plotting functions
 ******************
 
-``plot_2d_manifold``
-====================
-
 .. autofunction:: PCAfold.reduction.plot_2d_manifold
-
-``plot_3d_manifold``
-====================
-
 .. autofunction:: PCAfold.reduction.plot_3d_manifold
-
-``plot_2d_manifold_sequence``
-========================================
-
 .. autofunction:: PCAfold.reduction.plot_2d_manifold_sequence
-
-``plot_parity``
-===============
-
 .. autofunction:: PCAfold.reduction.plot_parity
-
-``plot_mode``
-=====================
-
 .. autofunction:: PCAfold.reduction.plot_mode
-
-``plot_eigenvectors``
-=====================
-
 .. autofunction:: PCAfold.reduction.plot_eigenvectors
-
-``plot_eigenvectors_comparison``
-================================
-
 .. autofunction:: PCAfold.reduction.plot_eigenvectors_comparison
-
-``plot_eigenvalue_distribution``
-================================
-
 .. autofunction:: PCAfold.reduction.plot_eigenvalue_distribution
-
-``plot_eigenvalue_distribution_comparison``
-===========================================
-
 .. autofunction:: PCAfold.reduction.plot_eigenvalue_distribution_comparison
-
-``plot_cumulative_variance``
-============================
-
 .. autofunction:: PCAfold.reduction.plot_cumulative_variance
-
-``plot_heatmap``
-============================
-
 .. autofunction:: PCAfold.reduction.plot_heatmap
-
-``plot_heatmap_sequence``
-============================
-
 .. autofunction:: PCAfold.reduction.plot_heatmap_sequence
