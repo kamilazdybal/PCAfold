@@ -42,23 +42,17 @@ as introduced in :cite:`Armstrong2021` and :cite:`zdybal2022cost`.
 
 .. autofunction:: PCAfold.analysis.compute_normalized_variance
 .. autofunction:: PCAfold.analysis.compute_normalized_range
+.. autofunction:: PCAfold.analysis.normalized_variance_derivative
+.. autofunction:: PCAfold.analysis.cost_function_normalized_variance_derivative
+.. autofunction:: PCAfold.analysis.find_local_maxima
+.. autofunction:: PCAfold.analysis.random_sampling_normalized_variance
+.. autofunction:: PCAfold.analysis.feature_size_map
+.. autofunction:: PCAfold.analysis.feature_size_map_smooth
 
 Class ``VarianceData``
 ======================
 
 .. autoclass:: PCAfold.analysis.VarianceData
-
-.. autofunction:: PCAfold.analysis.normalized_variance_derivative
-
-.. autofunction:: PCAfold.analysis.find_local_maxima
-
-.. autofunction:: PCAfold.analysis.random_sampling_normalized_variance
-
-.. autofunction:: PCAfold.analysis.feature_size_map
-
-.. autofunction:: PCAfold.analysis.feature_size_map_smooth
-
-.. autofunction:: PCAfold.analysis.cost_function_normalized_variance_derivative
 
 --------------------------------------------------------------------------------
 
