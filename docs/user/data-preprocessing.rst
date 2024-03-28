@@ -42,58 +42,29 @@ Data manipulation
 This section includes functions for performing basic data manipulation such
 as centering and scaling and outlier detection and removal.
 
-``center_scale``
-==========================
-
-.. autofunction:: PCAfold.preprocess.center_scale
-
-``invert_center_scale``
-==========================
-
-.. autofunction:: PCAfold.preprocess.invert_center_scale
-
-``power_transform``
-===================
-
-.. autofunction:: PCAfold.preprocess.power_transform
-
-``log_transform``
-=================
-
-.. autofunction:: PCAfold.preprocess.log_transform
-
-``zero_pivot_transform``
-========================
-
-.. autofunction:: PCAfold.preprocess.zero_pivot_transform
-
-``invert_zero_pivot_transform``
-===============================
-
-.. autofunction:: PCAfold.preprocess.invert_zero_pivot_transform
-
-``remove_constant_vars``
-==========================
-
-.. autofunction:: PCAfold.preprocess.remove_constant_vars
-
-``order_variables``
-==========================
-
-.. autofunction:: PCAfold.preprocess.order_variables
-
 Class ``PreProcessing``
 =======================
 
 .. autoclass:: PCAfold.preprocess.PreProcessing
 
-``outlier_detection``
-======================
+Preprocessing tools
+=======================
+
+.. autofunction:: PCAfold.preprocess.center_scale
+.. autofunction:: PCAfold.preprocess.invert_center_scale
+
+.. autofunction:: PCAfold.preprocess.power_transform
+
+.. autofunction:: PCAfold.preprocess.log_transform
+
+.. autofunction:: PCAfold.preprocess.zero_pivot_transform
+.. autofunction:: PCAfold.preprocess.invert_zero_pivot_transform
+
+.. autofunction:: PCAfold.preprocess.remove_constant_vars
+
+.. autofunction:: PCAfold.preprocess.order_variables
 
 .. autofunction:: PCAfold.preprocess.outlier_detection
-
-``representative_sample_size``
-================================
 
 .. autofunction:: PCAfold.preprocess.representative_sample_size
 
@@ -111,20 +82,8 @@ Class ``DensityEstimation``
 ============================
 
 .. autoclass:: PCAfold.preprocess.DensityEstimation
-
-``DensityEstimation.average_knn_distance``
-================================================
-
 .. autofunction:: PCAfold.preprocess.DensityEstimation.average_knn_distance
-
-``DensityEstimation.kth_nearest_neighbor_codensity``
-=====================================================
-
 .. autofunction:: PCAfold.preprocess.DensityEstimation.kth_nearest_neighbor_codensity
-
-``DensityEstimation.kth_nearest_neighbor_density``
-===================================================
-
 .. autofunction:: PCAfold.preprocess.DensityEstimation.kth_nearest_neighbor_density
 
 --------------------------------------------------------------------------------
@@ -151,57 +110,19 @@ classification of each observation from the original data set,
 
 .. note:: The first cluster has index ``0`` within all ``idx`` vectors returned.
 
-``variable_bins``
------------------
-
 .. autofunction:: PCAfold.preprocess.variable_bins
-
-``predefined_variable_bins``
-----------------------------
-
 .. autofunction:: PCAfold.preprocess.predefined_variable_bins
-
-``mixture_fraction_bins``
--------------------------
-
 .. autofunction:: PCAfold.preprocess.mixture_fraction_bins
-
-``zero_neighborhood_bins``
---------------------------
-
 .. autofunction:: PCAfold.preprocess.zero_neighborhood_bins
 
 Auxiliary functions
 ===================
 
-``degrade_clusters``
---------------------
-
 .. autofunction:: PCAfold.preprocess.degrade_clusters
-
-``flip_clusters``
------------------
-
 .. autofunction:: PCAfold.preprocess.flip_clusters
-
-``get_centroids``
------------------
-
 .. autofunction:: PCAfold.preprocess.get_centroids
-
-``get_partition``
------------------
-
 .. autofunction:: PCAfold.preprocess.get_partition
-
-``get_populations``
--------------------
-
 .. autofunction:: PCAfold.preprocess.get_populations
-
-``get_average_centroid_distance``
----------------------------------
-
 .. autofunction:: PCAfold.preprocess.get_average_centroid_distance
 
 --------------------------------------------------------------------------------
@@ -250,24 +171,9 @@ Class ``DataSampler``
 
 .. autoclass:: PCAfold.preprocess.DataSampler
 
-``DataSampler.number``
-======================
-
 .. autofunction:: PCAfold.preprocess.DataSampler.number
-
-``DataSampler.percentage``
-==========================
-
 .. autofunction:: PCAfold.preprocess.DataSampler.percentage
-
-``DataSampler.manual``
-======================
-
 .. autofunction:: PCAfold.preprocess.DataSampler.manual
-
-``DataSampler.random``
-======================
-
 .. autofunction:: PCAfold.preprocess.DataSampler.random
 
 --------------------------------------------------------------------------------
@@ -280,22 +186,7 @@ This section includes functions for data preprocessing related plotting such as
 visualizing the formed clusters, visualizing the selected train and test samples
 or plotting the conditional statistics.
 
-``plot_2d_clustering``
-======================
-
 .. autofunction:: PCAfold.preprocess.plot_2d_clustering
-
-``plot_3d_clustering``
-======================
-
 .. autofunction:: PCAfold.preprocess.plot_3d_clustering
-
-``plot_2d_train_test_samples``
-==============================
-
 .. autofunction:: PCAfold.preprocess.plot_2d_train_test_samples
-
-``plot_conditional_statistics``
-===============================
-
 .. autofunction:: PCAfold.preprocess.plot_conditional_statistics
