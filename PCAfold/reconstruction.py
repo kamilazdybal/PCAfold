@@ -96,6 +96,7 @@ class RegressionAssessment:
 
     - **coefficient_of_determination** - (read only) ``numpy.ndarray`` specifying the coefficient of determination, :math:`R^2`, values. It has size ``(1,n_variables)``.
     - **mean_absolute_error** - (read only) ``numpy.ndarray`` specifying the mean absolute error (MAE) values. It has size ``(1,n_variables)``.
+    - **max_absolute_error** - (read only) ``numpy.ndarray`` specifying the max absolute error (MaxAE) values. It has size ``(1,n_variables)``.
     - **mean_squared_error** - (read only) ``numpy.ndarray`` specifying the mean squared error (MSE) values. It has size ``(1,n_variables)``.
     - **root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the root mean squared error (RMSE) values. It has size ``(1,n_variables)``.
     - **normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
@@ -191,6 +192,7 @@ class RegressionAssessment:
 
         self.__coefficient_of_determination_matrix = np.ones((1,self.__n_variables))
         self.__mean_absolute_error_matrix = np.ones((1,self.__n_variables))
+        self.__max_absolute_error_matrix = np.ones((1,self.__n_variables))
         self.__mean_squared_error_matrix = np.ones((1,self.__n_variables))
         self.__mean_squared_logarithmic_error_matrix = np.ones((1,self.__n_variables))
         self.__root_mean_squared_error_matrix = np.ones((1,self.__n_variables))
@@ -207,6 +209,7 @@ class RegressionAssessment:
 
             self.__coefficient_of_determination_matrix[0,i] = coefficient_of_determination(observed[:,i], predicted[:,i])
             self.__mean_absolute_error_matrix[0,i] = mean_absolute_error(observed[:,i], predicted[:,i])
+            self.__max_absolute_error_matrix[0,i] = max_absolute_error(observed[:,i], predicted[:,i])
             self.__mean_squared_error_matrix[0,i] = mean_squared_error(observed[:,i], predicted[:,i])
             self.__mean_squared_logarithmic_error_matrix[0,i] = mean_squared_logarithmic_error(np.abs(observed[:,i]), np.abs(predicted[:,i]))
             self.__root_mean_squared_error_matrix[0,i] = root_mean_squared_error(observed[:,i], predicted[:,i])
@@ -237,6 +240,10 @@ class RegressionAssessment:
     @property
     def mean_absolute_error(self):
         return self.__mean_absolute_error_matrix
+
+    @property
+    def max_absolute_error(self):
+        return self.__max_absolute_error_matrix
 
     @property
     def mean_squared_error(self):

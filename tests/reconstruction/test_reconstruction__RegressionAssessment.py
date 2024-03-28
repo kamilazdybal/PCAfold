@@ -57,6 +57,7 @@ class Reconstruction(unittest.TestCase):
             regression_metrics = reconstruction.RegressionAssessment(X, X_rec)
             r2 = regression_metrics.coefficient_of_determination
             mae = regression_metrics.mean_absolute_error
+            maxae = regression_metrics.max_absolute_error
             mse = regression_metrics.mean_squared_error
             rmse = regression_metrics.root_mean_squared_error
             nrmse = regression_metrics.normalized_root_mean_squared_error
