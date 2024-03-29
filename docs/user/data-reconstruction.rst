@@ -1,8 +1,8 @@
 .. module:: reconstruction
 
-#################
-Reconstruction
-#################
+###############################
+Module: reconstruction
+###############################
 
 The ``reconstruction`` module contains functions for reconstructing quantities of interest (QoIs) from the
 low-dimensional data representations and functionalities to asses the quality of that reconstruction.

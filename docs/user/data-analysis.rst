@@ -1,8 +1,8 @@
 .. module:: analysis
 
-#################
-Manifold analysis
-#################
+###############################
+Module: analysis
+###############################
 
 The ``analysis`` module contains functions for assessing the intrinsic
 dimensionality and quality of manifolds.

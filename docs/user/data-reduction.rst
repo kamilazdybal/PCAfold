@@ -1,8 +1,8 @@
 .. module:: reduction
 
-##############
-Data reduction
-##############
+############################
+Module: reduction
+############################
 
 The ``reduction`` module contains functions for performing Principal Component
 Analysis (PCA).

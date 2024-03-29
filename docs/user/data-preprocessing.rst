@@ -1,8 +1,8 @@
 .. module:: preprocess
 
-##################
-Data preprocessing
-##################
+################################
+Module: preprocess
+################################
 
 The ``preprocess`` module can be used for performing data preprocessing
 including centering and scaling, outlier detection and removal, kernel density

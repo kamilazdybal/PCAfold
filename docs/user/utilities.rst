@@ -1,8 +1,8 @@
 .. module:: utilities
 
-#################
-Utilities
-#################
+###############################
+Module: utilities
+###############################
 
 The ``utilities`` module contains functions optimizing manifold topology in an automated way.
 
