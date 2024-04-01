@@ -143,8 +143,15 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
         pca_X = PCA(X, n_components=2)
         principal_components = pca_X.transform(X)
 
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-3, 1, 20)
+
         # Compute normalized variance quantities:
-        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=['A', 'B', 'C', 'D', 'E'],
+                                                    bandwidth_values=bandwidth_values,
+                                                    scale_unit_box=True)
 
         # Access bandwidth values:
         variance_data.bandwidth_values
@@ -373,10 +380,13 @@ def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth
         idx[60:70] = 2
         idx[71::] = 3
 
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-5, 1, 50)
+
         # Compute normalized range:
         variance_data = compute_normalized_range(principal_components,
                                                  idx,
-                                                 bandwidth_values=np.logspace(-5, 1, 50),
+                                                 bandwidth_values=bandwidth_values,
                                                  scale_unit_box=True,
                                                  activation_function='step')
 
@@ -556,8 +566,15 @@ def normalized_variance_derivative(variance_data):
         pca_X = PCA(X, n_components=2)
         principal_components = pca_X.transform(X)
 
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-3, 1, 20)
+
         # Compute normalized variance quantities:
-        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=['A', 'B', 'C', 'D', 'E'],
+                                                    bandwidth_values=bandwidth_values,
+                                                    scale_unit_box=True)
 
         # Compute normalized variance derivative:
         (derivative, bandwidth_values, max_derivative) = normalized_variance_derivative(variance_data)
@@ -1352,8 +1369,15 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
         pca_X = PCA(X, n_components=2)
         principal_components = pca_X.transform(X)
 
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-3, 1, 20)
+
         # Compute normalized variance quantities:
-        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=['A', 'B', 'C', 'D', 'E'],
+                                                    bandwidth_values=bandwidth_values,
+                                                    scale_unit_box=True)
 
         # Plot normalized variance quantities:
         plt = plot_normalized_variance(variance_data,
@@ -1472,9 +1496,21 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
         principal_components_X = pca_X.transform(X)
         principal_components_Y = pca_Y.transform(Y)
 
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-3, 2, 20)
+
         # Compute normalized variance quantities:
-        variance_data_X = compute_normalized_variance(principal_components_X, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
-        variance_data_Y = compute_normalized_variance(principal_components_Y, Y, depvar_names=['F', 'G', 'H', 'I', 'J'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+        variance_data_X = compute_normalized_variance(principal_components_X,
+                                                      X,
+                                                      depvar_names=['A', 'B', 'C', 'D', 'E'],
+                                                      bandwidth_values=bandwidth_values,
+                                                      scale_unit_box=True)
+
+        variance_data_Y = compute_normalized_variance(principal_components_Y,
+                                                      Y,
+                                                      depvar_names=['F', 'G', 'H', 'I', 'J'],
+                                                      bandwidth_values=bandwidth_values,
+                                                      scale_unit_box=True)
 
         # Plot a comparison of normalized variance quantities:
         plt = plot_normalized_variance_comparison((variance_data_X, variance_data_Y),
@@ -1597,8 +1633,15 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
         pca_X = PCA(X, n_components=2)
         principal_components = pca_X.transform(X)
 
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-3, 1, 20)
+
         # Compute normalized variance quantities:
-        variance_data = compute_normalized_variance(principal_components, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 1, 20), scale_unit_box=True)
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=['A', 'B', 'C', 'D', 'E'],
+                                                    bandwidth_values=bandwidth_values,
+                                                    scale_unit_box=True)
 
         # Plot normalized variance derivative:
         plt = plot_normalized_variance_derivative(variance_data,
@@ -1716,9 +1759,21 @@ def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_var
         principal_components_X = pca_X.transform(X)
         principal_components_Y = pca_Y.transform(Y)
 
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-3, 2, 20)
+
         # Compute normalized variance quantities:
-        variance_data_X = compute_normalized_variance(principal_components_X, X, depvar_names=['A', 'B', 'C', 'D', 'E'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
-        variance_data_Y = compute_normalized_variance(principal_components_Y, Y, depvar_names=['F', 'G', 'H', 'I', 'J'], bandwidth_values=np.logspace(-3, 2, 20), scale_unit_box=True)
+        variance_data_X = compute_normalized_variance(principal_components_X,
+                                                      X,
+                                                      depvar_names=['A', 'B', 'C', 'D', 'E'],
+                                                      bandwidth_values=bandwidth_values,
+                                                      scale_unit_box=True)
+
+        variance_data_Y = compute_normalized_variance(principal_components_Y,
+                                                      Y,
+                                                      depvar_names=['F', 'G', 'H', 'I', 'J'],
+                                                      bandwidth_values=bandwidth_values,
+                                                      scale_unit_box=True)
 
         # Plot a comparison of normalized variance derivatives:
         plt = plot_normalized_variance_derivative_comparison((variance_data_X, variance_data_Y),
