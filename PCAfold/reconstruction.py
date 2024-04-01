@@ -1712,9 +1712,9 @@ def stratified_max_absolute_error(observed, predicted, idx, verbose=False):
 
         if verbose:
             if (abs(constant_bin_metric_min - 1) < 0.01) and (abs(constant_bin_metric_max - 1) < 0.01):
-                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MaxAE\t' + str(round(mse,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MaxAE\t' + str(round(maxae,6)) + '\t| ' + colored('This bin has almost constant values.', 'red'))
             else:
-                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MaxAE\t' + str(round(mse,6)))
+                print('Bin\t' + str(cl+1) + '\t| size\t ' + str(len(idx_bin)) + '\t| MaxAE\t' + str(round(maxae,6)))
 
         maxae_in_bins.append(maxae)
 
