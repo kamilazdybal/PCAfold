@@ -1212,7 +1212,11 @@ def stratified_coefficient_of_determination(observed, predicted, idx, use_global
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        r2_in_bins = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], idx=idx, use_global_mean=True, verbose=True)
+        r2_in_bins = stratified_coefficient_of_determination(X[:,0],
+                                                             X_rec[:,0],
+                                                             idx=idx,
+                                                             use_global_mean=True,
+                                                             verbose=True)
 
         # Plot the stratified R2 values:
         plot_stratified_coefficient_of_determination(r2_in_bins, bins_borders)
@@ -1425,7 +1429,10 @@ def stratified_mean_absolute_error(observed, predicted, idx, verbose=False):
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified MAE in 10 bins of the first variable in a data set:
-        mae_in_bins = stratified_mean_absolute_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+        mae_in_bins = stratified_mean_absolute_error(X[:,0],
+                                                     X_rec[:,0],
+                                                     idx=idx,
+                                                     verbose=True)
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -1623,7 +1630,10 @@ def stratified_max_absolute_error(observed, predicted, idx, verbose=False):
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified MaxAE in 10 bins of the first variable in a data set:
-        maxae_in_bins = stratified_max_absolute_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+        maxae_in_bins = stratified_max_absolute_error(X[:,0],
+                                                      X_rec[:,0],
+                                                      dx=idx,
+                                                      verbose=True)
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -1821,7 +1831,10 @@ def stratified_mean_squared_error(observed, predicted, idx, verbose=False):
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified MSE in 10 bins of the first variable in a data set:
-        mse_in_bins = stratified_mean_squared_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+        mse_in_bins = stratified_mean_squared_error(X[:,0],
+                                                    X_rec[:,0],
+                                                    idx=idx,
+                                                    verbose=True)
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -2030,7 +2043,10 @@ def stratified_mean_squared_logarithmic_error(observed, predicted, idx, verbose=
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified MSLE in 10 bins of the first variable in a data set:
-        msle_in_bins = stratified_mean_squared_logarithmic_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+        msle_in_bins = stratified_mean_squared_logarithmic_error(X[:,0],
+                                                                 X_rec[:,0],
+                                                                 idx=idx,
+                                                                 verbose=True)
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -2231,7 +2247,10 @@ def stratified_root_mean_squared_error(observed, predicted, idx, verbose=False):
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified RMSE in 10 bins of the first variable in a data set:
-        rmse_in_bins = stratified_root_mean_squared_error(X[:,0], X_rec[:,0], idx=idx, verbose=True)
+        rmse_in_bins = stratified_root_mean_squared_error(X[:,0],
+                                                          X_rec[:,0],
+                                                          idx=idx,
+                                                          verbose=True)
 
     :param observed:
         ``numpy.ndarray`` specifying the observed values of a single dependent variable, :math:`\\phi_o`. It should be of size ``(n_observations,)`` or ``(n_observations, 1)``.
@@ -2659,7 +2678,9 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
         X_rec = pca_X.reconstruct(pca_X.transform(X))
 
         # Compute the vector of good direction and good direction estimate:
-        (good_direction, good_direction_estimate) = good_direction_estimate(X, X_rec, tolerance=0.01)
+        (good_direction, good_direction_estimate) = good_direction_estimate(X,
+                                                                            X_rec,
+                                                                            tolerance=0.01)
 
     :param observed:
         ``numpy.ndarray`` specifying the observed vector quantity, :math:`\\vec{\\phi}_o`. It should be of size ``(n_observations,n_dimensions)``.
@@ -2745,10 +2766,15 @@ def generate_tex_table(data_frame_table, float_format='.2f', caption='', label='
         r2_q3 = pca_q3.calculate_r2(X)[None,:]
 
         # Generate pandas.DataFrame from the R2 values:
-        r2_table = pd.DataFrame(np.vstack((r2_q2, r2_q3)), columns=variable_names, index=['PCA, $q=2$', 'PCA, $q=3$'])
+        r2_table = pd.DataFrame(np.vstack((r2_q2, r2_q3)),
+                                columns=variable_names,
+                                index=['PCA, $q=2$', 'PCA, $q=3$'])
 
         # Generate tex code for the table:
-        generate_tex_table(r2_table, float_format=".3f", caption='$R^2$ values.', label='r2-values')
+        generate_tex_table(r2_table,
+                           float_format=".3f",
+                           caption='$R^2$ values.',
+                           label='r2-values')
 
     .. note::
 
@@ -4514,24 +4540,24 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
 
         # Plot the regressed scalar field:
         plt = plot_2d_regression_scalar_field(grid_bounds,
-                                            regression_model,
-                                            x=X[:,0],
-                                            y=X[:,1],
-                                            resolution=(100,100),
-                                            extension=(10,10),
-                                            x_label='$X_1$',
-                                            y_label='$X_2$',
-                                            s_field=4,
-                                            s_manifold=60,
-                                            manifold_color=Z,
-                                            colorbar_label='$Z_1$',
-                                            color_map='inferno',
-                                            colorbar_range=(0,1),
-                                            manifold_alpha=1,
-                                            grid_on=False,
-                                            figure_size=(10,6),
-                                            title='2D regressed scalar field',
-                                            save_filename='2D-regressed-scalar-field.pdf')
+                                              regression_model,
+                                              x=X[:,0],
+                                              y=X[:,1],
+                                              resolution=(100,100),
+                                              extension=(10,10),
+                                              x_label='$X_1$',
+                                              y_label='$X_2$',
+                                              s_field=4,
+                                              s_manifold=60,
+                                              manifold_color=Z,
+                                              colorbar_label='$Z_1$',
+                                              color_map='inferno',
+                                              colorbar_range=(0,1),
+                                              manifold_alpha=1,
+                                              grid_on=False,
+                                              figure_size=(10,6),
+                                              title='2D regressed scalar field',
+                                              save_filename='2D-regressed-scalar-field.pdf')
         plt.close()
 
     :param grid_bounds:
@@ -5363,17 +5389,21 @@ def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, met
         (idx, bins_borders) = variable_bins(X[:,0], k=10, verbose=False)
 
         # Compute stratified R2 in 10 bins of the first variable in a data set:
-        r2_in_bins = stratified_coefficient_of_determination(X[:,0], X_rec[:,0], idx=idx, use_global_mean=True, verbose=True)
+        r2_in_bins = stratified_coefficient_of_determination(X[:,0],
+                                                             X_rec[:,0],
+                                                             idx=idx,
+                                                             use_global_mean=True,
+                                                             verbose=True)
 
         # Visualize how R2 changes across bins:
         plt = plot_stratified_metric(r2_in_bins,
-                                      bins_borders,
-                                      variable_name='$X_1$',
-                                      metric_name='$R^2$',
-                                      yscale='log',
-                                      figure_size=(10,5),
-                                      title='Stratified $R^2$',
-                                      save_filename='r2.pdf')
+                                     bins_borders,
+                                     variable_name='$X_1$',
+                                     metric_name='$R^2$',
+                                     yscale='log',
+                                     figure_size=(10,5),
+                                     title='Stratified $R^2$',
+                                     save_filename='r2.pdf')
         plt.close()
 
     :param metric_in_bins:

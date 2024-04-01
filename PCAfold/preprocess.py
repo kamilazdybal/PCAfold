@@ -1433,7 +1433,11 @@ def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_thres
         X = np.random.rand(100,20)
 
         # Find outliers:
-        (idx_outliers_removed, idx_outliers) = outlier_detection(X, scaling='auto', method='MULTIVARIATE TRIMMING', trimming_threshold=0.8, verbose=True)
+        (idx_outliers_removed, idx_outliers) = outlier_detection(X,
+                                                                 scaling='auto',
+                                                                 method='MULTIVARIATE TRIMMING',
+                                                                 trimming_threshold=0.8,
+                                                                 verbose=True)
 
         # New data set without outliers can be obtained as:
         X_outliers_removed = X[idx_outliers_removed,:]
@@ -3651,7 +3655,11 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
         x = np.linspace(-100,100,1000)
 
         # Create partitioning according to bins of x:
-        (idx, borders) = zero_neighborhood_bins(x, 4, zero_offset_percentage=10, split_at_zero=True, verbose=True)
+        (idx, borders) = zero_neighborhood_bins(x,
+                                                k=4,
+                                                zero_offset_percentage=10,
+                                                split_at_zero=True,
+                                                verbose=True)
 
     :param var:
         ``numpy.ndarray`` specifying the variable values. It should be of size ``(n_observations,)`` or ``(n_observations,1)``.
@@ -4334,16 +4342,16 @@ def plot_2d_clustering(x, y, idx, clean=False, x_label=None, y_label=None, color
 
         # Plot the clustering result:
         plt = plot_2d_clustering(x,
-                             y,
-                             idx,
-                             x_label='$x$',
-                             y_label='$y$',
-                             color_map='viridis',
-                             first_cluster_index_zero=False,
-                             grid_on=True,
-                             figure_size=(10,6),
-                             title='x-y data set',
-                             save_filename='clustering.pdf')
+                                 y,
+                                 idx,
+                                 x_label='$x$',
+                                 y_label='$y$',
+                                 color_map='viridis',
+                                 first_cluster_index_zero=False,
+                                 grid_on=True,
+                                 figure_size=(10,6),
+                                 title='x-y data set',
+                                 save_filename='clustering.pdf')
         plt.close()
 
     :param x:
