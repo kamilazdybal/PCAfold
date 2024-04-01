@@ -1632,7 +1632,7 @@ def stratified_max_absolute_error(observed, predicted, idx, verbose=False):
         # Compute stratified MaxAE in 10 bins of the first variable in a data set:
         maxae_in_bins = stratified_max_absolute_error(X[:,0],
                                                       X_rec[:,0],
-                                                      dx=idx,
+                                                      idx=idx,
                                                       verbose=True)
 
     :param observed:
