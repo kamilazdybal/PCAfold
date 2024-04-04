@@ -791,7 +791,8 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
         variance_data = compute_normalized_variance(principal_components,
                                                     X,
                                                     depvar_names=variable_names,
-                                                    bandwidth_values=bandwidth_values)
+                                                    bandwidth_values=bandwidth_values,
+                                                    compute_sample_norm_var=True)
 
         # Compute the feature size map:
         feature_size_map = feature_size_map(variance_data,
