@@ -40,7 +40,7 @@ Data manipulation
 *****************
 
 This section includes functions for performing basic data manipulation such
-as centering and scaling and outlier detection and removal.
+as centering and scaling, nonlinear transformations, and outlier detection and removal.
 
 Class ``PreProcessing``
 =======================
