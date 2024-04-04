@@ -798,6 +798,7 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
                                             variable_name='X_1',
                                             cutoff=1,
                                             starting_bandwidth_idx='peak',
+                                            use_variance=True,
                                             verbose=True)
 
     :param variance_data:
@@ -831,10 +832,19 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
         if not isinstance(starting_bandwidth_idx, int):
             raise ValueError("Parameter `starting_bandwidth_idx` has to be of type `int` or be set to 'peak'.")
 
+    if not isinstance(use_variance, bool):
+        raise ValueError("Parameter `use_variance` has to be of type `bool`.")
+
+    if use_variance:
+        if not bool(variance_data.sample_normalized_variance):
+            raise ValueError("When `use_variance=True`, `analysis.compute_normalized_variance` has to be ran with `compute_sample_norm_var=True`.")
+    else:
+        if not bool(variance_data.sample_normalized_range):
+            raise ValueError("When `use_variance=False`, `analysis.compute_normalized_variance` has to be ran with `compute_sample_norm_range=True`.")
+
     if not isinstance(verbose, bool):
         raise ValueError("Parameter `verbose` has to be of type `bool`.")
 
-    NV = variance_data.normalized_variance[variable_name]
     if use_variance:
         SNV = variance_data.sample_normalized_variance[variable_name]
     else:
