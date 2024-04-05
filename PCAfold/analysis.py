@@ -810,6 +810,10 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
         ``float`` or ``int`` specifying the cutoff percentage, :math:`p`. It should be a number between 0 and 100.
     :param starting_bandwidth_idx: (optional)
         ``int`` or ``str`` specifying the index of the starting bandwidth to compute the local feature sizes from. Local feature sizes computed will never be smaller than the starting bandwidth. If set to ``'peak'``, the starting bandwidth will be automatically calculated as the rightmost peak, :math:`\sigma_{peak}`.
+    :param use_variance: (optional)
+        ``bool`` specifying whether sample normalized variance (``use_variance=True``) or sample normalized range (``use_variance=False``) should be used to compute the feature size map.
+        When ``use_variance=True``, the ``analysis.compute_normalized_variance()`` should be computed with the flag ``compute_sample_norm_var=True`` so that sample normalized variance is available.
+        When ``use_variance=False``, the ``analysis.compute_normalized_variance()`` should be computed with the flag ``compute_sample_norm_range=True`` so that sample normalized range is available.
     :param verbose: (optional)
         ``bool`` for printing verbose details.
 
