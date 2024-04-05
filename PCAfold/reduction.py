@@ -3632,7 +3632,23 @@ def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_
 #
 ################################################################################
 
-def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, norm=None, grid_on=True, s=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_manifold(x,
+                     y,
+                     color=None,
+                     clean=False,
+                     x_label=None,
+                     y_label=None,
+                     xscale=None,
+                     yscale=None,
+                     colorbar_label=None,
+                     color_map='viridis',
+                     colorbar_range=None,
+                     norm=None,
+                     grid_on=True,
+                     s=None,
+                     figure_size=(7,7),
+                     title=None,
+                     save_filename=None):
     """
     Plots a two-dimensional manifold given two vectors defining the manifold.
 
@@ -3657,6 +3673,8 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
                                clean=False,
                                x_label='PC-1',
                                y_label='PC-2',
+                               xscale=None,
+                               yscale='log',
                                colorbar_label='$X_1$',
                                colorbar_range=(0,1),
                                figure_size=(5,5),
@@ -3686,6 +3704,10 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
     :param y_label: (optional)
         ``str`` specifying :math:`y`-axis label annotation. If set to ``None``
         label will not be plotted.
+    :param xscale: (optional)
+        ``str`` specifying the scale for the :math:`x`-axis. If set to ``None``, axis will be plotted in linear scale.
+    :param yscale: (optional)
+        ``str`` specifying the scale for the :math:`y`-axis. If set to ``None``, axis will be plotted in linear scale.
     :param colorbar_label: (optional)
         ``str`` specifying colorbar label annotation.
         If set to ``None``, colorbar label will not be plotted.
@@ -3771,6 +3793,14 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
         if not isinstance(y_label, str):
             raise ValueError("Parameter `y_label` has to be of type `str`.")
 
+    if xscale is not None:
+        if not isinstance(xscale, str):
+            raise ValueError("Parameter `xscale` has to be of type `str`.")
+
+    if yscale is not None:
+        if not isinstance(yscale, str):
+            raise ValueError("Parameter `yscale` has to be of type `str`.")
+
     if not isinstance(color_map, str):
         if not isinstance(color_map, ListedColormap):
             raise ValueError("Parameter `color_map` has to be of type `str` or `matplotlib.colors.ListedColormap`.")
@@ -3835,6 +3865,8 @@ def plot_2d_manifold(x, y, color=None, clean=False, x_label=None, y_label=None, 
         plt.yticks(fontsize=font_axes, **csfont)
         if x_label is not None: plt.xlabel(x_label, fontsize=font_labels, **csfont)
         if y_label is not None: plt.ylabel(y_label, fontsize=font_labels, **csfont)
+        if xscale is not None: plt.xscale(xscale)
+        if yscale is not None: plt.yscale(yscale)
         if grid_on: plt.grid(alpha=grid_opacity)
 
         if isinstance(color, np.ndarray):
