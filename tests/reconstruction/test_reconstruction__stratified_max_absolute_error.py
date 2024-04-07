@@ -16,7 +16,7 @@ class Reconstruction(unittest.TestCase):
         maxae_in_bins = reconstruction.stratified_max_absolute_error(X[:,0],
                                                                      X_rec[:,0],
                                                                      idx=idx,
-                                                                     verbose=True)
+                                                                     verbose=False)
 
 # ------------------------------------------------------------------------------
 

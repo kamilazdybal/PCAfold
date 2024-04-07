@@ -79,25 +79,25 @@ class Reconstruction(unittest.TestCase):
         X_rec = np.ones((100,1))
         X_rec[40,:] = 100
         MaxAE = reconstruction.max_absolute_error(X, X_rec)
-        self.assertTrue(maxae==99)
+        self.assertTrue(MaxAE==99)
 
         X = np.ones((100,1))
         X_rec = np.ones((100,1))
         X_rec[40,:] = -100
         MaxAE = reconstruction.max_absolute_error(X, X_rec)
-        self.assertTrue(maxae==99)
+        self.assertTrue(MaxAE==101)
 
         X = np.ones((100,1))
         X_rec = np.ones((100,1))
         X_rec[40,:] = 2
         MaxAE = reconstruction.max_absolute_error(X, X_rec)
-        self.assertTrue(maxae==1)
+        self.assertTrue(MaxAE==1)
 
         X = np.ones((100,1))
         X_rec = np.ones((100,1))
         X_rec[40,:] = -0.1
         MaxAE = reconstruction.max_absolute_error(X, X_rec)
-        self.assertTrue(maxae==0.9)
+        self.assertTrue(MaxAE==1.1)
 
         X = np.ones((100,1))
         X_rec = np.ones((100,1))
@@ -105,6 +105,6 @@ class Reconstruction(unittest.TestCase):
         X_rec[0] = 10
         X_rec[81] = 20
         MaxAE = reconstruction.max_absolute_error(X, X_rec)
-        self.assertTrue(maxae==19)
+        self.assertTrue(MaxAE==19)
 
 # ------------------------------------------------------------------------------
