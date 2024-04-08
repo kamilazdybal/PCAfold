@@ -35,7 +35,53 @@ import time
 class VarianceData:
     """
     A class for storing helpful quantities in analyzing dimensionality of manifolds through normalized variance measures.
-    This class will be returned by ``compute_normalized_variance``.
+    This class will be returned by ``analysis.compute_normalized_variance()`` and ``analysis.compute_normalized_range()`` functions.
+
+    Below is an example for saving and uploading an object of the ``VarianceData`` class using the ``pickle`` library:
+
+    **Example:**
+
+    .. code:: python
+
+        from PCAfold import PCA, compute_normalized_variance
+        import numpy as np
+        import pickle
+
+        # Generate dummy data set:
+        X = np.random.rand(100,5)
+
+        # Perform PCA to obtain the low-dimensional manifold:
+        pca_X = PCA(X, n_components=2)
+        principal_components = pca_X.transform(X)
+
+        # Specify the bandwidth values:
+        bandwidth_values = np.logspace(-3, 1, 20)
+
+        # Compute normalized variance quantities:
+        variance_data = compute_normalized_variance(principal_components,
+                                                    X,
+                                                    depvar_names=['A', 'B', 'C', 'D', 'E'],
+                                                    bandwidth_values=bandwidth_values,
+                                                    scale_unit_box=True)
+
+        # Save VarianceData class object to a file:
+        pickle.dump(variance_data, open('variance_data.pkl', 'wb'))
+
+        # Upload VarianceData class object from a file:
+        variance_data = pickle.load(open('variance_data.pkl', 'rb'))
+
+        # Access bandwidth values:
+        variance_data.bandwidth_values
+
+        # Access normalized variance values:
+        variance_data.normalized_variance
+
+        # Access normalized variance values for a specific variable:
+        variance_data.normalized_variance['B']
+
+    You can further pass an object of the ``VarianceData`` class as an input
+    to the ``analysis.normalized_variance_derivative()`` function
+    or to the ``analysis.cost_function_normalized_variance_derivative()`` function.
 
     :param bandwidth_values:
         the array of bandwidth values (Gaussian filter widths) used in computing the normalized variance for each variable
