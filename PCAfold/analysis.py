@@ -99,7 +99,16 @@ class VarianceData:
         dictionary of the sample normalized variance for every observation, for each bandwidth and for each variable
     """
 
-    def __init__(self, bandwidth_values, norm_var, global_var, bandwidth_10pct_rise, keys, norm_var_limit, sample_norm_var, sample_norm_range):
+    def __init__(self,
+                 bandwidth_values,
+                 norm_var,
+                 global_var,
+                 bandwidth_10pct_rise,
+                 keys,
+                 norm_var_limit,
+                 sample_norm_var,
+                 sample_norm_range):
+
         self._bandwidth_values = bandwidth_values.copy()
         self._normalized_variance = norm_var.copy()
         self._global_variance = global_var.copy()
@@ -152,8 +161,17 @@ class VarianceData:
 
 # ------------------------------------------------------------------------------
 
-def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth=25, min_bandwidth=None,
-                                max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None, compute_sample_norm_var=False, compute_sample_norm_range=False):
+def compute_normalized_variance(indepvars,
+                                depvars,
+                                depvar_names,
+                                npts_bandwidth=25,
+                                min_bandwidth=None,
+                                max_bandwidth=None,
+                                bandwidth_values=None,
+                                scale_unit_box=True,
+                                n_threads=None,
+                                compute_sample_norm_var=False,
+                                compute_sample_norm_range=False):
     """
     Compute a normalized variance (and related quantities) for analyzing manifold dimensionality.
     The normalized variance is computed as
@@ -332,7 +350,15 @@ def compute_normalized_variance(indepvars, depvars, depvar_names, npts_bandwidth
 
 # ------------------------------------------------------------------------------
 
-def compute_normalized_range(indepvars, labels, npts_bandwidth=25, min_bandwidth=None, max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, activation_function='step', multiplier=3):
+def compute_normalized_range(indepvars,
+                             labels,
+                             npts_bandwidth=25,
+                             min_bandwidth=None,
+                             max_bandwidth=None,
+                             bandwidth_values=None,
+                             scale_unit_box=True,
+                             activation_function='step',
+                             multiplier=3):
     """
     Computes a normalized range for analyzing manifold quality for categorical data.
     This function is an alternate version of the normalized variance
@@ -652,7 +678,11 @@ def normalized_variance_derivative(variance_data):
 
 # ------------------------------------------------------------------------------
 
-def find_local_maxima(dependent_values, independent_values, logscaling=True, threshold=1.e-2, show_plot=False):
+def find_local_maxima(dependent_values,
+                      independent_values,
+                      logscaling=True,
+                      threshold=1.e-2,
+                      show_plot=False):
     """
     Finds and returns locations and values of local maxima in a dependent variable given a set of observations.
     The functional form of the dependent variable is approximated with a cubic spline for smoother approximations to local maxima.
@@ -718,9 +748,18 @@ def find_local_maxima(dependent_values, independent_values, logscaling=True, thr
 
 # ------------------------------------------------------------------------------
 
-def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars, depvar_names,
-                                        n_sample_iterations=1, verbose=True, npts_bandwidth=25, min_bandwidth=None,
-                                        max_bandwidth=None, bandwidth_values=None, scale_unit_box=True, n_threads=None):
+def random_sampling_normalized_variance(sampling_percentages,
+                                        indepvars,
+                                        depvars,
+                                        depvar_names,
+                                        n_sample_iterations=1,
+                                        verbose=True,
+                                        npts_bandwidth=25,
+                                        min_bandwidth=None,
+                                        max_bandwidth=None,
+                                        bandwidth_values=None,
+                                        scale_unit_box=True,
+                                        n_threads=None):
     """
     Compute the normalized variance derivatives :math:`\\hat{\\mathcal{D}}(\\sigma)` for random samples of the provided
     data specified using ``sampling_percentages``. These will be averaged over ``n_sample_iterations`` iterations. Analyzing
@@ -807,7 +846,12 @@ def random_sampling_normalized_variance(sampling_percentages, indepvars, depvars
 
 # ------------------------------------------------------------------------------
 
-def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_idx='peak', use_variance=False, verbose=False):
+def feature_size_map(variance_data,
+                     variable_name,
+                     cutoff=1,
+                     starting_bandwidth_idx='peak',
+                     use_variance=False,
+                     verbose=False):
     """
     Computes a map of local feature sizes on a manifold.
 
@@ -942,7 +986,10 @@ def feature_size_map(variance_data, variable_name, cutoff=1, starting_bandwidth_
 
 # ------------------------------------------------------------------------------
 
-def feature_size_map_smooth(indepvars, feature_size_map, method='median', n_neighbors=10):
+def feature_size_map_smooth(indepvars,
+                            feature_size_map,
+                            method='median',
+                            n_neighbors=10):
     """
     Smooths out a map of local feature sizes on a manifold.
 
@@ -1408,7 +1455,12 @@ def cost_function_normalized_variance_derivative(variance_data,
 #
 ################################################################################
 
-def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title=None, save_filename=None):
+def plot_normalized_variance(variance_data,
+                             plot_variables=[],
+                             color_map='Blues',
+                             figure_size=(10,5),
+                             title=None,
+                             save_filename=None):
     """
     This function plots normalized variance :math:`\mathcal{N}(\sigma)` over
     bandwith values :math:`\sigma` from an object of a ``VarianceData`` class.
@@ -1532,7 +1584,12 @@ def plot_normalized_variance(variance_data, plot_variables=[], color_map='Blues'
 
 # ------------------------------------------------------------------------------
 
-def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tuple, color_map_tuple, figure_size=(10,5), title=None, save_filename=None):
+def plot_normalized_variance_comparison(variance_data_tuple,
+                                        plot_variables_tuple,
+                                        color_map_tuple,
+                                        figure_size=(10,5),
+                                        title=None,
+                                        save_filename=None):
     """
     This function plots a comparison of normalized variance :math:`\mathcal{N}(\sigma)` over
     bandwith values :math:`\sigma` from several objects of a ``VarianceData`` class.
@@ -1672,7 +1729,12 @@ def plot_normalized_variance_comparison(variance_data_tuple, plot_variables_tupl
 
 # ------------------------------------------------------------------------------
 
-def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_map='Blues', figure_size=(10,5), title=None, save_filename=None):
+def plot_normalized_variance_derivative(variance_data,
+                                        plot_variables=[],
+                                        color_map='Blues',
+                                        figure_size=(10,5),
+                                        title=None,
+                                        save_filename=None):
     """
     This function plots a scaled normalized variance derivative (computed over logarithmically scaled bandwidths), :math:`\hat{\mathcal{D}(\sigma)}`,
     over bandwith values :math:`\sigma` from an object of a ``VarianceData`` class.
@@ -1795,7 +1857,12 @@ def plot_normalized_variance_derivative(variance_data, plot_variables=[], color_
 
 # ------------------------------------------------------------------------------
 
-def plot_normalized_variance_derivative_comparison(variance_data_tuple, plot_variables_tuple, color_map_tuple, figure_size=(10,5), title=None, save_filename=None):
+def plot_normalized_variance_derivative_comparison(variance_data_tuple,
+                                                   plot_variables_tuple,
+                                                   color_map_tuple,
+                                                   figure_size=(10,5),
+                                                   title=None,
+                                                   save_filename=None):
     """
     This function plots a comparison of scaled normalized variance derivative (computed over logarithmically scaled bandwidths), :math:`\hat{\mathcal{D}(\sigma)}`,
     over bandwith values :math:`\sigma` from an object of a ``VarianceData`` class.
