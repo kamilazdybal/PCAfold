@@ -29,7 +29,9 @@ _scalings_list = ['none', '', 'auto', 'std', 'pareto', 'vast', 'range', '0to1', 
 
 # ------------------------------------------------------------------------------
 
-def center_scale(X, scaling, nocenter=False):
+def center_scale(X,
+                 scaling,
+                 nocenter=False):
     """
     Centers and scales the original data set, :math:`\mathbf{X}`.
     In the discussion below, we understand that :math:`X_j` is the :math:`j^{th}` column
@@ -236,7 +238,9 @@ def center_scale(X, scaling, nocenter=False):
 
 # ------------------------------------------------------------------------------
 
-def invert_center_scale(X_cs, X_center, X_scale):
+def invert_center_scale(X_cs,
+                        X_center,
+                        X_scale):
     """
     Inverts whatever centering and scaling was done by the ``center_scale`` function:
 
@@ -312,7 +316,11 @@ def invert_center_scale(X_cs, X_center, X_scale):
 
 # ------------------------------------------------------------------------------
 
-def power_transform(X, transform_power, transform_shift=0., transform_sign_shift=0., invert=False):
+def power_transform(X,
+                    transform_power,
+                    transform_shift=0.,
+                    transform_sign_shift=0.,
+                    invert=False):
     """
     Performs a power transformation of the provided data.
     The equation for the transformation of variable :math:`X` is
@@ -363,7 +371,9 @@ def power_transform(X, transform_power, transform_shift=0., transform_sign_shift
 
 # ------------------------------------------------------------------------------
 
-def log_transform(X, method='log', threshold=1.e-6):
+def log_transform(X,
+                  method='log',
+                  threshold=1.e-6):
     """
     Performs log transformation of the original data set, :math:`\mathbf{X}`.
 
@@ -463,7 +473,9 @@ def log_transform(X, method='log', threshold=1.e-6):
 
 # ------------------------------------------------------------------------------
 
-def zero_pivot_transform(X, method='-1to1', verbose=False):
+def zero_pivot_transform(X,
+                         method='-1to1',
+                         verbose=False):
     """
     Scales negative and positive values according to a user-specified method, but preserves values that are zero.
     This function treats zero values in a variable as pivots that remain unchanged by scaling.
@@ -558,7 +570,10 @@ def zero_pivot_transform(X, method='-1to1', verbose=False):
 
     return X_transformed, maximum_positive, minimum_negative
 
-def invert_zero_pivot_transform(X_transformed, maximum_positive, minimum_negative, method='-1to1'):
+def invert_zero_pivot_transform(X_transformed,
+                                maximum_positive,
+                                minimum_negative,
+                                method='-1to1'):
     """
     Inverts the zero-pivot transform.
 
@@ -694,7 +709,10 @@ class PreProcessing:
     - **X_scale** - (read only) ``numpy.ndarray`` specifying the scales, :math:`d_j`, applied on the original data set :math:`\mathbf{X}`. It should be of size ``(n_variables,)``.
     """
 
-    def __init__(self, X, scaling='none', nocenter=False):
+    def __init__(self,
+                 X,
+                 scaling='none',
+                 nocenter=False):
 
         (self.__X_removed, self.__idx_removed, self.__idx_retained) = remove_constant_vars(X)
         (self.__X_cs, self.__X_center, self.__X_scale) = center_scale(self.X_removed, scaling, nocenter=nocenter)
@@ -725,7 +743,9 @@ class PreProcessing:
 
 # ------------------------------------------------------------------------------
 
-def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
+def remove_constant_vars(X,
+                         maxtol=1e-12,
+                         rangetol=1e-4):
     """
     Removes any constant columns from the original data set, :math:`\mathbf{X}`.
     The :math:`j^{th}` column, :math:`X_j`, is considered constant if either of the following is true:
@@ -809,7 +829,9 @@ def remove_constant_vars(X, maxtol=1e-12, rangetol=1e-4):
 
 # ------------------------------------------------------------------------------
 
-def order_variables(X, method='mean', descending=True):
+def order_variables(X,
+                    method='mean',
+                    descending=True):
     """
     Orders variables in the original data set, :math:`\mathbf{X}`, using a selected method.
 
@@ -905,7 +927,15 @@ def order_variables(X, method='mean', descending=True):
 
 # ------------------------------------------------------------------------------
 
-def representative_sample_size(depvars, percentages, thresholds, variable_names=None, method='kl-divergence', statistics='median', n_resamples=10, random_seed=None, verbose=False):
+def representative_sample_size(depvars,
+                               percentages,
+                               thresholds,
+                               variable_names=None,
+                               method='kl-divergence',
+                               statistics='median',
+                               n_resamples=10,
+                               random_seed=None,
+                               verbose=False):
     """
     Computes a representative sample size given dependent variables that serve as ground truth (100% of data).
     It is assumed that the full dataset is representative of some physical phenomena.
@@ -1362,7 +1392,12 @@ def representative_sample_size(depvars, percentages, thresholds, variable_names=
 
 # ------------------------------------------------------------------------------
 
-def outlier_detection(X, scaling, method='MULTIVARIATE TRIMMING', trimming_threshold=0.5, quantile_threshold=0.9899, verbose=False):
+def outlier_detection(X,
+                      scaling,
+                      method='MULTIVARIATE TRIMMING',
+                      trimming_threshold=0.5,
+                      quantile_threshold=0.9899,
+                      verbose=False):
     """
     Finds outliers in the original data set, :math:`\mathbf{X}`, and returns
     indices of observations without outliers as well as indices of the outliers
@@ -1650,7 +1685,12 @@ class ConditionalStatistics:
     - **conditional_standard_deviation** - (read only) ``numpy.ndarray`` specifying the conditional standard deviations of all original variables in the :math:`k` bins created. It has size ``(k,n_variables)``.
     """
 
-    def __init__(self, X, conditioning_variable, k=20, split_values=None, verbose=False):
+    def __init__(self,
+                 X,
+                 conditioning_variable,
+                 k=20,
+                 split_values=None,
+                 verbose=False):
 
         if not isinstance(X, np.ndarray):
             raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -1868,7 +1908,10 @@ class KernelDensity:
     :math:`\mathbf{X}` is multiplied by the corresponding weight in :math:`\mathbf{W_c}`). It has size ``(n_observations,n_variables)``.
     """
 
-    def __init__(self, X, conditioning_variable, verbose=False):
+    def __init__(self,
+                 X,
+                 conditioning_variable,
+                 verbose=False):
 
         if not isinstance(X, np.ndarray):
             raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -1912,7 +1955,9 @@ class KernelDensity:
         return self.__X_weighted
 
     # Computes eq.(26):
-    def __bandwidth(self, n, mean_standard_deviation):
+    def __bandwidth(self,
+                    n,
+                    mean_standard_deviation):
         """
         This function computes kernel bandwidth as:
 
@@ -1934,7 +1979,9 @@ class KernelDensity:
         return(h)
 
     # Computes eq.(21):
-    def __distance(self, x_1, x_2):
+    def __distance(self,
+                   x_1,
+                   x_2):
         """
         This function computes distance between two observations:
 
@@ -1956,7 +2003,11 @@ class KernelDensity:
         return(d)
 
     # Computes eq.(22):
-    def __gaussian_kernel(self, x1, x2, n, mean_standard_deviation):
+    def __gaussian_kernel(self,
+                          x1,
+                          x2,
+                          n,
+                          mean_standard_deviation):
         """
         This function computes a Gaussian kernel:
 
@@ -1985,7 +2036,9 @@ class KernelDensity:
         return(K)
 
     # Computes eq.(23):
-    def __variable_density(self, x, mean_standard_deviation):
+    def __variable_density(self,
+                           x,
+                           mean_standard_deviation):
         """
         This function computes a vector of variable densities for all observations.
 
@@ -2015,7 +2068,8 @@ class KernelDensity:
         return(Kck)
 
     # Computes eq.(24):
-    def __multi_variable_global_density(self, X):
+    def __multi_variable_global_density(self,
+                                        X):
         """
         This function computes a vector of variable global densities for a
         multi-variable case, for all observations.
@@ -2049,7 +2103,8 @@ class KernelDensity:
         return(Kc)
 
     # Computes eq.(25):
-    def __multi_variable_observation_weights(self, X):
+    def __multi_variable_observation_weights(self,
+                                             X):
         """
         This function computes a vector of observation weights for a
         multi-variable case.
@@ -2076,7 +2131,8 @@ class KernelDensity:
         return(W_c)
 
     # Computes eq.(20):
-    def __single_variable_observation_weights(self, x):
+    def __single_variable_observation_weights(self,
+                                              x):
         """
         This function computes a vector of observation weights for a
         single-variable case.
@@ -2135,7 +2191,9 @@ class DensityEstimation:
         ``int`` specifying the number of nearest neighbors, or the :math:`k` th nearest neighbor when applicable.
     """
 
-    def __init__(self, X, n_neighbors):
+    def __init__(self,
+                 X,
+                 n_neighbors):
 
         if not isinstance(X, np.ndarray):
             raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -2156,7 +2214,8 @@ class DensityEstimation:
 
 # ------------------------------------------------------------------------------
 
-    def average_knn_distance(self, verbose=False):
+    def average_knn_distance(self,
+                             verbose=False):
         """
         Computes an average Euclidean distances to :math:`k` nearest neighbors on
         a manifold defined by the independent variables.
@@ -2392,7 +2451,11 @@ class DataSampler:
         ``bool`` for printing verbose details.
     """
 
-    def __init__(self, idx, idx_test=None, random_seed=None, verbose=False):
+    def __init__(self,
+                 idx,
+                 idx_test=None,
+                 random_seed=None,
+                 verbose=False):
 
         if isinstance(idx, np.ndarray):
             if not all(isinstance(i, np.integer) for i in idx.ravel()):
@@ -2544,7 +2607,10 @@ class DataSampler:
         else:
             self.__verbose = new_verbose
 
-    def __print_verbose_information_sampling(self, idx, idx_train, idx_test):
+    def __print_verbose_information_sampling(self,
+                                             idx,
+                                             idx_train,
+                                             idx_test):
         """
         Prints detailed information on train and test sampling when
         ``verbose=True``.
@@ -2581,7 +2647,9 @@ class DataSampler:
 
 # ------------------------------------------------------------------------------
 
-    def number(self, perc, test_selection_option=1):
+    def number(self,
+               perc,
+               test_selection_option=1):
         """
         Uses classifications into :math:`k` clusters and samples
         fixed number of observations from every cluster as training data.
@@ -2740,7 +2808,9 @@ class DataSampler:
 
 # ------------------------------------------------------------------------------
 
-    def percentage(self, perc, test_selection_option=1):
+    def percentage(self,
+                   perc,
+                   test_selection_option=1):
         """
         Uses classifications into :math:`k` clusters and
         samples a certain percentage ``perc`` from every cluster as the training data.
@@ -2887,7 +2957,10 @@ class DataSampler:
 
 # ------------------------------------------------------------------------------
 
-    def manual(self, sampling_dictionary, sampling_type='percentage', test_selection_option=1):
+    def manual(self,
+               sampling_dictionary,
+               sampling_type='percentage',
+               test_selection_option=1):
         """
         Uses classifications into :math:`k` clusters
         and a dictionary ``sampling_dictionary`` in which you manually specify what
@@ -3112,7 +3185,9 @@ class DataSampler:
 
 # ------------------------------------------------------------------------------
 
-    def random(self, perc, test_selection_option=1):
+    def random(self,
+               perc,
+               test_selection_option=1):
         """
         Samples train data at random from the entire data set.
 
@@ -3261,7 +3336,9 @@ class DataSampler:
 #
 ################################################################################
 
-def __print_verbose_information_clustering(var, idx, bins_borders):
+def __print_verbose_information_clustering(var,
+                                           idx,
+                                           bins_borders):
 
     k = len(np.unique(idx))
 
@@ -3275,7 +3352,9 @@ def __print_verbose_information_clustering(var, idx, bins_borders):
 
 # ------------------------------------------------------------------------------
 
-def variable_bins(var, k, verbose=False):
+def variable_bins(var,
+                  k,
+                  verbose=False):
     """
     Clusters the data by dividing a variable vector ``var`` into
     bins of equal lengths.
@@ -3365,7 +3444,9 @@ def variable_bins(var, k, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def predefined_variable_bins(var, split_values, verbose=False):
+def predefined_variable_bins(var,
+                             split_values,
+                             verbose=False):
     """
     Clusters the data by dividing a variable vector ``var`` into
     bins such that splits are done at user-specified values.
@@ -3465,7 +3546,10 @@ def predefined_variable_bins(var, split_values, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
+def mixture_fraction_bins(Z,
+                          k,
+                          Z_stoich,
+                          verbose=False):
     """
     Clusters the data by dividing a mixture fraction vector
     ``Z`` into bins of equal lengths. This technique can be used to partition
@@ -3588,7 +3672,11 @@ def mixture_fraction_bins(Z, k, Z_stoich, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=False, verbose=False):
+def zero_neighborhood_bins(var,
+                           k,
+                           zero_offset_percentage=0.1,
+                           split_at_zero=False,
+                           verbose=False):
     """
     Clusters the data by separating close-to-zero observations in a vector into one
     cluster (``split_at_zero=False``) or two clusters (``split_at_zero=True``).
@@ -3774,7 +3862,8 @@ def zero_neighborhood_bins(var, k, zero_offset_percentage=0.1, split_at_zero=Fal
 
 # ------------------------------------------------------------------------------
 
-def degrade_clusters(idx, verbose=False):
+def degrade_clusters(idx,
+                     verbose=False):
     """
     Re-numerates clusters if either of these two cases is true:
 
@@ -3876,7 +3965,8 @@ def degrade_clusters(idx, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def flip_clusters(idx, dictionary):
+def flip_clusters(idx,
+                  dictionary):
     """
     Flips cluster labelling according to instructions provided
     in a dictionary. For a ``dictionary = {key : value}``, a cluster with a
@@ -3974,7 +4064,8 @@ def flip_clusters(idx, dictionary):
 
 # ------------------------------------------------------------------------------
 
-def get_centroids(X, idx):
+def get_centroids(X,
+                  idx):
     """
     Computes the centroids for all variables in the original data set,
     :math:`\\mathbf{X}`, and for each cluster specified in the
@@ -4065,7 +4156,8 @@ def get_centroids(X, idx):
 
 # ------------------------------------------------------------------------------
 
-def get_partition(X, idx):
+def get_partition(X,
+                  idx):
     """
     Partitions the observations from the original data
     set, :math:`\mathbf{X}`, into :math:`k` clusters according to ``idx`` provided.
@@ -4214,7 +4306,9 @@ def get_populations(idx):
 
 # ------------------------------------------------------------------------------
 
-def get_average_centroid_distance(X, idx, weighted=False):
+def get_average_centroid_distance(X,
+                                  idx,
+                                  weighted=False):
     """
     Computes the average Euclidean distance between observations
     and the centroids of clusters to which each observation belongs.
@@ -4321,7 +4415,22 @@ def get_average_centroid_distance(X, idx, weighted=False):
 #
 ################################################################################
 
-def plot_2d_clustering(x, y, idx, clean=False, x_label=None, y_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, grid_on=False, s=None, markerscale=None, legend=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_clustering(x,
+                       y,
+                       idx,
+                       clean=False,
+                       x_label=None,
+                       y_label=None,
+                       color_map='viridis',
+                       alphas=None,
+                       first_cluster_index_zero=True,
+                       grid_on=False,
+                       s=None,
+                       markerscale=None,
+                       legend=True,
+                       figure_size=(7,7),
+                       title=None,
+                       save_filename=None):
     """
     Plots a two-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -4551,7 +4660,24 @@ def plot_2d_clustering(x, y, idx, clean=False, x_label=None, y_label=None, color
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=None, z_label=None, color_map='viridis', alphas=None, first_cluster_index_zero=True, s=None, markerscale=None, legend=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_clustering(x,
+                       y,
+                       z,
+                       idx,
+                       elev=45,
+                       azim=-45,
+                       x_label=None,
+                       y_label=None,
+                       z_label=None,
+                       color_map='viridis',
+                       alphas=None,
+                       first_cluster_index_zero=True,
+                       s=None,
+                       markerscale=None,
+                       legend=True,
+                       figure_size=(7,7),
+                       title=None,
+                       save_filename=None):
     """
     Plots a three-dimensional manifold divided into clusters.
     Number of observations in each cluster will be plotted in the legend.
@@ -4849,7 +4975,19 @@ def plot_3d_clustering(x, y, z, idx, elev=45, azim=-45, x_label=None, y_label=No
 
 # ------------------------------------------------------------------------------
 
-def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_label=None, color_map='viridis', first_cluster_index_zero=True, grid_on=False, figure_size=(14,7), title=None, save_filename=None):
+def plot_2d_train_test_samples(x,
+                               y,
+                               idx,
+                               idx_train,
+                               idx_test,
+                               x_label=None,
+                               y_label=None,
+                               color_map='viridis',
+                               first_cluster_index_zero=True,
+                               grid_on=False,
+                               figure_size=(14,7),
+                               title=None,
+                               save_filename=None):
     """
     Plots a two-dimensional manifold divided into train and test
     samples. Number of observations in train and test data respectively will be
@@ -5062,7 +5200,19 @@ def plot_2d_train_test_samples(x, y, idx, idx_train, idx_test, x_label=None, y_l
 
 # ------------------------------------------------------------------------------
 
-def plot_conditional_statistics(variable, conditioning_variable, k=20, split_values=None, statistics_to_plot=['mean'], color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', figure_size=(7,7), title=None, save_filename=None):
+def plot_conditional_statistics(variable,
+                                conditioning_variable,
+                                k=20,
+                                split_values=None,
+                                statistics_to_plot=['mean'],
+                                color=None,
+                                x_label=None,
+                                y_label=None,
+                                colorbar_label=None,
+                                color_map='viridis',
+                                figure_size=(7,7),
+                                title=None,
+                                save_filename=None):
     """
     Plots a two-dimensional manifold given by ``variable`` and ``conditioning_variable``
     and the selected conditional statistics (as per ``preprocess.ConditionalStatistics``).
