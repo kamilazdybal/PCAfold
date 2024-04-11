@@ -144,7 +144,12 @@ class PCA:
     - **tq** - (read only) variance accounted for in each individual variable in each PC, :math:`\mathbf{t_{q,j}}`.
     """
 
-    def __init__(self, X, scaling='std', n_components=0, use_eigendec=True, nocenter=False):
+    def __init__(self,
+                 X,
+                 scaling='std',
+                 n_components=0,
+                 use_eigendec=True,
+                 nocenter=False):
 
         # Check X:
         (n_observations, n_variables) = np.shape(X)
@@ -305,7 +310,9 @@ class PCA:
                 else:
                     self.__n_components = self.n_variables
 
-    def transform(self, X, nocenter=False):
+    def transform(self,
+                  X,
+                  nocenter=False):
         """
         Transforms any original data set, :math:`\mathbf{X}`, to a new
         truncated basis, :math:`\mathbf{A}_q`, identified by PCA.
@@ -401,7 +408,9 @@ class PCA:
 
         return principal_components
 
-    def reconstruct(self, principal_components, nocenter=False):
+    def reconstruct(self,
+                    principal_components,
+                    nocenter=False):
         """
         Calculates rank-:math:`q` reconstruction of the
         data set from the :math:`q` first principal components, :math:`\mathbf{Z}_q`.
@@ -491,7 +500,10 @@ class PCA:
 
         return(X_rec)
 
-    def get_weights_dictionary(self, variable_names, pc_index, n_digits=10):
+    def get_weights_dictionary(self,
+                               variable_names,
+                               pc_index,
+                               n_digits=10):
         """
         Creates a dictionary where keys are the names of the variables
         in the original data set :math:`\mathbf{X}` and values are the eigenvector weights
@@ -563,7 +575,8 @@ class PCA:
 
         return weights_dictionary
 
-    def calculate_r2(self, X):
+    def calculate_r2(self,
+                     X):
         """
         Calculates coefficient of determination, :math:`R^2`, values
         for the rank-:math:`q` reconstruction, :math:`\mathbf{X_{rec}}`, of the original
@@ -618,7 +631,9 @@ class PCA:
 
         return r2
 
-    def data_consistency_check(self, X, errors_are_fatal=False):
+    def data_consistency_check(self,
+                               X,
+                               errors_are_fatal=False):
         """
         Checks if the supplied data matrix ``X`` is consistent
         with the current ``PCA`` class object.
@@ -691,7 +706,13 @@ class PCA:
 
         return is_consistent
 
-    def r2_convergence(self, X, n_pcs, variable_names=[], print_width=10, verbose=False, save_filename=None):
+    def r2_convergence(self,
+                       X,
+                       n_pcs,
+                       variable_names=[],
+                       print_width=10,
+                       verbose=False,
+                       save_filename=None):
         """
         Returns and optionally prints and/or saves to ``.txt`` file
         :math:`R^2` values (as per ``PCA.calculate_r2``
@@ -817,7 +838,9 @@ class PCA:
 
         return r2
 
-    def principal_variables(self, method='B2', x=[]):
+    def principal_variables(self,
+                            method='B2',
+                            x=[]):
         """
         Extracts Principal Variables (PVs) from a PCA.
 
@@ -964,7 +987,8 @@ class PCA:
 
         return principal_variables_indices
 
-    def save_to_txt(self, save_filename):
+    def save_to_txt(self,
+                    save_filename):
         """
         Writes the eigenvector matrix, :math:`\mathbf{A}`,
         loadings, :math:`\mathbf{l}`, centering, :math:`\mathbf{C}`,
@@ -1022,7 +1046,9 @@ class PCA:
             np.savetxt(fid, np.array([self.X_scale]), delimiter=',', fmt='%6.12f')
         fid.close()
 
-    def set_retained_eigenvalues(self, method='SCREE GRAPH', option=None):
+    def set_retained_eigenvalues(self,
+                                 method='SCREE GRAPH',
+                                 option=None):
         """
         Helps determine how many principal components (PCs) should be retained.
         The following methods are available:
@@ -1143,7 +1169,8 @@ class PCA:
 
         return pca
 
-    def u_scores(self, X):
+    def u_scores(self,
+                 X):
         """
         Calculates the U-scores (principal components):
 
@@ -1186,7 +1213,8 @@ class PCA:
 
         return(u_scores)
 
-    def w_scores(self, X):
+    def w_scores(self,
+                 X):
         """
         Calculates the W-scores which are the principal components
         scaled by the inverse square root of the corresponding eigenvalue:
@@ -1234,7 +1262,8 @@ class PCA:
 
         return(w_scores)
 
-    def __eq__(a, b):
+    def __eq__(a,
+               b):
         """
         Compares two PCA objects for equality.
 
@@ -1262,7 +1291,8 @@ class PCA:
 
         return iseq
 
-    def __ne__(a, b):
+    def __ne__(a,
+               b):
         """
         Tests two PCA objects for inequality.
 
@@ -1358,7 +1388,14 @@ class LPCA:
     - **idx_retained_in_clusters** - (read only) ``list`` of ``list`` specifying the variables retained in each cluster. If a variable within a particular cluster becomes constant, it will be removed from this list.
     """
 
-    def __init__(self, X, idx, scaling='std', n_components=0, use_eigendec=True, nocenter=False, verbose=False):
+    def __init__(self,
+                 X,
+                 idx,
+                 scaling='std',
+                 n_components=0,
+                 use_eigendec=True,
+                 nocenter=False,
+                 verbose=False):
 
         if not isinstance(X, np.ndarray):
             raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -1564,7 +1601,12 @@ class LPCA:
     def idx_retained_in_clusters(self):
         return self.__idx_retained_in_clusters
 
-    def local_correlation(self, variable, index=0, metric='pearson', display=None, verbose=False):
+    def local_correlation(self,
+                          variable,
+                          index=0,
+                          metric='pearson',
+                          display=None,
+                          verbose=False):
         """
         Computes a correlation in each cluster and a globally-averaged correlation between the local
         principal component, PC, and some specified variable, :math:`\\phi`.
@@ -1935,7 +1977,16 @@ class VQPCA:
 
     """
 
-    def __init__(self, X, n_clusters, n_components, scaling='std', idx_init='random', max_iter=300, tolerance=None, random_state=None, verbose=False):
+    def __init__(self,
+                 X,
+                 n_clusters,
+                 n_components,
+                 scaling='std',
+                 idx_init='random',
+                 max_iter=300,
+                 tolerance=None,
+                 random_state=None,
+                 verbose=False):
 
         __inits = ['random', 'uniform']
 
@@ -2302,7 +2353,17 @@ class SubsetPCA:
     - **variable_sequence** - (read only) ``list`` or ``list`` of ``list`` specifying the names of variables that were used in each subset PCA.
     """
 
-    def __init__(self, X, X_source=None, full_sequence=True, subset_indices=None, variable_names=None, scaling='std', n_components=2, use_eigendec=True, nocenter=False, verbose=False):
+    def __init__(self,
+                 X,
+                 X_source=None,
+                 full_sequence=True,
+                 subset_indices=None,
+                 variable_names=None,
+                 scaling='std',
+                 n_components=2,
+                 use_eigendec=True,
+                 nocenter=False,
+                 verbose=False):
 
         if not isinstance(X, np.ndarray):
             raise ValueError("Parameter `X` has to be of type `numpy.ndarray`.")
@@ -2505,7 +2566,13 @@ class SamplePCA:
 
     """
 
-    def __init__(self, X, idx_X_r, scaling, n_components, biasing_option, X_source=None):
+    def __init__(self,
+                 X,
+                 idx_X_r,
+                 scaling,
+                 n_components,
+                 biasing_option,
+                 X_source=None):
 
         _biasing_options = [1,2,3,4]
 
@@ -2824,7 +2891,17 @@ class EquilibratedSamplePCA:
         data set at the last (equilibration) iteration.
     """
 
-    def __init__(self, X, idx, scaling, n_components, biasing_option, X_source=None, n_iterations=10, stop_iter=0, random_seed=None, verbose=False):
+    def __init__(self,
+                 X,
+                 idx,
+                 scaling,
+                 n_components,
+                 biasing_option,
+                 X_source=None,
+                 n_iterations=10,
+                 stop_iter=0,
+                 random_seed=None,
+                 verbose=False):
 
         _biasing_options = [1,2,3,4]
 
@@ -3112,7 +3189,14 @@ class EquilibratedSamplePCA:
     def D_r(self):
         return self.__D_r
 
-def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], legend_label=[], figure_size=None, title=None, save_filename=None):
+def analyze_centers_change(X,
+                           idx_X_r,
+                           variable_names=[],
+                           plot_variables=[],
+                           legend_label=[],
+                           figure_size=None,
+                           title=None,
+                           save_filename=None):
     """
     Analyzes the change in normalized centers computed on the
     sampled subset of the original data set :math:`\mathbf{X_r}` with respect
@@ -3279,7 +3363,16 @@ def analyze_centers_change(X, idx_X_r, variable_names=[], plot_variables=[], leg
 
     return(normalized_C, normalized_C_r, center_movement_percentage, plt)
 
-def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_variables=[], normalize=False, zero_norm=False, legend_label=[], color_map='viridis', figure_size=None, title=None, save_filename=None):
+def analyze_eigenvector_weights_change(eigenvectors,
+                                       variable_names=[],
+                                       plot_variables=[],
+                                       normalize=False,
+                                       zero_norm=False,
+                                       legend_label=[],
+                                       color_map='viridis',
+                                       figure_size=None,
+                                       title=None,
+                                       save_filename=None):
     """
     Analyzes the change of weights on an eigenvector obtained
     from a reduced data set as specified by the ``eigenvectors`` matrix.
@@ -3494,7 +3587,14 @@ def analyze_eigenvector_weights_change(eigenvectors, variable_names=[], plot_var
 
     return plt
 
-def analyze_eigenvalue_distribution(X, idx_X_r, scaling, biasing_option, legend_label=[], figure_size=None, title=None, save_filename=None):
+def analyze_eigenvalue_distribution(X,
+                                    idx_X_r,
+                                    scaling,
+                                    biasing_option,
+                                    legend_label=[],
+                                    figure_size=None,
+                                    title=None,
+                                    save_filename=None):
     """
     Analyzes the normalized eigenvalue distribution when PCA is
     performed on the original data set :math:`\mathbf{X}` and on the sampled
@@ -3884,7 +3984,23 @@ def plot_2d_manifold(x,
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, clean=False, x_label=None, y_label=None, z_label=None, colorbar_label=None, color_map='viridis', colorbar_range=None, s=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_manifold(x,
+                     y,
+                     z,
+                     color=None,
+                     elev=45,
+                     azim=-45,
+                     clean=False,
+                     x_label=None,
+                     y_label=None,
+                     z_label=None,
+                     colorbar_label=None,
+                     color_map='viridis',
+                     colorbar_range=None,
+                     s=None,
+                     figure_size=(7,7),
+                     title=None,
+                     save_filename=None):
     """
     Plots a three-dimensional manifold given three vectors defining the manifold.
 
@@ -4141,7 +4257,18 @@ def plot_3d_manifold(x, y, z, color=None, elev=45, azim=-45, clean=False, x_labe
 
 # ------------------------------------------------------------------------------
 
-def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=False, nrows=1, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,3), title=None, save_filename=None):
+def plot_2d_manifold_sequence(xy,
+                              color=None,
+                              x_label=None,
+                              y_label=None,
+                              cbar=False,
+                              nrows=1,
+                              colorbar_label=None,
+                              color_map='viridis',
+                              grid_on=True,
+                              figure_size=(7,3),
+                              title=None,
+                              save_filename=None):
     """
     Plots a sequence of two-dimensional manifolds given a list of two vectors defining the manifold.
 
@@ -4350,7 +4477,17 @@ def plot_2d_manifold_sequence(xy, color=None, x_label=None, y_label=None, cbar=F
 
 # ------------------------------------------------------------------------------
 
-def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, colorbar_label=None, color_map='viridis', grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_parity(variable,
+                variable_rec,
+                color=None,
+                x_label=None,
+                y_label=None,
+                colorbar_label=None,
+                color_map='viridis',
+                grid_on=True,
+                figure_size=(7,7),
+                title=None,
+                save_filename=None):
     """
     Plots a parity plot between a variable and its reconstruction.
 
@@ -4529,7 +4666,18 @@ def plot_parity(variable, variable_rec, color=None, x_label=None, y_label=None, 
 
 # ------------------------------------------------------------------------------
 
-def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, ylim=None, highlight_weights=None, highlight_color=None, figure_size=None, title=None, save_filename=None):
+def plot_mode(mode,
+              mode_name=None,
+              variable_names=None,
+              plot_absolute=False,
+              rotate_label=False,
+              bar_color=None,
+              ylim=None,
+              highlight_weights=None,
+              highlight_color=None,
+              figure_size=None,
+              title=None,
+              save_filename=None):
     """
     Plots weights on a generic mode.
 
@@ -4709,7 +4857,15 @@ def plot_mode(mode, mode_name=None, variable_names=None, plot_absolute=False, ro
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=None, plot_absolute=False, rotate_label=False, bar_color=None, figure_size=None, title=None, save_filename=None):
+def plot_eigenvectors(eigenvectors,
+                      eigenvectors_indices=[],
+                      variable_names=None,
+                      plot_absolute=False,
+                      rotate_label=False,
+                      bar_color=None,
+                      figure_size=None,
+                      title=None,
+                      save_filename=None):
     """
     Plots weights on eigenvectors. It will generate as many
     plots as there are eigenvectors present in the ``eigenvectors`` matrix.
@@ -4857,7 +5013,16 @@ def plot_eigenvectors(eigenvectors, eigenvectors_indices=[], variable_names=None
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_names=[], plot_absolute=False, rotate_label=False, ylim=None, color_map='coolwarm', figure_size=None, title=None, save_filename=None):
+def plot_eigenvectors_comparison(eigenvectors_tuple,
+                                 legend_labels=[],
+                                 variable_names=[],
+                                 plot_absolute=False,
+                                 rotate_label=False,
+                                 ylim=None,
+                                 color_map='coolwarm',
+                                 figure_size=None,
+                                 title=None,
+                                 save_filename=None):
     """
     Plots a comparison of weights on eigenvectors.
 
@@ -5010,7 +5175,11 @@ def plot_eigenvectors_comparison(eigenvectors_tuple, legend_labels=[], variable_
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvalue_distribution(eigenvalues, normalized=False, figure_size=None, title=None, save_filename=None):
+def plot_eigenvalue_distribution(eigenvalues,
+                                 normalized=False,
+                                 figure_size=None,
+                                 title=None,
+                                 save_filename=None):
     """
     Plots eigenvalue distribution.
 
@@ -5103,7 +5272,13 @@ def plot_eigenvalue_distribution(eigenvalues, normalized=False, figure_size=None
 
 # ------------------------------------------------------------------------------
 
-def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[], normalized=False, color_map='coolwarm', figure_size=None, title=None, save_filename=None):
+def plot_eigenvalue_distribution_comparison(eigenvalues_tuple,
+                                            legend_labels=[],
+                                            normalized=False,
+                                            color_map='coolwarm',
+                                            figure_size=None,
+                                            title=None,
+                                            save_filename=None):
     """
     Plots a comparison of eigenvalue distributions.
 
@@ -5229,7 +5404,11 @@ def plot_eigenvalue_distribution_comparison(eigenvalues_tuple, legend_labels=[],
 
 # ------------------------------------------------------------------------------
 
-def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, title=None, save_filename=None):
+def plot_cumulative_variance(eigenvalues,
+                             n_components=0,
+                             figure_size=None,
+                             title=None,
+                             save_filename=None):
     """
     Plots the eigenvalues as bars and their cumulative sum to visualize
     the percent variance in the data explained by each principal component
@@ -5326,7 +5505,18 @@ def plot_cumulative_variance(eigenvalues, n_components=0, figure_size=None, titl
 
 # ------------------------------------------------------------------------------
 
-def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=None, y_ticks=None, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+def plot_heatmap(M,
+                 annotate=False,
+                 text_color='w',
+                 format_displayed='%.2f',
+                 x_ticks=None,
+                 y_ticks=None,
+                 color_map='viridis',
+                 cbar=False,
+                 colorbar_label=None,
+                 figure_size=(5,5),
+                 title=None,
+                 save_filename=None):
     """
     Plots a heatmap for any matrix :math:`\\mathbf{M}`.
 
@@ -5493,7 +5683,18 @@ def plot_heatmap(M, annotate=False, text_color='w', format_displayed='%.2f', x_t
 
 # ------------------------------------------------------------------------------
 
-def plot_heatmap_sequence(M, annotate=False, text_color='w', format_displayed='%.2f', x_ticks=None, y_ticks=None, color_map='viridis', cbar=False, colorbar_label=None, figure_size=(5,5), title=None, save_filename=None):
+def plot_heatmap_sequence(M,
+                          annotate=False,
+                          text_color='w',
+                          format_displayed='%.2f',
+                          x_ticks=None,
+                          y_ticks=None,
+                          color_map='viridis',
+                          cbar=False,
+                          colorbar_label=None,
+                          figure_size=(5,5),
+                          title=None,
+                          save_filename=None):
     """
     Plots a sequence of heatmaps for matrices :math:`\\mathbf{M}` stored in a list.
 
