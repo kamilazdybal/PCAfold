@@ -112,7 +112,15 @@ class RegressionAssessment:
     - **stratified_normalized_root_mean_squared_error** - (read only) ``numpy.ndarray`` specifying the normalized root mean squared error (NRMSE) values. It has size ``(1,n_variables)``.
     """
 
-    def __init__(self, observed, predicted, idx=None, variable_names=None, use_global_mean=False, norm='std', use_global_norm=False, tolerance=0.05):
+    def __init__(self,
+                 observed,
+                 predicted,
+                 idx=None,
+                 variable_names=None,
+                 use_global_mean=False,
+                 norm='std',
+                 use_global_norm=False,
+                 tolerance=0.05):
 
         if not isinstance(observed, np.ndarray):
             raise ValueError("Parameter `observed` has to be of type `numpy.ndarray`.")
@@ -298,7 +306,11 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-    def print_metrics(self, table_format=['raw'], float_format='.4f', metrics=None, comparison=None):
+    def print_metrics(self,
+                      table_format=['raw'],
+                      float_format='.4f',
+                      metrics=None,
+                      comparison=None):
         """
         Prints regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
 
@@ -668,7 +680,11 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-    def print_stratified_metrics(self, table_format=['raw'], float_format='.4f', metrics=None, comparison=None):
+    def print_stratified_metrics(self,
+                                 table_format=['raw'],
+                                 float_format='.4f',
+                                 metrics=None,
+                                 comparison=None):
         """
         Prints stratified regression assessment metrics as raw text, in ``tex`` format and/or as ``pandas.DataFrame``.
         In each cluster, in addition to the regression metrics, number of observations is printed,
@@ -1070,7 +1086,8 @@ class RegressionAssessment:
 
 # ------------------------------------------------------------------------------
 
-def coefficient_of_determination(observed, predicted):
+def coefficient_of_determination(observed,
+                                 predicted):
     """
     Computes the coefficient of determination, :math:`R^2`, value:
 
@@ -1146,7 +1163,11 @@ def coefficient_of_determination(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_coefficient_of_determination(observed, predicted, idx, use_global_mean=True, verbose=False):
+def stratified_coefficient_of_determination(observed,
+                                            predicted,
+                                            idx,
+                                            use_global_mean=True,
+                                            verbose=False):
     """
     Computes the stratified coefficient of determination,
     :math:`R^2`, values. Stratified :math:`R^2` is computed separately in each
@@ -1320,7 +1341,8 @@ def stratified_coefficient_of_determination(observed, predicted, idx, use_global
 
 # ------------------------------------------------------------------------------
 
-def mean_absolute_error(observed, predicted):
+def mean_absolute_error(observed,
+                        predicted):
     """
     Computes the mean absolute error (MAE):
 
@@ -1395,7 +1417,10 @@ def mean_absolute_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_mean_absolute_error(observed, predicted, idx, verbose=False):
+def stratified_mean_absolute_error(observed,
+                                   predicted,
+                                   idx,
+                                   verbose=False):
     """
     Computes the stratified mean absolute error (MAE) values. Stratified MAE is computed separately in each
     bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
@@ -1521,7 +1546,8 @@ def stratified_mean_absolute_error(observed, predicted, idx, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def max_absolute_error(observed, predicted):
+def max_absolute_error(observed,
+                       predicted):
     """
     Computes the maximum absolute error (MaxAE):
 
@@ -1596,7 +1622,10 @@ def max_absolute_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_max_absolute_error(observed, predicted, idx, verbose=False):
+def stratified_max_absolute_error(observed,
+                                  predicted,
+                                  idx,
+                                  verbose=False):
     """
     Computes the stratified max absolute error (MaxAE) values. Stratified MaxAE is computed separately in each
     bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
@@ -1722,7 +1751,8 @@ def stratified_max_absolute_error(observed, predicted, idx, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def mean_squared_error(observed, predicted):
+def mean_squared_error(observed,
+                       predicted):
     """
     Computes the mean squared error (MSE):
 
@@ -1797,7 +1827,10 @@ def mean_squared_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_mean_squared_error(observed, predicted, idx, verbose=False):
+def stratified_mean_squared_error(observed,
+                                  predicted,
+                                  idx,
+                                  verbose=False):
     """
     Computes the stratified mean squared error (MSE) values. Stratified MSE is computed separately in each
     bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
@@ -1923,7 +1956,8 @@ def stratified_mean_squared_error(observed, predicted, idx, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def mean_squared_logarithmic_error(observed, predicted):
+def mean_squared_logarithmic_error(observed,
+                                   predicted):
     """
     Computes the mean squared logarithmic error (MSLE):
 
@@ -2005,7 +2039,10 @@ def mean_squared_logarithmic_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_mean_squared_logarithmic_error(observed, predicted, idx, verbose=False):
+def stratified_mean_squared_logarithmic_error(observed,
+                                              predicted,
+                                              idx,
+                                              verbose=False):
     """
     Computes the stratified mean squared logarithmic error (MSLE) values. Stratified MSLE is computed separately in each
     bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
@@ -2138,7 +2175,8 @@ def stratified_mean_squared_logarithmic_error(observed, predicted, idx, verbose=
 
 # ------------------------------------------------------------------------------
 
-def root_mean_squared_error(observed, predicted):
+def root_mean_squared_error(observed,
+                            predicted):
     """
     Computes the root mean squared error (RMSE):
 
@@ -2213,7 +2251,10 @@ def root_mean_squared_error(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def stratified_root_mean_squared_error(observed, predicted, idx, verbose=False):
+def stratified_root_mean_squared_error(observed,
+                                       predicted,
+                                       idx,
+                                       verbose=False):
     """
     Computes the stratified root mean squared error (RMSE) values. Stratified RMSE is computed separately in each
     bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
@@ -2339,7 +2380,9 @@ def stratified_root_mean_squared_error(observed, predicted, idx, verbose=False):
 
 # ------------------------------------------------------------------------------
 
-def normalized_root_mean_squared_error(observed, predicted, norm='std'):
+def normalized_root_mean_squared_error(observed,
+                                       predicted,
+                                       norm='std'):
     """
     Computes the normalized root mean squared error (NRMSE):
 
@@ -2452,7 +2495,12 @@ def normalized_root_mean_squared_error(observed, predicted, norm='std'):
 
 # ------------------------------------------------------------------------------
 
-def stratified_normalized_root_mean_squared_error(observed, predicted, idx, norm='std', use_global_norm=False, verbose=False):
+def stratified_normalized_root_mean_squared_error(observed,
+                                                  predicted,
+                                                  idx,
+                                                  norm='std',
+                                                  use_global_norm=False,
+                                                  verbose=False):
     """
     Computes the stratified normalized root mean squared error (NRMSE) values. Stratified NRMSE is computed separately in each
     bin (cluster) of an observed dependent variable, :math:`\\phi_o`.
@@ -2603,7 +2651,8 @@ def stratified_normalized_root_mean_squared_error(observed, predicted, idx, norm
 
 # ------------------------------------------------------------------------------
 
-def turning_points(observed, predicted):
+def turning_points(observed,
+                   predicted):
     """
     Computes the turning points percentage - the percentage of predicted outputs
     that have the opposite growth tendency to the corresponding observed growth tendency.
@@ -2620,7 +2669,9 @@ def turning_points(observed, predicted):
 
 # ------------------------------------------------------------------------------
 
-def good_estimate(observed, predicted, tolerance=0.05):
+def good_estimate(observed,
+                  predicted,
+                  tolerance=0.05):
     """
     Computes the good estimate (GE) - the percentage of predicted values that
     are within the specified tolerance from the corresponding observed values.
@@ -2644,7 +2695,9 @@ def good_estimate(observed, predicted, tolerance=0.05):
 
 # ------------------------------------------------------------------------------
 
-def good_direction_estimate(observed, predicted, tolerance=0.05):
+def good_direction_estimate(observed,
+                            predicted,
+                            tolerance=0.05):
     """
     Computes the good direction (GD) and the good direction estimate (GDE).
 
@@ -2738,7 +2791,10 @@ def good_direction_estimate(observed, predicted, tolerance=0.05):
 
 # ------------------------------------------------------------------------------
 
-def generate_tex_table(data_frame_table, float_format='.2f', caption='', label=''):
+def generate_tex_table(data_frame_table,
+                       float_format='.2f',
+                       caption='',
+                       label=''):
     """
     Generates ``tex`` code for a table stored in a ``pandas.DataFrame``. This function
     can be useful e.g. for printing regression results.
@@ -3271,7 +3327,8 @@ class ANN:
 
 # ------------------------------------------------------------------------------
 
-    def predict(self, input_regressors):
+    def predict(self,
+                input_regressors):
         """
         Predicts the quantities of interest (QoIs) from the trained artificial neural network (ANN) model.
 
@@ -3326,7 +3383,10 @@ class ANN:
 
 # ------------------------------------------------------------------------------
 
-    def plot_losses(self, markevery=100, figure_size=(15,5), save_filename=None):
+    def plot_losses(self,
+                    markevery=100,
+                    figure_size=(15,5),
+                    save_filename=None):
         """
         Plots training and validation losses.
 
@@ -3401,7 +3461,10 @@ _pshapes_write = 'shapes'
 _coeffs_write = 'coeffs'
 
 
-def init_uniform_partitions(list_npartitions, ivars, width_factor=0.5, verbose=False):
+def init_uniform_partitions(list_npartitions,
+                            ivars,
+                            width_factor=0.5,
+                            verbose=False):
     """
     Computes parameters for initializing partition locations near training data with uniform spacing in each dimension.
 
@@ -3896,7 +3959,13 @@ class PartitionOfUnityNetwork:
                 output = tf.concat([output, temp], 1)
         return output
 
-    def build_training_graph(self, ivars, dvars, error_type='abs', constrain_positivity=False, istensor=False, verbose=False):
+    def build_training_graph(self,
+                             ivars,
+                             dvars,
+                             error_type='abs',
+                             constrain_positivity=False,
+                             istensor=False,
+                             verbose=False):
         """
         Construct the graph used during training (including defining the training errors) with the provided training data
 
@@ -4047,7 +4116,8 @@ class PartitionOfUnityNetwork:
         self._training_archive = {'mse': list([msre]), 'inf': list([infre]), 'sse': list([ssre]), 'data':list([self.__getstate__()])}
         self._built_graph = True
 
-    def update_lr(self, lr):
+    def update_lr(self,
+                  lr):
         """
         update the learning rate for training
 
@@ -4057,7 +4127,8 @@ class PartitionOfUnityNetwork:
         print('updating lr:', lr)
         self._sess.run(self._lr.assign(lr))
 
-    def update_l2reg(self, l2reg):
+    def update_l2reg(self,
+                     l2reg):
         """
         update the least-squares regularization for training
 
@@ -4067,7 +4138,8 @@ class PartitionOfUnityNetwork:
         print('updating l2reg:', l2reg)
         self._sess.run(self._l2reg.assign(l2reg))
 
-    def lstsq(self, verbose=True):
+    def lstsq(self,
+              verbose=True):
         """
         update the basis coefficients with least-squares regression
 
@@ -4080,7 +4152,11 @@ class PartitionOfUnityNetwork:
             print('performing least-squares solve')
         self._sess.run(self._lstsq)
 
-    def train(self, iterations, archive_rate=100, use_best_archive_sse=True, verbose=False):
+    def train(self,
+              iterations,
+              archive_rate=100,
+              use_best_archive_sse=True,
+              verbose=False):
         """
         Performs training using a least-squares gradient descent block coordinate descent strategy.
         This alternates between updating the partition parameters with gradient descent and updating the basis coefficients with least-squares.
@@ -4147,7 +4223,8 @@ class PartitionOfUnityNetwork:
         else:
             raise ValueError("basis coefficients have not been set.")
 
-    def __call__(self, xeval):
+    def __call__(self,
+                 xeval):
         """
         evaluate the POUnet
 
@@ -4178,7 +4255,9 @@ class PartitionOfUnityNetwork:
                     dtype=self.dtype
                    )
 
-    def derivatives(self, xeval, dvar_idx=0):
+    def derivatives(self,
+                    xeval,
+                    dvar_idx=0):
         """
         evaluate the POUnet derivatives
 
@@ -4203,7 +4282,8 @@ class PartitionOfUnityNetwork:
         return self._sess.run(der)[:,:,0]
 
 
-    def partition_prenorm(self, xeval):
+    def partition_prenorm(self,
+                          xeval):
         """
         evaluate the POUnet partitions prior to normalization
 
@@ -4221,7 +4301,8 @@ class PartitionOfUnityNetwork:
         t_nnp = self.tf_partitions_prenorm(xeval_tf)
         return self._sess.run(t_nnp)
 
-    def write_data_to_file(self, filename):
+    def write_data_to_file(self,
+                           filename):
         """
         Save class data to a specified file using pickle. This does not include the archived data from training,
         which can be separately accessed with training_archive and saved outside of ``PartitionOfUnityNetwork``.
@@ -4232,7 +4313,9 @@ class PartitionOfUnityNetwork:
         with open(filename, 'wb') as file_output:
             pickle.dump(self.__getstate__(), file_output)
 
-    def write_data_to_txt(self, filename, nformat='%.14e'):
+    def write_data_to_txt(self,
+                          filename,
+                          nformat='%.14e'):
         """
         Save data to a specified txt file. This may be used to read POUnet parameters into other languages such as C++
 
@@ -4338,7 +4421,16 @@ class PartitionOfUnityNetwork:
 #
 ################################################################################
 
-def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, color_observed=None, color_predicted=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_regression(x,
+                       observed,
+                       predicted,
+                       x_label=None,
+                       y_label=None,
+                       color_observed=None,
+                       color_predicted=None,
+                       figure_size=(7,7),
+                       title=None,
+                       save_filename=None):
     """
     Plots the result of regression of a dependent variable on top
     of a one-dimensional manifold defined by a single independent variable ``x``.
@@ -4509,7 +4601,25 @@ def plot_2d_regression(x, observed, predicted, x_label=None, y_label=None, color
 
 # ------------------------------------------------------------------------------
 
-def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=None, resolution=(10,10), extension=(0,0), x_label=None, y_label=None, s_field=None, s_manifold=None, manifold_color=None, colorbar_label=None, color_map='viridis', colorbar_range=None, manifold_alpha=1, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_regression_scalar_field(grid_bounds,
+                                    regression_model,
+                                    x=None,
+                                    y=None,
+                                    resolution=(10,10),
+                                    extension=(0,0),
+                                    x_label=None,
+                                    y_label=None,
+                                    s_field=None,
+                                    s_manifold=None,
+                                    manifold_color=None,
+                                    colorbar_label=None,
+                                    color_map='viridis',
+                                    colorbar_range=None,
+                                    manifold_alpha=1,
+                                    grid_on=True,
+                                    figure_size=(7,7),
+                                    title=None,
+                                    save_filename=None):
     """
     Plots a 2D field of a regressed scalar dependent variable.
     A two-dimensional manifold can be additionally plotted on top of the field.
@@ -4797,7 +4907,25 @@ def plot_2d_regression_scalar_field(grid_bounds, regression_model, x=None, y=Non
 
 # ------------------------------------------------------------------------------
 
-def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None, resolution=(10,10), extension=(0,0), color='k', x_label=None, y_label=None, s_manifold=None, manifold_color=None, colorbar_label=None, color_map='viridis', colorbar_range=None, manifold_alpha=1, grid_on=True, figure_size=(7,7), title=None, save_filename=None):
+def plot_2d_regression_streamplot(grid_bounds,
+                                  regression_model,
+                                  x=None,
+                                  y=None,
+                                  resolution=(10,10),
+                                  extension=(0,0),
+                                  color='k',
+                                  x_label=None,
+                                  y_label=None,
+                                  s_manifold=None,
+                                  manifold_color=None,
+                                  colorbar_label=None,
+                                  color_map='viridis',
+                                  colorbar_range=None,
+                                  manifold_alpha=1,
+                                  grid_on=True,
+                                  figure_size=(7,7),
+                                  title=None,
+                                  save_filename=None):
     """
     Plots a streamplot of a regressed vector field of a dependent variable.
     A two-dimensional manifold can be additionally plotted on top of the streamplot.
@@ -5090,7 +5218,25 @@ def plot_2d_regression_streamplot(grid_bounds, regression_model, x=None, y=None,
 
 # ------------------------------------------------------------------------------
 
-def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, clean=False, x_label=None, y_label=None, z_label=None, color_observed=None, color_predicted=None, s_observed=None, s_predicted=None, alpha_observed=None, alpha_predicted=None, figure_size=(7,7), title=None, save_filename=None):
+def plot_3d_regression(x,
+                       y,
+                       observed,
+                       predicted,
+                       elev=45,
+                       azim=-45,
+                       clean=False,
+                       x_label=None,
+                       y_label=None,
+                       z_label=None,
+                       color_observed=None,
+                       color_predicted=None,
+                       s_observed=None,
+                       s_predicted=None,
+                       alpha_observed=None,
+                       alpha_predicted=None,
+                       figure_size=(7,7),
+                       title=None,
+                       save_filename=None):
     """
     Plots the result of regression of a dependent variable on top
     of a two-dimensional manifold defined by two independent variables ``x`` and ``y``.
@@ -5365,7 +5511,15 @@ def plot_3d_regression(x, y, observed, predicted, elev=45, azim=-45, clean=False
 
 # ------------------------------------------------------------------------------
 
-def plot_stratified_metric(metric_in_bins, bins_borders, variable_name=None, metric_name=None, yscale='linear', ylim=None, figure_size=(10,5), title=None, save_filename=None):
+def plot_stratified_metric(metric_in_bins,
+                           bins_borders,
+                           variable_name=None,
+                           metric_name=None,
+                           yscale='linear',
+                           ylim=None,
+                           figure_size=(10,5),
+                           title=None,
+                           save_filename=None):
     """
     This function plots a stratified metric across bins of a dependent variable.
 
