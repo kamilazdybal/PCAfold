@@ -980,7 +980,10 @@ class QoIAwareProjection:
 
 # ------------------------------------------------------------------------------
 
-    def plot_losses(self, markevery=100, figure_size=(15,5), save_filename=None):
+    def plot_losses(self,
+                    markevery=100,
+                    figure_size=(15,5),
+                    save_filename=None):
         """
         Plots training and validation losses.
 
@@ -1975,7 +1978,9 @@ class QoIAwareProjectionPOUnet:
         const = 0. if nobias else self._t_projection_biases
         return tf_v1.reduce_sum(y * self._t_projection_weights, axis=1) + const
 
-    def projection(self, ivars, nobias=False):
+    def projection(self,
+                   ivars,
+                   nobias=False):
         """
         Projects the independent variable inputs using the current projection weights and biases
 
@@ -1993,7 +1998,8 @@ class QoIAwareProjectionPOUnet:
         self._sess.run(tf_v1.variables_initializer([tf_y]))
         return self._sess.run(self.tf_projection(tf_y, nobias))
 
-    def update_lr(self, lr):
+    def update_lr(self,
+                  lr):
         """
         update the learning rate for training
 
@@ -2003,7 +2009,8 @@ class QoIAwareProjectionPOUnet:
         print('updating lr:', lr)
         self._sess.run(self._lr.assign(lr))
 
-    def update_l2reg(self, l2reg):
+    def update_l2reg(self,
+                     l2reg):
         """
         update the least-squares regularization for training
 
@@ -2013,7 +2020,12 @@ class QoIAwareProjectionPOUnet:
         print('updating l2reg:', l2reg)
         self._sess.run(self._reconstruction._l2reg.assign(l2reg))
 
-    def build_training_graph(self, ivars, dvars_function, error_type='abs', constrain_positivity=False, first_trainable_idx=0):
+    def build_training_graph(self,
+                             ivars,
+                             dvars_function,
+                             error_type='abs',
+                             constrain_positivity=False,
+                             first_trainable_idx=0):
         """
         Construct the graph used during training (including defining the training errors) with the provided training data
 
@@ -2062,7 +2074,11 @@ class QoIAwareProjectionPOUnet:
         self._built_graph = True
         self._reconstruction._training_archive['data'] = list([self.__getstate__()])
 
-    def train(self, iterations, archive_rate=100, use_best_archive_sse=True, verbose=False):
+    def train(self,
+              iterations,
+              archive_rate=100,
+              use_best_archive_sse=True,
+              verbose=False):
         """
         Performs training using a least-squares gradient descent block coordinate descent strategy.
         This alternates between updating the partition and projection parameters with gradient descent and updating the basis coefficients with least-squares.
@@ -2123,7 +2139,8 @@ class QoIAwareProjectionPOUnet:
             self._sess.run(self._reconstruction._t_sp.assign(best_shapes))
             self._sess.run(self._reconstruction._t_basis_coeffs.assign(best_coeffs))
 
-    def __call__(self, xeval):
+    def __call__(self,
+                 xeval):
         """
         evaluate the encoder-decoder
 
@@ -2156,7 +2173,8 @@ class QoIAwareProjectionPOUnet:
                     dtype=self.dtype
                    )
 
-    def write_data_to_file(self, filename):
+    def write_data_to_file(self,
+                           filename):
         """
         Save class data to a specified file using pickle. This does not include the archived data from training,
         which can be separately accessed with training_archive and saved outside of ``QoIAwareProjectionPOUnet``.
