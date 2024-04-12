@@ -1864,13 +1864,13 @@ class LPCA:
 
 ################################################################################
 #
-# Vector Quantification Principal Component Analysis
+# Vector Quantization with Principal Component Analysis
 #
 ################################################################################
 
 class VQPCA:
     """
-    Enables performing Vector Quantization Principal Component
+    Enables performing Vector Quantization with Principal Component
     Analysis (VQPCA).
 
     The VQPCA algorithm was first proposed in :cite:`Kambhatla1997` and its
