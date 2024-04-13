@@ -2148,11 +2148,15 @@ class VQPCA:
         global_tic = time.perf_counter()
 
         # The VQPCA algorithm: -------------------------------------------------
+
         collected_idx = np.zeros((n_observations,1))
+
+        n_clusters_degraded = cp.deepcopy(n_clusters)
+
         while ((not converged) and (iteration < max_iter)):
 
             # Initialize the reconstruction error matrix:
-            squared_reconstruction_error_matrix = np.zeros((n_observations, n_clusters))
+            squared_reconstruction_error_matrix = np.zeros((n_observations, n_clusters_degraded))
 
             # Initialize the convergence of cluster centroids:
             centroids_convergence = False
@@ -2161,7 +2165,7 @@ class VQPCA:
             reconstruction_error_convergence = False
 
             # Reconstruct the data from the low-dimensional representation of each cluster:
-            for j in range(0,n_clusters):
+            for j in range(0,n_clusters_degraded):
 
                 D = np.diag(scalings[j])
                 D = D[idx_retained_in_clusters[j],:]
@@ -2175,6 +2179,13 @@ class VQPCA:
             idx = np.argmin(squared_reconstruction_error_matrix, axis=1)
             collected_idx = np.hstack((collected_idx, idx[:,None]))
 
+            # Degrade clusters if needed:
+            if len(np.unique(idx)) != n_clusters:
+                (idx_degraded, n_clusters_degraded) = preprocess.degrade_clusters(idx, verbose=False)
+            else:
+                n_clusters_degraded = cp.deepcopy(n_clusters)
+                idx_degraded = cp.deepcopy(idx)
+
             # Evaluate the minimum squared reconstruction error:
             min_squared_reconstruction_error = np.min(squared_reconstruction_error_matrix, axis=1)
             min_squared_reconstruction_error_previous = cp.deepcopy(min_squared_reconstruction_error)
@@ -2186,12 +2197,12 @@ class VQPCA:
             (X_k, idx_k) = preprocess.get_partition(X_pre_processed, idx)
 
             # Judge the convergence of errors:
-            if (abs((global_mean_squared_reconstruction_error - global_mean_squared_reconstruction_error_previous) / global_mean_squared_reconstruction_error) < tolerance):
+            if (abs((global_mean_squared_reconstruction_error - global_mean_squared_reconstruction_error_previous) / (global_mean_squared_reconstruction_error + eps)) < tolerance):
                 reconstruction_error_convergence = True
 
             # Find the new cluster centroids:
-            centroids = np.zeros((n_clusters, n_variables))
-            for j in range(0,n_clusters):
+            centroids = np.zeros((n_clusters_degraded, n_variables))
+            for j in range(0,n_clusters_degraded):
                 centroids[j, :] = np.mean(X_k[j], axis=0)
 
             # Judge the convergence of centroids:
@@ -2209,8 +2220,11 @@ class VQPCA:
                 # Printing verbose information on the current iteration:
                 cluster_shapes = []
                 for j in range(0,n_clusters):
-                    (cluster_length, _) = np.shape(PCs[j])
-                    cluster_shapes.append(cluster_length)
+                    try:
+                        (cluster_length, _) = np.shape(PCs[j])
+                        cluster_shapes.append(cluster_length)
+                    except:
+                        cluster_shapes.append(0)
                 if verbose:
                     print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(reconstruction_error_convergence), str(centroids_convergence), *cluster_shapes, str(round((toc - global_tic)/60, 5))))
 
@@ -2218,14 +2232,14 @@ class VQPCA:
 
                 break
 
-            # Update the global mean squared reconstruction error:
+            # Update the global mean squared recontruction error:
             global_mean_squared_reconstruction_error_previous = cp.deepcopy(global_mean_squared_reconstruction_error)
 
             # Update the cluster centroids:
             centroids_previous = cp.deepcopy(centroids)
 
             # Perform local PCA to update the eigenvectors:
-            local_pca = LPCA(X_pre_processed, idx, scaling='none', n_components=n_components, use_eigendec=True, nocenter=False)
+            local_pca = LPCA(X_pre_processed, idx_degraded, scaling='none', n_components=n_components, use_eigendec=True, nocenter=False)
             eigenvectors = local_pca.A
             PCs = local_pca.principal_components
             idx_retained_in_clusters = local_pca.idx_retained_in_clusters
@@ -2234,9 +2248,12 @@ class VQPCA:
 
             # Printing verbose information on the current iteration:
             cluster_shapes = []
-            for j in range(0,n_clusters):
-                (cluster_length, _) = np.shape(PCs[j])
-                cluster_shapes.append(cluster_length)
+            for j in range(0, n_clusters):
+                try:
+                    (cluster_length, _) = np.shape(PCs[j])
+                    cluster_shapes.append(cluster_length)
+                except:
+                    cluster_shapes.append(0)
             if verbose:
                 print(row_format.format(iteration+1, round(global_mean_squared_reconstruction_error,8), str(reconstruction_error_convergence), str(centroids_convergence), *cluster_shapes, str(round((toc - global_tic)/60, 5))))
 
