@@ -1883,7 +1883,7 @@ class VQPCA:
     error is smallest.
 
     .. image:: ../images/VQPCA-diagram.png
-        :width: 700
+        :width: 800
         :align: center
 
     More information can be found in :cite:`Zdybal2023Local`.
