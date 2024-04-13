@@ -1882,6 +1882,10 @@ class VQPCA:
     the observation is assigned to the cluster for which the reconstruction
     error is smallest.
 
+    .. image:: ../images/VQPCA-diagram.png
+        :width: 700
+        :align: center
+
     More information can be found in :cite:`Zdybal2023Local`.
 
     .. note::
@@ -2214,14 +2218,11 @@ class VQPCA:
 
                 break
 
-            # Update the global mean squared recontruction error:
+            # Update the global mean squared reconstruction error:
             global_mean_squared_reconstruction_error_previous = cp.deepcopy(global_mean_squared_reconstruction_error)
 
             # Update the cluster centroids:
             centroids_previous = cp.deepcopy(centroids)
-
-            # Initialize the new eigenvectors matrix:
-            eigenvectors = []
 
             # Perform local PCA to update the eigenvectors:
             local_pca = LPCA(X_pre_processed, idx, scaling='none', n_components=n_components, use_eigendec=True, nocenter=False)
