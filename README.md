@@ -36,6 +36,8 @@ author = "Kamila Zdybał and Elizabeth Armstrong and Alessandro Parente and Jame
 
 **PCAfold** documentation contains a thorough user guide including equations, references and example code snippets. Numerous illustrative tutorials and demos are presented as well. The corresponding Jupyter notebooks can be found in the `docs/tutorials` directory.
 
+### [YouTube tutorials](https://www.youtube.com/playlist?list=PL7gWbAt3_3KFYchpPZKv2xJHD8q1Wjr-i)
+
 ## Software architecture
 
 A general overview for using **PCAfold** modules is presented in the diagram

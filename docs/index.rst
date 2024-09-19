@@ -45,6 +45,7 @@ Check out the YouTube tutorials on PCAfold:
 
 - `Prelude to PCAfold <https://youtu.be/oVF4QaLpc6k>`_
 - `Data clustering with PCAfold <https://youtu.be/7CgME4Gb0Vg>`_
+- `QoI-aware encoders-decoders & representation learning with PCAfold <https://youtu.be/ZEB46rEknvU>`_
 
 --------------------------------------------------------------------------------
 
